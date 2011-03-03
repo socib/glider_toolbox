@@ -31,7 +31,7 @@ function [cleanedProfile, varargout] = cleanProfile(profileData)
 %
 
     varsSet = fieldnames(profileData);
-    dataMatrix = [];
+    dataMatrix = []; % start with an empty matrix
     for varIdx = 1:length(varsSet)
         column = profileData.(varsSet{varIdx});
         dataMatrix = [dataMatrix, column(:)];
