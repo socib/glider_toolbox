@@ -1,4 +1,4 @@
-e%MAINGLIDERDATAPROCESSING - Main script to run the glider processing chain
+%MAINGLIDERDATAPROCESSING - Main script to run the glider processing chain
 % This script develops the full processing chain of glider data, from
 % data downloading from the dockserver, data conversion, data processing
 % and correction, netcdf storage and data images generation.
@@ -134,8 +134,12 @@ else
 
             % Loading and processing data if there is something new
             if 1%~isempty(downloadedLoaders)
-                rawData = loadTransectData(asciiDir, [params.START_DATE, params.END_DATE]);
+                timeNumbers = sscanf(params.START_TIME, '%2d:%02d:%02d');
+                period(1) = datenum(datevec(params.START_DATE) + [0 0 0 timeNumbers(:)']);
+                timeNumbers = sscanf(params.END_TIME, '%2d:%02d:%02d');
+                period(2) = datenum(datevec(params.END_DATE) + [0 0 0 timeNumbers(:)']);
 
+                rawData = loadTransectData(asciiDir, period);
                 missionId = [datestr(params.START_DATE, 'yyyymmdd'), '_', gliderName];
                 
                 % Store raw data in netcdf
@@ -144,7 +148,7 @@ else
 %                 mkdir(ncRawFilePath);
                 ncRawFileName = [gliderName, '_L0_', datestr(params.START_DATE, 'yyyy-mm-dd'), '.nc'];
                 ncRawDataFilename = fullfile(gliderRootDir, 'netcdf', ncRawFileName);
-                genRawGliderNcFile(ncRawDataFilename, rawData, params);
+                %genRawGliderNcFile(ncRawDataFilename, rawData, params);
 
                  try
                     processingOptions.debugPlotPath = imageDir;
@@ -163,16 +167,26 @@ else
                     save(processedDataFilename, 'processedData');
                     % Store results in nc file
                     ncProcDataFilename = fullfile(gliderRootDir, 'netcdf', [procFilename, '.nc']);
-                    genProcGliderNcFile(ncProcDataFilename, processedData, params);
+                    %genProcGliderNcFile(ncProcDataFilename, processedData, params);
 
                     griddedData = gridGliderData(processedData);
                     % Remove comments when processing is ready
                     % pause(0.25); %  QUIRKS MODE
                     ncGriddedDataFilename = fullfile(gliderRootDir, 'netcdf', [missionId, '_gridded_data.nc']);
-                    genGriddedGliderNcFile(ncGriddedDataFilename, griddedData, params);
+                    %genGriddedGliderNcFile(ncGriddedDataFilename, griddedData, params);
 
                     if isdir(imageDir)
                         try
+%                             for transectStart = 1:length(processedData.transects) - 1
+%                                 
+%                                 [partialProcessedData, partialGriddedData] = ...
+%                                     trimGliderData(processedData, griddedData, ...
+%                                     [processedData.transects(transectStart), ...
+%                                      processedData.transects(transectStart + 1)]);
+%                                 
+%                                 imgsList = generateScientificFigures(partialProcessedData, partialGriddedData, imageDir, [gliderName, '_']);
+% 
+%                             end;
                             imgsList = generateScientificFigures(processedData, griddedData, imageDir, [gliderName, '_']);
                             % Add URL base path to images
                             for idx = 1:length(imgsList)
@@ -180,14 +194,16 @@ else
                                     gliderName, params.DEPLOYMENT_NAME, ...
                                     imgsList(idx).path);
                             end;
+                            jsonName = fullfile( outputDirs.imageBaseLocalPath, ...
+                                [gliderName, '.', params.DEPLOYMENT_NAME, '.images.json']);
+                            writeJSON(imgsList, jsonName);
+                            
                         catch ME
                             xmlImgsList = '';
                             disp('Error in generateScientificFigures');
                             disp(ME.stack);
                         end
-                        jsonName = fullfile( outputDirs.imageBaseLocalPath, ...
-                            [gliderName, '.', params.DEPLOYMENT_NAME, '.images.json']);
-                        writeJSON(imgsList, jsonName);
+                        
                     end;
 
                 end; % if ~isempty(processedData)

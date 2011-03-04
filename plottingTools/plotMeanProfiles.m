@@ -17,11 +17,11 @@ function varargout = plotMeanProfiles(figProperties, profileData, depthRange, te
 % Example:
 %    imageFilename = plotMeanProfiles(figProperties, profileData, depthRange, texts)
 %
-% Other m-files required: none
-% Subfunctions: none
+% Other m-files required: prepareFigure, printImage
+% Subfunctions: plotVarProfile
 % MAT-files required: none
 %
-% See also: PLOT,
+% See also: PLOT, PREPAREFIGURE, PRINTIMAGE
 %
 % Author: Bartolome Garau
 % Work address: Parc Bit, Naorte, Bloc A 2ºp. pta. 3; Palma de Mallorca SPAIN. E-07121
@@ -38,10 +38,17 @@ function varargout = plotMeanProfiles(figProperties, profileData, depthRange, te
         titleStr = [profileData(prfIdx).varName, ' profiles'];
         subplot(1, length(profileData), prfIdx);
         plotVarProfile(profileData(prfIdx).meanVarProfile, ...
-            profileData(prfIdx).stdVarProfile, depthRange);
-        xlabel(labelStr, 'Fontsize', figProperties.textLabelSize);
-        ylabel('Depth (m)', 'FontSize', figProperties.textLabelSize);
-        title(titleStr, 'FontSize', figProperties.textTitleSize);
+            profileData(prfIdx).stdVarProfile, depthRange, figProperties);
+        xlabel(labelStr, ...
+            'FontName', figProperties.textFont, ...
+            'FontSize', figProperties.textLabelSize);
+        ylabel('Depth (m)', ...
+            'FontName', figProperties.textFont, ...
+            'FontSize', figProperties.textLabelSize);
+        title(titleStr, ...
+            'FontName', figProperties.textFont, ...
+            'FontSize', figProperties.textTitleSize, ...
+            'FontWeight', 'bold');
     end;
 
     if nargout > 0
@@ -53,8 +60,9 @@ function varargout = plotMeanProfiles(figProperties, profileData, depthRange, te
 
 return;
 
-    function plotVarProfile(meanVarProfile, stdVarProfile, depthRange)
+    function plotVarProfile(meanVarProfile, stdVarProfile, depthRange, figProperties)
 
+        meanVarProfile = real(meanVarProfile);
         varLowerBound = meanVarProfile - stdVarProfile;
         varUpperBound = meanVarProfile + stdVarProfile;
 
@@ -71,9 +79,14 @@ return;
         set(gca,'XMinorTick','on','ydir','reverse', 'box','on');
         grid on;
         axis([varLimits, depthLimits]);
-
-        [~, surfIdx] = min(depthRange);
-        [~, deepIdx] = max(depthRange);
+        set(gca, 'FontName', figProperties.textFont, ...
+                 'FontSize', figProperties.textAxisSize);
+        goodRows = find(~isnan(meanVarProfile));
+        
+        [~, surfIdx] = min(depthRange(goodRows));
+        [~, deepIdx] = max(depthRange(goodRows));
+        surfIdx = goodRows(surfIdx);
+        deepIdx = goodRows(deepIdx);
 
         if meanVarProfile(surfIdx) > meanVarProfile(deepIdx), % Value decreases with depth
             legendLocation2 = 'SouthEast';

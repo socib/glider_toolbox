@@ -1,5 +1,33 @@
 function griddedData = gridGliderData(processedData)
-
+%GRIDGLIDERDATA - Grids processed glider data, assuming vertical profiles
+% This function grids processed glider data into a matrix with regular
+% depth range as rows and profile index as column.
+% Each profile is assumed to be vertical, regular in depth and
+% instantaneous (it has one latitude, longitude and time per column)
+%
+% Syntax: griddedData = gridGliderData(processedData)
+%
+% Inputs:
+%    processedData - Description
+%
+% Outputs:
+%    griddedData - Description
+%
+% Example:
+%    griddedData = gridGliderData(processedData)
+%
+% Other m-files required: m_lldist
+% Subfunctions: none
+% MAT-files required: none
+%
+% See also: NANMEAN, NANSTD
+%
+% Author: Bartolome Garau
+% Work address: Parc Bit, Naorte, Bloc A 2ºp. pta. 3; Palma de Mallorca SPAIN. E-07121
+% Author e-mail: tgarau@socib.es
+% Website: http://www.socib.es
+% Creation: 04-Mar-2011
+%
 
     % Interpolate profiles in vertical at 1 meter resolution
     maxCasts = max(processedData.profile_index);
@@ -63,7 +91,7 @@ function griddedData = gridGliderData(processedData)
     for fieldIdx = 1:length(griddingVars)
         currentFieldName = griddingVars{fieldIdx};
         meanProfiles.(currentFieldName) = nanmean(grids.(currentFieldName), 2);
-        %stdProfiles.(currentFieldName) = nanstd(grids.(currentFieldName), 2);
+        stdProfiles.(currentFieldName) = nanstd(grids.(currentFieldName), 1, 2);
     end;
     
     gridCoords.distanceRange = [0, m_lldist(gridCoords.longitudeRange, gridCoords.latitudeRange)'];
@@ -71,7 +99,7 @@ function griddedData = gridGliderData(processedData)
     griddedData.gridCoords = gridCoords;
     griddedData.grids = grids;
     griddedData.meanProfiles = meanProfiles;
-    %griddedData.stdProfiles = stdProfiles;
+    griddedData.stdProfiles = stdProfiles;
     if isfield(processedData, 'source')
         griddedData.source = processedData.source;
     end;

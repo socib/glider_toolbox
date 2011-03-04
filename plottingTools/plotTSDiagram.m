@@ -1,4 +1,33 @@
 function varargout = plotTSDiagram(figProperties, temperature, salinity, texts)
+%PLOTTSDIAGRAM - Generates a Temperature vs. Salinity diagram
+% This function generates a TS diagram over imposed on density contours
+%
+% Syntax: imageFilename = plotTSDiagram(figProperties, temperature, salinity, texts)
+%
+% Inputs:
+%    figProperties - Structure containing desired figure properties
+%    temperature - Description
+%    salinity - Description
+%    texts - Texts to be displayed on the figure
+%
+% Outputs:
+%    imagefilename - name of the printed image filename
+%
+% Example:
+%    imageFilename = plotTSDiagram(figProperties, temperature, salinity, texts);
+%
+% Other m-files required: prepareFigure, printImage
+% Subfunctions: none
+% MAT-files required: none
+%
+% See also: PLOT, CONTOUR, PREPAREFIGURE, PRINTIMAGE
+%
+% Author: Bartolome Garau
+% Work address: Parc Bit, Naorte, Bloc A 2ºp. pta. 3; Palma de Mallorca SPAIN. E-07121
+% Author e-mail: tgarau@socib.es
+% Website: http://www.socib.es
+% Creation: 04-Mar-2011
+%
 
     prepareFigure(figProperties);
     colormap('gray');
@@ -59,8 +88,8 @@ function varargout = plotTSDiagram(figProperties, temperature, salinity, texts)
         varargout{1} = printImage(figProperties, texts);
     else
         printImage(figProperties, texts);
-    end
+    end;
     hold off;
 
-    return;
+end
     

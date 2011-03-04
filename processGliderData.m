@@ -168,26 +168,12 @@ function processedData = processGliderData(gliderData, options)
  
     % Generate transects information based on waypoint changes
     if exist('c_wpt_lat', 'var') && exist('c_wpt_lon', 'var')
-        
-        wptLat       = nmeaToDeg(data(:, c_wpt_lat));
-        wptLon       = nmeaToDeg(data(:, c_wpt_lon));
-        goodRows     = find(~isnan(wptLat) | ~isnan(wptLon));
-        wptLat       = wptLat(goodRows);
-        wptLon       = wptLon(goodRows);
-        wptChangeIdx = find(diff(wptLat) ~= 0 | diff(wptLon) ~= 0);
-        wptChangeIdx = [1; wptChangeIdx(:); length(timeserie.navTime)];
-        % Add whole transect
-        transects(1, :) = [min(timeserie.navTime), max(timeserie.navTime)];
-        % Add each partial transect
-        for changeIdx = 1:length(wptChangeIdx) - 1
-            startPeriod = timeserie.navTime(changeIdx);
-            endPeriod   = timeserie.navTime(changeIdx + 1);
-            transects(end + 1, :) = [startPeriod, endPeriod];
-        end;
-        
-        
+        wptLat    = nmeaToDeg(data(:, c_wpt_lat));
+        wptLon    = nmeaToDeg(data(:, c_wpt_lon));
+        transects = getTransects(timeserie.navTime, wptLon, wptLat);
     else
         disp('No waypoint vars found to identify transects');
+        transects = [timeserie.navTime(1), timeserie.navTime(end)];
     end;
     
     if exist('m_pitch', 'var')
@@ -264,7 +250,7 @@ function processedData = processGliderData(gliderData, options)
     flntuAvailable = 0;
     if exist('sci_flntu_chlor_units', 'var') && exist('sci_flntu_turb_units', 'var')
         tmp = data(:, [sci_flntu_chlor_units, sci_flntu_turb_units]);
-        if any(~isnan(tmp(:))) % if there is any data
+        if any(~isnan(tmp(:))) && length(unique(tmp(~isnan(tmp)))) > 1% if there is any data
             timeserie.chlorophyll = data(:, sci_flntu_chlor_units);
             timeserie.turbidity   = data(:, sci_flntu_turb_units);
             flntuAvailable = 1;
@@ -581,7 +567,6 @@ function processedData = processGliderData(gliderData, options)
     if exist('transects', 'var')
         processedData.transects = transects;
     end;
-
     
     if waterAvailable
         processedData.waterInfo  = waterInfo;

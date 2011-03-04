@@ -1,4 +1,4 @@
-function periodsList = getTransects(timeserie)
+function periodsList = getTransects(navTime, wptLon, wptLat)
 %GETTRANSECTS - Finds time periods at which the glider started each transect
 % this function uses the c_wpt_lon and c_wpt_lat to look for differences
 % and discover where the glider changed its goal. From that information
@@ -29,15 +29,8 @@ function periodsList = getTransects(timeserie)
 % Creation: 25-Feb-2011
 %
 
-    % Check we have the necessary fields in the input structure
-    if ~isfield(timeserie, 'wptLon') || ~isfield(timeserie, 'wptLat')
-        disp('No waypoints information in the input');
-        periodsList = [timeserie.navTime(1), timeserie.navTime(end)];
-        return;
-    end;
-    
     % Get the list of waypoints and deNan it
-    waypointList = [timeserie.wptLon(:), timeserie.wptLat(:)];
+    waypointList = [wptLon(:), wptLat(:)];
     goodRows = find( sum(isnan(waypointList), 2) == 0 );
     wptMat = waypointList(goodRows);
     
@@ -49,6 +42,6 @@ function periodsList = getTransects(timeserie)
     [idxRow, ~] = ind2sub(size(wptMat), idxChange);
     
     recordsIdx = goodRows(unique(idxRow));
-    periodsList = timeserie.navTime([1, recordsIdx, length(timeserie.navTime)]);
+    periodsList = navTime([1; recordsIdx(:); length(navTime)]);
 
 end

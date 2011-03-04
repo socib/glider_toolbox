@@ -1,4 +1,36 @@
 function varargout = plotVerticalTransect(figProperties, cMap, un_xAxis, un_depth, un_var, texts)
+%PLOTVERTICALTRANSECT - Plots a vertical transect of scattered glider data
+% This function generates a scatter plot of glider data on 
+% a vertical section
+%
+% Syntax: imagefilename = plotVerticalTransect(figProperties, cMap, un_xAxis, un_depth, un_var, texts)
+%
+% Inputs:
+%    figProperties - Structure containing desired figure properties
+%    cMap - colormap to be used in the scatter plot
+%    un_xAxis - vector containing the horizontal coordinate value
+%    un_depth - vector containing the vertical coordinate value
+%    un_var - vector containing the value
+%    texts - Texts to be displayed on the figure
+%
+% Outputs:
+%    imagefilename - name of the printed image filename
+%
+% Example:
+%    imagefilename = plotVerticalTransect(figProperties, cMap, un_xAxis, un_depth, un_var, texts);
+%
+% Other m-files required: prepareFigure, printImage, fast_scatter
+% Subfunctions: none
+% MAT-files required: none
+%
+% See also: FAST_SCATTER, PREPAREFIGURE, PRINTIMAGE
+%
+% Author: Bartolome Garau
+% Work address: Parc Bit, Naorte, Bloc A 2ºp. pta. 3; Palma de Mallorca SPAIN. E-07121
+% Author e-mail: tgarau@socib.es
+% Website: http://www.socib.es
+% Creation: 04-Mar-2011
+%
 
     dx = max(un_xAxis) - min(un_xAxis);
     dy = max(un_depth) - min(un_depth);
@@ -28,7 +60,7 @@ function varargout = plotVerticalTransect(figProperties, cMap, un_xAxis, un_dept
     xlabel(texts.xLabelStr, ...
         'FontName', figProperties.textFont, ...
         'FontSize', figProperties.textLabelSize);
-    if strmatch('time', lower(texts.xLabelStr))
+    if ~isempty(strfind(lower(texts.xLabelStr), 'time'))
         if dx > 2
             dateFormat = 'dd/mm';
         else
