@@ -71,10 +71,11 @@ function varargout = plotTSDiagram(figProperties, temperature, salinity, texts)
 
     % Plot density isolines
     [C,h] = contour(xsMat, ytMat, zdMat, contourLevels, 'k-');
-    clabel(C,h, 'FontName', figProperties.textFont, 'fontweight', 'bold');
     set(h,'ShowText','on','TextStep',get(h,'LevelStep')*2);
+    clabel(C,h, 'FontName', figProperties.textFont, 'FontSize', figProperties.textAxisSize, 'fontweight', 'bold');
     axis([min(xsRange), max(xsRange), min(ytRange), max(ytRange)]);
     axis('square'), axis('tight');
+    box on;
     set(gca, 'FontName', figProperties.textFont, ...
         'FontSize', figProperties.textAxisSize);
     xlabel('Salinity (psu)', 'FontName', figProperties.textFont, 'fontsize', figProperties.textLabelSize);

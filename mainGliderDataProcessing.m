@@ -201,7 +201,7 @@ else
                         catch ME
                             xmlImgsList = '';
                             disp('Error in generateScientificFigures');
-                            disp(ME.stack);
+                            disp(getReport(ME, 'extended'));
                         end
                         
                     end;

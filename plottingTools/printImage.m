@@ -31,6 +31,16 @@ function varargout = printImage(figProperties, texts)
     % Define image file names
     imgFilename = [texts.imageFilename, '.', figProperties.imFormat];
     
+%     % Remove the outer white space around the image
+%     outPos  = get(gca, 'OuterPosition');
+%     tightIn = get(gca, 'TightInset');
+%     magicMat = [...
+%         -1  0 1 0; 
+%          0 -1 0 1;
+%          0  0 1 0;
+%          0  0 0 1];
+%     set(gca, 'Position', outPos - tightIn * magicMat);
+    
     % Print the image to file 
     print(['-d', figProperties.imDevice], ...
           ['-r', figProperties.imResolution], ...

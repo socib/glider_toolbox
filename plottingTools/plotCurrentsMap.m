@@ -30,7 +30,7 @@ function varargout = plotCurrentsMap(figProperties, waterInfo, texts)
 % Creation: 04-Mar-2011
 %
 
-    prepareFigure(figProperties);
+    prepareFigure(figProperties); hold on;
     
     % Based on WRC documentation, x_dr_state possible values are
     % mission_start    = 0
@@ -50,69 +50,35 @@ function varargout = plotCurrentsMap(figProperties, waterInfo, texts)
     lonMin = min(lons) - margin;
     lonMax = max(lons) + margin;
     
-    m_proj('mercator','lat',[latMin latMax],'lon',[lonMin lonMax]);
+    LatLim = [latMin, latMax];
+    LonLim = [lonMin, lonMax];
+
+    imgHeight = figProperties.paperHeight * str2double(figProperties.imResolution);
+    imgWidth  = figProperties.paperWidth * str2double(figProperties.imResolution);
+
+    lon = linspace(lonMin, lonMax, imgWidth);
+    lat = fliplr(linspace(latMin, latMax, imgHeight));
+
+    serverURL = 'http://labs.metacarta.com/wms/vmap0';
+    layerName = 'basic';
+    server = WebMapServer(serverURL);
+    capabilities = server.getCapabilities();
+    [membership, position] = ismember(layerName, capabilities.LayerNames);
+    layer = capabilities.Layer(position);
+    [rasterMap, geoReference, webMapRequest] = wmsread(layer, ...
+                'LatLim', LatLim, ...
+                'LonLim', LonLim, ...
+                'ImageFormat', 'image/png', ...
+                'ImageHeight', imgHeight, ...
+                'ImageWidth', imgWidth, ...
+                'Transparent', true, ...
+                'TimeoutInSeconds', 10);
+        
+    image(lon(:)', lat(:), rasterMap);
+    axis xy equal tight;
+
+    plot(lons(:), lats(:), 'k-');
     
-    backgroundColor = [.9 .99 1];
-    set(gca, 'Color', backgroundColor);
-    hold on;
-
-%     bathyLevels = [-20, -50, -100, -200, -500, -1000];
-%     m_contour(longrat, latgrat, bathymetry, bathyLevels);
-    
-    warning off MATLAB:finite;
-    landColor = [.7 1 .7];
-    coastOption = 10;
-    switch coastOption
-        case 0
-            coastFile = '/home/glider/matlabDevelopment/coastfiles/coast.dat';
-            coastData = load(coastFile);
-            [cx, cy] = m_ll2xy(coastData(:, 1), coastData(:, 2));
-            patch(cx, cy, landColor);
-        case 1
-            m_coast('patch', landColor);
-            %m_gshhs_f(landColor);
-        otherwise
-            coastFile = '/home/glider/matlabDevelopment/coastfiles/coast2.mat';
-            m_gshhs_f('save', coastFile);
-            m_usercoast(coastFile, 'patch', landColor);
-    end;
-
-    m_plot(lons(:), lats(:), 'k-');
-    
-    scaleFactor = selectScaleFactor(figProperties);
-    if ~isempty(goodRows)
-        m_vec(scaleFactor, waterInfo.lon(goodRows), waterInfo.lat(goodRows), ...
-            waterInfo.m_final_water_vx(goodRows), waterInfo.m_final_water_vy(goodRows), 'b'); 
-        m_vec(scaleFactor, lonMin + margin / 2, latMin + margin / 2, 0.20, 0, 'b', ...
-            'key', '20 cm s^{-1}');
-    end;
-    m_grid('box','fancy','linestyle',':');
-    set(gca, 'Color', backgroundColor, ...
-        'FontName', figProperties.textFont, ...
-        'FontSize', figProperties.textAxisSize);
-    xlabel('Longitude (degrees)', ...
-        'FontName', figProperties.textFont, ...
-        'FontSize', figProperties.textLabelSize);
-    ylabel('Latitude (degrees)', ...
-        'FontName', figProperties.textFont, ...
-        'FontSize', figProperties.textLabelSize);
-    title('Glider trajectory and column integrated water currents estimations', ...
-    'FontName', figProperties.textFont, ...
-    'FontSize', figProperties.textTitleSize, ...
-    'FontWeight', 'bold');
-    
-    if nargout > 0
-        varargout{1} = printImage(figProperties, texts);
-    else
-        printImage(figProperties, texts);
-    end
-    hold off;
-
-return;
-
-function scaleFactor = selectScaleFactor(figProperties)
-
-    % Get figure and axis size
     OrigAxUnits = get(gca,'Units');
     if strcmp(OrigAxUnits(1:3), 'nor')
         axposNor = get(gca, 'position');
@@ -132,4 +98,46 @@ function scaleFactor = selectScaleFactor(figProperties)
     characteristicLength = 0.01;
     scaleFactor = sc / characteristicLength;
     
+    arrowColor = [0.9 0.8, 0.1];
+    
+    quivers(waterInfo.lon(goodRows), ...
+            waterInfo.lat(goodRows), ...
+            waterInfo.m_final_water_vx(goodRows), ...
+            waterInfo.m_final_water_vy(goodRows),...
+            scaleFactor, 1, 'm s^{-1}', ...
+            {'Color', arrowColor, 'LineWidth', 3}, ...
+            {'Color', arrowColor, ...
+            'FontName', figProperties.textFont, ...
+            'FontSize', figProperties.textAxisSize});
+
+    set(gca, 'xlim', [lonMin lonMax], ... 
+        'ylim', [latMin latMax], ... 
+        'xgrid', 'on', ... 
+        'ygrid', 'on', ... 
+        'gridlinestyle', ':', ... 
+        'xcolor', 'k', ... 
+        'ycolor', 'k', ...
+        'layer', 'top');
+
+    box on;
+    set(gca, 'FontName', figProperties.textFont, ...
+        'FontSize', figProperties.textAxisSize);
+    xlabel('Longitude (degrees)', ...
+        'FontName', figProperties.textFont, ...
+        'FontSize', figProperties.textLabelSize);
+    ylabel('Latitude (degrees)', ...
+        'FontName', figProperties.textFont, ...
+        'FontSize', figProperties.textLabelSize);
+    title('Glider trajectory and column integrated water currents estimations', ...
+    'FontName', figProperties.textFont, ...
+    'FontSize', figProperties.textTitleSize, ...
+    'FontWeight', 'bold');
+
+    if nargout > 0
+        varargout{1} = printImage(figProperties, texts);
+    else
+        printImage(figProperties, texts);
+    end
+    hold off;
+
 return;
