@@ -30,6 +30,7 @@ function varargout = printImage(figProperties, texts)
 
     % Define image file names
     imgFilename = [texts.imageFilename, '.', figProperties.imFormat];
+    epsFilename = [texts.imageFilename, '.eps'];
     
 %     % Remove the outer white space around the image
 %     outPos  = get(gca, 'OuterPosition');
@@ -42,9 +43,16 @@ function varargout = printImage(figProperties, texts)
 %     set(gca, 'Position', outPos - tightIn * magicMat);
     
     % Print the image to file 
-    print(['-d', figProperties.imDevice], ...
-          ['-r', figProperties.imResolution], ...
-          fullfile(texts.imgsPath, imgFilename));
+%     print(['-d', figProperties.imDevice], ...
+%           ['-r', figProperties.imResolution], ...
+%           fullfile(texts.imgsPath, imgFilename));
+    
+    print('-depsc2', ['-r', figProperties.imResolution], fullfile(texts.imgsPath, epsFilename));
+    system(['convert', ...
+        ' -size ', num2str(figProperties.imWidth), 'x', num2str(figProperties.imHeight), ... 
+        ' -density ', figProperties.imResolution, ...
+        ' ', fullfile(texts.imgsPath, epsFilename), ' ', fullfile(texts.imgsPath, imgFilename)]);
+    delete(fullfile(texts.imgsPath, epsFilename));
 
     % Print the thumbnail to file 
     if isfield(figProperties, 'thumbnailDesired')

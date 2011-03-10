@@ -148,7 +148,7 @@ else
 %                 mkdir(ncRawFilePath);
                 ncRawFileName = [gliderName, '_L0_', datestr(params.START_DATE, 'yyyy-mm-dd'), '.nc'];
                 ncRawDataFilename = fullfile(gliderRootDir, 'netcdf', ncRawFileName);
-                %genRawGliderNcFile(ncRawDataFilename, rawData, params);
+                genRawGliderNcFile(ncRawDataFilename, rawData, params);
 
                  try
                     processingOptions.debugPlotPath = imageDir;
@@ -167,13 +167,14 @@ else
                     save(processedDataFilename, 'processedData');
                     % Store results in nc file
                     ncProcDataFilename = fullfile(gliderRootDir, 'netcdf', [procFilename, '.nc']);
-                    %genProcGliderNcFile(ncProcDataFilename, processedData, params);
+                    genProcGliderNcFile(ncProcDataFilename, processedData, params);
 
                     griddedData = gridGliderData(processedData);
                     % Remove comments when processing is ready
                     % pause(0.25); %  QUIRKS MODE
-                    ncGriddedDataFilename = fullfile(gliderRootDir, 'netcdf', [missionId, '_gridded_data.nc']);
-                    %genGriddedGliderNcFile(ncGriddedDataFilename, griddedData, params);
+                    griddedFilename = [gliderName, '_L2_', datestr(params.START_DATE, 'yyyy-mm-dd')];
+                    ncGriddedDataFilename = fullfile(gliderRootDir, 'netcdf', [griddedFilename, '.nc']);
+                    genGriddedGliderNcFile(ncGriddedDataFilename, griddedData, params);
 
                     if isdir(imageDir)
                         try
