@@ -37,19 +37,24 @@ function varargout = plotTSDiagram(figProperties, temperature, salinity, texts)
     % Prepare density matrix
     temperature = real(temperature);
     salinity = real(salinity);
-    mu = nanmedian(temperature);
-    sigma = nanstd(temperature);
-    safeTempRange = mu + 2 * sigma * [-1, 1];
-    mu = nanmedian(salinity);
-    sigma = nanstd(salinity);
-    safeSaltRange = mu + 2 * sigma * [-1, 1];
-    goodRows = find(temperature > min(safeTempRange) & ...
-    temperature < max(safeTempRange) & ...
-    salinity > min(safeSaltRange) & ...
-    salinity < max(safeSaltRange));
+    statsDesired = 0;
+    if statsDesired
+        mu = nanmedian(temperature);
+        sigma = nanstd(temperature);
+        safeTempRange = mu + 2 * sigma * [-1, 1];
+        mu = nanmedian(salinity);
+        sigma = nanstd(salinity);
+        safeSaltRange = mu + 2 * sigma * [-1, 1];
+    else
+        safeTempRange = [min(temperature), max(temperature)];
+        safeSaltRange = [min(salinity), max(salinity)];
+    end;
+    goodRows = find(temperature >= min(safeTempRange) & ...
+    temperature <= max(safeTempRange) & ...
+    salinity >= min(safeSaltRange) & ...
+    salinity <= max(safeSaltRange));
     temperature = temperature(goodRows);
     salinity = salinity(goodRows);
-    
     
     ytRange = linspace(min(safeTempRange), max(safeTempRange), 30);
     xsRange = linspace(min(safeSaltRange), max(safeSaltRange), 30);
@@ -66,7 +71,7 @@ function varargout = plotTSDiagram(figProperties, temperature, salinity, texts)
     %density = sw_dens0(salinity, temperature);
     %pointArea = selectPointArea(figProperties);
     %scatter(salinity, temperature, pointArea, density, 'filled');
-    plot(salinity, temperature, '.', 'color',[0.6 0.6 0.6]);
+    plot(salinity, temperature, '.', 'color',[0.4 0.4 0.4]);
     %plot(salinity, temperature, 'ko', 'MarkerFaceColor', 'k');
 
     % Plot density isolines
@@ -93,4 +98,3 @@ function varargout = plotTSDiagram(figProperties, temperature, salinity, texts)
     hold off;
 
 end
-    

@@ -74,7 +74,7 @@ function [figProperties, cmJet] = setFiguresProperties(desiredImgSize)
     figProperties.imResolution = imResolution;
     figProperties.linearColorScale = 1;
     
-    figProperties.textFont         = 'Verdana';
+    figProperties.textFont         = 'Helvetica';
     figProperties.textAxisSize     = 20;
     figProperties.textColorbarSize = 20;
     figProperties.textLabelSize    = 24;

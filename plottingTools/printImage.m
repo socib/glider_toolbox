@@ -32,36 +32,30 @@ function varargout = printImage(figProperties, texts)
     imgFilename = [texts.imageFilename, '.', figProperties.imFormat];
     epsFilename = [texts.imageFilename, '.eps'];
     
-%     % Remove the outer white space around the image
-%     outPos  = get(gca, 'OuterPosition');
-%     tightIn = get(gca, 'TightInset');
-%     magicMat = [...
-%         -1  0 1 0; 
-%          0 -1 0 1;
-%          0  0 1 0;
-%          0  0 0 1];
-%     set(gca, 'Position', outPos - tightIn * magicMat);
-    
     % Print the image to file 
 %     print(['-d', figProperties.imDevice], ...
 %           ['-r', figProperties.imResolution], ...
 %           fullfile(texts.imgsPath, imgFilename));
     
+    % Print an eps (vector, no raster) intermediate file
     print('-depsc2', ['-r', figProperties.imResolution], fullfile(texts.imgsPath, epsFilename));
-    system(['convert', ...
+    
+    % Convert eps to user desired format using ImageMagick system command
+    [isError, result] = system(['convert', ...
         ' -size ', num2str(figProperties.imWidth), 'x', num2str(figProperties.imHeight), ... 
         ' -density ', figProperties.imResolution, ...
-        ' ', fullfile(texts.imgsPath, epsFilename), ' ', fullfile(texts.imgsPath, imgFilename)]);
-    delete(fullfile(texts.imgsPath, epsFilename));
-
-    % Print the thumbnail to file 
-    if isfield(figProperties, 'thumbnailDesired')
-        thumbnailDesired = figProperties.thumbnailDesired;
+        ' -font ', figProperties.textFont, ...
+        ' -quality 100', ...
+        ' ', fullfile(texts.imgsPath, epsFilename), ...
+        ' ', fullfile(texts.imgsPath, imgFilename)]);
+    if isError
+        disp(['ImageMagick convert command failed:', result]);
     else
-        thumbnailDesired = 0;
+        delete(fullfile(texts.imgsPath, epsFilename));
     end;
-    
-    if thumbnailDesired
+
+    % Print the thumbnail to file if required
+    if isfield(figProperties, 'thumbnailDesired') && figProperties.thumbnailDesired
         thumbFilename = [texts.imageFilename, '_thumb.', figProperties.imFormat];
         img = imread(fullfile(texts.imgsPath, imgFilename));
         scaleFactor = figProperties.thumbWidth / ...
