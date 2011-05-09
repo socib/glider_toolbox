@@ -31,6 +31,10 @@ function griddedData = gridGliderData(processedData)
 
     % Interpolate profiles in vertical at 1 meter resolution
     maxCasts = max(processedData.profile_index);
+    if maxCasts < 1 || ~isfinite(maxCasts)
+        griddedData = [];
+        return;
+    end;
     depthResol = 1;
     minDepth   = depthResol * floor(min(processedData.depth) / depthResol);
     maxDepth   = depthResol *  ceil(max(processedData.depth) / depthResol);

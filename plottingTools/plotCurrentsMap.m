@@ -38,7 +38,14 @@ function varargout = plotCurrentsMap(figProperties, waterInfo, texts)
     % awaiting_fix     = 2
     % awaiting_postfix = 3
     % awaiting_dive    = 4
-    goodRows = find(waterInfo.x_dr_state == 4);
+    
+    fieldsList = fieldnames(waterInfo);
+    theMatrix = [];
+    for fieldIdx = 1:length(fieldsList)
+        theMatrix = [theMatrix, waterInfo.(fieldsList{fieldIdx})(:)];
+    end;
+    notNanRows = find(sum(double(isnan(theMatrix)), 2) == 0);    
+    goodRows = intersect(find(waterInfo.x_dr_state > 2), notNanRows);
 
     % Prepare map limits
     lats = waterInfo.lat(goodRows)';
@@ -66,7 +73,7 @@ function varargout = plotCurrentsMap(figProperties, waterInfo, texts)
                 serverURL = 'http://labs.metacarta.com/wms/vmap0';
                 layerName = 'basic';
             case 2
-                serverURL = 'http://scb-gisserver:8080/geoserver/wms';
+                serverURL = 'http://gis.socib.es/geoserver/wms';
                 layerName = 'gn:wmed_mcb200v40';
         end;
         server = WebMapServer(serverURL);
@@ -118,7 +125,7 @@ function varargout = plotCurrentsMap(figProperties, waterInfo, texts)
     sc  = max(scx, scy);
     
     % Compute the desired scale factor
-    characteristicLength = 0.01;
+    characteristicLength = 0.1;
     scaleFactor = sc / characteristicLength;
     
     arrowColor = [0.9 0.8, 0.1];

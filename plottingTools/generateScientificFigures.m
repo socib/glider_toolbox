@@ -356,12 +356,16 @@ function varargout = generateScientificFigures(processedData, griddedData, image
         end;
         
         genStr = [' (generated on ', datestr(now, 31), ')'];
-        fn = plotMeanProfiles(figProperties, profileData,...
-            griddedData.gridCoords.depthRange, texts);
-        imageList(end+1).name = ' OXY Profiles';
-        imageList(end).description = ['Oxygen and Saturation Profiles', genStr];
-        imageList(end).path = fn;
-
+        try
+            fn = plotMeanProfiles(figProperties, profileData,...
+                griddedData.gridCoords.depthRange, texts);
+            imageList(end+1).name = ' OXY Profiles';
+            imageList(end).description = ['Oxygen and Saturation Profiles', genStr];
+            imageList(end).path = fn;
+        catch ME
+            disp('Could not perform the Mean Profiles plot');
+            disp(getReport(ME, 'extended'));
+        end;
     end;
 
     
@@ -379,10 +383,15 @@ function varargout = generateScientificFigures(processedData, griddedData, image
             salt = processedData.salinity;
         end;
         genStr = [' (generated on ', datestr(now, 31), ')'];
-        fn = plotTSDiagram(figProperties, processedData.temperature, salt, texts);
-        imageList(end+1).name = 'TS Diagram';
-        imageList(end).description = ['Temperature vs. Salinity Diagram', genStr];
-        imageList(end).path = fn;
+        try
+            fn = plotTSDiagram(figProperties, processedData.profile_index, processedData.temperature, salt, texts);
+            imageList(end+1).name = 'TS Diagram';
+            imageList(end).description = ['Temperature vs. Salinity Diagram', genStr];
+            imageList(end).path = fn;
+        catch ME
+            disp('Could not perform the TS Diagram plot');
+            disp(getReport(ME, 'extended'));
+        end;
     end;
     
     % Plot a horizontal map to check glider trajectory
@@ -390,10 +399,15 @@ function varargout = generateScientificFigures(processedData, griddedData, image
     if isfield(processedData, 'waterInfo')
         texts.imageFilename = [imgPreffix, 'currents'];
         genStr = [' (generated on ', datestr(now, 31), ')'];
-        fn = plotCurrentsMap(figProperties, processedData.waterInfo, texts);
-        imageList(end+1).name = 'Currents Map';
-        imageList(end).description = ['Map with vertically integrated currents derived from navigation', genStr];
-        imageList(end).path = fn;
+        try
+            fn = plotCurrentsMap(figProperties, processedData.waterInfo, texts);
+            imageList(end+1).name = 'Currents Map';
+            imageList(end).description = ['Map with vertically integrated currents derived from navigation', genStr];
+            imageList(end).path = fn;
+        catch ME
+            disp('Could not perform the Currents Map plot');
+            disp(getReport(ME, 'extended'));
+        end;
         
     end;
     % Plot gridded vertical sections here?

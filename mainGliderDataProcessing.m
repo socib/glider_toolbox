@@ -24,7 +24,7 @@ addpath(genpath(gliderToolboxDir));
 %% Set the path to the data: edit for mission processing
 % Gliders configuration file directory
 configDir = fullfile(gliderToolboxDir, 'config');
-desiredExtensions = {'dbd', 'ebd'}; %{'sbd', 'tbd'}; % {'dbd'};
+desiredExtensions = {'sbd', 'tbd'}; 
 gliderSubDirTree = {...
     'binary',   ...
     'ascii',    ...
@@ -42,7 +42,7 @@ clear processingOptions;
 processingOptions.salinityCorrected = 'TH';
 %processingOptions.tempTimeConstant = 0.4;
 %processingOptions.condTimeConstant = 1.0;
-processingOptions.thermalParams    = [0.18, 0.02, 7.16, 2.78];
+processingOptions.thermalParams    = [0.15, 0.06, 7.15, 2.78];
 %processingOptions.thermalParams    = repmat([0.18, 0.02, 7.16, 2.78], 1, 1);
 processingOptions.thermalParamsMeaning{1} = {'temperature', 'conductivity'};
 % processingOptions.thermalParamsMeaning{2} = {'Tcor', 'conductivity'};
@@ -64,7 +64,7 @@ else
         disp(['No config files (*.cfg) were found inside ', configDir]);
     else
         % Run through the list of active gliders
-        for configIdx = 2:length(gliderConfigFileList)
+        for configIdx = 1:length(gliderConfigFileList)
             
             % Fullpath of configuration file
             configFilename = fullfile(configDir, gliderConfigFileList(configIdx).name);
@@ -121,19 +121,19 @@ else
             % 1 - convert binary data files to ascii
             % *Note: the parameter 'e' for extension needs to be specified
             % in order to merge files with new Science Data Logging feature
-%             if isdir(asciiDir) && isdir(binaryDir)
-%                 downloadedLoaders = convertSlocumBinaries([],...
-%                     's', binaryDir, ...
-%                     'd', asciiDir, ...
-%                     'e', desiredExtensions, ...
-%                     'f', fullfile(configDir, 'sensorfilter.txt'), ...
-%                     'c', binaryDir);
-%                 disp([num2str(length(downloadedLoaders), '%0.0f')...
-%                     ' files converted.']);
-%             end
+            if isdir(asciiDir) && isdir(binaryDir)
+                downloadedLoaders = convertSlocumBinaries([],...
+                    's', binaryDir, ...
+                    'd', asciiDir, ...
+                    'e', desiredExtensions, ...
+                    'f', fullfile(configDir, 'sensorfilter.txt'), ...
+                    'c', binaryDir);
+                disp([num2str(length(downloadedLoaders), '%0.0f')...
+                    ' files converted.']);
+            end
 
             % Loading and processing data if there is something new
-            if 1%~isempty(downloadedLoaders)
+            if ~isempty(downloadedLoaders)
                 timeNumbers = sscanf(params.START_TIME, '%2d:%02d:%02d');
                 period(1) = datenum(datevec(params.START_DATE) + [0 0 0 timeNumbers(:)']);
                 timeNumbers = sscanf(params.END_TIME, '%2d:%02d:%02d');
@@ -143,21 +143,37 @@ else
                 missionId = [datestr(params.START_DATE, 'yyyymmdd'), '_', gliderName];
                 
                 % Store raw data in netcdf
-%                 ncRawFilePath = fullfile(outputDirs.ncBasePath, ...
-%                     gliderName, 'l0', datestr(params.START_DATE, 'yyyy'));
-%                 mkdir(ncRawFilePath);
-                ncRawFileName = [gliderName, '_L0_', datestr(params.START_DATE, 'yyyy-mm-dd'), '.nc'];
-                ncRawDataFilename = fullfile(gliderRootDir, 'netcdf', ncRawFileName);
-                genRawGliderNcFile(ncRawDataFilename, rawData, params);
-
+                try
+                    % Generate L0 Raw nc file
+                    ncRawFileName = [gliderName, '_L0_', datestr(params.START_DATE, 'yyyy-mm-dd'), '.nc'];
+                    ncRawDataFilename = fullfile(gliderRootDir, 'netcdf', ncRawFileName);
+                    genRawGliderNcFile(ncRawDataFilename, rawData, params);
+                    % Move to folder for THREDDS catalog
+                    ncRawFilePath = fullfile(outputDirs.ncBasePath, ...
+                        gliderName, 'L0', datestr(params.START_DATE, 'yyyy'));
+                    % First stage: connection
+                    theCommand = 'ssh dataprocuser@SCB-DATPROC';
+                    % Second stage: create destination directory
+                    theCommand = [theCommand, ' "mkdir -p ', ncRawFilePath];
+                    % Third stage: copy file
+                    theCommand = [theCommand, '; cp ', ncRawDataFilename, ' ', ncRawFilePath, '"'];
+                    [anyError, errMsg] = system(theCommand);
+                    if anyError ~= 0
+                        disp(errMsg);
+                    end;
+                    
+                catch ME
+                    disp('could not generate glider raw netcdf file');
+                    disp(getReport(ME, 'extended'));
+                end;
+                    
                  try
                     processingOptions.debugPlotPath = imageDir;
                     processedData = processGliderData(rawData, processingOptions);
-                    
                  catch ME
                     processedData = [];
                     disp('Error in processing data');
-                    disp(ME.stack);
+                    disp(getReport(ME, 'extended'));
                  end
 
                 if ~isempty(processedData)
@@ -166,27 +182,65 @@ else
                     processedDataFilename = fullfile(gliderRootDir, 'matfiles', [procFilename, '.mat']);
                     save(processedDataFilename, 'processedData');
                     % Store results in nc file
-                    ncProcDataFilename = fullfile(gliderRootDir, 'netcdf', [procFilename, '.nc']);
-                    genProcGliderNcFile(ncProcDataFilename, processedData, params);
+                    try
+                        % Generate L1 Processed nc file
+                        ncProcDataFilename = fullfile(gliderRootDir, 'netcdf', [procFilename, '.nc']);
+                        genProcGliderNcFile(ncProcDataFilename, processedData, params);
+                        % Move to folder for THREDDS catalog
+                        ncProcFilePath = fullfile(outputDirs.ncBasePath, ...
+                            gliderName, 'L1', datestr(params.START_DATE, 'yyyy'));
+                        % First stage: connection
+                        theCommand = 'ssh dataprocuser@SCB-DATPROC';
+                        % Second stage: create destination directory
+                        theCommand = [theCommand, ' "mkdir -p ', ncProcFilePath];
+                        % Third stage: copy file
+                        theCommand = [theCommand, '; cp ', ncProcDataFilename, ' ', ncProcFilePath, '"'];
+                        [anyError, errMsg] = system(theCommand);
+                        if anyError ~= 0
+                            disp(errMsg);
+                        end;
+                    catch ME
+                        disp('could not generate glider processed netcdf file');
+                        disp(getReport(ME, 'extended'));
+                    end;
 
                     griddedData = gridGliderData(processedData);
-                    % Remove comments when processing is ready
-                    % pause(0.25); %  QUIRKS MODE
-                    griddedFilename = [gliderName, '_L2_', datestr(params.START_DATE, 'yyyy-mm-dd')];
-                    ncGriddedDataFilename = fullfile(gliderRootDir, 'netcdf', [griddedFilename, '.nc']);
-                    genGriddedGliderNcFile(ncGriddedDataFilename, griddedData, params);
+                    if ~isempty(griddedData)
+                        try                        
+                            % Generate L2 Gridded nc file
+                            griddedFilename = [gliderName, '_L2_', datestr(params.START_DATE, 'yyyy-mm-dd')];
+                            ncGriddedDataFilename = fullfile(gliderRootDir, 'netcdf', [griddedFilename, '.nc']);
+                            genGriddedGliderNcFile(ncGriddedDataFilename, griddedData, params);
+                            % Move to folder for THREDDS catalog
+                            ncGriddedFilePath = fullfile(outputDirs.ncBasePath, ...
+                                gliderName, 'L2', datestr(params.START_DATE, 'yyyy'));
+                            % First stage: connection
+                            theCommand = 'ssh dataprocuser@SCB-DATPROC';
+                            % Second stage: create destination directory
+                            theCommand = [theCommand, ' "mkdir -p ', ncGriddedFilePath];
+                            % Third stage: copy file
+                            theCommand = [theCommand, '; cp ', ncGriddedDataFilename, ' ', ncGriddedFilePath, '"'];
+                            [anyError, errMsg] = system(theCommand);
+                            if anyError ~= 0
+                                disp(errMsg);
+                            end;
+                            
+                        catch ME
+                            disp('could not generate glider gridded netcdf file');
+                            disp(getReport(ME, 'extended'));
+                        end;
+                    end;
 
                     if isdir(imageDir)
                         try
 %                             for transectStart = 1:length(processedData.transects) - 1
-%                                 
 %                                 [partialProcessedData, partialGriddedData] = ...
 %                                     trimGliderData(processedData, griddedData, ...
 %                                     [processedData.transects(transectStart), ...
 %                                      processedData.transects(transectStart + 1)]);
-%                                 
-%                                 imgsList = generateScientificFigures(partialProcessedData, partialGriddedData, imageDir, [gliderName, '_']);
-% 
+%                                 transectImageDir = fullfile(imageDir, ['transect', num2str(transectStart)]);
+%                                 mkdir(transectImageDir);
+%                                 imgsList = generateScientificFigures(partialProcessedData, partialGriddedData, transectImageDir, [gliderName, '_']);
 %                             end;
                             imgsList = generateScientificFigures(processedData, griddedData, imageDir, [gliderName, '_']);
                             % Add URL base path to images
@@ -198,17 +252,14 @@ else
                             jsonName = fullfile( outputDirs.imageBaseLocalPath, ...
                                 [gliderName, '.', params.DEPLOYMENT_NAME, '.images.json']);
                             writeJSON(imgsList, jsonName);
-                            
                         catch ME
                             xmlImgsList = '';
                             disp('Error in generateScientificFigures');
                             disp(getReport(ME, 'extended'));
                         end
-                        
-                    end;
-
+                    end; % if isdir(imageDir)
                 end; % if ~isempty(processedData)
-            end;
+            end; % if ~isempty(downloadedLoaders)
         end; % for configIdx = 1:length(gliderConfigFileList)
     end; % if isempty(gliderConfigFileList)
 end; % if ~isdir(configDir)

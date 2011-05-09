@@ -32,16 +32,38 @@ function periodsList = getTransects(navTime, wptLon, wptLat)
     % Get the list of waypoints and deNan it
     waypointList = [wptLon(:), wptLat(:)];
     goodRows = find( sum(isnan(waypointList), 2) == 0 );
-    wptMat = waypointList(goodRows);
+    wptMat = waypointList(goodRows, :);
     
     % Search in which record (row) the waypoint changed.
     % *Note1: Copy the first waypoint at the beginning on the list so
     % 'diff' will have the same size as wptMat (and idx will be right)
     % *Note2: It does not matter if just changes lat or lon, only the row
-    idxChange = find(diff([wptMat(1,:); wptMat]) ~= 0);
+    extMat = [wptMat(1,:); wptMat];
+    idxChange = find(diff(extMat, 1, 1) ~= 0);
     [idxRow, ~] = ind2sub(size(wptMat), idxChange);
     
     recordsIdx = goodRows(unique(idxRow));
     periodsList = navTime([1; recordsIdx(:); length(navTime)]);
 
+%     plot(wptMat(:,1), wptMat(:,2), 'ko-');
+%     h = [];
+%     for k = 1:size(wptMat, 1)
+%         if ~isempty(h)
+%             delete(h);
+%         end;
+%         plot(wptMat(:,1), wptMat(:,2), 'ko-');
+%         h = text(wptMat(k, 1) + 0.01, wptMat(k, 2) - 0.01, num2str(k));
+%         pause(1.5);
+%     end;
+%     
+    plot(wptLon(recordsIdx), wptLat(recordsIdx), 'ko-');
+    h = [];
+    for k = 1:length(recordsIdx)
+        if ~isempty(h)
+            delete(h);
+        end;
+        h = text(wptLon(recordsIdx(k))+0.01, wptLat(recordsIdx(k))-0.01, num2str(k));
+        pause(1.5);
+    end;    
+    
 end

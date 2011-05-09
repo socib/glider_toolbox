@@ -1,4 +1,4 @@
-function varargout = plotTSDiagram(figProperties, temperature, salinity, texts)
+function varargout = plotTSDiagram(figProperties, profiles, temperature, salinity, texts)
 %PLOTTSDIAGRAM - Generates a Temperature vs. Salinity diagram
 % This function generates a TS diagram over imposed on density contours
 %
@@ -46,8 +46,8 @@ function varargout = plotTSDiagram(figProperties, temperature, salinity, texts)
         sigma = nanstd(salinity);
         safeSaltRange = mu + 2 * sigma * [-1, 1];
     else
-        safeTempRange = [min(temperature), max(temperature)];
-        safeSaltRange = [min(salinity), max(salinity)];
+        safeTempRange = [nanmin(temperature), nanmax(temperature)];
+        safeSaltRange = [nanmin(salinity), nanmax(salinity)];
     end;
     goodRows = find(temperature >= min(safeTempRange) & ...
     temperature <= max(safeTempRange) & ...
@@ -55,6 +55,7 @@ function varargout = plotTSDiagram(figProperties, temperature, salinity, texts)
     salinity <= max(safeSaltRange));
     temperature = temperature(goodRows);
     salinity = salinity(goodRows);
+    profileIndex = profiles(goodRows);
     
     ytRange = linspace(min(safeTempRange), max(safeTempRange), 30);
     xsRange = linspace(min(safeSaltRange), max(safeSaltRange), 30);
@@ -71,7 +72,12 @@ function varargout = plotTSDiagram(figProperties, temperature, salinity, texts)
     %density = sw_dens0(salinity, temperature);
     %pointArea = selectPointArea(figProperties);
     %scatter(salinity, temperature, pointArea, density, 'filled');
-    plot(salinity, temperature, '.', 'color',[0.4 0.4 0.4]);
+    maxProfiles = max(profileIndex);
+    for k = 1:maxProfiles
+        idx = find(profileIndex == k);
+        plot(salinity(idx), temperature(idx), '-', 'color', [0.4 0.4 0.4]);
+        %plot(salinity, temperature, '.', 'color',[0.4 0.4 0.4]);
+    end;
     %plot(salinity, temperature, 'ko', 'MarkerFaceColor', 'k');
 
     % Plot density isolines

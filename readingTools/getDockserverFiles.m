@@ -65,7 +65,7 @@ function [fetchedSbdList, fetchedLogList] = getDockserverFiles(gliderName, glide
         ftpStruct = ftpConnect(ftpStruct);
     catch ME
         disp('Could not connect to dockserver');
-        disp(ME.stack);
+        disp(getReport(ME, 'extended'));
         return;
     end;
 
@@ -153,7 +153,7 @@ function [fetchedSbdList, fetchedLogList] = getDockserverFiles(gliderName, glide
             end;
         catch MatExcep
             disp('Could not get remote file list');
-            disp(MatExcep.stack);
+            disp(getReport(MatExcep.stack, 'extended'));
             return;
         end;
 
@@ -169,20 +169,9 @@ function [fetchedSbdList, fetchedLogList] = getDockserverFiles(gliderName, glide
             % If there is no local copy
             if isempty(strmatch(remoteFilenames{fileIdx}, localFilenames))
                 disp(['Downloading new file: ', remoteFilenames{fileIdx}]);
-                try
-                    fetchedFileName = mget(ftpStruct.ftpHandle, remoteFilenames{fileIdx}, localDir);
-                    if ~isempty(fetchedFileName)
-                        fetchedFilesList{end+1} = fetchedFileName{:};
-                    end;
-                catch MatExcep
-                    disp('Fetch Error');
-                    disp(MatExcep.stack);
-                    try
-                        ftpStruct = ftpReconnect(ftpStruct);
-                    catch MatExcep2
-                        disp('Reconnection failed too');
-                        disp(MatExcep2.stack);
-                    end;
+                [ftpStruct, fetchedFileName] = fetchOneFile(ftpStruct, remoteFilenames{fileIdx}, localDir);
+                if ~isempty(fetchedFileName)
+                    fetchedFilesList{end+1} = fetchedFileName{:};
                 end;
                 
             % Get remote file if is larger than local one
@@ -193,25 +182,29 @@ function [fetchedSbdList, fetchedLogList] = getDockserverFiles(gliderName, glide
                     localSize = localFile.bytes;
                     if remoteSize > localSize
                         disp(['Updating file: ', remoteFilenames{fileIdx}]);
-                        try
-                            fetchedFileName = mget(ftpHandle, remoteFilenames{fileIdx}, localDir);
-                            if ~isempty(fetchedFileName)
-                                fetchedFilesList{end+1} = fetchedFileName{:};
-                            end
-                        catch MatExcep
-                            disp('Fetch Error: ' );
-                            disp(MatExcep.stack);
-                            try
-                                ftpStruct = ftpReconnect(ftpStruct);
-                            catch MatExcep2
-                                disp('Reconnection failed too');
-                                disp(MatExcep2.stack);
-                            end;
-                        end;
+                        [ftpStruct, fetchedFileName] = fetchOneFile(ftpStruct, remoteFilenames{fileIdx}, localDir);
+                        if ~isempty(fetchedFileName)
+                            fetchedFilesList{end+1} = fetchedFileName{:};
+                        end
                     end; % if remoteSize > localSize
                 end; % if ~isempty(localFile)
             end; % if isempty(strmatch(remoteFilenames{fileIdx}, localFilenames))
         end; % for fileIdx = 1:length(remoteFilenames)
+    end
+
+    function [ftpStruct, fetchedFileName] = fetchOneFile(ftpStruct, remoteFileName, localDir)
+        try
+            fetchedFileName = mget(ftpStruct.ftpHandle, remoteFileName, localDir);
+        catch MatExcep
+            disp('Fetch Error');
+            disp(getReport(MatExcep.stack, 'extended'));
+            try
+                ftpStruct = ftpReconnect(ftpStruct);
+            catch MatExcep2
+                disp('Reconnection failed too');
+                disp(getReport(MatExcep2.stack, 'extended'));
+            end;
+        end;
     end
 
 %% Sub-function ftp handling

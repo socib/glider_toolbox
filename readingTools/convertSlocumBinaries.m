@@ -470,7 +470,7 @@ function asciis = convertSlocumBinaries(files, varargin)
         [~, resultOutput] = system(theCommand);
 
         resultOutput = strtrim(resultOutput); % remove newlines
-        disp(resultOutput);
+        disp(['Generated file: ', resultOutput]);
 
         % See if the file exists (ie: successful conversion)
         loaderFile = fullfile(pwd, resultOutput);
