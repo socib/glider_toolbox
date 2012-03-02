@@ -1,0 +1,63 @@
+% Format day as yyyy-mm-dd
+% Format time as HH:MM:SS
+% Data will be downloaded from this instant on
+START_DATE=2012-02-29
+START_TIME=10:00:00
+
+END_DATE=2012-01-31
+END_TIME=23:59:00
+
+% Data Root Directory
+DEPLOYMENT_NAME=TestJanuary
+DATA_ROOT=/home/glider/gliderDeployments/TestJanuary/
+
+% Dockserver URL can be either a name or the IP address
+DOCKSERVER_URL=130.206.32.240
+DOCKSERVER_USER=localuser
+DOCKSERVER_PASS=WideOpen
+
+% Target Ballasing density
+BALLAST_DENSITY=1028
+
+% File Metadata
+METADATA_Conventions=CF-1.5
+METADATA_title=SCBTEST
+METADATA_type=Glider data file
+METADATA_references=http://www.socib.es
+METADATA_provider=SOCIB (Sistema de Observacion y prediccion Costero de las Islas Baleares)
+METADATA_summary=Simulated Glider Mission in Balearic Sea
+METADATA_cdm_data_type=Trajectory
+METADATA_data_mode=R
+
+% Project Metadata
+METADATA_project_name=SOCIB operational
+METADATA_pi_name=Joaquin Tintore
+
+% Platform Metadata
+METADATA_platform_code=sdeep00
+METADATA_ptt=unknown
+METADATA_trans_system=IRIDIUM
+METADATA_positioning_system=GPS
+METADATA_platform_model=WEBB SLOCUM
+METADATA_platform_maker=Webb Research Corporation
+METADATA_anomaly=none
+
+% Deployment Metadata
+METADATA_launch_date=2012-01-30 08:00:00
+METADATA_launch_latitude=unknown
+METADATA_launch_longitude=unknown
+METADATA_launch_qc=0
+METADATA_start_date=2012-01-30 08:00:00
+METADATA_start_date_qc=0 
+METADATA_end_misison_date=unknown
+METADATA_southernmost_latitude=unknown
+METADATA_northernmost_latitude=unknown
+METADATA_westernmost_longitude=unknown
+METADATA_easternmost_longitude=unknown
+
+% Provider Metadata
+METADATA_institution=SOCIB
+METADATA_institution_reference=http://www.socib.es/
+METADATA_contact=http://www.socib.es/
+METADATA_distribution_statement=Non restricted access
+METADATA_quality_index=0

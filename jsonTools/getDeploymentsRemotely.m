@@ -41,14 +41,16 @@ function currentDeploymentsList = getDeploymentsRemotely
         end;
     end;
 
+    if isempty(currentDeploymentsList)
+        disp('No deployments found');
+        return;
+    end;
 %% Parse each deployment info
-    % Preallocate space for known number of deployments
-    currentDeploymentsList = cell(length(currentDeploymentsList), 1);
     % Loop through the deployments and parse their information
     for depIdx = 1:length(currentDeploymentsList)
         currentDeployment = currentDeploymentsList{depIdx};
         parsedDeployment  = parseDeploymentInfo(currentDeployment);
-        currentDeploymentsList{depIdx} = parsedDeployment;
+        currentDeploymentsList{depIdx} = parsedDeployment; %#ok<AGROW>
     end; % for depIdx = 1:length(currentDeploymentsList)
 
     return;
