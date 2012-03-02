@@ -46,8 +46,12 @@ function processedData = processGliderData(gliderData, options)
     end;
 
     % Parse the processing options
-    remain = textscan(options.salinityCorrected, '%s', 'Delimiter', '_');
-    correctionTokens = remain{1};
+    if isfield(options, 'salinityCorrected')
+        remain = textscan(options.salinityCorrected, '%s', 'Delimiter', '_');
+        correctionTokens = remain{1};
+    else
+        correctionTokens = {};
+    end;
 %     remain = options.salinityCorrected;
 %     correctionTokens = {};
 %     while true
@@ -484,7 +488,10 @@ function processedData = processGliderData(gliderData, options)
             profileIdxRange = find(timeserie.profile_index == prfIdx);
             for idx = 1:size(correctionParams, 1)
                 currentCorrectionParams = correctionParams(idx, :);
-                varsList = ['sciTime', 'depth', correctionParamsMeaning{idx}, 'pitch'];
+                varsList = ['sciTime', 'depth', correctionParamsMeaning{idx}];
+                if isfield(timeserie, 'pitch')
+                    varsList = [varsList, 'pitch'];
+                end;
                 [basicProfileData, goodRows] = buildCombinedProfile(timeserie, profileIdxRange, varsList, newFieldNames);
                 if isfield(basicProfileData, 'conductivity')
                     basicProfileData.cond = basicProfileData.conductivity;

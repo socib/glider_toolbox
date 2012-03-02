@@ -94,7 +94,7 @@ function [fetchedSbdList, fetchedLogList] = getDockserverFiles(gliderName, glide
     disp(['Downloading files between ', datestr(startingDate), ' and ', datestr(endingDate)]);
 
 %% Binary data files downloading
-    filePattern = [lower(gliderName) '*.*bd'];
+    
     remoteSbdDir = [dockserverDataBaseDir, '/from-glider'];
     localSbdDir = fullfile(localDataBaseDir, 'binary');
     if ~exist(localSbdDir, 'dir')
@@ -105,13 +105,12 @@ function [fetchedSbdList, fetchedLogList] = getDockserverFiles(gliderName, glide
         end;
     end;
     
-    fetchedSbdList = downloadFiles(ftpStruct, filePattern, ...
+    fetchedSbdList = downloadFiles(ftpStruct, gliderName, 'binary', ...
         remoteSbdDir, localSbdDir, ...
         startingDate, endingDate);
     disp([num2str(length(fetchedSbdList), '%0.0f') ' new/updated binary data files fetched.']);
     
 %% Surface log files downloading
-    filePattern = [lower(gliderName) '*.log'];
     remoteLogDir = [dockserverDataBaseDir, '/logs'];
     localLogDir = fullfile(localDataBaseDir, 'logs');
     if ~exist(localLogDir, 'dir')
@@ -122,7 +121,7 @@ function [fetchedSbdList, fetchedLogList] = getDockserverFiles(gliderName, glide
         end;
     end;
     
-    fetchedLogList = downloadFiles(ftpStruct, filePattern, ...
+    fetchedLogList = downloadFiles(ftpStruct, gliderName, 'logfile', ...
         remoteLogDir, localLogDir, ...
         startingDate, endingDate);
     disp([num2str(length(fetchedLogList), '%0.0f') ' new/updated surface log files fetched.']);
@@ -132,12 +131,25 @@ function [fetchedSbdList, fetchedLogList] = getDockserverFiles(gliderName, glide
     return;
 
 %% Sub-function downloadFiles
-    function fetchedFilesList = downloadFiles(ftpStruct, filePattern, remoteDir, localDir, ...
+    function fetchedFilesList = downloadFiles(ftpStruct, vehicleName, fileType, remoteDir, localDir, ...
         startingDate, endingDate)
-    
+
         % Initialize output
         fetchedFilesList = {};
-        
+
+    
+        if strcmp(fileType, 'binary')
+            filePattern = [lower(vehicleName) '*.*bd'];
+            fileDatePattern = [lower(vehicleName) '-%d-%d-%d-%d.'];
+        elseif strcmp(fileType, 'logfile')
+            filePattern = [lower(vehicleName) '*.log'];
+            
+            fileDatePattern = [lower(vehicleName) '_%*[a-zA-Z0-9]_%04d%02d%02dT%02d%02d%02d.log'];
+        else
+            disp('Unknown file type to download');
+            return;
+        end;
+    
         % Get list of remote files
         try
             cd(ftpStruct.ftpHandle, remoteDir);
@@ -146,14 +158,28 @@ function [fetchedSbdList, fetchedLogList] = getDockserverFiles(gliderName, glide
                 disp(['No files on dockserver following pattern ', filePattern]);
                 return;
             else
-                filesTimestamp = [remoteFiles(:).datenum]';
-                areInPeriodIdx = (filesTimestamp >= startingDate & filesTimestamp <= endingDate);
+                remoteNames = {remoteFiles(:).name}';
+                filesTimestamp = nan(length(remoteNames), 1);
+                for idx = 1:length(remoteNames)
+                    fnContent = sscanf(remoteNames{idx}, fileDatePattern);
+                    if strcmp(fileType, 'binary')
+                        filesTimestamp(idx) = datenum([fnContent(1), 1, fnContent(2)]) + 1;
+                    elseif strcmp(fileType, 'logfile')
+                        filesTimestamp(idx) = datenum(fnContent(:)');
+                    else
+                        disp('Unknown file type to download');
+                        return;
+                    end;
+                end;
+
+                areInPeriodIdx = (filesTimestamp >= floor(startingDate) & filesTimestamp <= endingDate);
                 remoteFiles = remoteFiles(areInPeriodIdx);
                 remoteFilenames = {remoteFiles.name}';
             end;
         catch MatExcep
             disp('Could not get remote file list');
-            disp(getReport(MatExcep.stack, 'extended'));
+            keyboard;
+            disp(getReport(MatExcep, 'extended'));
             return;
         end;
 

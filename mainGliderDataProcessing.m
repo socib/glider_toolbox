@@ -16,6 +16,8 @@ close all;
 clc;
 %restoredefaultpath;
 
+warning('off','MATLAB:dispatcher:InexactCaseMatch');
+
 %% Basic path setup
 % Set the path for accessing the glider toolbox functionality
 gliderToolboxDir = fileparts(mfilename('fullpath'));
@@ -39,12 +41,12 @@ outputDirs.imageBaseURLPath   = 'http://www.socib.es/~glider/';
 
 %% Configure processing options
 clear processingOptions;
-processingOptions.salinityCorrected = 'TH';
+%processingOptions.salinityCorrected = 'TH';
 %processingOptions.tempTimeConstant = 0.4;
 %processingOptions.condTimeConstant = 1.0;
-processingOptions.thermalParams    = [0.15, 0.06, 7.15, 2.78];
+%processingOptions.thermalParams    = [0.15, 0.06, 7.15, 2.78];
 %processingOptions.thermalParams    = repmat([0.18, 0.02, 7.16, 2.78], 1, 1);
-processingOptions.thermalParamsMeaning{1} = {'temperature', 'conductivity'};
+%processingOptions.thermalParamsMeaning{1} = {'temperature', 'conductivity'};
 % processingOptions.thermalParamsMeaning{2} = {'Tcor', 'conductivity'};
 % processingOptions.thermalParamsMeaning{3} = {'Tcor', 'Ccor'};
 processingOptions.allowSciTimeFill = true;

@@ -32,7 +32,7 @@ function genGriddedGliderNcFile(outFilename, griddedData, params)
 %% FILE CREATION
     % First of all, generate an empty file to be filled in
     nc_create_empty(outFilename);
-    nc_padheader(outFilename, 2^15);
+    %nc_padheader(outFilename, 2^15);
 %% DIMENSIONS
     numCasts  = length(griddedData.gridCoords.distanceRange);
     numDepths = length(griddedData.gridCoords.depthRange);
@@ -112,17 +112,15 @@ function genGriddedGliderNcFile(outFilename, griddedData, params)
 
 %% FILE FILLING
 
-    % Loop through the list of fields again to fill the file
-%     for fieldIdx = 1:length(fieldList)
-% 
-%         currentFieldName = [fieldList{fieldIdx}, genericSuffix];
-%         currFieldName = fieldList{fieldIdx};
-%         
-%         currentFieldData = griddedData.(currentFieldName);
-%         nc_varput(outFilename, currFieldName, ...
-%             currentFieldData);
-%     end;
-    
+    % Scientific variables
+    fieldList = fieldnames(griddedData.grids);
+    % Loop through the list of fields to define the file
+    for fieldIdx = 1:length(fieldList)
+        currentFieldName = fieldList{fieldIdx};
+        currentFieldData = griddedData.grids.(currentFieldName);
+        nc_varput(outFilename, currentFieldName, currentFieldData);
+    end;
+
     % STILL TO BE FIXED
 %     lat = rawData.data(:, rawData.m_gps_lat);
 %     lon = rawData.data(:, rawData.m_gps_lon);
