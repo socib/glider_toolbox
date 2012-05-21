@@ -468,16 +468,16 @@ function processedData = processGliderData(gliderData, options)
         
         % Prepare timeseries for thermal lag corrected data
         for idx = 1:size(correctionParams, 1)
-            newFieldNames = {'ptime', 'depth', 'temp', 'cond'};
-            varsList = ['sciTime', 'depth', correctionParamsMeaning{idx}];
+            newFieldNames = {'ptime', 'depth', 'temp', 'cond', 'pitch'};
+            varsList = ['sciTime', 'depth', correctionParamsMeaning{idx}, 'pitch'];
             corFound = strfind(varsList, 'cor');
-            salFieldName = 'salinity_corrected';
-            for k = 1:length(corFound)
-                if ~isempty(corFound{k})
-                    salFieldName = [salFieldName, '_', varsList{k}]; %#ok<AGROW>
+             salFieldName = 'salinity_corrected';
+                for k = 1:length(corFound)
+                    if ~isempty(corFound{k})
+                        salFieldName = [salFieldName, '_', varsList{k}]; %#ok<AGROW>
+                    end;
                 end;
-            end;
-            salFieldName = [salFieldName, '_TH']; %#ok<AGROW>
+                salFieldName = [salFieldName, '_TH']; %#ok<AGROW>
             timeserie.(salFieldName) = nan(size(timeserie.navTime));
         end;
 
@@ -488,11 +488,11 @@ function processedData = processGliderData(gliderData, options)
             profileIdxRange = find(timeserie.profile_index == prfIdx);
             for idx = 1:size(correctionParams, 1)
                 currentCorrectionParams = correctionParams(idx, :);
-                varsList = ['sciTime', 'depth', correctionParamsMeaning{idx}];
+                varsList = {'sciTime', 'depth', ['salinity_corrected_',correctionParamsMeaning{idx}]};
                 if isfield(timeserie, 'pitch')
-                    newFieldNames = [newFieldNames, 'pitch'];
                     varsList = [varsList, 'pitch'];
                 end;
+                keyboard;
                 [basicProfileData, goodRows] = buildCombinedProfile(timeserie, profileIdxRange, varsList, newFieldNames);
                 if isfield(basicProfileData, 'conductivity')
                     basicProfileData.cond = basicProfileData.conductivity;

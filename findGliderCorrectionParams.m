@@ -4,7 +4,8 @@ function [bestGuessCorrectionParams, paramsMeaning] = findGliderCorrectionParams
     
     bestGuessCorrectionParams = innerFindGliderCorrectionParams(timeserie, ...
         {'temperature', 'conductivity'}, options);
-    paramsMeaning{end + 1} = 'TH';
+    %paramsMeaning{end + 1} = 'TH';
+    paramsMeaning{end + 1} = {'temperature', 'conductivity'};
 
     if isfield(timeserie, 'Tcor')
         bestGuessCorrectionParams = [bestGuessCorrectionParams;
@@ -22,8 +23,13 @@ function [bestGuessCorrectionParams, paramsMeaning] = findGliderCorrectionParams
 
     function bestGuessCorrectionParams = innerFindGliderCorrectionParams(timeserie, varsSet, options)
         
-        innerVarsSet = ['sciTime', 'depth', varsSet, 'pitch'];
-        newFieldNames = {'ptime', 'depth', 'temp', 'cond', 'pitch'};
+        innerVarsSet = ['sciTime', 'depth', varsSet];
+        newFieldNames = {'ptime', 'depth', 'temp', 'cond'};
+        if isfield(timeserie, 'pitch')
+            innerVarsSet = [innerVarsSet, 'pitch'];
+            newFieldNames = [newFieldNames, 'pitch'];
+        end;
+        
         maxCasts = max(timeserie.profile_index);
         totalCorrectionParams = [];
 

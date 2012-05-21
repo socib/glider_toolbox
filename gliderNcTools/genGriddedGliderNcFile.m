@@ -77,18 +77,8 @@ function genGriddedGliderNcFile(outFilename, griddedData, params)
 
 %% GLOBAL ATTRIBUTES: METADATA
     % A list of 'fixed' attributes (user can override them)
-    nc_attput(outFilename, nc_global, 'type', 'Slocum glider gridded data file');
     nc_attput(outFilename, nc_global, 'creation_date', datestr(now));
-    nc_attput(outFilename, nc_global, 'netcdf_version', '3.6.1');
-    
-    % Source ascii files list
-    if isfield(griddedData, 'source') && ~isempty(griddedData.source)
-        sourceFileList = griddedData.source{1};
-        for srcIdx = 2:length(griddedData.source)
-            sourceFileList = strcat(sourceFileList, ['; ', griddedData.source{srcIdx}]);
-        end;
-        nc_attput(outFilename, nc_global, 'source_files', sourceFileList);
-    end;
+    writeGliderStaticMetadata(outFilename);
     
     % Get the list of fields appearing on the params structure
     paramNames = fieldnames(params);
@@ -110,7 +100,29 @@ function genGriddedGliderNcFile(outFilename, griddedData, params)
         end;
     end;
 
+    % Source ascii files list
+    if isfield(griddedData, 'source') && ~isempty(griddedData.source)
+        sourceFileList = griddedData.source{1};
+        for srcIdx = 2:length(griddedData.source)
+            sourceFileList = strcat(sourceFileList, ['; ', griddedData.source{srcIdx}]);
+        end;
+        nc_attput(outFilename, nc_global, 'source_files', sourceFileList);
+    end;
+    
 %% FILE FILLING
+
+    % Coordinate variables
+    fieldList = fieldnames(griddedData.gridCoords);
+    % Loop through the list of fields to define the file
+    for fieldIdx = 1:length(fieldList)
+        currentFieldName = fieldList{fieldIdx};
+        currentFieldData = griddedData.gridCoords.(currentFieldName);
+        try
+            nc_varput(outFilename, currentFieldName, currentFieldData(:));
+        catch
+            keyboard;
+        end;
+    end;
 
     % Scientific variables
     fieldList = fieldnames(griddedData.grids);
@@ -121,28 +133,19 @@ function genGriddedGliderNcFile(outFilename, griddedData, params)
         nc_varput(outFilename, currentFieldName, currentFieldData);
     end;
 
-    % STILL TO BE FIXED
-%     lat = rawData.data(:, rawData.m_gps_lat);
-%     lon = rawData.data(:, rawData.m_gps_lon);
-%     time = rawData.data(:, rawData.m_present_time);
-%     
-%     latIdx  = find(~isnan(lat),  1, 'first');
-%     lonIdx  = find(~isnan(lon),  1, 'first');
-%     timeIdx = find(~isnan(time), 1, 'first');
-% 
-%     % Rewrite some global attributes with contained information
-% 	nc_attput(outFilename, nc_global, 'launch_latitude', lat(latIdx));
-%     nc_attput(outFilename, nc_global, 'launch_longitude', lon(lonIdx));
-%     
-%     d = nc_attget(outFilename, nc_global, 'launch_date');
-%     nc_attput(outFilename, nc_global, 'launch_date', datestr(d));
-%     
-%     d = datenum([1970 1 1 0 0 time(timeIdx)]);
-%     nc_attput(outFilename, nc_global, 'start_date', datestr(d));
-% 
-%     nc_attput(outFilename, nc_global, 'southernmost_latitude', min(lat));
-%     nc_attput(outFilename, nc_global, 'northernmost_latitude', max(lat));
-%     nc_attput(outFilename, nc_global, 'westernmost_longitude', min(lon));
-%     nc_attput(outFilename, nc_global, 'easternmost_longitude', max(lon));
+    lat = griddedData.gridCoords.latitudeRange;
+    lon = griddedData.gridCoords.longitudeRange;
+     
+    latIdx  = find(~isnan(lat),  1, 'first');
+    lonIdx  = find(~isnan(lon),  1, 'first');
+
+    % Rewrite some global attributes with contained information
+ 	nc_attput(outFilename, nc_global, 'launch_latitude', lat(latIdx));
+    nc_attput(outFilename, nc_global, 'launch_longitude', lon(lonIdx));
+    
+    nc_attput(outFilename, nc_global, 'southernmost_latitude', nanmin(lat));
+    nc_attput(outFilename, nc_global, 'northernmost_latitude', nanmax(lat));
+    nc_attput(outFilename, nc_global, 'westernmost_longitude', nanmin(lon));
+    nc_attput(outFilename, nc_global, 'easternmost_longitude', nanmax(lon));
     
 end

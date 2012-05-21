@@ -47,8 +47,8 @@ function profileIndex = findProfiles(depthTimeserie, inflectionInd)
         maxDepthRange = max(profileDepth) - min(profileDepth);
         maxGap        = max(abs(diff(profileDepth)));
         emptyRatio    = maxGap / maxDepthRange;
-        % Profile longer than 10 meters and gaps smaller than 30%
-        if and(maxDepthRange > 10, emptyRatio < 0.3)
+        % Profile longer than 10 meters and gaps smaller than 80%
+        if and(maxDepthRange > 10, emptyRatio < 0.8)
             profileCounter = profileCounter + 1;
             profileIndex(profileRange) = profileCounter;
         else
@@ -58,10 +58,7 @@ function profileIndex = findProfiles(depthTimeserie, inflectionInd)
     
     disp([num2str(length(inflectionInd)), ' inflection points']);
     disp([num2str(profileCounter), ' profiles found']);
-    %disp([num2str(dismissedCounter), ' profiles dismissed']);
-    %disp([num2str(profileCounter + dismissedCounter), ' total profiles analyzed']);
+    disp([num2str(dismissedCounter), ' profiles dismissed']);
+    disp([num2str(profileCounter + dismissedCounter), ' total profiles analyzed']);
 
-
-    
-    
 end

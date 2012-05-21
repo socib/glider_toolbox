@@ -61,18 +61,8 @@ function genRawGliderNcFile(outFilename, rawData, params)
 
 %% GLOBAL ATTRIBUTES: METADATA
     % A list of 'fixed' attributes (user can override them)
-    nc_attput(outFilename, nc_global, 'type', 'Slocum glider raw data file');
     nc_attput(outFilename, nc_global, 'creation_date', datestr(now));
-    nc_attput(outFilename, nc_global, 'netcdf_version', '3.6.1');
-    
-    % Source ascii files list
-    if ~isempty(rawData.source)
-        sourceFileList = rawData.source{1};
-        for srcIdx = 2:length(rawData.source)
-            sourceFileList = strcat(sourceFileList, ['; ', rawData.source{srcIdx}]);
-        end;
-        nc_attput(outFilename, nc_global, 'source_files', sourceFileList);
-    end
+    writeGliderStaticMetadata(outFilename);
     
     % Get the list of fields appearing on the params structure
     paramNames = fieldnames(params);
@@ -94,6 +84,15 @@ function genRawGliderNcFile(outFilename, rawData, params)
         end
     end
 
+    % Source ascii files list
+    if ~isempty(rawData.source)
+        sourceFileList = rawData.source{1};
+        for srcIdx = 2:length(rawData.source)
+            sourceFileList = strcat(sourceFileList, ['; ', rawData.source{srcIdx}]);
+        end;
+        nc_attput(outFilename, nc_global, 'source_files', sourceFileList);
+    end
+    
 %% FILE FILLING
 
     % Loop through the list of fields again to fill the file
@@ -111,28 +110,19 @@ function genRawGliderNcFile(outFilename, rawData, params)
         end
     end
     
-    % STILL TO BE FIXED
-%     lat = rawData.data(:, rawData.m_gps_lat);
-%     lon = rawData.data(:, rawData.m_gps_lon);
-%     time = rawData.data(:, rawData.m_present_time);
-%     
-%     latIdx  = find(~isnan(lat),  1, 'first');
-%     lonIdx  = find(~isnan(lon),  1, 'first');
-%     timeIdx = find(~isnan(time), 1, 'first');
-% 
-%     % Rewrite some global attributes with contained information
-% 	nc_attput(outFilename, nc_global, 'launch_latitude', lat(latIdx));
-%     nc_attput(outFilename, nc_global, 'launch_longitude', lon(lonIdx));
-%     
-%     d = nc_attget(outFilename, nc_global, 'launch_date');
-%     nc_attput(outFilename, nc_global, 'launch_date', datestr(d));
-%     
-%     d = datenum([1970 1 1 0 0 time(timeIdx)]);
-%     nc_attput(outFilename, nc_global, 'start_date', datestr(d));
-% 
-%     nc_attput(outFilename, nc_global, 'southernmost_latitude', min(lat));
-%     nc_attput(outFilename, nc_global, 'northernmost_latitude', max(lat));
-%     nc_attput(outFilename, nc_global, 'westernmost_longitude', min(lon));
-%     nc_attput(outFilename, nc_global, 'easternmost_longitude', max(lon));
+    lat = rawData.data(:, rawData.m_gps_lat);
+    lon = rawData.data(:, rawData.m_gps_lon);
+    
+    latIdx  = find(~isnan(lat),  1, 'first');
+    lonIdx  = find(~isnan(lon),  1, 'first');
+
+    % Rewrite some global attributes with contained information
+	nc_attput(outFilename, nc_global, 'launch_latitude', lat(latIdx));
+    nc_attput(outFilename, nc_global, 'launch_longitude', lon(lonIdx));
+    
+    nc_attput(outFilename, nc_global, 'southernmost_latitude', nanmin(lat));
+    nc_attput(outFilename, nc_global, 'northernmost_latitude', nanmax(lat));
+    nc_attput(outFilename, nc_global, 'westernmost_longitude', nanmin(lon));
+    nc_attput(outFilename, nc_global, 'easternmost_longitude', nanmax(lon));
     
 end

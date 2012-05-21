@@ -55,5 +55,5 @@ function [x, y, area] = buildPolygon(x1, y1, x2, y2)
 %     patch('Faces', faces, ...
 %           'Vertices', vertices, ...
 %           'FaceColor', 'k', 'EdgeColor', 'none');
-%     pause(0.25);
+%     pause(0.05);
 end

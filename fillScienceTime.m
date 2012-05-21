@@ -27,11 +27,12 @@ function newScienceTime = fillScienceTime(scienceTime)
 % Creation: 24-Feb-2011
 %
 
-    origSize       = size(scienceTime);
-    scienceTime    = scienceTime(:);
-    aRange         = (1:length(scienceTime))';
-    goodRows       = find(~isnan(scienceTime));
-    newScienceTime = interp1(goodRows, scienceTime(goodRows), aRange);
-    newScienceTime = reshape(newScienceTime, origSize);
+    origSize                 = size(scienceTime);
+    scienceTime              = scienceTime(:);
+    goodRows                 = find(~isnan(scienceTime));
+    badRows                  = find( isnan(scienceTime));
+    newScienceTime(goodRows) = scienceTime(goodRows);
+    newScienceTime(badRows)  = interp1(goodRows, scienceTime(goodRows), badRows);
+    newScienceTime           = reshape(newScienceTime, origSize);
 
 end

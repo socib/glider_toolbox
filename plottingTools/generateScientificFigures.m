@@ -136,7 +136,7 @@ function varargout = generateScientificFigures(processedData, griddedData, image
         figProperties.linearColorScale = 0;
 
         varValues = processedData.chlorophyll;
-        varValues(varValues < 0) = eps; % Avoid inf results
+        varValues(varValues <= 0) = eps; % Avoid inf results
         genStr = [' (generated on ', datestr(now, 31), ')'];
         fn = plotVerticalTransect(figProperties, cmJet, ...
             xAxisVar, processedData.depth, log10(varValues), texts);
@@ -152,7 +152,7 @@ function varargout = generateScientificFigures(processedData, griddedData, image
         figProperties.linearColorScale = 0;
 
         varValues = processedData.cdom;
-        varValues(varValues < 0) = eps;
+        varValues(varValues <= 0) = eps;
         genStr = [' (generated on ', datestr(now, 31), ')'];
         fn = plotVerticalTransect(figProperties, cmJet, ...
             xAxisVar, processedData.depth, log10(varValues), texts);
@@ -168,7 +168,7 @@ function varargout = generateScientificFigures(processedData, griddedData, image
         figProperties.linearColorScale = 0;
 
         varValues = processedData.turbidity;
-        varValues(varValues < 0) = eps;
+        varValues(varValues <= 0) = eps;
         genStr = [' (generated on ', datestr(now, 31), ')'];
         fn = plotVerticalTransect(figProperties, cmJet, ...
             xAxisVar, processedData.depth, log10(varValues), texts);
@@ -177,7 +177,7 @@ function varargout = generateScientificFigures(processedData, griddedData, image
         imageList(end).path = fn;
     end;
     
-    if isfield(processedData, 'oxygen')
+    if isfield(processedData, 'oxygen_saturation')
         texts.colorbarTitle = 'Oxygen (perc.)';
         texts.figureTitle = 'In Situ Oxygen Saturation';
         texts.imageFilename = [imgPreffix, 'oxygen_saturation'];
@@ -185,7 +185,7 @@ function varargout = generateScientificFigures(processedData, griddedData, image
 
         genStr = [' (generated on ', datestr(now, 31), ')'];
         fn = plotVerticalTransect(figProperties, cmJet, ...
-            xAxisVar, processedData.depth, processedData.oxygen, texts);
+            xAxisVar, processedData.depth, processedData.oxygen_saturation, texts);
         imageList(end+1).name = 'Oxygen Section';
         imageList(end).description = ['Cross Section of in situ measured dissolved oxygen', genStr];
         imageList(end).path = fn;

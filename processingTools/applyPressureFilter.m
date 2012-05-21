@@ -55,8 +55,6 @@ function newPressure = applyPressureFilter(sciTime, oldPressure, options)
     newPressSignal = seabirdFilter(regPressSignal, pressTimeConstant, 1);
     % Set the time series on it original time instants
     newPressSignal = interp1(regTimeRange, newPressSignal, pressTimeRange);
-
-
     
     newPressure(goodRows(idxStayed))  = newPressSignal;
     newPressure(goodRows(idxRemoved)) = nan;

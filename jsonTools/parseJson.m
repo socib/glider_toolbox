@@ -172,7 +172,7 @@ function [string json] = parse_string(json)
                         case '/'
                             new_char = '/';
                         case {'b' 'f' 'n' 'r' 't'}
-                            new_char = sprintf('\%c',code);
+                            new_char = sprintf('\\%c',code);
                         case 'u'
                             if length(json) >= 4
                                 new_char = sprintf('\\u%s',json(1:4));

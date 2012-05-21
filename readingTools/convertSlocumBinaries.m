@@ -434,6 +434,15 @@ function asciis = convertSlocumBinaries(files, varargin)
             [fileRoute, fileName, fileExtension] = fileparts(scienceFile);
             [membership, position] = ismember(lower(fileExtension(2:end)), sciExtensions);
             if membership
+                % Quirks mode on
+                for extIdx = 3:-1:1 % From the most extensive file to the least
+                    navFile = fullfile(fileRoute, [fileName, '.', navExtensions{extIdx}]);
+                    if exist(navFile, 'file')
+                        position = extIdx;
+                        break;
+                    end;
+                end;
+                % Quirks mode off
                 navFile = fullfile(fileRoute, [fileName, '.', navExtensions{position}]);
                 if ~exist(navFile, 'file')
                     navFile = fullfile(fileRoute, [fileName, '.', upper(navExtensions{position})]);

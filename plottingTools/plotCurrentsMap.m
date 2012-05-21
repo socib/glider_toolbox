@@ -99,14 +99,13 @@ function varargout = plotCurrentsMap(figProperties, waterInfo, texts)
                     'ImageWidth', imgWidth, ...
                     'Transparent', false, ...
                     'TimeoutInSeconds', 10);
+        image(lon(:)', lat(:), rasterMap);
+        axis xy equal tight;
     catch ME
         disp('WMS did not work as expected');
         disp(getReport(ME, 'extended'));
     end;
-
-    image(lon(:)', lat(:), rasterMap);
-    axis xy equal tight;
-
+    
     plot(lons(:), lats(:), 'k-');
     
     OrigAxUnits = get(gca,'Units');

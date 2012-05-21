@@ -44,11 +44,11 @@ function [fetchedSbdList, fetchedLogList] = getDockserverFiles(gliderName, glide
     end
 
     % Set the glider data root directory
-    if ~isfield(gliderParams, 'DATA_ROOT')
+    if ~isfield(gliderParams, 'dataRoot')
         disp('Missing DATA_ROOT config parameter!');
         return;
     end
-    localDataBaseDir = fullfile(gliderParams.DATA_ROOT, gliderName);
+    localDataBaseDir = gliderParams.dataRoot;
 
     if ~(isfield(gliderParams, 'DOCKSERVER_URL') && ~isempty(gliderParams.DOCKSERVER_URL))
         disp(['Could not find dockserver URL in glider parameters data structure provided to ', mfilename]);
@@ -70,24 +70,24 @@ function [fetchedSbdList, fetchedLogList] = getDockserverFiles(gliderName, glide
     end;
 
 %% Starting date management
-    if ~isfield(gliderParams, 'START_DATE')
+    if ~isfield(gliderParams, 'start_date')
         disp('No START_DATE parameter found in config file.');
         startingDate = datenum([1970 1 1], 'yyyy-mm-dd');
     else
-        startingDate = gliderParams.START_DATE;
-        if isfield(gliderParams, 'START_TIME');
-            timeNumbers = sscanf(gliderParams.START_TIME, '%2d:%02d:%02d');
-            startingDate = datenum(datevec(startingDate) + [0 0 0 timeNumbers(:)']);
+        startingDate = datenum(gliderParams.start_date);
+        if isfield(gliderParams, 'start_time');
+            timeNumbers = sscanf(gliderParams.start_time, '%2d:%02d');
+            startingDate = datenum(datevec(startingDate) + [0 0 0 timeNumbers(:)' 0]);
         end;
     end;
-    if ~isfield(gliderParams, 'END_DATE')
+    if ~isfield(gliderParams, 'end_date')
         disp('No END_DATE parameter found in config file.');
         endingDate = now;
     else
-        endingDate = gliderParams.END_DATE;
-        if isfield(gliderParams, 'END_TIME');
-            timeNumbers = sscanf(gliderParams.END_TIME, '%2d:%02d:%02d');
-            endingDate = datenum(datevec(endingDate) + [0 0 0 timeNumbers(:)']);
+        endingDate = datenum(gliderParams.end_date);
+        if isfield(gliderParams, 'end_time');
+            timeNumbers = sscanf(gliderParams.end_time, '%2d:%02d');
+            endingDate = datenum(datevec(endingDate) + [0 0 0 timeNumbers(:)' 0]);
         end;
     end;
     
@@ -136,14 +136,12 @@ function [fetchedSbdList, fetchedLogList] = getDockserverFiles(gliderName, glide
 
         % Initialize output
         fetchedFilesList = {};
-
     
         if strcmp(fileType, 'binary')
             filePattern = [lower(vehicleName) '*.*bd'];
             fileDatePattern = [lower(vehicleName) '-%d-%d-%d-%d.'];
         elseif strcmp(fileType, 'logfile')
             filePattern = [lower(vehicleName) '*.log'];
-            
             fileDatePattern = [lower(vehicleName) '_%*[a-zA-Z0-9]_%04d%02d%02dT%02d%02d%02d.log'];
         else
             disp('Unknown file type to download');

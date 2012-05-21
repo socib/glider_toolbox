@@ -42,13 +42,8 @@ function varargout = plotVerticalTransect(figProperties, cMap, un_xAxis, un_dept
     end
     colormap(cMap);
     hold on;
-    %plot(un_xAxis, un_depth, 'k-'); 
-    %pointArea = selectPointArea(figProperties);
-    %scatter(un_xAxis, un_depth, pointArea, un_var, 'filled');
     
-    mu      = nanmedian(un_var);
-    sigma   = nanstd(un_var);
-    climVec = mu + 1.75 * sigma * [-1, 1];
+    climVec = getColorLimits(un_var);
     [~, hc] = fast_scatter(un_xAxis, un_depth, un_var, ...
         'colorbar', 'horiz', 'clim', climVec);
 %     [h, hc] = fast_scatter(un_xAxis, un_depth, un_var, ...
