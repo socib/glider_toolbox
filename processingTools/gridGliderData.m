@@ -58,11 +58,11 @@ function griddedData = gridGliderData(processedData)
         currentFieldName = griddingVars{fieldIdx};
         grids.(currentFieldName) = nan(depthLevels, maxCasts);
     end;
-    
+
     for prfIdx = 1:maxCasts
-    
+
         indexRange = find(processedData.profile_index == prfIdx);
-        
+
         gridCoords.latitudeRange(prfIdx)  = nanmean(processedData.latitude(indexRange));
         gridCoords.longitudeRange(prfIdx) = nanmean(processedData.longitude(indexRange));
         gridCoords.timeRange(prfIdx)      = nanmean(processedData.navTime(indexRange));
@@ -79,7 +79,7 @@ function griddedData = gridGliderData(processedData)
             [knownDepth, idxForward, ~] = unique(currentDepthContent(goodRows));
             knownVal = currentFieldContent(goodRows);
             knownVal = knownVal(idxForward);
-            
+
             if length(knownDepth) >= 2
                 currentFieldProfile = interp1(knownDepth, knownVal, depthRange, interpMethod, NaN)';
             else
@@ -91,15 +91,15 @@ function griddedData = gridGliderData(processedData)
             %gridded.(currentFieldName) = double(griddedField);
         end;
     end;
-    
+
     for fieldIdx = 1:length(griddingVars)
         currentFieldName = griddingVars{fieldIdx};
         meanProfiles.(currentFieldName) = nanmean(grids.(currentFieldName), 2);
         stdProfiles.(currentFieldName) = nanstd(grids.(currentFieldName), 1, 2);
     end;
-    
+
     gridCoords.distanceRange = [0, m_lldist(gridCoords.longitudeRange, gridCoords.latitudeRange)'];
-    
+
     griddedData.gridCoords = gridCoords;
     griddedData.grids = grids;
     griddedData.meanProfiles = meanProfiles;

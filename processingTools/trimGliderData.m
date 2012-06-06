@@ -3,7 +3,7 @@ function [partialProcessedData, partialGriddedData] = trimGliderData(processedDa
     % Initialize output
     partialProcessedData = processedData;
     partialGriddedData = griddedData;
-    
+
     % Trim timeseries
     goodIdx = find(processedData.navTime >= min(timePeriod) & ...
         processedData.navTime <= max(timePeriod));
@@ -13,7 +13,7 @@ function [partialProcessedData, partialGriddedData] = trimGliderData(processedDa
         partialProcessedData.(currentFieldName) = ...
             partialProcessedData.(currentFieldName)(goodIdx);
     end;
-    
+
     goodIdx = find(processedData.waterInfo.time >= min(timePeriod) & ...
         processedData.waterInfo.time <= max(timePeriod));
     fields = fieldnames(processedData.waterInfo);
@@ -22,7 +22,7 @@ function [partialProcessedData, partialGriddedData] = trimGliderData(processedDa
         partialProcessedData.waterInfo.(currentFieldName) = ...
             partialProcessedData.waterInfo.(currentFieldName)(goodIdx);
     end;
-    
+
 
     % Trim grids
     goodIdx = find(griddedData.gridCoords.timeRange >= min(timePeriod) & ...

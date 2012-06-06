@@ -36,16 +36,16 @@ function [cleanedProfile, varargout] = cleanProfile(profileData)
         column = profileData.(varsSet{varIdx});
         dataMatrix = [dataMatrix, column(:)];
     end;
-    
+
     goodRows = find( sum(isnan(dataMatrix), 2) == 0 );
     dataMatrix = dataMatrix(goodRows, :);
-    
+
     for varIdx = 1:length(varsSet)
         cleanedProfile.(varsSet{varIdx}) = dataMatrix(:, varIdx);
     end;
-    
+
     if nargout > 1
         varargout{1} = goodRows;
     end;
-    
+
 end

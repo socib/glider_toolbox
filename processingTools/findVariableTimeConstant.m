@@ -3,7 +3,7 @@ function bestGuessCorrectionParam = findVariableTimeConstant(timeserie, varName,
     maxCasts = max(timeserie.profile_index);
 
     totalCorrectionParams = [];
-    
+
     % Loop through the list of profiles
     for prfIdx = 1:(maxCasts - 1)
 
@@ -17,22 +17,22 @@ function bestGuessCorrectionParam = findVariableTimeConstant(timeserie, varName,
         %basicProfile1Data.data  = ts(profile1IdxRange);
         basicProfile1Data.data  = timeserie.(varName)(profile1IdxRange);
         basicProfile1Data       = cleanProfile(basicProfile1Data);
-        
+
         basicProfile2Data.time  = timeserie.sciTime(profile2IdxRange);
         basicProfile2Data.depth = timeserie.depth  (profile2IdxRange);
         %ts = timeserie.(varName);
         %basicProfile2Data.data  = ts(profile2IdxRange);
         basicProfile2Data.data  = timeserie.(varName)(profile2IdxRange);
         basicProfile2Data       = cleanProfile(basicProfile2Data);
-        
+
         prf1Down = basicProfile1Data.depth(end) > basicProfile1Data.depth(1);
         prf2Down = basicProfile2Data.depth(end) > basicProfile2Data.depth(1);
-        
+
         %% Check the amount of data in both profiles and oposite directions
         if ~isempty(basicProfile1Data) && ~isempty(basicProfile2Data) ...
             && xor(prf1Down, prf2Down)
             disp(['Finding ', varName, ' time constant params (profile ', num2str(prfIdx), ' of ', num2str(maxCasts),')...']);
-            
+
             timeConstant = adjustTimeConstant(basicProfile1Data, basicProfile2Data);
             totalCorrectionParams = [totalCorrectionParams; timeConstant]; %#ok<AGROW>
         else
@@ -43,7 +43,7 @@ function bestGuessCorrectionParam = findVariableTimeConstant(timeserie, varName,
             end;
         end;
     end;
-   
+
     % Find statistically the best guess for the correction parameters set
     if isempty(totalCorrectionParams)
         disp('Warning: could not find any suitable correction param');

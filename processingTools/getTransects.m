@@ -33,7 +33,7 @@ function periodsList = getTransects(navTime, wptLon, wptLat)
     waypointList = [wptLon(:), wptLat(:)];
     goodRows = find( sum(isnan(waypointList), 2) == 0 );
     wptMat = waypointList(goodRows, :);
-    
+
     % Search in which record (row) the waypoint changed.
     % *Note1: Copy the first waypoint at the beginning on the list so
     % 'diff' will have the same size as wptMat (and idx will be right)
@@ -41,7 +41,7 @@ function periodsList = getTransects(navTime, wptLon, wptLat)
     extMat = [wptMat(1,:); wptMat];
     idxChange = find(diff(extMat, 1, 1) ~= 0);
     [idxRow, ~] = ind2sub(size(wptMat), idxChange);
-    
+
     recordsIdx = goodRows(unique(idxRow));
     periodsList = navTime([1; recordsIdx(:); length(navTime)]);
 
@@ -55,7 +55,7 @@ function periodsList = getTransects(navTime, wptLon, wptLat)
 %         h = text(wptMat(k, 1) + 0.01, wptMat(k, 2) - 0.01, num2str(k));
 %         pause(1.5);
 %     end;
-%     
+%
     plot(wptLon(recordsIdx), wptLat(recordsIdx), 'ko-');
     h = [];
     for k = 1:length(recordsIdx)
@@ -64,6 +64,6 @@ function periodsList = getTransects(navTime, wptLon, wptLat)
         end;
         h = text(wptLon(recordsIdx(k))+0.01, wptLat(recordsIdx(k))-0.01, num2str(k));
         pause(1.5);
-    end;    
-    
+    end;
+
 end

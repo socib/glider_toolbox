@@ -46,7 +46,7 @@ function [basicProfileData, varargout] = buildCombinedProfile(timeserie, indexRa
         disp('The set of vars required are not in the input timeserie');
         return;
     end;
-    
+
     if nargin > 3
         newFieldNames = varargin{1};
     else
@@ -57,7 +57,7 @@ function [basicProfileData, varargout] = buildCombinedProfile(timeserie, indexRa
         basicProfile.(newFieldNames{varIdx}) = timeserie.(varsSet{varIdx})(indexRange);
     end;
     [basicProfileData, goodRows] = cleanProfile(basicProfile);
-    
+
     if nargout > 1
         varargout{1} = goodRows;
     end;

@@ -1,5 +1,5 @@
 function processedData = processGliderData(gliderData, options)
-%PROCESSGLIDERDATA - Processes glider data 
+%PROCESSGLIDERDATA - Processes glider data
 %  This function processes glider data previously loaded by functions
 %  like LOADSEGMENTDATA or LOADTRANSECTDATA.
 %  Among other things, this functions converts position from NMEA to
@@ -59,7 +59,7 @@ function processedData = processGliderData(gliderData, options)
 %         if isempty(currentToken),  break;  end
 %         correctionTokens = [correctionTokens; currentToken]; %#ok<AGROW>
 %     end
-    
+
     % Get the column definition: m_present_time, m_lon, ...
     strucContent = fieldnames(gliderData);
     for fieldIdx = 1:length(strucContent),
@@ -100,7 +100,7 @@ function processedData = processGliderData(gliderData, options)
     end;
     data(:, lat_col) = nmeaToDeg(data(:, lat_col));
     data(:, lon_col) = nmeaToDeg(data(:, lon_col));
-    
+
     % Interpolate data in time if missing, coordinates and others
     varsRange = [lat_col, lon_col];
     if exist('m_pitch', 'var')
@@ -138,14 +138,14 @@ function processedData = processGliderData(gliderData, options)
     dsGoodRows = find((containNan == 0));
     data       = data(dsGoodRows, :);
     disp(['Found ', num2str(length(dsBadRows)), ' records without spatio-temporal reference']);
-    
+
     maxRows = length(dsGoodRows);
     if (maxRows <= 2),
         disp('No interpolated data to process');
         return;
     end;
     clear notNanRows containNan varsRange;
-    
+
 %% TIME BASE
 
     % Generate "time" timeseries
@@ -158,18 +158,18 @@ function processedData = processGliderData(gliderData, options)
         disp('No science time found! Using navigation time');
         timeserie.sciTime = timeserie.navTime;
     end;
-    % Remove nans from science time, assuming 
-    % regular sampling was performed in time gaps    
+    % Remove nans from science time, assuming
+    % regular sampling was performed in time gaps
     if isfield(timeserie, 'sciTime') && options.allowSciTimeFill
         timeserie.sciTime = fillScienceTime(timeserie.sciTime);
     end;
-    
-%% Put the rest of variables in vectors 
+
+%% Put the rest of variables in vectors
 
     % Generate "coordinate" timeseries
     timeserie.latitude  = data(:, lat_col);
     timeserie.longitude = data(:, lon_col);
- 
+
     % Generate transects information based on waypoint changes
     if exist('c_wpt_lat', 'var') && exist('c_wpt_lon', 'var')
         wptLat    = nmeaToDeg(data(:, c_wpt_lat));
@@ -179,7 +179,7 @@ function processedData = processGliderData(gliderData, options)
         disp('No waypoint vars found to identify transects');
         transects = [timeserie.navTime(1), timeserie.navTime(end)];
     end;
-    
+
     if exist('m_pitch', 'var')
         timeserie.pitch = data(:, m_pitch);
         if all(isnan(timeserie.pitch))
@@ -223,7 +223,7 @@ function processedData = processGliderData(gliderData, options)
 %             ocrAvailable = 1;
 %         end;
 %     end;
-% 
+%
 %     % Optics: bb3slo (wet labs bb3slo backscatter triplet sensor)
 %     bb3Available = 0;
 %     if exist('sci_bb3slo_b470_scaled', 'var') && exist('sci_bb3slo_b532_scaled', 'var') && ...
@@ -236,7 +236,7 @@ function processedData = processGliderData(gliderData, options)
 %             bb3Available = 1;
 %         end;
 %     end;
-% 
+%
 %     % Optics: bbfl2s (wet labs bbfl2slo fluorometer / backscatter sensor)
 %     bbfAvailable = 0;
 %     if exist('sci_bbfl2s_bb_scaled', 'var') && exist('sci_bbfl2s_chlor_scaled', 'var') && ...
@@ -290,11 +290,11 @@ function processedData = processGliderData(gliderData, options)
             waterAvailable = 1;
         end;
     end;
-    
+
     % Distance over ground
     timeserie.distanceOverGround = ...
         [0; cumsum(m_lldist(timeserie.longitude, timeserie.latitude))];
-    
+
 %% Apply Pressure Filter
     if isfield(timeserie, 'pressure') && options.allowPressFilter
         timeserie.pressure = applyPressureFilter(...
@@ -333,7 +333,7 @@ function processedData = processGliderData(gliderData, options)
     goodidx = find(~isnan(timeserie.depth));
     timeserie.continousDepth = interp1(...
         timeserie.sciTime(goodidx), timeserie.depth(goodidx),...
-    	timeserie.sciTime);
+	timeserie.sciTime);
 
     % Find inflection points:
     %timeserie.profile_index  = nan(size(timeserie.navTime));
@@ -346,7 +346,7 @@ function processedData = processGliderData(gliderData, options)
 %     inflectionInd = inflectionInd((diffInd > 5));
     % Remove inflection indexes that mark a "shallow" profile
     timeserie.profile_index = findProfiles(timeserie.depth, inflectionInd);
-    
+
     maxCasts = max(timeserie.profile_index);
 
 %     if options.debugPlot
@@ -359,13 +359,13 @@ function processedData = processGliderData(gliderData, options)
 %             disp(ME.message);
 %         end;
 %         figure; clf; hold on;
-%         plot(timeserie.sciTime(1:2:end), timeserie.depth(1:2:end), '.k-'); 
+%         plot(timeserie.sciTime(1:2:end), timeserie.depth(1:2:end), '.k-');
 %         scatter(timeserie.sciTime(1:2:end), timeserie.depth(1:2:end), 30, timeserie.temperature(1:2:end), 'filled');
 %         figure; clf; hold on;
-%         plot(timeserie.sciTime(1:2:end), timeserie.depth(1:2:end), '.k-'); 
+%         plot(timeserie.sciTime(1:2:end), timeserie.depth(1:2:end), '.k-');
 %         scatter(timeserie.sciTime(1:2:end), timeserie.depth(1:2:end), 30, timeserie.salinity(1:2:end), 'filled');
-% 
-% 
+%
+%
 %         plot(processedData.sciTime, processedData.depth, '.k-'); hold on;
 %         scatter(processedData.sciTime, processedData.depth, 30, processedData.temperature, 'filled');
 %         scatter(processedData.sciTime, processedData.depth, 30, processedData.salinity, 'filled');
@@ -373,7 +373,7 @@ function processedData = processGliderData(gliderData, options)
 %         caxis([13.5, 14.5])
 %         caxis([38, 38.2])
 %         colorbar
-%     end;    
+%     end;
 
 %% SENSOR LAG PARAMETERS IDENTIFICATION
     if ctdAvailable && ismember('T', correctionTokens)
@@ -406,21 +406,21 @@ function processedData = processGliderData(gliderData, options)
         end;
     end;
 
-    
+
 %% SENSOR LAG APPLICATION
 % Loop through the list of profiles
     for prfIdx = 1:maxCasts
 
         % Get the range indexes for this profile
         profileIdxRange = find(timeserie.profile_index == prfIdx);
-        
+
         % Check in this range where we have data from each sensor
         if ctdAvailable
 
             varsSet = {'T', 'C'};
             fieldsName = {'temperature', 'conductivity'};
             for varIdx = 1:length(varsSet)
-                
+
                 if ismember(varsSet{varIdx}, correctionTokens)
                     clear aProfile;
                     aProfile.time                 = timeserie.sciTime    (profileIdxRange);
@@ -438,7 +438,7 @@ function processedData = processGliderData(gliderData, options)
             end;
         end;
     end;
-    
+
 %% THERMAL LAG PARAMS IDENTIFICATION
     if ctdAvailable && ismember('TH', correctionTokens)
         if isfield(options, 'thermalParams') && isfield(options, 'thermalParamsMeaning')
@@ -448,7 +448,7 @@ function processedData = processGliderData(gliderData, options)
             % Parameters adjusted within this dataset
             % data: alpha offset, alpha slope, tau offset, tau slope
             [correctionParams, correctionParamsMeaning] = findGliderCorrectionParams(timeserie, options);
-            
+
             for rowIdx = 1:size(correctionParams, 1)
                 disp(['Thermal params (a_o a_s t_o t_s): ',num2str(correctionParams(rowIdx, :))]);
                 if any(isnan(correctionParams(rowIdx, :)))
@@ -463,21 +463,21 @@ function processedData = processGliderData(gliderData, options)
             end;
         end;
     end;
-    
+
     if ctdAvailable && ismember('TH', correctionTokens)
-        
+
         % Prepare timeseries for thermal lag corrected data
         for idx = 1:size(correctionParams, 1)
-            newFieldNames = {'ptime', 'depth', 'temp', 'cond', 'pitch'};
-            varsList = ['sciTime', 'depth', correctionParamsMeaning{idx}, 'pitch'];
+            newFieldNames = {'ptime', 'depth', 'temp', 'cond'};
+            varsList = ['sciTime', 'depth', correctionParamsMeaning{idx}];
             corFound = strfind(varsList, 'cor');
-             salFieldName = 'salinity_corrected';
-                for k = 1:length(corFound)
-                    if ~isempty(corFound{k})
-                        salFieldName = [salFieldName, '_', varsList{k}]; %#ok<AGROW>
-                    end;
+            salFieldName = 'salinity_corrected';
+            for k = 1:length(corFound)
+                if ~isempty(corFound{k})
+                    salFieldName = [salFieldName, '_', varsList{k}]; %#ok<AGROW>
                 end;
-                salFieldName = [salFieldName, '_TH']; %#ok<AGROW>
+            end;
+            salFieldName = [salFieldName, '_TH']; %#ok<AGROW>
             timeserie.(salFieldName) = nan(size(timeserie.navTime));
         end;
 
@@ -488,11 +488,11 @@ function processedData = processGliderData(gliderData, options)
             profileIdxRange = find(timeserie.profile_index == prfIdx);
             for idx = 1:size(correctionParams, 1)
                 currentCorrectionParams = correctionParams(idx, :);
-                varsList = {'sciTime', 'depth', ['salinity_corrected_',correctionParamsMeaning{idx}]};
+                varsList = ['sciTime', 'depth', correctionParamsMeaning{idx}];
                 if isfield(timeserie, 'pitch')
+                    newFieldNames = [newFieldNames, 'pitch'];
                     varsList = [varsList, 'pitch'];
                 end;
-                keyboard;
                 [basicProfileData, goodRows] = buildCombinedProfile(timeserie, profileIdxRange, varsList, newFieldNames);
                 if isfield(basicProfileData, 'conductivity')
                     basicProfileData.cond = basicProfileData.conductivity;
@@ -504,7 +504,7 @@ function processedData = processGliderData(gliderData, options)
                 elseif isfield(basicProfileData, 'Tcor')
                     basicProfileData.temp = basicProfileData.Tcor;
                 end;
-                
+
                 corFound = strfind(varsList, 'cor');
                 salFieldName = 'salinity_corrected';
                 for k = 1:length(corFound)
@@ -514,7 +514,7 @@ function processedData = processGliderData(gliderData, options)
                 end;
                 salFieldName = [salFieldName, '_TH']; %#ok<AGROW>
 
-                if ~isempty(basicProfileData) 
+                if ~isempty(basicProfileData)
                     correctedProfileData = correctThermalLag(basicProfileData, currentCorrectionParams);
                     cndr = 10 * basicProfileData.cond / sw_c3515;
                     timeserie.(salFieldName)(profileIdxRange(goodRows)) = ...
@@ -539,35 +539,35 @@ function processedData = processGliderData(gliderData, options)
                 minVal = 10;
                 maxVal = 40;
                 passTest = true;
-                
+
             case {'salinity', 'salinity_corrected_TH'}
                 minVal = 2;
                 maxVal = 40;
                 passTest = true;
-                
+
             otherwise
                 passTest = false;
-                
+
         end;
-        
+
         if passTest
             varVector = timeserie.(currentFieldName);
             varVector(varVector < minVal) = nan;
             varVector(varVector > maxVal) = nan;
             timeserie.(currentFieldName) = varVector;
         end;
-        
+
     end;
     % QUIRKS MODE FOR NOW
-    
+
 %% Build processed data structure
 
     % Introduce output values in a structure: timeserie + currents
     processedData = timeserie;
     processedData.timeseries = fieldnames(timeserie);
-    
+
     % Note add our time constants corrected data into structure
-    
+
     if exist('correctionParams', 'var')
         processedData.correctionParams = correctionParams;
     end;
@@ -575,13 +575,12 @@ function processedData = processGliderData(gliderData, options)
     if exist('transects', 'var')
         processedData.transects = transects;
     end;
-    
+
     if waterAvailable
         processedData.waterInfo  = waterInfo;
     end;
-    
+
     if isfield(gliderData, 'source'),
         processedData.source = gliderData.source;
     end;
 end
-    
