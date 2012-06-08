@@ -128,7 +128,14 @@ function [data json] = parse_object(json)
                     ME = MException('json:parse_object',['Can not have an empty name: ' json]);
                     ME.throw;
                 end
-                data.(name) = value;
+                
+                [startIdx, endIdx] = regexp(name, '^[a-zA-Z_][a-zA-Z0-9_]*', 'once');
+                if isempty(startIdx)
+                   keyboard;
+                   ME = MException('json:parse_object',['Can not have an empty name: ' json]);
+                   ME.throw;
+                end
+                data.(name(startIdx:endIdx)) = value;
                 json = remaining_json;
                 
             case '}' % End of object, so exit the function

@@ -33,7 +33,11 @@ function currentDeploymentsList = getDeploymentsRemotely
             deploymentQuery = [getDeploymentInfoURL, ...
                 '?glider=', deploymentList{depIdx}.glider, ...
                 '&mission=', deploymentList{depIdx}.mission_name];
-            data = parseJson(urlread(deploymentQuery));
+            try
+                data = parseJson(urlread(deploymentQuery));
+            catch ME
+                keyboard;
+            end;
             deploymentInfo = data{1}';
             % As number of active deployments cannot be known in advance
             % there is no way of preallocating space for them
