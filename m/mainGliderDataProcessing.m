@@ -1,22 +1,14 @@
-%MAINGLIDERDATAPROCESSINGDT - Main script to run delayed time glider processing chain
+%MAINGLIDERDATAPROCESSINGNRT - Main script to run near real time glider processing chain.
 % This script develops the full processing chain of glider data, from
 % data downloading from the dockserver, data conversion, data processing
 % and correction, netcdf storage and data images generation.
 %
-% Author: Joan Pau Beltran
-% Work address: Parc Bit, Naorte, Bloc A pis 2 porta 3; Palma SPAIN. E-07121
-% Author e-mail: joanpau.beltran@socib.cat
+% Author: Bartolome Garau
+% Work address: Parc Bit, Naorte, Bloc A 2Âºp. pta. 3; Palma de Mallorca SPAIN. E-07121
+% Author e-mail: tgarau@socib.es
 % Website: http://www.socib.es
-% Creation: 6-JUN-2011
+% Creation: 17-Feb-2011
 %
-
-%% Script start: clean workspace and set path defaults
-clear all;
-close all;
-clc;
-%restoredefaultpath;
-
-warning('off','MATLAB:dispatcher:InexactCaseMatch');
 
 %% Basic path setup
 % Set the path for accessing the glider toolbox functionality
@@ -34,10 +26,11 @@ gliderSubDirTree = {...
     'matfiles', ...
     'netcdf'};
 
-outputDirs.ncBasePath         = '/data/current/opendap/observational/auv/glider/';
-outputDirs.imageBaseLocalPath = '/home/glider/public_html/';
-outputDirs.imageBaseURLPath   = 'http://www.socib.es/~glider/';
-
+%outputDirs.ncBasePath         = '/data/current/opendap/observational/auv/glider/';
+outputDirs.ncBasePath         = '/home/jbeltran/public_html/observational/auv/glider/';
+outputDirs.imageBaseLocalPath = '/home/jbeltran/public_html/glider';
+outputDirs.imageBaseURLPath   = 'http://www.socib.es/~jbeltran/glider/';
+data_root_testing = '/home/jbeltran/public_html/glider';
 
 %% Configure processing options
 clear processingOptions;
@@ -50,7 +43,7 @@ processingOptions.debugPlot        = true;
 
 %% Get list of active deployments
 disp('Retrieving remote list of deployments...');
-currentDeploymentsList = getDeploymentsRemotely;
+currentDeploymentsList = getDeploymentsForTesting();
 if isempty(currentDeploymentsList)
     disp(['Empty list of deployments found']);
 
@@ -83,6 +76,7 @@ else
             disp('Missing DATA_ROOT config parameter. Setting default value...');
             currentDeployment.dataRoot = fullfile('/home/glider/gliderDeployments/', gliderName, currentDeployment.mission_name);
         end;
+        currentDeployment.dataRoot = fullfile(data_root_testing, gliderName, currentDeployment.mission_name);
 
         % Generate glider directory if it does not exist
         [success, errorMsg] = mkdir(currentDeployment.dataRoot);
