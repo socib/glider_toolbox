@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 function data = parseJson(json)
 %PARSEJSON - JSON string parsing. Returns a data structure.
 % This function parses a JSON string and returns a cell array with the

@@ -12,6 +12,8 @@ function addGliderToolboxPath()
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
+error(nargchk(0, 0, nargin, 'struct'));
+
 [mfile_path, ~, ~] = fileparts(mfilename('fullpath'));
 addpath(genpath(mfile_path));
 
