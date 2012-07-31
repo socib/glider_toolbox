@@ -44,11 +44,11 @@ function [fetchedSbdList, fetchedLogList] = getDockserverFiles(gliderName, glide
     end
 
     % Set the glider data root directory
-    if ~isfield(gliderParams, 'dataRoot')
+    if ~isfield(gliderParams, 'data_root')
         disp('Missing DATA_ROOT config parameter!');
         return;
     end
-    localDataBaseDir = gliderParams.dataRoot;
+    localDataBaseDir = gliderParams.data_root;
 
     if ~(isfield(gliderParams, 'DOCKSERVER_URL') && ~isempty(gliderParams.DOCKSERVER_URL))
         disp(['Could not find dockserver URL in glider parameters data structure provided to ', mfilename]);
@@ -70,25 +70,17 @@ function [fetchedSbdList, fetchedLogList] = getDockserverFiles(gliderName, glide
     end;
 
 %% Starting date management
-    if ~isfield(gliderParams, 'start_date')
+    if ~isfield(gliderParams, 'start_time')
         disp('No START_DATE parameter found in config file.');
         startingDate = datenum([1970 1 1], 'yyyy-mm-dd');
     else
-        startingDate = datenum(gliderParams.start_date);
-        if isfield(gliderParams, 'start_time');
-            timeNumbers = sscanf(gliderParams.start_time, '%2d:%02d');
-            startingDate = datenum(datevec(startingDate) + [0 0 0 timeNumbers(:)' 0]);
-        end;
+        startingDate = gliderParams.start_time;
     end;
-    if ~isfield(gliderParams, 'end_date')
+    if ~isfield(gliderParams, 'end_time')
         disp('No END_DATE parameter found in config file.');
         endingDate = now;
     else
-        endingDate = datenum(gliderParams.end_date);
-        if isfield(gliderParams, 'end_time');
-            timeNumbers = sscanf(gliderParams.end_time, '%2d:%02d');
-            endingDate = datenum(datevec(endingDate) + [0 0 0 timeNumbers(:)' 0]);
-        end;
+        endingDate = gliderParams.end_time;
     end;
 
     disp(['Downloading files between ', datestr(startingDate), ' and ', datestr(endingDate)]);
