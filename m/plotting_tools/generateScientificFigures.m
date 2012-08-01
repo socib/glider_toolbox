@@ -45,7 +45,7 @@ function varargout = generateScientificFigures(processedData, griddedData, image
     switch lower(desiredAxis),
         case 'time'
             texts.xLabelStr = 'Time';
-            xAxisVar = epoch2datenum(processedData.navTime);
+            xAxisVar = epochToDateNum(processedData.navTime);
         case 'dist'
             texts.xLabelStr = 'Distance (Km)';
             xAxisVar = processedData.distanceOverGround;
