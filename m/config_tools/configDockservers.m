@@ -2,12 +2,8 @@ function dockservers = configDockservers()
 %CONFIGDOCKSERVERS  Configure dockserver parameters for glider data processing.
 %
 %  DOCKSERVERS = CONFIGDOCKSERVERS() should return a struct array with the
-%  access parameters for the dockservers containing Slocum glider data.
-%  Each of this dockservers is checked for new data in the processing chain.
-%  Returned DOCKSERVERS struct should have the following fields:
-%    URL: url of the dockserver (either fully qualified name or IP address as string).
-%    USER: user to access the dockserver (string).
-%    PASS: password of the dockserver (string).
+%  access parameters for the dockservers containing Slocum glider data, as
+%  needed by the function GETDOCKSERVERFILES.
 %
 %  Notes:
 %    Edit this file filling in the parameters of your dockservers.
@@ -18,6 +14,7 @@ function dockservers = configDockservers()
 %    dockservers = configDockservers()
 %
 %  See also:
+%    GETDOCKSERVERFILES
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
