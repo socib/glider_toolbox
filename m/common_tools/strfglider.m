@@ -9,11 +9,13 @@ function str = strfglider(pattern, deployment)
 %  Some specifiers accept a modifier, separated from the specifier by a comma, 
 %  affecting the replacement format. This is the list of valid specifiers:
 %    ${GLIDER_NAME}: glider platform name.
-%    ${MISSION_NAME}: deployment name.
-%    ${START_DATE}: deployment start date as 'yyyymmdd'.
-%    ${END_DATE}: deployment end date as 'yyyymmdd'.
-%    ${START_TIME,...}: formatted deployment start date and time (described below).
-%    ${END_TIME,...}: formatted deployment end date an time (described below).
+%    ${GLIDER_INSTRUMENT_NAME}: glider instrument name.
+%    ${DEPLOYMENT_ID}: deployment unique identifier.
+%    ${DEPLOYMENT_NAME}: deployment name.
+%    ${DEPLOYMENT_START_DATE}: deployment start date as 'yyyymmdd'.
+%    ${DEPLOYMENT_END_DATE}: deployment end date as 'yyyymmdd'.
+%    ${DEPLOYMENT_START,...}: formatted deployment start date and time (described below).
+%    ${DEPLOYMENT_END,...}: formatted deployment end date an time (described below).
 %
 %  Time fields may include a modifier selecting the date an time format.
 %  The modifier is any date field specifier string  accepted by the function 
@@ -45,14 +47,16 @@ function str = strfglider(pattern, deployment)
   error(nargchk(2, 2, nargin, 'struct'));
 
   rep_map = ...
-    { ... 
-    '\$\{GLIDER_NAME\}'          @(d,m)(d.glider_name); ...
-    '\$\{MISSION_NAME\}'         @(d,m)(d.mission_name); ...
-    '\$\{START_DATE\}'           @(d,m)(datestr(d.start_time,'yyyymmdd')); ...
-    '\$\{END_DATE\}'             @(d,m)(datestr(d.end_time,'yyyymmdd')); ...
-    '\$\{START_TIME,([^}]+)\}'   @(d,m)(datestr(d.start_time,m)); ...
-    '\$\{END_TIME,([^}]+)\}'     @(d,m)(datestr(d.end_time,m)) ...
-    };
+  {
+    '\$\{GLIDER_NAME\}'              @(d,m)(d.glider_name)
+    '\$\{GLIDER_INSTRUMENT_NAME\}'   @(d,m)(d.glider_instrument_name)
+    '\$\{DEPLOYMENT_ID\}'            @(d,m)(num2str(d.deployment_id))
+    '\$\{DEPLOYMENT_NAME\}'          @(d,m)(d.deployment_name)
+    '\$\{DEPLOYMENT_START_DATE\}'    @(d,m)(datestr(d.deployment_start,'yyyymmdd'))
+    '\$\{DEPLOYMENT_END_DATE\}'      @(d,m)(datestr(d.deployment_end,'yyyymmdd'))
+    '\$\{DEPLOYMENT_START,([^}]+)\}' @(d,m)(datestr(d.deployment_start,m))
+    '\$\{DEPLOYMENT_END,([^}]+)\}'   @(d,m)(datestr(d.deployment_end,m))
+  };
   
   specifiers = rep_map(:,1);
   repl_funcs = rep_map(:,2);

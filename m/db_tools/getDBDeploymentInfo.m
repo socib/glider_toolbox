@@ -18,12 +18,16 @@ function data = getDBDeploymentInfo(db_access, query, fields)
 %
 %  For the returned DATA be a deployment structure, it should have the following
 %  minimal set of fields:
-%   DEPLOYMENT_ID: deployment identifier (invariant over time).
-%   DEPLOYMENT_NAME: deployment name (may eventually change).
-%   GLIDER_NAME: glider platform name.
-%   GLIDER_DEPLOYMENT_NUMBER: number of deployment of this glider.
-%   DEPLOYMENT_START: deployment start date (see note on time format).
-%   DEPLOYMENT_END: deployment end date (see note on time format).
+%    DEPLOYMENT_ID: deployment identifier (invariant over time).
+%    DEPLOYMENT_NAME: deployment name (may eventually change).
+%    DEPLOYMENT_START: deployment start date (see note on time format).
+%    DEPLOYMENT_END: deployment end date (see note on time format).
+%    GLIDER_NAME: glider platform name (as used in glider file names).
+%    GLIDER_INSTRUMENT_NAME: glider instrument name (e.g. internal unit name).
+%    GLIDER_DEPLOYMENT_NUMBER: number of deployment of this glider.
+%  The returned structure may include other fields which are considered to be
+%  global deployment attributes by functions generating final products like
+%  GENERATEOUTPUTNETCDFL0, GENERATEOUTPUTNETCDFL1 and GENERATEOUTPUTNETCDFL2.
 %
 %  Notes:
 %    Time columns returned by the query should be returned as UTC timestamp
@@ -60,7 +64,7 @@ function data = getDBDeploymentInfo(db_access, query, fields)
   setdbprefs('DataReturnFormat', data_format);
 
   % Convert available time fields.
-  time_fields = {'start_time', 'end_time'};
+  time_fields = {'deployment_start', 'deployment_end'};
   time_field_columns = ismember(fields, time_fields);
   time_data = data(:, time_field_columns);
   if iscellstr(time_data)
