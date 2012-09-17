@@ -35,13 +35,14 @@ desired_extensions = {'sbd', 'tbd'};
 %% Configure deployment data paths.
 config.local_paths = configLocalPathsRT();
 
+
 %% Configure NetCDF output.
-config.output_nc_l0 = configOutputNetCDFL0();
+config.output_ncl0 = configOutputNetCDFL0();
+config.output_ncl1 = configOutputNetCDFL1();
+config.output_ncl2 = configOutputNetCDFL2();
 
 
 %% Set the path to the data: edit for mission processing.
-%output_dirs.nc_base_path     = '/data/current/opendap/observational/auv/glider/';
-output_dirs.nc_base_path      = '/home/jbeltran/public_html/observational/auv/glider/';
 output_dirs.image_base_local_path = '/home/jbeltran/public_html/glider';
 output_dirs.imageBaseURLPath    = 'http://www.socib.es/~jbeltran/glider/web';
 
@@ -79,7 +80,7 @@ end
 for deployment_idx = 1:numel(active_deployments)
   %% Deployment complete configuration.
   deployment = active_deployments(deployment_idx);
-
+  
   %{
   % Fix possibly missing deployment end time.
   if isempty(deployment.end_time)
@@ -98,23 +99,45 @@ for deployment_idx = 1:numel(active_deployments)
                                 
   %% Deployment field shortcut variables.
   glider_name = deployment.glider_name;
+  deployment_name = deployment.deployment_name;
+  deployment_id = deployment.deployment_id;
+  deployment_start = deployment.deployment_start;
+  deployment_end = deployment.deployment_end;
   binary_dir = strfglider(config.local_paths.binary_path, deployment);
   log_dir = strfglider(config.local_paths.log_path, deployment);
   ascii_dir = strfglider(config.local_paths.ascii_path, deployment);
-  image_dir = strfglider(config.local_paths.figure_path, deployment);
-%  netcdf_dir = strfglider(config.local_paths.netcdf_path, deployment);
+  figure_dir = strfglider(config.local_paths.figure_path, deployment);
   ncl0_fullfile = strfglider(config.local_paths.netcdf_l0, deployment);
-  deployment_start = deployment.deployment_start;
-  deployment_end = deployment.deployment_end;
+  ncl1_fullfile = strfglider(config.local_paths.netcdf_l1, deployment);
+  ncl2_fullfile = strfglider(config.local_paths.netcdf_l2, deployment);
   
   
+  %% Notify the processing of this deployment.
+  disp(['Processing deployment ' num2str(deployment_id) ':']);
+  disp(['  Glider name      : ' glider_name]);
+  disp(['  Deployment name  : ' deployment_name]);
+  disp(['  Deployment start : ' datestr(deployment_start)]);
+  if isempty(deployment_end)
+    disp(['  Deployment end   : ' 'undefined']);
+  else
+    disp(['  Deployment end   : ' datestr(deployment_end)]);
+  end
+
+    
   %% Download glider files from station(s).
   % Check for new or updated deployment files in every dockserver and fetch them.
   % Subsequent flattening would not be needed if uniform output worked properly.
   % Deployment end time may be undefined.
+  download_start = deployment_start;
+  if isempty(deployment_end)
+    download_end = now();
+  else
+    download_end = deployment_end;
+  end
   [new_xbds, new_logs] = ...
-    arrayfun(@(d) getDockserverFiles(d, glider_name, binary_dir, log_dir, ...
-                                     'start', deployment_start, 'end', deployment_end), ...
+    arrayfun(@(ds) getDockserverFiles(ds, glider_name, binary_dir, log_dir, ...
+                                      'start', download_start, ...
+                                      'end', download_end), ...
              config.dockservers(:)', 'UniformOutput', false);
   new_xbds = [new_xbds{:}];
   new_logs = [new_logs{:}];
@@ -150,74 +173,116 @@ for deployment_idx = 1:numel(active_deployments)
     disp('No new deployment data to process, omitting this deployment...');
     continue
   end
-  raw_data = loadTransectData(ascii_dir, [deployment_start deployment_end]);
+  raw_data = loadTransectData(ascii_dir, [download_start download_end]);
   
-  %% Generate L0 (raw) NetCDF file.
-  % Take default global attributes from configuration but overwrite the ones
-  % present in deployment struct.
+  
+  %% Generate L0 NetCDF file (raw data).
   raw_data_aux = struct();
   for f = setdiff(fieldnames(raw_data),{'data' 'source'})
     raw_data_aux.(f{:}) = raw_data.data(:,raw_data.(f{:}));
   end
-  raw_meta = config.output_nc_l0.var_meta;
-  raw_dims = config.output_nc_l0.dim_names;
-  raw_atts = config.output_nc_l0.global_atts; 
+  raw_meta = config.output_ncl0.var_meta;
+  raw_dims = config.output_ncl0.dim_names;
+  raw_atts = config.output_ncl0.global_atts; 
   try
-    generateOutputNetCDFL0(ncl0_fullfile, deployment, ...
-                           raw_data_aux, raw_meta, raw_dims, raw_atts);
+    generateOutputNetCDFL0(ncl0_fullfile, raw_data_aux, raw_meta, ...
+                           raw_dims, raw_atts, deployment);
   catch exception
     disp(['Error creating L0 (raw data) NetCDF file ' ncl0_fullfile ': ']);
-    disp(getReport(exception));
+    disp(getReport(exception, 'extended'));
   end;
 
 
   %% Process raw glider data to get clean trajectory data.
   try
-    processing_options.debugPlotPath = image_dir;
+    processing_options.debugPlotPath = figure_dir;
     processed_data = processGliderData(raw_data, processing_options);
-  catch ME
-    processed_data = [];
-    disp('Error processing data:');
-    disp(getReport(ME, 'extended'));
-  end
-
-  if isempty(processed_data)
-    disp('Processed data is empty. Skipping storage, gridding and plotting.');
+  catch exception
+    disp('Error processing glider deployment data:');
+    disp(getReport(exception, 'extended'));
+    disp('Skipping storage, gridding and plotting...');
     continue
   end
-%{
-  % Generate L1 (Processed) netcdf file and store it
-  try
-    % Store results in mat file
-    proc_filename = [glider_name, '_L1_', datestr(deployment.start_date, 'yyyy-mm-dd')];
-    processed_data_filename = fullfile(deployment.data_root, 'matfiles', [proc_filename, '.mat']);
-    save(processed_data_filename, 'processed_data');
 
-    generateNcProduct(deployment, output_dirs, glider_name, 'L1', processed_data);
-  catch ME
-    disp('could not generate glider processed netcdf file');
-    disp(getReport(ME, 'extended'));
+  
+  %% Generate L1 NetCDF file (processed data).
+  field_renaming = {
+    'navTime' 'time_nav'
+    'sciTime' 'time_sci'
+    'wptLat'  'waypoint_latitude'
+    'wptLon'  'waypoint_longitude'
+    'distanceOverGround' 'distance_over_ground'
+    'continousDepth'     'continous_depth'
+    'Tcor'               'temperature_corrected'
+    'Ccor'               'conductivity_corrected'
+    'salinity_corrected_TH'            'salinity_corrected_thermal' 
+    'salinity_corrected_Tcor_TH'       'salinity_corrected_temperature_thermal'
+    'salinity_corrected_Tcor_Ccor_TH'  'salinity_corrected_temperature_conductivity_thermal'
+    'backscatter470' 'backscatter_470'
+    'backscatter532' 'backscatter_532'
+    'backscatter660' 'backscatter_660'
+    'irradiance412nm' 'irradiance_412'
+    'irradiance442nm' 'irradiance_442'
+    'irradiance491nm' 'irradiance_491'
+    'irradiance664nm' 'irradiance_664'
+  };
+  proc_data_aux = processed_data;
+  for old_new_name = field_renaming'
+    if isfield(proc_data_aux, old_new_name{1})
+      [proc_data_aux.(old_new_name{2})] = proc_data_aux.(old_new_name{1});
+      proc_data_aux = rmfield(proc_data_aux, old_new_name{1});
+    end
   end
-%}
+  proc_meta = config.output_ncl1.var_meta;
+  proc_dims = config.output_ncl1.dim_names;
+  proc_atts = config.output_ncl1.global_atts; 
+  try
+    generateOutputNetCDFL1(ncl1_fullfile, proc_data_aux, proc_meta, ...
+                           proc_dims, proc_atts, deployment);
+  catch exception
+    disp(['Error creating L1 (processed data) NetCDF file ' ncl1_fullfile ': ']);
+    disp(getReport(exception, 'extended'));
+  end;
 
   
   %% Process glider trajectory data to vertically gridded data.
-  gridded_data = gridGliderData(processed_data);
-%{    
-  % Generate L2 (Gridded) netcdf file and store it
   try
-    generateNcProduct(deployment, output_dirs, glider_name, 'L2', gridded_data);
-  catch ME
-    disp('could not generate glider gridded netcdf file');
-    disp(getReport(ME, 'extended'));
+    gridded_data = gridGliderData(processed_data);
+  catch exception
+    disp('Error processing glider deployment data:');
+    disp(getReport(exception, 'extended'));
+    continue
   end
-%}
+  
+
+  %% Generate L2 (gridded data) netcdf file.
+  grid_data_aux = gridded_data.grids;
+  for f = fieldnames(gridded_data.gridCoords)'
+    grid_data_aux.(strrep(f{:},'Range','')) = gridded_data.gridCoords.(f{:});
+  end
+  grid_meta = config.output_ncl2.var_meta;
+  grid_dims = config.output_ncl2.dim_names;
+  grid_atts = config.output_ncl2.global_atts; 
+  try
+    generateOutputNetCDFL2(ncl2_fullfile, grid_data_aux, grid_meta, ...
+                           grid_dims, grid_atts, deployment);
+  catch exception
+    disp(['Error creating L2 (gridded data) NetCDF file ' ncl2_fullfile ': ']);
+    disp(getReport(exception, 'extended'));
+  end
 
   
   %% Generate deployment figures.
-  if isdir(image_dir)
-    try
-%{
+  if ~isdir(figure_dir)
+    [success, error_msg] = mkdir(figure_dir);
+    if ~success
+      disp(['Error creating directory for deployment figures ' figure_dir ':']);
+      disp(error_msg);
+      continue
+    end
+  end
+  try
+    %{
     for transect_start = 1:length(processed_data.transects) - 1
       [partial_processed_data, partial_gridded_data] = ...
       trimGliderData(processed_data, gridded_data, ...
@@ -227,23 +292,21 @@ for deployment_idx = 1:numel(active_deployments)
       mkdir(transect_image_dir);
       imgs_list = generateScientificFigures(partial_processed_data, partial_gridded_data, transect_image_dir, [glider_name, '_']);
     end;
-%}
+    %}
     imgs_list = generateScientificFigures(processed_data, gridded_data, ...
-                                          image_dir, [deployment.glider_name, '_']);
-      % Add URL base path to images
-      for idx = 1:length(imgs_list)
-        imgs_list(idx).path = fullfile(output_dirs.imageBaseURLPath, ...
-                                       deployment.glider_name, ...
-                                       deployment.mission_name, ...
-                                       imgs_list(idx).path);
-      end
-      json_name = fullfile(output_dirs.image_base_local_path, ...
-                           [deployment.glider_name '.' deployment.mission_name '.images.json']);
-      writeJSON(imgs_list, json_name);
-    catch ME
-      disp('Error generating scientific figures:');
-      disp(getReport(ME, 'extended'));
+                                          figure_dir, [glider_name, '_']);
+    % Add URL base path to images
+    for idx = 1:length(imgs_list)
+      imgs_list(idx).path = fullfile(output_dirs.imageBaseURLPath, ...
+                                     glider_name, deployment_name, ...
+                                     imgs_list(idx).path);
     end
+    json_name = fullfile(output_dirs.image_base_local_path, ...
+                         [glider_name '.' deployment_name '.images.json']);
+    writeJSON(imgs_list, json_name);
+  catch exception
+    disp('Error generating scientific figures:');
+    disp(getReport(exception, 'extended'));
   end
   
 end
