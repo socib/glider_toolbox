@@ -464,7 +464,7 @@ function asciis = convertSlocumBinaries(files, varargin)
 
             theCommand = [commandPreffix, dba_merge, ' ', navFile, '.asc ', scienceFile, '.asc | '];
         else
-            navFile = initialFiles{x};
+            navFile = initialFiles{fileIdx};
             theCommand = [commandPreffix, dbd2asc, ' -o -c ', cacheDir, ' ', navFile, ' | '];
         end;
 
