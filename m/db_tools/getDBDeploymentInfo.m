@@ -69,7 +69,8 @@ function data = getDBDeploymentInfo(db_access, query, fields)
   time_data = data(:, time_field_columns);
   if iscellstr(time_data)
     time_data_null = cellfun(@(s) strcmp(s,'null'), time_data);
-    time_data(~time_data_null) = num2cell(datenum(time_data(~time_data_null), 'yyyy-mm-dd HH:MM:SS'));
+    time_data(~time_data_null) = ...
+      num2cell(datenum(time_data(~time_data_null), 'yyyy-mm-dd HH:MM:SS'));
     time_data(time_data_null) = {[]};
   else
     error('glider_toolbox:db_tools:TimeFieldError', ...
