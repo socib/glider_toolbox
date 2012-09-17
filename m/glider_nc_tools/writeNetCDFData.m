@@ -3,15 +3,18 @@ function writeNetCDFData(filename, var_data, var_meta, dims, global_atts)
 %
 %  WRITENETCDFDATA(FILENAME, VAR_DATA, VAR_META, DIMS)  creates a NetCDF file 
 %  named FILENAME with the dimensions given in struct DIMS and the variables 
-%  defined by the structs VAR_META and VAR_DATA.  For every field in DIMS one 
+%  defined by the structs VAR_META and VAR_DATA. For every field in DIMS one 
 %  dimension is created with the size given in the field value. For every field
-%  in struct VAR_DATA a variable with the same name is created with the
-%  values in the field value. VAR_META should have a field with the same name
-%  containing the metadata for that variable in a struct with fields:
+%  in struct VAR_DATA a variable is created with the values in the field value.
+%  VAR_META should have a field with the same name containing the metadata for 
+%  that variable in a struct with fields:
 %    DIMENSIONS: (mandatory) cell array with the name of the dimensions of the
 %      variable.
 %    ATTRIBUTES: (optional) struct array with fields 'NAME' and 'VALUE' 
 %      specifying the attributes of the variable.
+%    NAME: (optional) string with the variable name as it should appear in the
+%      NetCDF file. If this field is missing the variable is named after the
+%      field name.
 %
 %  WRITENETCDFDATA(...,  GLOBAL_ATTS) also adds file global attributes in struct
 %  array GLOBAL_ATTS, which should have'NAME' and 'VALUE' fields.
@@ -21,6 +24,8 @@ function writeNetCDFData(filename, var_data, var_meta, dims, global_atts)
 %    attribute names as field names and attribute values as field values.
 %    But due to a MATLAB limitation, it will cause trouble with attributes like
 %    '_FillValue' (because it is not a valid field name).
+%
+%    Fill value and scale conversions are always performed.    
 %
 %  Examples:
 %    filename = 'random.nc'
@@ -69,10 +74,15 @@ function writeNetCDFData(filename, var_data, var_meta, dims, global_atts)
         nc(dim_name) = dims.(dim_name);      
       end
       % Set variable dimensions and attributes, and variable data.
-      var_name_list = fieldnames(var_data);
-      for var_idx = 1:numel(var_name_list)
-        var_name = var_name_list{var_idx};
-        var_dims = var_meta.(var_name).dimensions;
+      field_name_list = fieldnames(var_data);
+      for var_idx = 1:numel(field_name_list)
+        field_name = field_name_list{var_idx};
+        if isfield(var_meta.(field_name), 'name')
+          var_name = var_meta.(field_name).name;
+        else
+          var_name = field_name;
+        end
+        var_dims = var_meta.(field_name).dimensions;
         nc{var_name} = ncdouble(var_dims{:});
         if isfield(var_meta.(var_name), 'attributes')
           var_attr_list = var_meta.(var_name).attributes;
@@ -84,7 +94,7 @@ function writeNetCDFData(filename, var_data, var_meta, dims, global_atts)
         nc{var_name} = ncautonan(nc{var_name},1);
         nc{var_name} = ncautoscale(nc{var_name},1);
         % Give the range for record dimensions.
-        nc{var_name}(1:numel(var_data.(var_name))) = var_data.(var_name); 
+        nc{var_name}(1:numel(var_data.(field_name))) = var_data.(field_name); 
       end
     catch
       close(nc);
@@ -100,10 +110,15 @@ function writeNetCDFData(filename, var_data, var_meta, dims, global_atts)
       % Set dimensions.
       cellfun(@(d) nc_adddim(filename, d, dims.(d)), fieldnames(dims));
       % Set variable dimensions and attributes and variable data.
-      var_name_list = fieldnames(var_data);
-      for var_idx = 1:numel(var_name_list)
-        var_name = var_name_list{var_idx};
-        var_dims = var_meta.(var_name).dimensions;
+      field_name_list = fieldnames(var_data);
+      for var_idx = 1:numel(field_name_list)
+        field_name = field_name_list{var_idx};
+        if isfield(var_meta.(field_name), 'name')
+          var_name = var_meta.(field_name).name;
+        else
+          var_name = field_name;
+        end
+        var_dims = var_meta.(field_name).dimensions;
         nc_var = struct('Name', {var_name}, 'Dimension', {var_dims});
         if isfield(var_meta.(var_name), 'attributes')
           % Rename fields as required by low level library.
@@ -112,7 +127,7 @@ function writeNetCDFData(filename, var_data, var_meta, dims, global_atts)
                                     'Value', {var_atts.value});
         end
         nc_addvar(filename, nc_var);
-        nc_varput(filename, var_name, var_data.(var_name))
+        nc_varput(filename, var_name, var_data.(field_name))
       end
     catch exception
       delete(filename);
