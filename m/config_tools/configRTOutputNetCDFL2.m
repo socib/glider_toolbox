@@ -1,15 +1,16 @@
-function nc_l1_info = configRTOutputNetCDFL1()
-%CONFIGRTOUTPUTNETCDFL1  Configure NetCDF output for processed glider deployment data in real time.
+function nc_l2_info = configRTOutputNetCDFL2()
+%CONFIGRTOUTPUTNETCDFL2  Configure NetCDF output for gridded glider deployment data in real time.
 %
-%  NC_L1_INFO = CONFIGRTOUTPUTNETCDFL1() should return a struct describing the
-%  structure of the NetCDF file for processed glider deployment data in real
-%  time (see the note about the file generation for more details).
+%  NC_L2_INFO = CONFIGRTOUTPUTNETCDFL2() should return a struct describing the
+%  structure of the NetCDF file for gridded glider deployment data in real time
+%  (see the note about the file generation for more details).
 %  The returned struct should have the following fields:
 %    DIM_NAMES: struct with string fields defining the dimension names.
 %      The size of the dimensions are inferred from the data during the
 %      processing, so only dimension names need to be provided. It should have
 %      the following fields:
-%        TIME: time dimension name. 
+%        PROFILE: profile index dimension name.
+%        DEPTH: regular depth index name.
 %    VAR_META: A struct defining variable metadata. Field names are variable
 %      names and field values are structs as needed by function WRITENETCDFDATA.
 %      More variables than the ones present in one specific deployment may be
@@ -19,18 +20,18 @@ function nc_l1_info = configRTOutputNetCDFL1()
 %      attributes of the file.
 %
 %  Notes:
-%    The NetCDF file will be created by the function GENERATEOUTPUTNETCDFL1 with
-%    the metadata provided here and the data returned by PROCESSGLIDERDATA.
+%    The NetCDF file will be created by the function GENERATEOUTPUTNETCDFL2 with
+%    the metadata provided here and the data returned by GRIDGLIDERDATA.
 %
 %    Please note that global attributes described here may be overwritten by
 %    deployment field values whenever the names match. This allows adding file
 %    attributes whose values are known only at runtime.
 %
 %  Examples:
-%    nc_l1_info = configRTOutputNetCDFL1()
+%    nc_l2_info = configRTOutputNetCDFL2()
 %
 %  See also:
-%    GENERATEOUTPUTNETCDFL1
+%    GENERATEOUTPUTNETCDFL2
 %    WRITENETCDFDATA
 %    PROCESSGLIDERDATA
 %
@@ -38,8 +39,8 @@ function nc_l1_info = configRTOutputNetCDFL1()
 %  Email: joanpau.beltran@socib.cat
 
   error(nargchk(0, 0, nargin, 'struct'));
-
-  %% Define variable attributes.
+  
+  %% Define variable information.
   % To define the variable attribute easily and readably, add the corresponding
   % variable field to the struct defined below, with its attributes defined in 
   % a cell array (attribute name in first column and attribute value in second).
@@ -48,18 +49,24 @@ function nc_l1_info = configRTOutputNetCDFL1()
 
   default_fill_value = realmax('double');
 
-  var_attr_list.time_nav = {
-    'long_name'     'navigation board epoch time'
+  var_attr_list.profile_index = {
+    'long_name'     'profile index'
+    'standard_name' 'profile_index'
+    'units'         '1'   
+    '_FillValue'    default_fill_value };
+  
+  var_attr_list.depth = {
+    'long_name'     'glider depth'
+    'standard_name' 'depth'
+    'units'         'm'   
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.time = {
+    'long_name'     'epoch time'
     'standard_name' 'time'
     'units'         'seconds since 1970-01-01 00:00:00'
     '_FillValue'    default_fill_value };
-
-  var_attr_list.time_sci = {
-    'long_name'     'science bay epoch time'
-    'standard_name' 'time'
-    'units'         'seconds since 1970-01-01 00:00:00'  
-    '_FillValue'    default_fill_value };
-
+  
   var_attr_list.latitude = {
     'long_name'     'latitude'
     'standard_name' 'latitude'
@@ -72,49 +79,19 @@ function nc_l1_info = configRTOutputNetCDFL1()
     'units'         'degree_east'   
     '_FillValue'    default_fill_value };
 
-  var_attr_list.waypoint_latitude = {
-    'long_name'     'waypoint latitude'
-    'standard_name' 'latitude'
-    'units'         'degree_north'   
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.waypoint_longitude = {
-    'long_name'     'waypoint longitude'
-    'standard_name' 'longitude'
-    'units'         'degree_east'   
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.distance_over_ground = {
+  var_attr_list.distance = {
     'long_name'     'distance over ground flown since mission start'
     'standard_name' 'distance'
-    'units'         'km'   
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.depth = {
-    'long_name'     'glider depth'
-    'standard_name' 'depth'
     'units'         'm'   
     '_FillValue'    default_fill_value };
 
-  var_attr_list.transect_index = {
-    'long_name'     'transect index'
-    'standard_name' ''
-    'units'         '1'   
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.profile_index = {
-    'long_name'     'profile index'
-    'standard_name' ''
-    'units'         '1'   
-    '_FillValue'    default_fill_value };
-  
   var_attr_list.vertical_speed_direction = {
     'long_name'     'glider vertical speed direction'
-    'standard_name' ''
+    'standard_name' 'vertical_speed_direction'
     'units'         '1'
     'comment'       '-1 = ascending, 0 = inflecting, 1 = descending'
     '_FillValue'    default_fill_value };
-
+  
   var_attr_list.pitch = {
     'long_name'     'glider pitch angle'
     'standard_name' 'pitch'
@@ -149,12 +126,6 @@ function nc_l1_info = configRTOutputNetCDFL1()
     'long_name'     'water conductivity ratio wrt 35PSU15C'
     'standard_name' 'sea_water_conductivity_ratio'
     'units'         'S m-1'   
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.pressure = {
-    'long_name'     'water pressure'
-    'standard_name' 'pressure'
-    'units'         'decibar'   
     '_FillValue'    default_fill_value };
 
   var_attr_list.salinity = {
@@ -192,7 +163,7 @@ function nc_l1_info = configRTOutputNetCDFL1()
     'standard_name' 'sea_water_density'
     'units'         'Kg m-3'   
     '_FillValue'    default_fill_value };
-
+  
   var_attr_list.density_corrected_temperature_thermal = {
     'long_name'     'water density using salinity from corrected temperature and raw conductivity with thermal lag corrected'
     'standard_name' 'sea_water_density'
@@ -221,6 +192,12 @@ function nc_l1_info = configRTOutputNetCDFL1()
     'long_name'     'sound velocity'
     'standard_name' 'sea_water_sound_velocity'
     'units'         'Kg m-3'   
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.pressure = {
+    'long_name'     'water pressure'
+    'standard_name' 'pressure'
+    'units'         'decibar'   
     '_FillValue'    default_fill_value };
 
   var_attr_list.backscatter_470 = {
@@ -307,6 +284,7 @@ function nc_l1_info = configRTOutputNetCDFL1()
     'units'         'uW cm-2 nm-1'   
     '_FillValue'    default_fill_value };
 
+
   %% Define global attributes (they may be overwritten with deployment values).
   % To define the global attributes easily and readably, add them to this
   % cell array (attribute name in first column and attribute value in second).
@@ -326,10 +304,10 @@ function nc_l1_info = configRTOutputNetCDFL1()
     'creator_name'                 '' % deployment_author_email
     'creator_url'                  '' % deployment_author_url
     'data_center'                  '' % deployment_data_center
-    'data_center_email'            '' % deployment_data_center_email
+    'data_center_email'            ''     % deployment_data_center_email
     'data_mode'                    'real time'
     'date_modified'                datestr(utc2datenum(utc_time), 'yyyy-mm-ddTHH:MM:SS+00')
-    'featureType'                  'trajectory'
+    'featureType'                  'profile'
     'geospatial_lat_max'           'undefined'
     'geospatial_lat_min'           'undefined'
     'geospatial_lat_resolution'    'undefined'
@@ -344,11 +322,11 @@ function nc_l1_info = configRTOutputNetCDFL1()
     'instrument_model'             '' % instrument_model
     'instrument_manufacturer'      '' % instrument_manufacturer
     'license'                      'Approved for public release. Distribution Unlimited.' % deployment_distribution_statement
-    'netcdf_version'               '4.0.1' 
+    'netcdf_version'               '4.0.1'
     'positioning_system'           'GPS and dead reckoning'
     'principal_investigator'       '' % deployment_principal_investigator
     'principal_investigator_email' '' % deployment_principal_investigator_email
-    'processing_level'             'L1 processed data with corrections and derivations'
+    'processing_level'             'L2 interpolated data at selected locations and instants'
     'project'                      '' % deployment_project
     'publisher_email'              '' % deployment_publisher_email
     'publisher_name'               '' % deployment_publisher_name
@@ -360,28 +338,40 @@ function nc_l1_info = configRTOutputNetCDFL1()
     'time_coverage_end'            'undefined'
     'time_coverage_resolution'     'undefined'
     'time_coverage_start'          'undefined'
-    'title'                        'Glider deployment processed data'
+    'title'                        'Glider deployment gridded data'
     'transmission_system'          'IRIDIUM'
   };
 
-  %% Define dimension names.
-  time_dim_name = 'time';
 
+  %% Define dimension names.
+  profile_dim_name = 'profile_index';
+  depth_dim_name = 'depth';
+
+  
   %% Return variable metadata in the correct format.
   % Set the dimensions.
-  nc_l1_info.dim_names.time = time_dim_name;
+  nc_l2_info.dim_names.profile = profile_dim_name;
+  nc_l2_info.dim_names.depth = depth_dim_name;
   % Set the variable metadata.
-  nc_l1_info.var_meta = struct();
+  nc_l2_info.var_meta = struct();
   var_name_list = fieldnames(var_attr_list);
   for var_name_idx = 1:numel(var_name_list)
     var_name = var_name_list{var_name_idx};
     var_atts = var_attr_list.(var_name);
-    nc_l1_info.var_meta.(var_name).dimensions = {time_dim_name};
-    nc_l1_info.var_meta.(var_name).attributes = struct('name',  var_atts(:,1), ...
-                                                       'value', var_atts(:,2));
+    switch var_name
+      case {'profile_index', 'time', 'longitude', 'latitude', 'distance'}
+        var_dims = {profile_dim_name};
+      case {'depth'}
+        var_dims = {depth_dim_name};
+      otherwise
+        var_dims = {depth_dim_name, profile_dim_name};
+    end
+    nc_l2_info.var_meta.(var_name).dimensions = var_dims;
+    nc_l2_info.var_meta.(var_name).attributes = ...
+      struct('name',  var_atts(:,1), 'value', var_atts(:,2));
   end
   % Set the global attributes.
-  nc_l1_info.global_atts = struct('name', global_atts(:,1), ...
+  nc_l2_info.global_atts = struct('name', global_atts(:,1), ...
                                   'value', global_atts(:,2));
 
 end

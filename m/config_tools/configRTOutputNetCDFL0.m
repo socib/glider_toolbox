@@ -555,7 +555,7 @@ function nc_l0_info = configRTOutputNetCDFL0()
     'time_coverage_end'            'undefined'
     'time_coverage_resolution'     'undefined'
     'time_coverage_start'          'undefined'
-    'title'                        ''
+    'title'                        'Glider deployment raw data'
     'transmission_system'          'IRIDIUM'
   };
 
