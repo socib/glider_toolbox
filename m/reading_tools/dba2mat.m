@@ -6,10 +6,10 @@ function [meta, data] = dba2mat(filename, varargin)
 %
 %  [META, DATA] = DBA2MAT(FILENAME, OPT1, VAL1, ...) accepts the following
 %  options:
-%    SENSORS: a string cell array with the names of the sensors of interest.
+%    'sensors': a string cell array with the names of the sensors of interest.
 %      If given, only sensors present in both the file and this list will be 
 %      present in output.
-%    FORMAT: a string setting the format of the output DATA. Valid values are:
+%    'format': a string setting the format of the output DATA. Valid values are:
 %      'array' (default): DATA is a matrix whith sensor readings as columns 
 %         ordered as in the SENSORS metadata field.
 %      'struct': DATA is a struct with sensor names as field names and column 
@@ -60,7 +60,7 @@ function [meta, data] = dba2mat(filename, varargin)
 
   error(nargchk(1, 5, nargin, 'struct'));
   
-  % Set option values.
+  %% Set option values.
   sensor_filtering = false;
   sensor_list = [];
   output_format = 'array';
@@ -78,8 +78,13 @@ function [meta, data] = dba2mat(filename, varargin)
     end
   end
   
-  % Open the file.
-  fid = fopen(filename);
+  %% Open the file.
+  [fid, fid_msg] = fopen(filename, 'r');
+  if fid < 0
+    error('glider_toolbox:dba2mat:FileError', fid_msg)
+  end
+  
+  %% Process the file.
   try
     % Read mandatory tags.
     num_mandatory_ascii_tags = 12;
@@ -160,14 +165,15 @@ function [meta, data] = dba2mat(filename, varargin)
         data = cell2struct(data_values, meta.sensors, 2);
       otherwise
         error('glider_toolbox:dba2mat:InvalidFormat', ...
-              'Invalid output format %s.', format)
+              'Invalid output format: %s.', format)
     end
   catch exception
     % Close the file after a reading error.
     fclose(fid);
     rethrow(exception);
   end
-  % Close the file after file read successfully.
+  
+  %% Close the file after successful reading.
   fclose(fid); 
 
 end
