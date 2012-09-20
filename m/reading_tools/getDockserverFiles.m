@@ -49,20 +49,20 @@ function [bin_files, log_files] = getDockserverFiles(dockserver, glider_name, lo
 %    glider man.
 %
 %  Examples:
-%   dockservers = configDockservers()
-%   dockserver = dockservers(1)
-%   glider_name = my_glider
+%   dockserver.host = 'ftp.mydockserver.org'
+%   dockserver.user = 'myself'
+%   dockserver.pass = 'top_secret'   
+%   glider_name = 'happyglider'
 %   bin_dir = '~/my_glider/binary'
 %   log_dir = '~/my_glider/log'
 %   % Get all binary and log files.
-%   [bin_files, log_files] = getDockserverFiles(dockserver, glider_name, ...
-%                                               bin_dir, log_dir)
-%   % Get only small files and no logs from last week:
-%   [bin_files, log_files] = getDockserverFiles(dockserver, glider_name, ...
-%                                               bin_dir, log_dir, ...
-%                                               'bin_name', '^*.[st]bd$', ...
-%                                               'log_name', '',
-%                                               'start', now()-7, 'end', now())
+%   [bin_files, log_files] = ...
+%      getDockserverFiles(dockserver, glider_name, bin_dir, log_dir)
+%   % Get only small files and no logs from missions started last month:
+%   [bin_files, log_files] = ...
+%      getDockserverFiles(dockserver, glider_name, bin_dir, log_dir, ...
+%                         'bin_name', '^*.[st]bd$',   'log_name', '', ...
+%                         'start', now()-30, 'end', now())
 %
 %  See also:
 %    FTP
