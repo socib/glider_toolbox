@@ -103,7 +103,7 @@ function ncl1 = generateOutputNetCDFL1(filename, data, meta, dims, atts, deploym
   
   %% Create base directory of target file if needed.
   [file_dir, ~, ~] = fileparts(filename);
-  if ~exist(file_dir,'dir')
+  if ~exist(file_dir, 'dir')
     [success, error_msg] = mkdir(file_dir);
     if ~success
       error('glider_toolbox:netcdf_tools:NetCDFDirectoryError', error_msg);
@@ -116,7 +116,13 @@ function ncl1 = generateOutputNetCDFL1(filename, data, meta, dims, atts, deploym
   
   
   %% Return the absolute name of the generated file.
-  [~, ncl1_file_atts, ~] = fileattrib(filename);
-  ncl1 = ncl1_file_atts.Name;
+  [status, att_output, ~] = fileattrib(filename);
+  if status==0
+    % We should never get here (if NetCDF creation succeed, file must exist).
+    error('glider_toolbox:netcdf_tools:NetCDFFileError', ...
+          'NetCDF generation succeed but problems with output file %s:\n%s.', ...
+          filename, att_output);
+  end
+  ncl1 = att_output.Name;
 
 end
