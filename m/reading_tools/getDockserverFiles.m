@@ -72,13 +72,13 @@ function [bin_files, log_files] = getDockserverFiles(dockserver, glider_name, lo
 %  Email: joanpau.beltran@socib.cat
 
   %% Argument handling.
-  error(nargchk(3, 11, nargin, 'struct'));
+  error(nargchk(4, 12, nargin, 'struct'));
 
   date_filtering = false;
   start_date = -Inf;
   end_date = Inf;
-  bin_name = '^*.[smdtne]bd$';
-  log_name = '^*.log$';
+  bin_name = '^.+\.[smdtne]bd$';
+  log_name = '^.+\.log$';
   for i=1:2:numel(varargin)
     opt = varargin{i};
     val = varargin{i+1};
@@ -194,11 +194,11 @@ function files = fetchNewAndUpdatedFiles(ftp_handle, remote_dir, local_dir, name
   % Go to remote directory (it should be save here).
   cd(ftp_handle, remote_dir);
   % Select files mathcing name pattern and date.
-  remote_match = (1 == cellfun('length',regexp({remote_files.name}, name)));
+  remote_match = (1 == cellfun('length', regexp({remote_files.name}, name)));
   remote_files = remote_files(remote_match);
   if filter_date
     remote_dates = cellfun(@(s) datenum(date_scan(s)), {remote_files.name});
-    remote_indate = datenum(start_date) < remote_dates & remote_dates < datenum(end_date);
+    remote_indate = datenum(start_date) <= remote_dates & remote_dates <= datenum(end_date);
     remote_files = remote_files(remote_indate);
   end
   if isempty(remote_files)
@@ -226,6 +226,5 @@ function files = fetchNewAndUpdatedFiles(ftp_handle, remote_dir, local_dir, name
     return;
   end
   % Download the files.
-  files = cellfun(@(f) mget(ftp_handle, f, local_dir), {remote_files.name}, ...
-                  'UniformOutput', false);
+  files = cellfun(@(f) mget(ftp_handle, f, local_dir), {remote_files.name});
 end
