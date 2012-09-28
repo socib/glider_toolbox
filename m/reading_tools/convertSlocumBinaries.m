@@ -456,16 +456,19 @@ function asciis = convertSlocumBinaries(files, varargin)
                 continue;
             end;
 
-            theCommand = [commandPreffix, dbd2asc, ' -o -c ', cacheDir, ' ', scienceFile, ' >', scienceFile, '.asc'];
+%            theCommand = [commandPreffix, dbd2asc, ' -o -c ', cacheDir, ' ', scienceFile, ' >', scienceFile, '.asc'];
+            theCommand = [commandPreffix, dbd2asc, ' -c ', cacheDir, ' ', scienceFile, ' >', scienceFile, '.asc'];
             system(theCommand);
 
-            theCommand = [commandPreffix, dbd2asc, ' -o -c ', cacheDir, ' ', navFile, ' >', navFile, '.asc'];
+%            theCommand = [commandPreffix, dbd2asc, ' -o -c ', cacheDir, ' ', navFile, ' >', navFile, '.asc'];
+            theCommand = [commandPreffix, dbd2asc, ' -c ', cacheDir, ' ', navFile, ' >', navFile, '.asc'];
             system(theCommand);
 
             theCommand = [commandPreffix, dba_merge, ' ', navFile, '.asc ', scienceFile, '.asc | '];
         else
             navFile = initialFiles{fileIdx};
-            theCommand = [commandPreffix, dbd2asc, ' -o -c ', cacheDir, ' ', navFile, ' | '];
+%            theCommand = [commandPreffix, dbd2asc, ' -o -c ', cacheDir, ' ', navFile, ' | '];
+            theCommand = [commandPreffix, dbd2asc, ' -c ', cacheDir, ' ', navFile, ' | '];
         end;
 
         % Filter the output sensors if requested
