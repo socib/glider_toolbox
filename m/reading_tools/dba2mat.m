@@ -6,14 +6,14 @@ function [meta, data] = dba2mat(filename, varargin)
 %
 %  [META, DATA] = DBA2MAT(FILENAME, OPT1, VAL1, ...) accepts the following
 %  options:
-%    'sensors': a string cell array with the names of the sensors of interest.
-%      If given, only sensors present in both the file and this list will be 
-%      present in output.
 %    'format': a string setting the format of the output DATA. Valid values are:
 %      'array' (default): DATA is a matrix whith sensor readings as columns 
 %         ordered as in the SENSORS metadata field.
 %      'struct': DATA is a struct with sensor names as field names and column 
 %         vectors of sensor readings as field values.
+%    'sensors': a string cell array with the names of the sensors of interest.
+%      If given, only sensors present in both the file and this list will be 
+%      present in output.
 %
 %  META has the following fields based on the tags of the ascii header:
 %    DBD_LABEL: ascii tag in dba header.
@@ -37,7 +37,7 @@ function [meta, data] = dba2mat(filename, varargin)
 %      returned data array.
 %    BYTES: array with the number of bytes of each sensor present in the 
 %      returned data array.
-%    SOURCE: cell array of strings containing FILENAME.
+%    SOURCES: cell array of strings containing FILENAME.
 %
 %  Notes:
 %    A description of the dba format may be found here:
@@ -68,13 +68,14 @@ function [meta, data] = dba2mat(filename, varargin)
     opt = varargin{opt_idx};
     val = varargin{opt_idx+1};
     switch lower(opt)
+      case 'format'
+        output_format = val;
       case 'sensors'
         sensor_filtering = true;
         sensor_list = val;
-      case 'format'
-        output_format = val;
       otherwise
-        error('glider_toolbox:dba2mat:InvalidOption', 'Invalid option %s', opt);
+        error('glider_toolbox:dba2mat:InvalidOption', ...
+              'Invalid option: %s.', opt);
     end
   end
   
@@ -103,7 +104,7 @@ function [meta, data] = dba2mat(filename, varargin)
       'num_label_lines'    'num_label_lines: %d\n' };
     header_fields = field_header_line_map(:,1);
     header_format_str = [field_header_line_map{:,2}];
-    header_values =  textscan(fid, header_format_str, 1, 'ReturnOnError', true);
+    header_values = textscan(fid, header_format_str, 1, 'ReturnOnError', false);
     header_field_value_map = {header_fields{:}; header_values{:}};
     % Read optional tags (number of segment files and segment file names).
     num_ascii_tags = header_values{3};
@@ -111,19 +112,19 @@ function [meta, data] = dba2mat(filename, varargin)
       segment_field_value_map = cell(0,2);
     else
       num_segments_values = ...
-        textscan(fid, 'num_segments: %d\n', 1, 'ReturnOnError', true);
+        textscan(fid, 'num_segments: %d\n', 1, 'ReturnOnError', false);
       segment_format = ...
         sprintf('segment_filename_%d: %%s\n', 0:num_segments_values{1}-1);
-      segment_values = textscan(fid, segment_format, 1, 'ReturnOnError', true);
+      segment_values = textscan(fid, segment_format, 1, 'ReturnOnError', false);
       segment_field_value_map =  {
         'num_segments'       [num_segments_values{:}]
         'segment_file_names' {vertcat(segment_values{:})} }';
     end
     % Read label lines (sensor names, sensor units and bytes per sensor).
     num_sensors = header_values{11};
-    sensor_values = textscan(fid, '%s', num_sensors, 'ReturnOnError', true);
-    unit_values   = textscan(fid, '%s', num_sensors, 'ReturnOnError', true);
-    byte_values   = textscan(fid, '%d', num_sensors, 'ReturnOnError', true);
+    sensor_values = textscan(fid, '%s', num_sensors, 'ReturnOnError', false);
+    unit_values   = textscan(fid, '%s', num_sensors, 'ReturnOnError', false);
+    byte_values   = textscan(fid, '%d', num_sensors, 'ReturnOnError', false);
     label_field_value_map = {
       'sensors'  sensor_values'
       'units'    unit_values'
@@ -131,7 +132,7 @@ function [meta, data] = dba2mat(filename, varargin)
     % Add extra fields not in dba header.
     [~, name, ext] = fileparts(filename);
     extra_field_value_map = {
-      'source'   {[name ext]}
+      'sources'  {{[name ext]}}
     }';
     % Build metadata structure;
     meta_fill_value_map = [
@@ -157,7 +158,7 @@ function [meta, data] = dba2mat(filename, varargin)
       sensor_format(:) = {'%f'};
     end
     fmt_str = [sprintf('%s ', sensor_format{1:end-1}) sensor_format{end} '\n'];
-    data_values = textscan(fid, fmt_str, 'ReturnOnError', true);
+    data_values = textscan(fid, fmt_str, 'ReturnOnError', false);
     switch lower(output_format)
       case 'array'
         data = [data_values{:}];
