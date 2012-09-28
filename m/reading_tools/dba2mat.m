@@ -16,21 +16,22 @@ function [meta, data] = dba2mat(filename, varargin)
 %      present in output.
 %
 %  META has the following fields based on the tags of the ascii header:
-%    DBD_LABEL: ascii tag in dba header.
-%    ENCODING_VER: ascii tag in dba header.
-%    NUM_ASCII_TAGS: ascii tag in dba header.
-%    ALL_SENSORS: ascii tag in dba header.
-%    FILENAME: ascii tag in dba header.
-%    THE8X3_FILENAME: ascii tag in dba header.
-%    FILENAME_EXTENSION: ascii tag in dba header.
-%    FILENAME_LABEL: ascii tag in dba header.
-%    MISSION_NAME: ascii tag in dba header.
-%    FILEOPEN_TIME: ascii tag in dba header.
-%    SENSORS_PER_CYCLE: ascii tag in dba header.
-%    NUM_LABEL_LINES: ascii tag in dba header.
-%    NUM_SEGMENTS: ascii tag in dba header.
-%    SEGMENT_FILENAMES: string cell array with the contents of the ascii tags
-%      SEGMENT_FILENAME_0, ..., SEGMENT_FILENAME_N-1.
+%    HEADERS: a struct with the ascii tags present in dba header with fields:
+%      DBD_LABEL: ascii tag in dba header.
+%      ENCODING_VER: ascii tag in dba header.
+%      NUM_ASCII_TAGS: ascii tag in dba header.
+%      ALL_SENSORS: ascii tag in dba header.
+%      FILENAME: ascii tag in dba header.
+%      THE8X3_FILENAME: ascii tag in dba header.
+%      FILENAME_EXTENSION: ascii tag in dba header.
+%      FILENAME_LABEL: ascii tag in dba header.
+%      MISSION_NAME: ascii tag in dba header.
+%      FILEOPEN_TIME: ascii tag in dba header.
+%      SENSORS_PER_CYCLE: ascii tag in dba header.
+%      NUM_LABEL_LINES: ascii tag in dba header.
+%      NUM_SEGMENTS: ascii tag in dba header.
+%      SEGMENT_FILENAMES: string cell array with the contents of the ascii tags
+%        SEGMENT_FILENAME_0, ..., SEGMENT_FILENAME_N-1.
 %    SENSORS: cell array of strings with the names of the sensors present in the
 %      returned data array (in the same column order as the data).
 %    UNITS: cell array of strings with the units of the sensors present in the
@@ -87,7 +88,7 @@ function [meta, data] = dba2mat(filename, varargin)
   
   %% Process the file.
   try
-    % Read mandatory tags.
+    % Read mandatory header tags.
     num_mandatory_ascii_tags = 12;
     field_header_line_map = { ...
       'dbd_label'          'dbd_label: %s\n'
@@ -106,56 +107,42 @@ function [meta, data] = dba2mat(filename, varargin)
     header_format_str = [field_header_line_map{:,2}];
     header_values = textscan(fid, header_format_str, 1, 'ReturnOnError', false);
     header_field_value_map = {header_fields{:}; header_values{:}};
+    header_struct = struct(header_field_value_map{:});
     % Read optional tags (number of segment files and segment file names).
     num_ascii_tags = header_values{3};
     if num_ascii_tags == num_mandatory_ascii_tags
-      segment_field_value_map = cell(0,2);
+      header_struct.num_segments = [];
+      header_struct.segment_filenames = {};
     else
       num_segments_values = ...
         textscan(fid, 'num_segments: %d\n', 1, 'ReturnOnError', false);
       segment_format = ...
         sprintf('segment_filename_%d: %%s\n', 0:num_segments_values{1}-1);
       segment_values = textscan(fid, segment_format, 1, 'ReturnOnError', false);
-      segment_field_value_map =  {
-        'num_segments'       [num_segments_values{:}]
-        'segment_file_names' {vertcat(segment_values{:})} }';
+      header_struct.num_segments = num_segments_values{1};
+      header_struct.segment_filenames = vertcat(segment_values{:});
     end
     % Read label lines (sensor names, sensor units and bytes per sensor).
-    num_sensors = header_values{11};
+    num_sensors = header_struct.sensors_per_cycle;
     sensor_values = textscan(fid, '%s', num_sensors, 'ReturnOnError', false);
     unit_values   = textscan(fid, '%s', num_sensors, 'ReturnOnError', false);
     byte_values   = textscan(fid, '%d', num_sensors, 'ReturnOnError', false);
-    label_field_value_map = {
-      'sensors'  sensor_values'
-      'units'    unit_values'
-      'bytes'    byte_values' }';
-    % Add extra fields not in dba header.
-    [~, name, ext] = fileparts(filename);
-    extra_field_value_map = {
-      'sources'  {{[name ext]}}
-    }';
     % Build metadata structure;
-    meta_fill_value_map = [
-      header_field_value_map ...
-      segment_field_value_map ...
-      label_field_value_map ...
-      extra_field_value_map ...
-    ];
-    meta = struct(meta_fill_value_map{:});
+    [~, name, ext] = fileparts(filename);
+    meta.sources = {[name ext]};
+    meta.headers = header_struct;
+    meta.sensors = sensor_values{1};
+    meta.units = unit_values{1};
+    meta.bytes = byte_values{1};
+
     % Read sensor data filtering selected sensors if needed.
+    sensor_format = repmat({'%f'}, meta.headers.sensors_per_cycle, 1);
     if sensor_filtering
       selected_sensors = ismember(meta.sensors, sensor_list);
       meta.sensors = meta.sensors(selected_sensors);
       meta.units = meta.units(selected_sensors);
       meta.bytes = meta.bytes(selected_sensors);
-      meta.num_sensors = numel(meta.sensors);
-      sensor_format = cell(meta.num_sensors, 1);
-      sensor_format(selected_sensors) = {'%f'};
       sensor_format(~selected_sensors) = {'%*f'};
-    else
-      meta.num_sensors = meta.sensors_per_cycle;
-      sensor_format = cell(meta.num_sensors, 1);
-      sensor_format(:) = {'%f'};
     end
     fmt_str = [sprintf('%s ', sensor_format{1:end-1}) sensor_format{end} '\n'];
     data_values = textscan(fid, fmt_str, 'ReturnOnError', false);

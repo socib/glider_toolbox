@@ -55,6 +55,8 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
 %    [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargin)
 %
 %  See also:
+%    XBD2DBA
+%    DBA2MAT
 %    DBACAT
 %
 %  Author: Joan Pau Beltran
@@ -104,14 +106,16 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
   else
     % Merge metadata performing sensor renaming if needed.
     % Sensor renaming is done to mimic the behaviour of WRC program 'dba_merge'.
+    sources_nav = meta_nav.sources;
+    headers_nav = meta_nav.headers;
     sensors_nav_list = meta_nav.sensors;
     units_nav_list = meta_nav.units;
     bytes_nav_list = meta_nav.bytes;
-    sources_nav = meta_nav.sources;
+    sources_sci = meta_sci.sources;
+    headers_sci = meta_sci.headers;
     sensors_sci_list = meta_sci.sensors;
     units_sci_list = meta_sci.units;
     bytes_sci_list = meta_sci.bytes;
-    sources_sci = meta_sci.sources;
     [sensors_dup_list, sensors_dup_index_nav, sensors_dup_index_sci] = ...
       intersect(sensors_nav_list, sensors_sci_list);
     sensors_dup_sci = strncmp('sci_', sensors_dup_list, 4);
@@ -120,10 +124,11 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
       strcat('gld_dup_', sensors_dup_list(sensors_dup_sci));
     sensors_sci_list(sensors_dup_index_sci(sensors_dup_nav)) = ...
       strcat('sci_dup_', sensors_dup_list(sensors_dup_nav));
+    meta.sources = vertcat(sources_nav, sources_sci);
+    meta.headers = vertcat(headers_nav, headers_sci);
     meta.sensors = vertcat(sensors_nav_list, sensors_sci_list);
     meta.units = vertcat(units_nav_list, units_sci_list);
     meta.bytes = vertcat(bytes_nav_list, bytes_sci_list);
-    meta.sources = vertcat(sources_nav, sources_sci);
 
     % Merge data.
     % Check that both data sets have their own timestamp sensor.

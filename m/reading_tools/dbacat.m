@@ -1,13 +1,12 @@
 function [meta_out, data_out] = dbacat(meta_list, data_list, timestamp)
 %DBACAT  Combine data from several dba data sets into a single data set.
 %
-%  [META_OUT, DATA_OUT] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP) combines
-%  data from arrays in cell array DATA_LIST and metadata from structs in cell
-%  array META_LIST into a single data set with data in array DATA_OUT and
-%  metadata in struct META_OUT according to a timestamp from sensor named by
-%  string TIMESTAMP. META_OUT, DATA_OUT, and the elements of META_LIST and
-%  DATA_LIST follow the format returned by the function DBA2MAT, except that
-%  header entries from ascii tags are omitted.
+%  [META_OUT, DATA_OUT] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP) combines data 
+%  from arrays in cell array DATA_LIST and metadata from structs in cell array 
+%  META_LIST into a single data set with data in array DATA_OUT and metadata in 
+%  struct META_OUT according to a time from sensor named by string TIMESTAMP.
+%  META_OUT, DATA_OUT, and the elements of META_LIST and DATA_LIST follow the 
+%  format returned by the function DBA2MAT.
 %
 %  Notes:
 %    This function should be used to combine data from several navigation files,
@@ -45,16 +44,18 @@ function [meta_out, data_out] = dbacat(meta_list, data_list, timestamp)
   % Cat metadata.
   meta_struct = [meta_list{:}];
   
+  all_sources = vertcat(meta_struct.sources);
+  all_headers = vertcat(meta_struct.headers);
   all_sensors = vertcat(meta_struct.sensors);
   all_units = vertcat(meta_struct.units);
   all_bytes = vertcat(meta_struct.bytes);
-  all_sources = vertcat(meta_struct.sources);
   
   [sensors_list, sensors_idx] = unique(all_sensors);
+  meta_out.sources = all_sources;
+  meta_out.headers = all_headers;
   meta_out.sensors = all_sensors(sensors_idx);
   meta_out.units   = all_units(sensors_idx);
   meta_out.bytes   = all_bytes(sensors_idx);
-  meta_out.sources = all_sources;
   
   % Cat data.
   [~, sensor_index_list] = cellfun(@(m) ismember(m.sensors, sensors_list), ...
