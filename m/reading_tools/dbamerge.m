@@ -62,7 +62,7 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
 
   error(nargchk(4, 14, nargin, 'struct'));
   
-  %% Set option values.
+  % Set option values.
   output_format = 'array';
   timestamp_nav = 'm_present_time';
   timestamp_sci = 'sci_m_present_time';
@@ -87,104 +87,104 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
         time_filtering = true;
         time_range = val;
       otherwise
-        error('glider_toolbox:dbamerge:InvalidOption', 'Invalid option %s.', opt);
+        error('glider_toolbox:dbamerge:InvalidOption', ...
+              'Invalid option: %s.', opt);
     end
   end
-  
-  
-  %% Check that both data sets has its timestamp sensor.
-  
-  [ts_nav_present, ts_nav_col] = ismember(timestamp_nav, sensors_nav_list);
-  if ~ts_nav_present
-    error('glider_toolbox:dbamerge:MissingTimestamp', ...
-          'Missing timestamp sensor in navigation data set: %s.', timestamp_nav);
-  end
-  [ts_sci_present, ts_sci_col] = ismember(timestamp_sci, sensors_sci_list);
-  if ~ts_sci_present
-    error('glider_toolbox:dbamerge:MissingTimestamp', ...
-          'Missing timestamp sensor in science data set: %s.', timestamp_sci);
-  end
-  if time_filtering
-    ts_nav_select = ~(data_nav(:,ts_nav_col) < time_range(1) || ...
-                      data_nav(:,ts_nav_col) > time_range(2));
-    ts_nav = data_nav(ts_nav_select, ts_nav_col);
-    ts_sci_select = ~(data_sci(:,ts_sci_col) < time_range(1) || ...
-                      data_sci(:,ts_sci_col) > time_range(2));
-    ts_sci = data_sci(ts_sci_select, ts_sci_col);
+
+  % Merge data and metadata checking for empty input cases.
+  if isempty(meta_sci)
+    % Only navigation data.
+    meta = meta_nav;
+    data = data_nav;
+  elseif isempty(meta_nav)
+    % Only sciend data.
+    meta = meta_sci;
+    data = data_sci;
   else
-    ts_nav = data_nav(:, ts_nav_col);
-    ts_nav_select = true(size(ts_nav));
-    ts_sci = data_sci(:, ts_sci_col);
-    ts_sci_select = true(size(ts_sci));
-  end
-  
-  %% Merge metadada performing sensor renaming and filtering if needed.
-  if sensor_filtering
-    sensors_nav_select = ismember(meta_nav.sensors, sensor_list);
-    sensors_nav_list = meta_nav.sensors(sensors_nav_select);
-    units_nav_list = meta_nav.units(sensors_nav_select);
-    bytes_nav_list = meta_nav.bytes(sensors_nav_select);
-    sensors_sci_select = ismember(meta_sci.sensors, sensor_list);
-    sensors_sci_list = meta_sci.sensors(sensors_sci_select);
-    units_sci_list = meta_sci.units(sensors_sci_select);
-    bytes_sci_list = meta_sci.bytes(sensors_sci_select);
-  else
+    % Merge metadata performing sensor renaming if needed.
+    % Sensor renaming is done to mimic the behaviour of WRC program 'dba_merge'.
     sensors_nav_list = meta_nav.sensors;
     units_nav_list = meta_nav.units;
     bytes_nav_list = meta_nav.bytes;
-    sensors_nav_select = true(size(sensor_nav_list));
+    sources_nav = meta_nav.sources;
     sensors_sci_list = meta_sci.sensors;
     units_sci_list = meta_sci.units;
     bytes_sci_list = meta_sci.bytes;
-    sensors_sci_select = true(size(sensor_sci_list));
+    sources_sci = meta_sci.sources;
+    [sensors_dup_list, sensors_dup_index_nav, sensors_dup_index_sci] = ...
+      intersect(sensors_nav_list, sensors_sci_list);
+    sensors_dup_sci = strncmp('sci_', sensors_dup_list, 4);
+    sensors_dup_nav = ~sensors_dup_sci;
+    sensors_nav_list(sensors_dup_index_nav(sensors_dup_sci)) = ...
+      strcat('gld_dup_', sensors_dup_list(sensors_dup_sci));
+    sensors_sci_list(sensors_dup_index_sci(sensors_dup_nav)) = ...
+      strcat('sci_dup_', sensors_dup_list(sensors_dup_nav));
+    meta.sensors = vertcat(sensors_nav_list, sensors_sci_list);
+    meta.units = vertcat(units_nav_list, units_sci_list);
+    meta.bytes = vertcat(bytes_nav_list, bytes_sci_list);
+    meta.sources = vertcat(sources_nav, sources_sci);
+
+    % Merge data.
+    % Check that both data sets have their own timestamp sensor.
+    [ts_nav_present, ts_nav_col] = ismember(timestamp_nav, sensors_nav_list);
+    if ~ts_nav_present
+      error('glider_toolbox:dbamerge:MissingTimestamp', ...
+            'Missing timestamp sensor in navigation data set: %s.', ...
+            timestamp_nav);
+    end
+    [ts_sci_present, ts_sci_col] = ismember(timestamp_sci, sensors_sci_list);
+    if ~ts_sci_present
+      error('glider_toolbox:dbamerge:MissingTimestamp', ...
+            'Missing timestamp sensor in science data set: %s.', timestamp_sci);
+    end
+    % Build list of unique timestamps and the output index of each sensor cycle.  
+    ts_nav = data_nav(:,ts_nav_col);
+    ts_sci = data_sci(:,ts_sci_col);
+    [ts_unique, ~, ts_indices_to] = unique(vertcat(ts_nav, ts_sci));
+    % Build merged data array with sensor columns horizontally concatenated 
+    % and different sensor cycles verticaly interleaved according to timestamp.
+    num_rows_nav = numel(ts_nav);
+    num_rows_sci = numel(ts_sci);
+    num_cols_nav = numel(sensors_nav_list);
+    num_cols_sci = numel(sensors_sci_list);
+    total_rows = numel(ts_unique);
+    total_cols = num_cols_nav + num_cols_sci;
+    row_range_nav = (1:num_rows_nav);
+    row_range_sci = num_rows_nav + (1:num_rows_sci);
+    col_range_nav = (1:num_cols_nav);
+    col_range_sci = num_cols_nav + (1:num_cols_sci);
+    data = nan(total_rows, total_cols);
+    data(ts_indices_to(row_range_nav), col_range_nav) = data_nav;
+    data(ts_indices_to(row_range_sci), col_range_sci) = data_sci;
+
+    % Fill missing navigation timestamp values with science timestamp values.
+    % This is done to mimic the behaviour of the WRC program 'dba_merge'.
+    ts_nav_missing = isnan(data(:,ts_nav_col));
+    data(ts_nav_missing, ts_nav_col) = ...
+      data(ts_nav_missing, num_cols_nav + ts_sci_col);
   end
 
+  % Perform time filtering if needed.
+  if time_filtering
+    ts_select = ~(ts_unique < time_range(1) || ts_unique > time_range(2));
+    data = data(ts_select,:);
+  end
   
-  %% Merge metadata performing sensor renaming if needed.
-  % Sensor renaming is done to mimic the behaviour of WRC program 'dba_merge'.
-  [sensors_dup_list, sensors_dup_index_nav, sensors_dup_index_sci] = ...
-    intersect(sensors_nav_list, sensors_sci_list);
-  sensors_dup_sci = strncmp('sci_', sensors_dup_list, 4);
-  sensors_dup_nav = ~sensors_dup_sci;
-  sensors_nav_list(sensors_dup_index_nav(sensors_dup_sci)) = ...
-    strcat('gld_dup_', sensors_dup_list(sensors_dup_sci));
-  sensors_sci_list(sensors_dup_index_sci(sensors_dup_nav)) = ...
-    strcat('sci_dup_', sensors_dup_list(sensors_dup_nav));
-  meta.sensors = vertcat(sensors_nav_list, sensors_sci_list);
-  meta.units = vertcat(units_nav_list, units_sci_list);
-  meta.bytes = vertcat(bytes_nav_list, bytes_sci_list);
-  meta.sources = vertcat(sources_nav, sources_sci);
+  % Perform sensor filtering if needed.
+  if sensor_filtering
+    [sensor_select, ~] = ismember(meta.sensors, sensor_list);
+    meta.sensors = meta.sensors(sensor_select);
+    meta.units = meta.units(sensor_select);
+    meta.bytes = meta.bytes(sensor_select);
+    data = data(:,sensor_select);
+  end
+  
+  % Convert output data to struct format if needed.
+  switch output_format
+    case 'array'
+    case 'struct'
+      data = cell2struct(num2cell(data,1), meta.sensors, 2);
+  end
 
-  %% Merge data.
-  [ts_unique, ~, ts_indices_to] = unique(vertcat(ts_nav, ts_sci));
-  num_rows_nav = numel(ts_nav);
-  num_rows_sci = numel(ts_sci);
-  num_cols_nav = numel(sensors_nav_list);
-  num_cols_sci = numel(sensors_sci_list);
-  total_rows = numel(ts_unique);
-  total_cols = num_cols_nav + num_cols_sci;
-  row_range_nav = (1:num_rows_nav);
-  row_range_sci = num_rows_nav + (1:num_rows_sci);
-  col_range_nav = (1:num_cols_nav);
-  col_range_sci = num_cols_nav+(1:num_cols_sci);
-  data = nan(total_rows, total_cols);
-  data(ts_indices_to(row_range_nav), col_range_nav) = ...
-    data_nav(ts_nav_select, sensors_nav_select);
-  data(ts_indices_to(row_range_sci), col_range_sci) = ...
-    data_sci(ts_sci_select, sensors_sci_select);
-  
-  
-  %% Fill missing navigation timestamp values with science timestamp values.
-  % This is done to mimic the behaviour of the WRC program 'dba_merge'.
-  ts_missing = isnan(data(:,ts_nav_col));
-  data(ts_nav_missing, ts_nav_col) = data(ts_nav_missing, num_cols_nav + ts_sci_col);
-  
-  
-    
-    
-  
-  
-  
-  time_column_nav
-  
 end
