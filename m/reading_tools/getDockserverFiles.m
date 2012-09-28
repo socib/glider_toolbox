@@ -194,11 +194,13 @@ function files = fetchNewAndUpdatedFiles(ftp_handle, remote_dir, local_dir, name
   % Go to remote directory (it should be save here).
   cd(ftp_handle, remote_dir);
   % Select files mathcing name pattern and date.
-  remote_match = (1 == cellfun('length', regexp({remote_files.name}, name)));
+  remote_match = ...
+    (1 == cellfun(@length, regexp({remote_files.name}, name, 'match')));
   remote_files = remote_files(remote_match);
   if filter_date
     remote_dates = cellfun(@(s) datenum(date_scan(s)), {remote_files.name});
-    remote_indate = datenum(start_date) <= remote_dates & remote_dates <= datenum(end_date);
+    remote_indate = ...
+      datenum(start_date) <= remote_dates & remote_dates <= datenum(end_date);
     remote_files = remote_files(remote_indate);
   end
   if isempty(remote_files)
@@ -210,7 +212,8 @@ function files = fetchNewAndUpdatedFiles(ftp_handle, remote_dir, local_dir, name
     % Select only new files or files whose size is bigger in the dockserver.
     local_files = dir(local_dir);
     [existing, local_idx] = ismember({remote_files.name}, {local_files.name});
-    updated = [remote_files(existing).bytes] > [local_files(local_idx(existing)).bytes];
+    updated = ...
+      [remote_files(existing).bytes] > [local_files(local_idx(existing)).bytes];
     to_download = ~existing;
     to_download(existing) = updated;
     remote_files = remote_files(to_download);
