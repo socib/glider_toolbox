@@ -120,9 +120,9 @@ function writeNetCDFData(filename, var_data, var_meta, dims, global_atts)
         end
         var_dims = var_meta.(field_name).dimensions;
         nc_var = struct('Name', {var_name}, 'Dimension', {var_dims});
-        if isfield(var_meta.(var_name), 'attributes')
+        if isfield(var_meta.(field_name), 'attributes')
           % Rename fields as required by low level library.
-          var_atts = var_meta.(var_name).attributes;
+          var_atts = var_meta.(field_name).attributes;
           nc_var.Attribute = struct('Name', {var_atts.name}, ...
                                     'Value', {var_atts.value});
         end
