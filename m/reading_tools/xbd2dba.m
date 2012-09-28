@@ -1,7 +1,7 @@
-function dba_file_full = xbd2ascii(dbd_files, dba_file, varargin)
-%XBD2ASCII  Slocum xbd to ascii file conversion using external program provided by WRC.
+function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
+%XBD2DBA  Slocum xbd to ascii file conversion using external program provided by WRC.
 %
-%  DBA_FILE_FULL = XBD2ASCII(DBD_FILES, DBA_FILE) converts the binary file(s) 
+%  DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE) converts the binary file(s) 
 %  named by string or string cell array DBD_FILES (xxx.[smdtne]bd files) to the 
 %  corresponding text representation in the ascii file named by string DBA_FILE,
 %  and returns the absolute path of the generated file in string DBA_FILE_FULL.
@@ -11,7 +11,7 @@ function dba_file_full = xbd2ascii(dbd_files, dba_file, varargin)
 %  directory through the function SYSTEM (this may be relevant for the cache 
 %  directory involved in the conversion).
 %
-%  DBA_FILE_FULL = XBD2ASCII(DBD_FILES, DBA_FILE, OPT1, VAL1, ...) accepts the
+%  DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE, OPT1, VAL1, ...) accepts the
 %  following set of options to modify the default behaviour:
 %    'program': string with the conversion program command name, including the
 %      path if needed. This is useful if the 'dbd2asc' program has been renamed
@@ -33,12 +33,12 @@ function dba_file_full = xbd2ascii(dbd_files, dba_file, varargin)
 %  Examples:
 %    % Convert a simple file.
 %    dbd_file = 'happyglider-1970-000-0-0.sbd'
-%    dba_file_full = xbd2ascii(dbd_file, dba_file)
+%    dba_file_full = xbd2dba(dbd_file, dba_file)
 %    % Convert all navigation files of the same mission in current directory,
 %    % using it as cache directory and setting the path of the dbd2asc program.
 %    dbd_files = 'happyglider-1970-000-0-*.[smd]bd'
-%    dba_file_full = xbd2ascii(dbd_file, dba_file, 'cache', pwd(), ...
-%                              'program', '~/bin/dbd2asc')
+%    dba_file_full = xbd2dba(dbd_file, dba_file, 'cache', pwd(), ...
+%                            'program', '~/bin/dbd2asc')
 %
 %  See also:
 %    DBACAT
@@ -65,7 +65,7 @@ function dba_file_full = xbd2ascii(dbd_files, dba_file, varargin)
       case 'options'
         extra_options = val;
       otherwise
-        error('glider_toolbox:xbd2ascii:InvalidOption', 'Invalid option %s', opt);
+        error('glider_toolbox:xbd2ascii:InvalidOption', 'Invalid option: %s.', opt);
     end
   end
   
