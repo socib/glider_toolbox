@@ -49,28 +49,36 @@ function ncl1 = generateOutputNetCDFL1(filename, data, meta, dims, atts, deploym
 
   %% Set dynamic global attributes.
   dyn_atts = struct();
-  dyn_atts.date_modified = datestr(utc2datenum(utc_time), 'yyyy-mm-ddTHH:MM:SS+00');
+  dyn_atts.date_modified = ...
+    datestr(utc2datenum(utc_time), 'yyyy-mm-ddTHH:MM:SS+00');
   if isfield(data, 'time_nav')
-    dyn_atts.time_coverage_start = datestr(utc2datenum(min(data.time_nav)), 'yyyy-mm-ddTHH:MM:SS+00');
-    dyn_atts.time_coverage_end = datestr(utc2datenum(max(data.time_nav)), 'yyyy-mm-ddTHH:MM:SS+00');
-    dyn_atts.time_coverage_resolution = sprintf('P%.2fS', min(abs(diff(data.time_nav))));
+    dyn_atts.time_coverage_start = ...
+      datestr(utc2datenum(min(data.time_nav)), 'yyyy-mm-ddTHH:MM:SS+00');
+    dyn_atts.time_coverage_end = ...
+      datestr(utc2datenum(max(data.time_nav)), 'yyyy-mm-ddTHH:MM:SS+00');
+    dyn_atts.time_coverage_resolution = ...
+      sprintf('P%.2fS', min(abs(diff(data.time_nav))));
   end
   if isfield(data, 'latitude') && isfield(meta, 'latitude')
     dyn_atts.geospatial_lat_min = min(data.latitude);
     dyn_atts.geospatial_lat_max = max(data.latitude);
     dyn_atts.geospatial_lat_resolution = min(abs(diff(data.latitude)));
-    [lat_has_units, lat_units_idx] = ismember('units', {meta.latitude.attributes.name});
+    [lat_has_units, lat_units_idx] = ...
+      ismember('units', {meta.latitude.attributes.name});
     if lat_has_units
-      dyn_atts.geospatial_lat_units = meta.latitude.attributes(lat_units_idx).value;
+      dyn_atts.geospatial_lat_units = ...
+        meta.latitude.attributes(lat_units_idx).value;
     end
   end
   if isfield(data, 'longitude') && isfield(meta, 'longitude')
     dyn_atts.geospatial_lon_min = min(data.longitude);
     dyn_atts.geospatial_lon_max = max(data.longitude);
     dyn_atts.geospatial_lon_resolution = min(abs(diff(data.longitude)));
-    [lon_has_units, lon_units_idx] = ismember('units', {meta.longitude.attributes.name});
+    [lon_has_units, lon_units_idx] = ...
+      ismember('units', {meta.longitude.attributes.name});
     if lon_has_units
-      dyn_atts.geospatial_lon_units = meta.longitude.attributes(lon_units_idx).value;
+      dyn_atts.geospatial_lon_units = ...
+        meta.longitude.attributes(lon_units_idx).value;
     end
   end
  
@@ -120,7 +128,7 @@ function ncl1 = generateOutputNetCDFL1(filename, data, meta, dims, atts, deploym
   if status==0
     % We should never get here (if NetCDF creation succeed, file must exist).
     error('glider_toolbox:netcdf_tools:NetCDFFileError', ...
-          'NetCDF generation succeed but problems with output file %s:\n%s.', ...
+          'NetCDF generation succeed but problems with output file %s: %s.', ...
           filename, att_output);
   end
   ncl1 = att_output.Name;
