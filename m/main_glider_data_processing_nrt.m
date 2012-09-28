@@ -28,8 +28,8 @@
 %% Configure toolbox and configuration file path.
 glider_toolbox_dir = configGliderToolboxPath();
 % Glider configuration file directory
-config_dir = fullfile(glider_toolbox_dir, 'config');
-desired_extensions = {'sbd', 'tbd'};
+% config_dir = fullfile(glider_toolbox_dir, 'config');
+desired_extensions = {'sbd', 'tbd', 'mbd', 'nbd'};
 
 
 %% Configure deployment data paths.
@@ -47,7 +47,7 @@ output_dirs.image_base_local_path = '/home/jbeltran/public_html/glider';
 output_dirs.imageBaseURLPath    = 'http://www.socib.es/~jbeltran/glider/web';
 
 
-%% Configure processing options
+%% Configure processing options.
 processing_options.salinityCorrected = 'TH';
 processing_options.allowSciTimeFill = true;
 processing_options.allowPressFilter = true;
@@ -64,46 +64,33 @@ config.db_access = configDBAccess();
 config.dockservers = configDockservers();
 
 
+%% Configure Slocum file downloading and conversion, and Slocum data loading.
+config.slocum_options = configRTSlocumFileOptions;
+
+
 %% Get list of active deployments from database.
 disp('Querying information of glider deployments...');
 active_deployments = getDBDeploymentInfo(config.db_access, ...
                                          config.db_query, ...
                                          config.db_fields);
-% active_deployments = active_deployments([active_deployments.deployment_id] == 94);
+active_deployments = active_deployments([active_deployments.deployment_id] == 99);
 if isempty(active_deployments)
   disp('No glider deployments available.');
   return
 end
 
                                        
-%% Process active deployments
+%% Process active deployments.
 for deployment_idx = 1:numel(active_deployments)
-  %% Deployment complete configuration.
+  %% Set deployment field shortcut variables.
   deployment = active_deployments(deployment_idx);
-  
-  %{
-  % Fix possibly missing deployment end time.
-  if isempty(deployment.end_time)
-    deployment.end_time = now();
-  end
-  %}
-  
-  % Set the glider data root directory
-  %{
-  if ~isfield(deployment, 'data_root')
-    disp('Missing DATA_ROOT config parameter. Setting default value...');
-    deployment.data_root = fullfile('/home/glider/glider_deployments/', glider_name, deployment.mission_name);
-  end;
-  %}
-  
-                                
-  %% Deployment field shortcut variables.
-  glider_name = deployment.glider_name;
   deployment_name = deployment.deployment_name;
   deployment_id = deployment.deployment_id;
   deployment_start = deployment.deployment_start;
   deployment_end = deployment.deployment_end;
+  glider_name = deployment.glider_name;
   binary_dir = strfglider(config.local_paths.binary_path, deployment);
+  cache_dir = strfglider(config.local_paths.cache_path, deployment);
   log_dir = strfglider(config.local_paths.log_path, deployment);
   ascii_dir = strfglider(config.local_paths.ascii_path, deployment);
   figure_dir = strfglider(config.local_paths.figure_path, deployment);
@@ -124,25 +111,142 @@ for deployment_idx = 1:numel(active_deployments)
   end
 
     
-  %% Download glider files from station(s).
-  % Check for new or updated deployment files in every dockserver and fetch them.
-  % Subsequent flattening would not be needed if uniform output worked properly.
+  %% Download deployment glider files from station(s).
+  % Check for new or updated deployment files in every dockserver.
+  % Deployment start time must be truncated to days because the date of 
+  % a binary file is deduced from its name only up to day precission.
   % Deployment end time may be undefined.
-  download_start = deployment_start;
+  download_start = datenum(datestr(deployment_start,'yyyy-mm-dd'),'yyyy-mm-dd');
   if isempty(deployment_end)
     download_end = now();
   else
     download_end = deployment_end;
   end
-  [new_xbds, new_logs] = ...
-    arrayfun(@(ds) getDockserverFiles(ds, glider_name, binary_dir, log_dir, ...
-                                      'start', download_start, ...
-                                      'end', download_end), ...
-             config.dockservers(:)', 'UniformOutput', false);
+  new_xbds = cell(size(config.dockservers));
+  new_logs = cell(size(config.dockservers));
+  for dockserver_idx = 1:numel(config.dockservers)
+    dockserver = config.dockservers(dockserver_idx);
+    try
+      [new_xbds{dockserver_idx}, new_logs{dockserver_idx}] = ...
+        getDockserverFiles(dockserver, glider_name, binary_dir, log_dir, ...
+                           'start', download_start, 'end', download_end, ...
+                           'bin_name', config.slocum_options.bin_name_pattern, ...
+                           'log_name', config.slocum_options.log_name_pattern);
+    catch exception
+      disp(['Error getting dockserver files from ' dockserver.host ':']);
+      disp(getReport(exception, 'extended'));
+    end
+  end  
   new_xbds = [new_xbds{:}];
   new_logs = [new_logs{:}];
-
-                                        
+  
+  
+  %% Convert binary glider files to ascii human readable format.
+  % For each downloaded binary file, convert it to ascii format in the ascii
+  % directory and store the returned absolute path for use later.
+  % Since some conversion may fail use a cell array of string cell arrays and
+  % flatten it when finished, leaving only the succesfully created dbas.
+  disp('Converting binary data files to ascii format...');
+  new_dbas = cell(size(new_xbds));
+  for xbd_idx = 1:numel(new_xbds)
+    [~, xbd_name, xbd_ext] = fileparts(new_xbds{xbd_idx});
+    xbd_name_ext = [xbd_name xbd_ext];
+    dba_name_ext = regexprep(xbd_name_ext, ...
+                             config.slocum_options.bin_name_pattern, ...
+                             config.slocum_options.dba_name_replacement); 
+    dba_fullfile = fullfile(ascii_dir, [xbd_name '_' xbd_ext(2:end) '.dba']);
+    try
+      new_dbas{xbd_idx} = { xbd2dba(new_xbds{xbd_idx}, dba_fullfile, ...
+                                    'cache', cache_dir) };
+    catch exception
+      disp(['Error converting binary file ' [xbd_name xbd_ext] ':']);
+      disp(getReport(exception, 'extended'));
+      new_dbas{xbd_idx} = {};
+    end
+  end
+  new_dbas = [new_dbas{:}];
+  disp(['Binary files successfully converted: ' ...
+        num2str(numel(new_dbas)) ' of ' num2str(numel(new_xbds)) '.']);
+  
+ 
+  %% Quit deployment processing if there is no new data.
+  if isempty(new_dbas)
+    disp('No new deployment data, skipping processing and product generation.');
+    continue
+  end
+  
+  
+  %% Load data from ascii deployment glider files.
+  % Load all files matching the desired pattern (not only the newly generated).
+  % Flatten lists to discard unmatched files.
+  ascii_dir_contents = dir(ascii_dir);
+  dba_all_names = {ascii_dir_contents(~[ascii_dir_contents.isdir]).name};
+  dba_nav_names = ...
+    regexp(dba_all_names, config.slocum_options.dba_name_pattern_nav, 'match');
+  dba_sci_names = ...
+    regexp(dba_all_names, config.slocum_options.dba_name_pattern_sci, 'match');
+  dba_nav_names = [dba_nav_names{:}];
+  dba_sci_names = [dba_sci_names{:}];
+  % Load data from individual ascii files.
+  % Perform sensor filtering now to reduce memory usage.
+  if isfield(config.slocum_options, 'dba_sensors')
+    dba_sensor_args = {'sensors' config.slocum_options.dba_sensors};
+  else
+    dba_sensor_args = {};
+  end
+  % Load navigation files.
+  dba_nav_files = cell(size(dba_nav_names));
+  dba_nav_success = false(size(dba_nav_names));
+  meta_nav = cell(size(dba_nav_names));
+  data_nav = cell(size(dba_nav_names));
+  for dba_nav_idx = 1:numel(dba_nav_names)
+    try
+     dba_nav_files{dba_nav_idx} = ...
+       fullfile(ascii_dir, dba_nav_names{dba_nav_idx});
+     [meta_nav{dba_nav_idx}, data_nav{dba_nav_idx}] = ...
+       dba2mat(dba_nav_files{dba_nav_idx}, dba_sensor_args{:});
+     dba_nav_success(dba_nav_idx) = true;
+    catch exception
+      disp(['Error loading ascii file ' dba_nav_files{dba_nav_idx} ':']);
+      disp(getReport(exception, 'extended'));
+    end
+  end
+  meta_nav = meta_nav(dba_nav_success);
+  data_nav = data_nav(dba_nav_success);
+  % Load science files.
+  dba_sci_files = cell(size(dba_sci_names));
+  dba_sci_success = false(size(dba_sci_names));
+  meta_sci = cell(size(dba_sci_names));
+  data_sci = cell(size(dba_sci_names));
+  for dba_sci_idx = 1:numel(dba_sci_names)
+    try
+     dba_sci_files{dba_sci_idx} = ...
+       fullfile(ascii_dir, dba_sci_names{dba_sci_idx});
+     [meta_sci{dba_sci_idx}, data_sci{dba_sci_idx}] = ...
+       dba2mat(dba_sci_files{dba_sci_idx}, dba_sensor_args{:});
+     dba_sci_success(dba_sci_idx) = true;
+    catch exception
+      disp(['Error loading ascii file ' dba_sci_files{dba_sci_idx} ':']);
+      disp(getReport(exception, 'extended'));
+    end
+  end
+  meta_sci = meta_sci(dba_sci_success);
+  data_sci = data_sci(dba_sci_success);
+  % Combine data from each bay.
+  if ~isempty(meta_nav)
+    [meta_nav, data_nav] = ...
+      dbacat(meta_nav, data_nav, config.slocum_options.dba_time_sensor_nav);
+  end
+  if ~isempty(meta_sci)
+    [meta_sci, data_sci] = ...
+      dbacat(meta_sci, data_sci, config.slocum_options.dba_time_sensor_sci);
+  end
+  % Merge data from both bays.
+  [meta_raw, data_raw] = ...
+    dbamerge(meta_nav, data_nav, meta_sci, data_sci, ...
+             'format', 'array', dba_sensor_args{:});
+  
+  
   %% Convert binary glider files to human readable format.
   % 1 - convert binary data files to ascii
   % *Note: the parameter 'e' for extension needs to be specified
@@ -156,14 +260,11 @@ for deployment_idx = 1:numel(active_deployments)
       continue
     end
   end
-%     new_dbas = cellfun(@(f) fullfile(ascii_dir,f), ...
-%                        regexprep(new_xbds,'\.([smdtne]bd)$', '_$1\.dba'));
-%     new_dbas = xbd2ascii(new_xbds, new_dbas, config.slocum_programs.dbd2ascii);
   downloaded_loaders = convertSlocumBinaries([],...
     's', binary_dir, ...
     'd', ascii_dir, ...
     'e', desired_extensions, ...
-    'f', fullfile(config_dir, 'sensorfilter.txt'), ...
+    'f', fullfile(glider_toolbox_dir, 'config', 'sensorfilter.txt'), ...
     'c', binary_dir);
   disp([num2str(length(downloaded_loaders), '%0.0f'), ' files converted.']);
 
@@ -188,11 +289,23 @@ for deployment_idx = 1:numel(active_deployments)
     generateOutputNetCDFL0(ncl0_fullfile, raw_data_aux, raw_meta, ...
                            raw_dims, raw_atts, deployment);
   catch exception
-    disp(['Error creating L0 (raw data) NetCDF file ' ncl0_fullfile ': ']);
+    disp(['Error creating L0 (raw data) NetCDF file ' ncl0_fullfile ':']);
     disp(getReport(exception, 'extended'));
   end;
 
+  
+  %% Create figure directory if needed.
+  % Check it here because processing function produces debugging plots.
+  if ~isdir(figure_dir)
+    [success, error_msg] = mkdir(figure_dir);
+    if ~success
+      disp(['Error creating directory for deployment figures ' figure_dir ':']);
+      disp(error_msg);
+      continue
+    end
+  end
 
+  
   %% Process raw glider data to get clean trajectory data.
   try
     processing_options.debugPlotPath = figure_dir;
@@ -240,10 +353,10 @@ for deployment_idx = 1:numel(active_deployments)
     generateOutputNetCDFL1(ncl1_fullfile, proc_data_aux, proc_meta, ...
                            proc_dims, proc_atts, deployment);
   catch exception
-    disp(['Error creating L1 (processed data) NetCDF file ' ncl1_fullfile ': ']);
+    disp(['Error creating L1 (processed data) NetCDF file ' ncl1_fullfile ':']);
     disp(getReport(exception, 'extended'));
   end;
-
+  
   
   %% Process glider trajectory data to vertically gridded data.
   try
@@ -267,20 +380,12 @@ for deployment_idx = 1:numel(active_deployments)
     generateOutputNetCDFL2(ncl2_fullfile, grid_data_aux, grid_meta, ...
                            grid_dims, grid_atts, deployment);
   catch exception
-    disp(['Error creating L2 (gridded data) NetCDF file ' ncl2_fullfile ': ']);
+    disp(['Error creating L2 (gridded data) NetCDF file ' ncl2_fullfile ':']);
     disp(getReport(exception, 'extended'));
   end
 
   
   %% Generate deployment figures.
-  if ~isdir(figure_dir)
-    [success, error_msg] = mkdir(figure_dir);
-    if ~success
-      disp(['Error creating directory for deployment figures ' figure_dir ':']);
-      disp(error_msg);
-      continue
-    end
-  end
   try
     %{
     for transect_start = 1:length(processed_data.transects) - 1
