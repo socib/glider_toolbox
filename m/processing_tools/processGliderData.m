@@ -86,20 +86,6 @@ function processedData = processGliderData(gliderData, options)
     data = sortrows(data, time_col);
     timeRange = data(:, time_col);
 
-    % Transform lat and lon coords BEFORE interpolating,
-    % from degrees and decimal minutes to decimal degrees
-    if exist('m_gps_lat', 'var') && exist('m_gps_lon', 'var')
-        lat_col = m_gps_lat;
-        lon_col = m_gps_lon;
-    elseif exist('m_lat', 'var') && exist('m_lon', 'var')
-        lat_col = m_lat;
-        lon_col = m_lon;
-    else
-        disp('No variables to use as lat/lon position');
-        return;
-    end;
-    data(:, lat_col) = nmeaToDeg(data(:, lat_col));
-    data(:, lon_col) = nmeaToDeg(data(:, lon_col));
 
     % Interpolate data in time if missing, coordinates and others
     varsRange = [lat_col, lon_col];
