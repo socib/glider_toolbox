@@ -33,7 +33,7 @@ desired_extensions = {'sbd', 'tbd', 'mbd', 'nbd'};
 
 
 %% Configure deployment data paths.
-config.local_paths = configLocalPathsRT();
+config.local_paths = configRTLocalPaths();
 
 
 %% Configure NetCDF output.
@@ -45,6 +45,10 @@ config.output_ncl2 = configOutputNetCDFL2();
 %% Set the path to the data: edit for mission processing.
 output_dirs.image_base_local_path = '/home/jbeltran/public_html/glider';
 output_dirs.imageBaseURLPath    = 'http://www.socib.es/~jbeltran/glider/web';
+
+
+%% Configure preprocessing options.
+config.preprocessing_options = configPreprocessingOptions();
 
 
 %% Configure processing options.
@@ -242,51 +246,27 @@ for deployment_idx = 1:numel(active_deployments)
       dbacat(meta_sci, data_sci, config.slocum_options.dba_time_sensor_sci);
   end
   % Merge data from both bays.
-  [meta_raw, data_raw] = ...
+  [meta_dba, data_dba] = ...
     dbamerge(meta_nav, data_nav, meta_sci, data_sci, ...
-             'format', 'array', dba_sensor_args{:});
+             'format', 'struct', dba_sensor_args{:});
+  
+           
+  %% Add source files to deployment structure.
+  deployment.source_files = sprintf('%s\n', meta_dba.headers.filename_label);
   
   
-  %% Convert binary glider files to human readable format.
-  % 1 - convert binary data files to ascii
-  % *Note: the parameter 'e' for extension needs to be specified
-  % in order to merge files with new Science Data Logging feature
-  if ~isdir(ascii_dir)
-    [success, error_msg] = mkdir(ascii_dir);
-    if ~success
-      disp(['Error creating directory for ascii files ' ascii_dir ':']);
-      disp(error_msg);
-      disp('Deployment processing aborted.');
-      continue
-    end
-  end
-  downloaded_loaders = convertSlocumBinaries([],...
-    's', binary_dir, ...
-    'd', ascii_dir, ...
-    'e', desired_extensions, ...
-    'f', fullfile(glider_toolbox_dir, 'config', 'sensorfilter.txt'), ...
-    'c', binary_dir);
-  disp([num2str(length(downloaded_loaders), '%0.0f'), ' files converted.']);
-
-    
-  %% Load raw glider data (if there is something new).
-  if isempty(downloaded_loaders)
-    disp('No new deployment data to process, omitting this deployment...');
-    continue
-  end
-  raw_data = loadTransectData(ascii_dir, [download_start download_end]);
+  %% Preprocess raw glider data.
+  data_preprocessed = ...
+    preprocessGliderData(data_dba, config.preprocessing_options);
   
   
   %% Generate L0 NetCDF file (raw data).
-  raw_data_aux = struct();
-  for f = setdiff(fieldnames(raw_data),{'data' 'source'})
-    raw_data_aux.(f{:}) = raw_data.data(:,raw_data.(f{:}));
-  end
+  raw_data = data_dba;
   raw_meta = config.output_ncl0.var_meta;
   raw_dims = config.output_ncl0.dim_names;
   raw_atts = config.output_ncl0.global_atts; 
   try
-    generateOutputNetCDFL0(ncl0_fullfile, raw_data_aux, raw_meta, ...
+    generateOutputNetCDFL0(ncl0_fullfile, raw_data, raw_meta, ...
                            raw_dims, raw_atts, deployment);
   catch exception
     disp(['Error creating L0 (raw data) NetCDF file ' ncl0_fullfile ':']);
