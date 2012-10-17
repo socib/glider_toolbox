@@ -1,64 +1,52 @@
-function profileIndex = findProfiles(depthTimeserie, inflectionInd)
-%FINDPROFILES - Identifies profiles from a depth time serie and inflection points
-% This function identifies profiles from a depth time serie and inflection points
-% and removes profiles with gaps larger than 50% of the profile coverage.
-% This is specially useful to remove sparse profiles, like the ones
-% obtained between inflections when sampling only on downcast or upcast
-% i.e. with one reading after inflection at depth and
-% few before inflection as CTD turns on ahead of surface inflection
+function [profile_direction, profile_index] = findProfiles(depth)
+%FINDPROFILES  Compute vertical direction and identify individual profiles from depth sequence.
 %
-% Syntax: profileIndex = findProfiles(depthTimeserie, inflectionInd)
+%  [PROFILE_DIRECTION, PROFILE_INDEX] = FINDPROFILES(DEPTH) identifies upcast
+%  and downcast profiles in depth (or pressure) vector DEPTH, and computes a 
+%  vector of vertical direction PROFILE_DIRECTION and a vector of profile
+%  indices PROFILE_INDEX. DEPTH, PROFILE_DIRECTION and PROFILE_INDEX have the
+%  same lenght. PROFILE_DIRECTION entries may be 1 (down), 0 (flat), -1 (up).
+%  PROFILE_INDEX entries flag each sample with the profile it belongs to,
+%  starting from 1.
 %
-% Inputs:
-%    depthTimeserie - a column vector with depth time serie
-%    inflectionInd - a column vector with indices where inflections occur
+%  Notes:
+%    Direction is inferred from the sign of forward differences of vector DEPTH.
+%    Last sample is always marked with direction 0.
 %
-% Outputs:
-%    profileIndex - a column vector, same size than depthTimeserie, with
-%                   indices of which profile this sample belongs to
+%    Profiles are numbered cumulating changes of direction (depth peaks).
+%    To deal with (the very unusual) points with 0 direction, they are marked as
+%    belonging to the previous profile.
 %
-% Example:
-%    profileIndex = findProfiles(depthTimeserie, inflectionInd)
 %
-% Other m-files required: none
-% Subfunctions: none
-% MAT-files required: none
+%  Examples:
+%    depth = [3 2 1 2 3 3 4 5 5 5 4 3 3 4 2 1 1 0 3 3]
+%    [profile_direction, profile_index] = findProfiles(depth)
+%    figure
+%    subplot(3, 1, 1)
+%    stairs(profile_direction, '-g')
+%    subplot(3, 1, 2)
+%    plot(depth, '-b')
+%    subplot(3, 1, 3)
+%    stairs(profile_index, '-r')
 %
-% See also: MAX, MIN DIFF
+%  See also:
 %
-% Author: Bartolome Garau
-% Work address: Parc Bit, Naorte, Bloc A 2ºp. pta. 3; Palma de Mallorca SPAIN. E-07121
-% Author e-mail: tgarau@socib.es
-% Website: http://www.socib.es
-% Creation: 24-Feb-2011
-%
+%  Author: Joan Pau Beltran
+%  Email: joanpau.beltran@socib.cat
 
-    % Initialize output
-    profileIndex = nan(length(depthTimeserie) , 1);
-
-    % Loop through profiles
-    profileCounter = 0;
-    dismissedCounter = 0;
-    for idx = 1:length(inflectionInd) - 1
-
-        profileRange  = inflectionInd(idx):inflectionInd(idx + 1);
-        profileDepth  = depthTimeserie(profileRange);
-        profileDepth  = profileDepth(~isnan(profileDepth));
-        maxDepthRange = max(profileDepth) - min(profileDepth);
-        maxGap        = max(abs(diff(profileDepth)));
-        emptyRatio    = maxGap / maxDepthRange;
-        % Profile longer than 10 meters and gaps smaller than 80%
-        if and(maxDepthRange > 10, emptyRatio < 0.8)
-            profileCounter = profileCounter + 1;
-            profileIndex(profileRange) = profileCounter;
-        else
-            dismissedCounter = dismissedCounter + 1;
-        end;
-    end;
-
-    disp([num2str(length(inflectionInd)), ' inflection points']);
-    disp([num2str(profileCounter), ' profiles found']);
-    disp([num2str(dismissedCounter), ' profiles dismissed']);
-    disp([num2str(profileCounter + dismissedCounter), ' total profiles analyzed']);
-
+  error(nargchk(1, 1, nargin, 'struct'));
+  
+  profile_direction = zeros(size(depth));
+  profile_index = ones(size(depth));
+  if numel(depth) >= 2
+    sdy_flat = sign(diff(depth(:)));
+    sdy_ind = find(sdy_flat ~= 0);
+    sdy = sdy_flat(sdy_ind);
+    sdy_peak = [false; (sdy(1:(end-1)).*sdy(2:end) < 0); false];
+    depth_peak = zeros(size(depth));
+    depth_peak(sdy_ind(sdy_peak)) = 1;
+    profile_index = 1 + cumsum(depth_peak);
+    profile_direction(1:end-1) = sdy_flat;
+  end
+      
 end
