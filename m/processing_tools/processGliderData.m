@@ -3,10 +3,10 @@ function data_proc = processGliderData(data_pre, varargin)
 %
 %  DATA_PROC = PROCESSGLIDERDATA(DATA_PRE, OPT1, VAL1, ...) processes a raw 
 %  glider data struct DATA_PRE according to given options in option-value pairs
-%  OPT1 and VAL1, ... , OPTN and VALN. DATA_PRE is a struct in the format
-%  returned by PREPROCESSGLIDERDATA, where each field is a time sequence from 
-%  the sensor with the same name. DATA_PROC is a struct with the same format,
-%  whith time sequences resulting from the following processes:
+%  OPT1 and VAL1... DATA_PRE is a struct in the format returned by 
+%  PREPROCESSGLIDERDATA, where each field is a time sequence from the sensor
+%  with the same name. DATA_PROC is a struct with the same format, whth time 
+%  sequences resulting from the following processes:
 %    - Selection of reference sensors: 
 %      Time, latitude and longitude sequences are selected.
 %      Optionally, missing values are filled by interpolation.
@@ -28,12 +28,18 @@ function data_proc = processGliderData(data_pre, varargin)
 %      Oxygen concentration and saturation sequences are selected, if any.
 %    - Selection of other sensors of interest:
 %      Sequences from extra sensors configured in options are selected.
+%    - Transect identification:
+%      Transects are identified finding their boundaries at changes of waypoint
+%      coordinates.
+%    - Distance over ground computation:
+%      The planar distance covered along the trajectory is computed cumulating
+%      the distance between consecutive points with valid position coordinates.
 %    - Pressure processing:
 %      Pressure is optionally filtered using a filter proposed by Seabird.
 %      Depth is optionally derived from pressure and longitude sequences.
 %    - Cast identification:
 %      Upcasts and downcasts are identified finding local extrema of the chosen 
-%      depth or pressure sequence the glider vertical is deduced.
+%      depth or pressure sequence, and the glider vertical direction is deduced.
 %    - Sensor lag correction:
 %      Any already selected sequence may be corrected from sensor lag effects.
 %      The sensor lag time constant may be provided as option or estimated from
@@ -42,17 +48,47 @@ function data_proc = processGliderData(data_pre, varargin)
 %      Any temperature and conductivity sequence pair may be corrected from
 %      thermal lag effects. The thermal lag parameters may be provided as option
 %      or estimated from identified consecutive casts with opposed directions.
+%    - Salinity derivation:
+%      In situ salinity may be derived from any set of conductivity, temperature
+%      and pressure sequences already selected or produced.
+%    - Density derivation:
+%      In situ density may be derived from any set of conductivity, temperature 
+%      and pressure sequences already selected or produced.
 %  
 %  Notes:
 %    This function is based on the previous work by Tomeu Garau. He is the true
 %    glider man.
 %
 %  See also:
+%    PREPROCESSGLIDERDATA
+%    FILLINVALIDVALUES
+%    FINDTRANSECTS
+%    COMPUTECUMULATIVEDISTANCE
+%    FINDPROFILES
+%    VALIDATEPROFILES
+%    APPLYSEABIRDFILTER
+%    SW_DPTH
+%    SW_SALT
+%    SW_DENS
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-
+  %% Configure default values for optional sensor lag arguments. 
+  default_sensor_lag_time_option = {'time'};
+  default_sensor_lag_depth_option = {'depth'};
+  default_sensor_lag_param_estimator = @median;
+  
+  
+  %% Configure default values for optional thermal lag arguments. 
+  % Before refactoring was default value for missing pitch was: deg2rad(26).
+  default_thermal_lag_time_option = {'time_ctd' 'time'};
+  default_thermal_lag_depth_option = {'depth_ctd' 'depth'};
+  default_thermal_lag_pitch_option = {'pitch'};
+  default_thermal_lag_pitch_missing_value = [];
+  default_thermal_lag_param_estimator = @median;
+  
+  
   %% Handle optional arguments.
   % Set default values for non mandatory options.
   time_sensor_option = {'m_present_time' 'sci_m_present_time'};
@@ -66,9 +102,10 @@ function data_proc = processGliderData(data_pre, varargin)
     struct('water_speed_eastward', {'m_final_water_vx'}, ...
            'water_speed_northward', {'m_final_water_vy'});
   ctd_sensor_option = ...
-    struct('conductivity', {'sci_water_cond'     'm_water_cond'}, ...
-           'temperature',  {'sci_water_temp'     'm_water_temp'}, ...
-           'pressure',     {'sci_water_pressure' 'm_water_pressure'});
+    struct('conductivity', {'sci_water_cond'        'm_water_cond'}, ...
+           'temperature',  {'sci_water_temp'        'm_water_temp'}, ...
+           'pressure',     {'sci_water_pressure'    'm_water_pressure'}, ...
+           'time',         {'sci_ctd41cp_timestamp' []});
   flntu_sensor_option = struct('chlorophyll', {'sci_flntu_chlor_units'}, ...
                                'turbidity',   {'sci_flntu_turb_units'});
   oxygen_sensor_option = ...
@@ -88,8 +125,20 @@ function data_proc = processGliderData(data_pre, varargin)
   profiling_sequence_filling = true;
   valid_profile_min_range = 10;
   valid_profile_max_gap_ratio = 0.8;
-  sensor_lag_option_list = struct('corrected', {}, 'original', {}, ...
-                                  'time', {}, 'depth', {}, 'estimator', {});
+  sensor_lag_option_list = ...
+    struct('corrected', {}, 'original', {}, 'parameters', {});
+  thermal_lag_option_list = ...
+    struct('conductivity_corrected', {'conductivity_corrected_thermal'}, ...
+           'temperature_corrected',  {'temperature_corrected_thermal'}, ...         
+           'conductivity_original', {'conductivity'}, ...
+           'temperature_original', {'temperature'}, ...
+           'parameters', {'auto'} );
+  salinity_option_list = ...
+    struct('salinity', {'salinity'}, 'conductivity', {'conductivity'}, ...
+           'temperature', {'temperature'}, 'pressure', {'pressure'});
+  density_option_list = ...
+    struct('density', {'density'}, 'salinity', {'salinity'}, ...
+           'temperature', {'temperature'}, 'pressure', {'pressure'});
   % Parse option-value pairs given as arguments.
   for opt_idx = 1:2:numel(varargin)
     opt = varargin{opt_idx};
@@ -98,7 +147,7 @@ function data_proc = processGliderData(data_pre, varargin)
       case 'time'
         time_sensor_option = val;
       case 'time_filling'
-        time_filling = true;
+        time_filling = val;
       case 'position'
         position_sensor_option = val;
       case 'position_filling'
@@ -141,27 +190,18 @@ function data_proc = processGliderData(data_pre, varargin)
         valid_profile_max_gap_ratio = val;
       case 'sensor_lag'
         sensor_lag_option_list = val;
+      case 'thermal_lag'
+        thermal_lag_option_list = val;
+      case 'salinity'
+        salinity_option_list = val;
+      case 'density'
+        density_option_list = val;
       otherwise
         error('glider_toolbox:processGliderData:InvalidOption', ...
               'Invalid option: %s.', opt);
     end
   end
 
-  
-  %% Configure default values for optional sensor lag arguments. 
-  default_sensor_lag_time_option = {'time'};
-  default_sensor_lag_depth_option = {'depth'};
-  default_sensor_lag_param_estimator = @median;
-  
-  
-  %% Configure default values for optional thermal lag arguments. 
-  % Before refactoring was default value for missing pitch was: deg2rad(26).
-  default_thermal_lag_time_option = {'time_ctd' 'time'};
-  default_thermal_lag_depth_option = {'depth_ctd' 'depth'};
-  default_thermal_lag_pitch_option = {'pitch'};
-  default_thermal_lag_pitch_missing_value = [];
-  default_thermal_lag_param_estimator = @median;
-  
   
   %% Initialize output variable.
   data_proc = struct();
@@ -274,9 +314,6 @@ function data_proc = processGliderData(data_pre, varargin)
       data_proc.waypoint_longitude = ...
         fillInvalidValues(data_proc.waypoint_longitude, 'previous');
     end
-    % Compute transect indices.
-    data_proc.transect_index = ...
-      findTransects(data_proc.waypoint_latitude, data_proc.waypoint_longitude);
   end
   
   
@@ -322,8 +359,8 @@ function data_proc = processGliderData(data_pre, varargin)
     % Look for CTD timestamp.
     if isfield(ctd_sensor_option, 'time') ...
        && ~isempty(ctd_sensor_option(ctd_sensor_index).time) ...
-       && ismember(ctd_senor_option(ctd_sensor_index).time, sensor_list)
-      time_ctd_sensor = ctd_senor_option(ctd_sensor_index).time;
+       && ismember(ctd_sensor_option(ctd_sensor_index).time, sensor_list)
+      time_ctd_sensor = ctd_sensor_option(ctd_sensor_index).time;
       data_proc.time_ctd = data_pre(time_ctd_sensor);
     end
   end
@@ -387,7 +424,19 @@ function data_proc = processGliderData(data_pre, varargin)
     end
   end
   
+
+  %% Identify begin and end of transects, if waypoint coordinates available.
+  if all(isfield(data_proc, {'waypoint_latitude' 'waypoint_longitude'}))
+    data_proc.transect_index = ...
+      findTransects(data_proc.waypoint_latitude, data_proc.waypoint_longitude);
+  end
   
+  
+  %% Compute navigated distance over ground.
+  data_proc.distance_over_ground = ...
+    computePLanarDistance(data_proc.latitude, data_proc.longitude);
+  
+
   %% Convert and filter pressure, if pressure available and needed.
   if isfield(data_proc, 'pressure')
     % Convert pressure from bars to decibars, if needed (by later processings).
@@ -410,13 +459,12 @@ function data_proc = processGliderData(data_pre, varargin)
   
   
   %% Derive depth from pressure, if pressure available and needed.
-  if depth_ctd_derivation ...
-     && isfield(data_proc, 'pressure') && isfield(data_proc, 'latitude')
+  if depth_ctd_derivation && all(isfield(data_proc, {'pressure' 'latitude'}))
     data_proc.depth_ctd = sw_dpth(data_proc.pressure, data_proc.latitude);
   end
   
   
-  %% Identify begin and end of profiles.
+  %% Identify start and end of profiles.
   % Find profiling sequence (e.g. navigation depth, CTD derived depth, ...)
   % present in the already processed data.
   profiling_sequence_present = isfield(data_proc, profiling_sequence_option);
@@ -489,17 +537,17 @@ function data_proc = processGliderData(data_pre, varargin)
           prof1_raw = data_proc.(sensor_lag_raw)(prof1_select);
           prof1_depth = data_proc.(sensor_lag_depth)(prof1_select);
           prof1_time = data_proc.(sensor_lag_time)(prof1_select);
-          prof1_valid = isValidProfile(prof1_depth, prof1_raw, ...
-                                       'range', valid_profile_min_range, ...
-                                       'gap', valid_profile_max_gap_ratio);
+          prof1_valid = validateProfile(prof1_depth, prof1_raw, ...
+                                        'range', valid_profile_min_range, ...
+                                        'gap', valid_profile_max_gap_ratio);
           prof2_select = (data_proc.profile_index == profile_idx + 1);
           prof2_dir = data_proc.profile_direction(prof2_select(1));
           prof2_raw = data_proc.(sensor_lag_raw)(prof2_select);
           prof2_depth = data_proc.(sensor_lag_depth)(prof2_select);
           prof2_time = data_proc.(sensor_lag_time)(prof2_select);
-          prof2_valid = isValidProfile(prof2_depth, prof2_raw, ...
-                                       'range', valid_profile_min_range, ...
-                                       'gap', valid_profile_max_gap_ratio);
+          prof2_valid = validateProfile(prof2_depth, prof2_raw, ...
+                                        'range', valid_profile_min_range, ...
+                                        'gap', valid_profile_max_gap_ratio);
           prof_opposite_dir = (prof1_dir * prof2_dir < 0);
           if ~prof_opposite_dir
             fprintf('Omitting casts %d and %d for sensor lag estimation: %s.\n', ...
@@ -636,9 +684,9 @@ function data_proc = processGliderData(data_pre, varargin)
             prof1_pitch = thermal_lag_pitch_missing_value;
           end
           prof1_valid = ...
-            isValidProfile(prof1_depth, [prof1_cond_raw prof1_temp_raw], ...
-                           'range', valid_profile_min_range, ...
-                           'gap', valid_profile_max_gap_ratio);
+            validateProfile(prof1_depth, [prof1_cond_raw prof1_temp_raw], ...
+                            'range', valid_profile_min_range, ...
+                            'gap', valid_profile_max_gap_ratio);
           prof2_select = (data_proc.profile_index == profile_idx + 1);
           prof2_dir = data_proc.profile_direction(prof2_select(1));
           prof2_cond_raw = data_proc.(thermal_lag_cond_raw)(prof2_select);
@@ -651,9 +699,9 @@ function data_proc = processGliderData(data_pre, varargin)
             prof2_pitch = thermal_lag_pitch_missing_value;
           end
           prof2_valid = ...
-            isValidProfile(prof2_depth, [prof2_cond_raw prof2_temp_raw], ...
-                           'range', valid_profile_min_range, ...
-                           'gap', valid_profile_max_gap_ratio);
+            validateProfile(prof2_depth, [prof2_cond_raw prof2_temp_raw], ...
+                            'range', valid_profile_min_range, ...
+                            'gap', valid_profile_max_gap_ratio);
           prof_opposite_dir = (prof1_dir * prof2_dir < 0);
           if ~prof_opposite_dir
             fprintf('Omitting casts %d and %d for thermal lag estimation: %s.\n', ...
@@ -716,5 +764,39 @@ function data_proc = processGliderData(data_pre, varargin)
       end
     end
   end
-    
+  
+  
+  %% Derive salinity from pressure, conductivity and temperature, if available.
+  for salinity_option_idx = 1:numel(salinity_option_list)
+    salinity_option = salinity_option_list(salinity_option_idx);
+    salinity_salt = salinity_option.salinity;
+    salinity_cond = salinity_option.conductivity;
+    salinity_temp = salinity_option.temperature;
+    salinity_pres = salinity_option.pressure;
+    if all(isfield(data_proc, {salinity_cond salinity_temp salinity_pres}))
+      % Compute salinity from temperature, pressure and conductivity ratio.
+      % Input conductivity is given in S/m (Siemens per metre), 
+      % but reference conductivity returned by sw_c3515 is in mS/cm.
+      data_proc.(salinity_salt) = ...
+        sw_salt(data_proc.(salinity_cond) * (10 / sw_c3515()), ...
+                data_proc.(salinity_temp), data_proc.(salinity_pres));
+    end
+  end
+
+  
+  %% Derive density from pressure, salinity and temperature, if available.
+  for density_option_idx = 1:numel(density_option_list)
+    density_option = density_option_list(density_option_idx);
+    density_dens = density_option.density;
+    density_salt = density_option.salinity;
+    density_temp = density_option.temperature;
+    density_pres = density_option.pressure;
+    if all(isfield(data_proc, {density_salt density_temp density_pres}))
+      % Compute density from temperature, pressure and salinity.
+      data_proc.(density_dens) = ...
+        sw_dens(data_proc.(density_salt), ...
+                data_proc.(density_temp), data_proc.(density_pres));
+    end
+  end
+  
 end
