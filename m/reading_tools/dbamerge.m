@@ -12,7 +12,7 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
 %  [META, DATA] = DBAMERGE(..., OPT1, VAL1, ...) accepts the following options:
 %    'format': a string setting the format of the output DATA. Valid values are:
 %      'array' (default): DATA is a matrix whith sensor readings as columns 
-%         ordered as in the SENSORS metadata field.
+%         ordered as in the 'sensors' metadata field.
 %      'struct': DATA is a struct with sensor names as field names and column 
 %         vectors of sensor readings as field values.
 %    'timestamp_nav': a string setting the time sensor from navigation data for
@@ -99,10 +99,12 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
     % Only navigation data.
     meta = meta_nav;
     data = data_nav;
+    ts_unique = timestamp_nav; % Unique timestamp to be used for time filtering.
   elseif isempty(meta_nav)
     % Only sciend data.
     meta = meta_sci;
     data = data_sci;
+    ts_unique = timestamp_sci; % Unique timestamp to be used for time filtering.
   else
     % Merge metadata performing sensor renaming if needed.
     % Sensor renaming is done to mimic the behaviour of WRC program 'dba_merge'.
@@ -172,7 +174,7 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
 
   % Perform time filtering if needed.
   if time_filtering
-    ts_select = ~(ts_unique < time_range(1) || ts_unique > time_range(2));
+    ts_select = ~(ts_unique < time_range(1) | ts_unique > time_range(2));
     data = data(ts_select,:);
   end
   

@@ -54,7 +54,9 @@ function [meta, data] = dba2mat(filename, varargin)
 %    [meta, data] = dba2mat('test.dba', 'sensors', time_sensors)
 %
 %  See also:
+%    XBD2DBA
 %    DBACAT
+%    DBAMERGE
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat

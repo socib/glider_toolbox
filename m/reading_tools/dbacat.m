@@ -1,12 +1,26 @@
-function [meta_out, data_out] = dbacat(meta_list, data_list, timestamp)
+function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 %DBACAT  Combine data from several dba data sets into a single data set.
 %
-%  [META_OUT, DATA_OUT] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP) combines data 
-%  from arrays in cell array DATA_LIST and metadata from structs in cell array 
-%  META_LIST into a single data set with data in array DATA_OUT and metadata in 
-%  struct META_OUT according to a time from sensor named by string TIMESTAMP.
-%  META_OUT, DATA_OUT, and the elements of META_LIST and DATA_LIST follow the 
-%  format returned by the function DBA2MAT.
+%  [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP) combines data from 
+%  arrays in cell array DATA_LIST and metadata from structs in cell array 
+%  META_LIST into a single data set with data in array DATA and metadata in 
+%  struct META according to a time from sensor named by string TIMESTAMP.
+%  META, DATA, and the elements of META_LIST and DATA_LIST follow the format 
+%  returned by the function DBA2MAT.
+%
+%  [META, DATA] = DBACAT(..., OPT1, VAL1, ...) accepts the following options:
+%    'format': a string setting the format of the output DATA. Valid values are:
+%      'array' (default): DATA is a matrix whith sensor readings as columns 
+%         ordered as in the 'sensors' metadata field.
+%      'struct': DATA is a struct with sensor names as field names and column 
+%         vectors of sensor readings as field values.
+%    'sensors': a string cell array with the names of the sensors of interest.
+%      If given, only sensors present in both the input data sets and this list
+%      will be present in output.
+%    'period': a two element numeric array with the start and end of the time
+%      interval of interest (seconds since 1970-01-01 00:0:00.00 UTC).
+%      If given, only sensor cycles with timestamps within this period will be
+%      present in output.
 %
 %  Notes:
 %    This function should be used to combine data from several navigation files,
@@ -29,7 +43,7 @@ function [meta_out, data_out] = dbacat(meta_list, data_list, timestamp)
 %    All values in timestamp columns should be valid (not nan).
 %
 %  Examples:
-%    [meta_out, data_out] = dbacat(meta_list, data_list, timestamp)
+%    [meta, data] = dbacat(meta_list, data_list, timestamp)
 %
 %  See also:
 %    XBD2DBA
@@ -39,11 +53,51 @@ function [meta_out, data_out] = dbacat(meta_list, data_list, timestamp)
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-  error(nargchk(3, 3, nargin, 'struct'));
+  error(nargchk(3, 9, nargin, 'struct'));
+  
+  % Set option values.
+  output_format = 'array';
+  sensor_filtering = false;
+  sensor_list = [];
+  time_filtering = false;
+  time_range = [];
+  for opt_idx = 1:2:numel(varargin)
+    opt = varargin{opt_idx};
+    val = varargin{opt_idx+1};
+    switch lower(opt)
+      case 'format'
+        output_format = val;
+      case 'sensors'
+        sensor_filtering = true;
+        sensor_list = val;
+      case 'period'
+        time_filtering = true;
+        time_range = val;
+      otherwise
+        error('glider_toolbox:dbacat:InvalidOption', ...
+              'Invalid option: %s.', opt);
+    end
+  end
+  
+  % Check for trivial empty input.
+  
+  if isempty(meta_list)
+    meta_struct.sources = {};
+    meta_struct.headers = ...
+      struct('dbd_label', {}, 'encoding_ver', {}, 'num_ascii_tags', {}, ...
+             'all_sensors', {}, 'filename', {}, 'the8x3_filename', {}, ...
+             'filename_extension', {}, 'filename_label', {}, ...
+             'mission_name', {}, 'fileopen_time', {}, ...
+             'sensors_per_cycle', {}, 'num_label_lines', {}, ...
+             'num_segments', {}, 'segment_filenames', {});
+    meta_struct.sensors = {};
+    meta_struct.units = {};
+    meta_struct.bytes = {};
+  else
+    meta_struct = [meta_list{:}];
+  end
   
   % Cat metadata.
-  meta_struct = [meta_list{:}];
-  
   all_sources = vertcat(meta_struct.sources);
   all_headers = vertcat(meta_struct.headers);
   all_sensors = vertcat(meta_struct.sensors);
@@ -51,11 +105,11 @@ function [meta_out, data_out] = dbacat(meta_list, data_list, timestamp)
   all_bytes = vertcat(meta_struct.bytes);
   
   [sensors_list, sensors_idx] = unique(all_sensors);
-  meta_out.sources = all_sources;
-  meta_out.headers = all_headers;
-  meta_out.sensors = all_sensors(sensors_idx);
-  meta_out.units   = all_units(sensors_idx);
-  meta_out.bytes   = all_bytes(sensors_idx);
+  meta.sources = all_sources;
+  meta.headers = all_headers;
+  meta.sensors = all_sensors(sensors_idx);
+  meta.units   = all_units(sensors_idx);
+  meta.bytes   = all_bytes(sensors_idx);
   
   % Cat data.
   [~, sensor_index_list] = cellfun(@(m) ismember(m.sensors, sensors_list), ...
@@ -65,7 +119,7 @@ function [meta_out, data_out] = dbacat(meta_list, data_list, timestamp)
   [ts_unique, ~, ts_indices_to] = unique(vertcat(ts_list{:}));
   total_rows = numel(ts_unique);
   total_cols = numel(sensors_list);
-  data_out = nan(total_rows, total_cols);
+  data = nan(total_rows, total_cols);
   num_rows_list = cellfun(@numel, ts_list);
   row_end_list = cumsum(num_rows_list);
   row_start_list = 1 + [0; row_end_list(1:end-1)];
@@ -73,14 +127,36 @@ function [meta_out, data_out] = dbacat(meta_list, data_list, timestamp)
     row_range = row_start_list(data_idx):row_end_list(data_idx);
     row_indices = ts_indices_to(row_range);
     col_indices = sensor_index_list{data_idx};
-    data_old = data_out(row_indices, col_indices);
+    data_old = data(row_indices, col_indices);
     data_new = data_list{data_idx};
     data_nan = isnan(data_new);
     if ~all(isnan(data_old(data_old(~data_nan)~=data_new(~data_nan))))
       error('glider_toolbox:dbacat:InconsistentData', 'Inconsistent data.');
     end
     data_new(data_nan) = data_old(data_nan);
-    data_out(row_indices, col_indices) = data_new;
+    data(row_indices, col_indices) = data_new;
+  end
+  
+  % Perform time filtering if needed.
+  if time_filtering
+    ts_select = ~(ts_unique < time_range(1) | ts_unique > time_range(2));
+    data = data(ts_select,:);
+  end
+  
+  % Perform sensor filtering if needed.
+  if sensor_filtering
+    [sensor_select, ~] = ismember(meta.sensors, sensor_list);
+    meta.sensors = meta.sensors(sensor_select);
+    meta.units = meta.units(sensor_select);
+    meta.bytes = meta.bytes(sensor_select);
+    data = data(:,sensor_select);
+  end
+  
+  % Convert output data to struct format if needed.
+  switch output_format
+    case 'array'
+    case 'struct'
+      data = cell2struct(num2cell(data,1), meta.sensors, 2);
   end
 
 end
