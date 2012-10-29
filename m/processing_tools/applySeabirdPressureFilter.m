@@ -63,7 +63,7 @@ function new_pressure = applySeabirdPressureFilter(time, old_pressure, time_cons
   % Set the time series on its original time instants.
   new_pres_signal = interp1(reg_time_range, new_pres_signal, time_range);
 
-  % Return the filtered signal preserving origina nan values.
+  % Return the filtered signal preserving original nan values.
   new_pressure(good_rows)  = new_pres_signal;
 
 end
