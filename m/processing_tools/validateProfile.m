@@ -23,9 +23,9 @@ function [valid, full_rows] = validateProfile(depth, data, varargin)
 %  respective entries in DEPTH or rows in DATA contain some invalid value.
 %
 %  Notes:
-%    This function is based on the previous work by Tomeu Garau, in a function
+%    This function is based on the previous work by Tomeu Garau, in functions
 %    called FINDPROFILES (not to be confused with the current function with the
-%    same name). He is the true glider man.
+%    same name) and CLEANPROFILE. He is the true glider man.
 %
 %  Examples:
 %    depth = [1 2   3 nan  5 nan   7  nan   9  10]
@@ -68,6 +68,11 @@ function [valid, full_rows] = validateProfile(depth, data, varargin)
 
   full_rows = ~any(isnan([depth(:) data]), 2);
   valid = false;
+  
+  % Emptiness check.
+  if ~any(full_rows)
+    return
+  end
   
   % Range check.
   depth_range = range(depth);
