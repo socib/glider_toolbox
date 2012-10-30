@@ -28,16 +28,16 @@ function data_proc = processGliderData(data_pre, varargin)
 %      Oxygen concentration and saturation sequences are selected, if any.
 %    - Selection of other sensors of interest:
 %      Sequences from extra sensors configured in options are selected.
-%    - Transect identification:
+%    - Identification of transects:
 %      Transects are identified finding their boundaries at changes of waypoint
 %      coordinates.
-%    - Distance over ground computation:
+%    - Computation of distance over ground:
 %      The planar distance covered along the trajectory is computed cumulating
 %      the distance between consecutive points with valid position coordinates.
 %    - Pressure processing:
 %      Pressure is optionally filtered using a filter proposed by Seabird.
 %      Depth is optionally derived from pressure and longitude sequences.
-%    - Cast identification:
+%    - Identification of casts:
 %      Upcasts and downcasts are identified finding local extrema of the chosen 
 %      depth or pressure sequence, and the glider vertical direction is deduced.
 %    - Sensor lag correction:
@@ -67,6 +67,10 @@ function data_proc = processGliderData(data_pre, varargin)
 %    FINDPROFILES
 %    VALIDATEPROFILES
 %    APPLYSEABIRDFILTER
+%    FINDSENSORLAGPARAMS
+%    CORRECTSENSORLAG
+%    FINDTHERMALLAGPARAMS
+%    CORRECTTHERMALLAG
 %    SW_DPTH
 %    SW_SALT
 %    SW_DENS
@@ -361,7 +365,7 @@ function data_proc = processGliderData(data_pre, varargin)
        && ~isempty(ctd_sensor_option(ctd_sensor_index).time) ...
        && ismember(ctd_sensor_option(ctd_sensor_index).time, sensor_list)
       time_ctd_sensor = ctd_sensor_option(ctd_sensor_index).time;
-      data_proc.time_ctd = data_pre(time_ctd_sensor);
+      data_proc.time_ctd = data_pre.(time_ctd_sensor);
     end
   end
   
@@ -434,7 +438,7 @@ function data_proc = processGliderData(data_pre, varargin)
   
   %% Compute navigated distance over ground.
   data_proc.distance_over_ground = ...
-    computePLanarDistance(data_proc.latitude, data_proc.longitude);
+    computeCumulativeDistance(data_proc.latitude, data_proc.longitude);
   
 
   %% Convert and filter pressure, if pressure available and needed.
@@ -484,8 +488,12 @@ function data_proc = processGliderData(data_pre, varargin)
   
   
   %% Perform sensor lag estimation and correction, if needed.
+  % Sensor, time and depth sequences must be present in already processed data.
   for sensor_lag_option_idx = 1:numel(sensor_lag_option_list)
     % Get sensor lag arguments, setting options to default values if needed.
+    % Name of corrected sequence must be specified in option.
+    % Name of original sequence must be specified too.
+    % Name of time and depth sequences may be specified as list of choices, defaulted if missing.
     sensor_lag_option = sensor_lag_option_list(sensor_lag_option_idx);
     sensor_lag_cor = sensor_lag_option.corrected;
     sensor_lag_raw = sensor_lag_option.original;
@@ -529,25 +537,29 @@ function data_proc = processGliderData(data_pre, varargin)
       % Estimate sensor lag time constant, if needed.
       if ischar(sensor_lag_params) && strcmpi(sensor_lag_params, 'auto')
         % Estimate sensor lag time constant for each pofile.
-        num_profiles = fix(max(data_proc.profile_index));
+        num_profiles = max(data_proc.profile_index);
         sensor_lag_param_estimates = nan(num_profiles-1, 1);
         for profile_idx = 1:(num_profiles-1)
           prof1_select = (data_proc.profile_index == profile_idx);
-          prof1_dir = data_proc.profile_direction(prof1_select(1));
           prof1_raw = data_proc.(sensor_lag_raw)(prof1_select);
           prof1_depth = data_proc.(sensor_lag_depth)(prof1_select);
           prof1_time = data_proc.(sensor_lag_time)(prof1_select);
-          prof1_valid = validateProfile(prof1_depth, prof1_raw, ...
-                                        'range', valid_profile_min_range, ...
-                                        'gap', valid_profile_max_gap_ratio);
+          prof1_valid = ...
+            validateProfile(prof1_depth(:), [prof1_time(:) prof1_raw(:)], ...
+                            'range', valid_profile_min_range, ...
+                            'gap', valid_profile_max_gap_ratio);
+          [~, ~, prof1_dir] = ...
+            find(data_proc.profile_direction(prof1_select), 1);
           prof2_select = (data_proc.profile_index == profile_idx + 1);
-          prof2_dir = data_proc.profile_direction(prof2_select(1));
           prof2_raw = data_proc.(sensor_lag_raw)(prof2_select);
           prof2_depth = data_proc.(sensor_lag_depth)(prof2_select);
           prof2_time = data_proc.(sensor_lag_time)(prof2_select);
-          prof2_valid = validateProfile(prof2_depth, prof2_raw, ...
-                                        'range', valid_profile_min_range, ...
-                                        'gap', valid_profile_max_gap_ratio);
+          prof2_valid = ...
+            validateProfile(prof2_depth(:), [prof2_time(:) prof2_raw(:)], ...
+                            'range', valid_profile_min_range, ...
+                            'gap', valid_profile_max_gap_ratio);
+          [~, ~, prof2_dir] = ...
+            find(data_proc.profile_direction(prof2_select), 1);
           prof_opposite_dir = (prof1_dir * prof2_dir < 0);
           if ~prof_opposite_dir
             fprintf('Omitting casts %d and %d for sensor lag estimation: %s.\n', ...
@@ -579,11 +591,12 @@ function data_proc = processGliderData(data_pre, varargin)
       % Correct sensor lag, if possible.
       if isnan(sensor_lag_constant)
         fprintf('Omitting %s sensor lag correction: %s.\n', ...
-                sensor_lag_cor, 'no valid sensor lag parameter available.');
+                sensor_lag_cor, 'no valid sensor lag parameter available');
       else
         data_proc.(sensor_lag_cor) = nan(size(data_proc.(sensor_lag_raw)));
         for profile_idx = 1:num_profiles
           prof_select = (data_proc.profile_index == profile_idx);
+          
           prof_raw = data_proc.(sensor_lag_raw)(prof_select);
           prof_time = data_proc.(sensor_lag_time)(prof_select);
           prof_cor = correctSensorLag(prof_time, prof_raw, sensor_lag_constant);
@@ -595,8 +608,15 @@ function data_proc = processGliderData(data_pre, varargin)
 
   
   %% Perform thermal lag estimation and correction, if needed.
+  % Conductivity, temperature, time and depth sequences must be present in 
+  % already processed data. Pitch may be also a sequence in processed data
+  % (preferred) or a default pitch value when pitch sequence is not available.
   for thermal_lag_option_idx = 1:numel(thermal_lag_option_list)
     % Get thermal lag arguments, setting options to default values if needed.
+    % Name of corrected conductivity and temperature sequences must be specified in option.
+    % Name of original conductivity and temperature sequences must be specified too.
+    % Name of time, depth and pitch sequences may be specified as list of choices, defaulted if missing.
+    % Pitch default value when no sequence available may be specified too.
     thermal_lag_option = thermal_lag_option_list(thermal_lag_option_idx);
     thermal_lag_cond_cor = thermal_lag_option.conductivity_corrected;
     thermal_lag_temp_cor = thermal_lag_option.temperature_corrected;
@@ -673,7 +693,6 @@ function data_proc = processGliderData(data_pre, varargin)
         thermal_lag_param_estimates = nan(num_profiles-1, 4);
         for profile_idx = 1:(num_profiles-1)
           prof1_select = (data_proc.profile_index == profile_idx);
-          prof1_dir = data_proc.profile_direction(prof1_select(1));
           prof1_cond_raw = data_proc.(thermal_lag_cond_raw)(prof1_select);
           prof1_temp_raw = data_proc.(thermal_lag_temp_raw)(prof1_select);
           prof1_depth = data_proc.(thermal_lag_depth)(prof1_select);
@@ -684,11 +703,13 @@ function data_proc = processGliderData(data_pre, varargin)
             prof1_pitch = thermal_lag_pitch_missing_value;
           end
           prof1_valid = ...
-            validateProfile(prof1_depth, [prof1_cond_raw prof1_temp_raw], ...
+            validateProfile(prof1_depth, ...
+                            [prof1_time prof1_cond_raw prof1_temp_raw], ...
                             'range', valid_profile_min_range, ...
                             'gap', valid_profile_max_gap_ratio);
+          [~, ~, prof1_dir] = ...
+            find(data_proc.profile_direction(prof1_select), 1);
           prof2_select = (data_proc.profile_index == profile_idx + 1);
-          prof2_dir = data_proc.profile_direction(prof2_select(1));
           prof2_cond_raw = data_proc.(thermal_lag_cond_raw)(prof2_select);
           prof2_temp_raw = data_proc.(thermal_lag_temp_raw)(prof2_select);
           prof2_depth = data_proc.(thermal_lag_depth)(prof2_select);
@@ -699,9 +720,12 @@ function data_proc = processGliderData(data_pre, varargin)
             prof2_pitch = thermal_lag_pitch_missing_value;
           end
           prof2_valid = ...
-            validateProfile(prof2_depth, [prof2_cond_raw prof2_temp_raw], ...
+            validateProfile(prof2_depth, ...
+                            [prof2_time, prof2_cond_raw prof2_temp_raw], ...
                             'range', valid_profile_min_range, ...
                             'gap', valid_profile_max_gap_ratio);
+          [~, ~, prof2_dir] = ...
+            find(data_proc.profile_direction(prof2_select), 1);
           prof_opposite_dir = (prof1_dir * prof2_dir < 0);
           if ~prof_opposite_dir
             fprintf('Omitting casts %d and %d for thermal lag estimation: %s.\n', ...
@@ -714,12 +738,10 @@ function data_proc = processGliderData(data_pre, varargin)
                     profile_idx, profile_idx+1, 'invalid second cast');
           else
             thermal_lag_param_estimates(profile_idx) = ...
-              findThermalLagParams(prof1_time, prof1_depth, ...
+              findThermalLagParams(prof1_time, prof1_depth, prof1_pitch, ...
                                    prof1_cond_raw, prof1_temp_raw, ...
-                                   prof2_time, prof2_depth, ...
-                                   prof2_cond_raw, prof2_temp_raw, ...
-                                   'pitch_down', prof1_pitch, ...
-                                   'pitch_up', prof2_pitch);
+                                   prof2_time, prof2_depth, prof2_pitch, ...
+                                   prof2_cond_raw, prof2_temp_raw);
           end
         end
         % Compute statistical estimate from individual profile estimates.
@@ -736,10 +758,10 @@ function data_proc = processGliderData(data_pre, varargin)
               thermal_lag_cond_cor, thermal_lag_temp_cor);
       end
       % Correct thermal lag, if possible.
-      if any(isnan(thermal_lag_constant))
+      if any(isnan(thermal_lag_constants))
         fprintf('Omitting %s and %s thermal lag correction: %s.\n', ...
                 thermal_lag_cond_cor, thermal_lag_temp_cor, ...
-                'no valid thermal lag parameters available.');
+                'no valid thermal lag parameters available');
       else
         data_proc.(thermal_lag_cond_cor) = ...
           nan(size(data_proc.(thermal_lag_cond_raw)));
@@ -750,13 +772,15 @@ function data_proc = processGliderData(data_pre, varargin)
           prof_cond_raw = data_proc.(thermal_lag_cond_raw)(prof_select);
           prof_temp_raw = data_proc.(thermal_lag_temp_raw)(prof_select);
           prof_time = data_proc.(thermal_lag_time)(prof_select);
+          prof_depth = data_proc.(thermal_lag_depth)(prof_select);
           if thermal_lag_pitch_avail
             prof_pitch = data_proc.(thermal_lag_pitch)(prof_select);
           else
             prof_pitch = thermal_lag_pitch_missing_value;
           end
           [prof_cond_cor, prof_temp_cor] = ...
-            correctThermalLag(prof_time, prof_cond_raw, prof_temp_raw, ...
+            correctThermalLag(prof_time, prof_depth, ...
+                              prof_cond_raw, prof_temp_raw, ...
                               thermal_lag_constants, 'pitch', prof_pitch);
           data_proc.(thermal_lag_cond_cor)(prof_select) = prof_cond_cor;
           data_proc.(thermal_lag_temp_cor)(prof_select) = prof_temp_cor;
