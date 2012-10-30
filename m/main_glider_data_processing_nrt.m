@@ -7,12 +7,20 @@
 %    - Preprocess raw data applying simple unit conversions data without 
 %      modifying it:
 %      1. NMEA latitude and longitude to decimal degrees.
-%    - Produce standarized product version of raw data.
-%    - Process raw data deriving new measurements and applying corrections
-%      to obtain well referenced trajectory data.
-%    - Produce standarized product version of trajectory data.
+%    - Produce standarized product version of raw data (NetCDF level 0).
+%    - Process raw data to obtain well referenced trajectory data with new 
+%      derived measurements and corrections. The following steps are applied:
+%      01. Select reference sensors for time and space coordinates.
+%      02. Select extra navigation sensors: commanded waypoints, pitch, depth...
+%      03. Select sensors of interest: CTD, oxygen, ocean color...
+%      04. Identify transect boundaries at waypoint changes.
+%      05. Identify cast boundaries from vertical direction changes.
+%      06. General sensor processings: sensor lag correction, interpolation.
+%      07. Process CTD data: pressure filtering, thermal lag correction...
+%      08. Derive new measurements: depth, salinity, density, ...
+%    - Produce standarized product version of trajectory data (NetCDF level 1).
 %    - Interpolate trajectory data to obtain vertically gridded profile data.
-%    - Produce standarized product version of gridded data.
+%    - Produce standarized product version of gridded data (NetCDF level 2).
 %    - Generate descriptive figures of both trajectory and gridded data.
 %
 %  See also:
@@ -77,16 +85,19 @@ disp('Querying information of glider deployments...');
 active_deployments = getDBDeploymentInfo(config.db_access, ...
                                          config.db_query, ...
                                          config.db_fields);
-active_deployments = active_deployments([active_deployments.deployment_id] == 99);
+%active_deployments = active_deployments([active_deployments.deployment_id] == 99);
 if isempty(active_deployments)
   disp('No glider deployments available.');
   return
+else
+  disp(['Deployments found: ' num2str(numel(active_deployments)) '.']);
 end
 
                                        
 %% Process active deployments.
 for deployment_idx = 1:numel(active_deployments)
   %% Set deployment field shortcut variables.
+  disp(['Processing deployment ' num2str(deployment_idx) '...']);
   deployment = active_deployments(deployment_idx);
   deployment_name = deployment.deployment_name;
   deployment_id = deployment.deployment_id;
@@ -101,13 +112,11 @@ for deployment_idx = 1:numel(active_deployments)
   ncl0_fullfile = strfglider(config.local_paths.netcdf_l0, deployment);
   ncl1_fullfile = strfglider(config.local_paths.netcdf_l1, deployment);
   ncl2_fullfile = strfglider(config.local_paths.netcdf_l2, deployment);
-  
-  
-  %% Notify the processing of this deployment.
-  disp(['Processing deployment ' num2str(deployment_id) ':']);
-  disp(['  Glider name      : ' glider_name]);
-  disp(['  Deployment name  : ' deployment_name]);
-  disp(['  Deployment start : ' datestr(deployment_start)]);
+  disp('Deployment information:')
+  disp(['  Glider name          : ' glider_name]);
+  disp(['  Deployment identifier: ' num2str(deployment_id)]);
+  disp(['  Deployment name      : ' deployment_name]);
+  disp(['  Deployment start     : ' datestr(deployment_start)]);
   if isempty(deployment_end)
     disp(['  Deployment end   : ' 'undefined']);
   else
@@ -120,6 +129,7 @@ for deployment_idx = 1:numel(active_deployments)
   % Deployment start time must be truncated to days because the date of 
   % a binary file is deduced from its name only up to day precission.
   % Deployment end time may be undefined.
+  disp('Downloading deployment new data...');
   download_start = datenum(datestr(deployment_start,'yyyy-mm-dd'),'yyyy-mm-dd');
   if isempty(deployment_end)
     download_end = now();
@@ -143,6 +153,8 @@ for deployment_idx = 1:numel(active_deployments)
   end  
   new_xbds = [new_xbds{:}];
   new_logs = [new_logs{:}];
+  disp(['Binary data files downloaded: '  num2str(numel(new_xbds)) '.']);
+  disp(['Surface log files downloaded: '  num2str(numel(new_logs)) '.']);
   
   
   %% Convert binary glider files to ascii human readable format.
@@ -158,7 +170,7 @@ for deployment_idx = 1:numel(active_deployments)
     dba_name_ext = regexprep(xbd_name_ext, ...
                              config.slocum_options.bin_name_pattern, ...
                              config.slocum_options.dba_name_replacement); 
-    dba_fullfile = fullfile(ascii_dir, [xbd_name '_' xbd_ext(2:end) '.dba']);
+    dba_fullfile = fullfile(ascii_dir, dba_name_ext);
     try
       new_dbas{xbd_idx} = { xbd2dba(new_xbds{xbd_idx}, dba_fullfile, ...
                                     'cache', cache_dir) };
@@ -169,10 +181,10 @@ for deployment_idx = 1:numel(active_deployments)
     end
   end
   new_dbas = [new_dbas{:}];
-  disp(['Binary files successfully converted: ' ...
+  disp(['Binary files converted: ' ...
         num2str(numel(new_dbas)) ' of ' num2str(numel(new_xbds)) '.']);
-  
- 
+
+
   %% Quit deployment processing if there is no new data.
   if isempty(new_dbas)
     disp('No new deployment data, skipping processing and product generation.');
@@ -181,115 +193,72 @@ for deployment_idx = 1:numel(active_deployments)
   
   
   %% Load data from ascii deployment glider files.
-  % Load all files matching the desired pattern (not only the newly generated).
-  % Flatten lists to discard unmatched files.
-  ascii_dir_contents = dir(ascii_dir);
-  dba_all_names = {ascii_dir_contents(~[ascii_dir_contents.isdir]).name};
-  dba_nav_names = ...
-    regexp(dba_all_names, config.slocum_options.dba_name_pattern_nav, 'match');
-  dba_sci_names = ...
-    regexp(dba_all_names, config.slocum_options.dba_name_pattern_sci, 'match');
-  dba_nav_names = [dba_nav_names{:}];
-  dba_sci_names = [dba_sci_names{:}];
-  % Load data from individual ascii files.
-  % Perform sensor filtering now to reduce memory usage.
-  if isfield(config.slocum_options, 'dba_sensors')
-    dba_sensor_args = {'sensors' config.slocum_options.dba_sensors};
-  else
-    dba_sensor_args = {};
-  end
-  % Load navigation files.
-  dba_nav_files = cell(size(dba_nav_names));
-  dba_nav_success = false(size(dba_nav_names));
-  meta_nav = cell(size(dba_nav_names));
-  data_nav = cell(size(dba_nav_names));
-  for dba_nav_idx = 1:numel(dba_nav_names)
-    try
-     dba_nav_files{dba_nav_idx} = ...
-       fullfile(ascii_dir, dba_nav_names{dba_nav_idx});
-     [meta_nav{dba_nav_idx}, data_nav{dba_nav_idx}] = ...
-       dba2mat(dba_nav_files{dba_nav_idx}, dba_sensor_args{:});
-     dba_nav_success(dba_nav_idx) = true;
-    catch exception
-      disp(['Error loading ascii file ' dba_nav_files{dba_nav_idx} ':']);
-      disp(getReport(exception, 'extended'));
+  % Shipped function ETIME ignores leap seconds, day saving time and time zones.
+  % However, this error should not make a significative difference.
+  disp('Loading raw deployment data from text files...');
+  try
+    load_start_epoch = etime(datevec(deployment_start), [1970 1 1 0 0 0.0]);
+    if isempty(deployment_end)
+      load_end_epoch = etime(datevec(now()), [1970 1 1 0 0 0.0]);
+    else
+      load_end_epoch = etime(datevec(deployment_end), [1970 1 1 0 0 0.0]);
     end
+    [meta_raw, data_raw] = ...
+      loadSlocumData(ascii_dir, ...
+                     config.slocum_options.dba_name_pattern_nav, ...
+                     config.slocum_options.dba_name_pattern_sci, ...
+                     'timestamp_nav', config.slocum_options.dba_time_sensor_nav, ...
+                     'timestamp_sci', config.slocum_options.dba_time_sensor_sci, ...
+                     'sensors', config.slocum_options.dba_sensors, ...
+                     'period', [load_start_epoch load_end_epoch], ...
+                     'format', 'struct');
+  catch exception
+    disp('Error loading Slocum data:');
+    disp(getReport(exception, 'extended'));
+    disp(['Deployment ' num2str(deployment_id) ' processing aborted!']);
+    continue
   end
-  meta_nav = meta_nav(dba_nav_success);
-  data_nav = data_nav(dba_nav_success);
-  % Load science files.
-  dba_sci_files = cell(size(dba_sci_names));
-  dba_sci_success = false(size(dba_sci_names));
-  meta_sci = cell(size(dba_sci_names));
-  data_sci = cell(size(dba_sci_names));
-  for dba_sci_idx = 1:numel(dba_sci_names)
-    try
-     dba_sci_files{dba_sci_idx} = ...
-       fullfile(ascii_dir, dba_sci_names{dba_sci_idx});
-     [meta_sci{dba_sci_idx}, data_sci{dba_sci_idx}] = ...
-       dba2mat(dba_sci_files{dba_sci_idx}, dba_sensor_args{:});
-     dba_sci_success(dba_sci_idx) = true;
-    catch exception
-      disp(['Error loading ascii file ' dba_sci_files{dba_sci_idx} ':']);
-      disp(getReport(exception, 'extended'));
-    end
-  end
-  meta_sci = meta_sci(dba_sci_success);
-  data_sci = data_sci(dba_sci_success);
-  % Combine data from each bay.
-  if ~isempty(meta_nav)
-    [meta_nav, data_nav] = ...
-      dbacat(meta_nav, data_nav, config.slocum_options.dba_time_sensor_nav);
-  end
-  if ~isempty(meta_sci)
-    [meta_sci, data_sci] = ...
-      dbacat(meta_sci, data_sci, config.slocum_options.dba_time_sensor_sci);
-  end
-  % Merge data from both bays.
-  [meta_dba, data_dba] = ...
-    dbamerge(meta_nav, data_nav, meta_sci, data_sci, ...
-             'format', 'struct', dba_sensor_args{:});
+  disp(['Slocum files loaded: ' num2str(numel(meta_raw.sources)) '.']);
   
-           
+  
   %% Add source files to deployment structure.
-  deployment.source_files = sprintf('%s\n', meta_dba.headers.filename_label);
-  
+  deployment.source_files = sprintf('%s\n', meta_raw.headers.filename_label);
+    
   
   %% Preprocess raw glider data.
-  data_preprocessed = ...
-    preprocessGliderData(data_dba, config.preprocessing_options);
+  disp('Preprocessing raw data...');
+  try
+    data_preprocessed = ...
+      preprocessGliderData(data_raw, config.preprocessing_options);
+  catch exception
+    disp('Error preprocessing raw data:');
+    disp(getReport(exception, 'extended'));
+    disp(['Deployment ' num2str(deployment_id) ' processing aborted!']);
+    continue
+  end
   
   
   %% Generate L0 NetCDF file (raw data).
-  raw_data = data_dba;
-  raw_meta = config.output_ncl0.var_meta;
-  raw_dims = config.output_ncl0.dim_names;
-  raw_atts = config.output_ncl0.global_atts; 
+  disp('Generating NetCDF L0 output...');
+  output_ncl0 = [];
   try
-    generateOutputNetCDFL0(ncl0_fullfile, raw_data, raw_meta, ...
-                           raw_dims, raw_atts, deployment);
+    output_ncl0 = generateOutputNetCDFL0(ncl0_fullfile, data_raw, ...
+                                         config.output_ncl0.var_meta, ...
+                                         config.output_ncl0.dim_names, ...
+                                         config.output_ncl0.global_atts, ...
+                                         deployment);
+    disp(['Output NetCDF L0 (raw data) generated: ' output_ncl0 '.']);
   catch exception
-    disp(['Error creating L0 (raw data) NetCDF file ' ncl0_fullfile ':']);
+    disp(['Error generating NetCDF L0 (preprocessed data) output ' ncl0_fullfile ':']);
     disp(getReport(exception, 'extended'));
   end;
 
   
-  %% Create figure directory if needed.
-  % Check it here because processing function produces debugging plots.
-  if ~isdir(figure_dir)
-    [success, error_msg] = mkdir(figure_dir);
-    if ~success
-      disp(['Error creating directory for deployment figures ' figure_dir ':']);
-      disp(error_msg);
-      continue
-    end
-  end
-
-  
-  %% Process raw glider data to get clean trajectory data.
+  %% Process preprocessed glider data.
+  disp('Processing glider data...');
   try
     processing_options.debugPlotPath = figure_dir;
-    processed_data = processGliderData(raw_data, processing_options);
+    data_processed = processGliderData(data_preprocessed);
   catch exception
     disp('Error processing glider deployment data:');
     disp(getReport(exception, 'extended'));
@@ -332,11 +301,24 @@ for deployment_idx = 1:numel(active_deployments)
   try
     generateOutputNetCDFL1(ncl1_fullfile, proc_data_aux, proc_meta, ...
                            proc_dims, proc_atts, deployment);
+    disp(['Output NetCDF L1 (processed data) generated: ' output_ncl1 '.']);
   catch exception
-    disp(['Error creating L1 (processed data) NetCDF file ' ncl1_fullfile ':']);
+    disp(['Error generating NetCDF L1 (processed data) output ' ncl1_fullfile ':']);
     disp(getReport(exception, 'extended'));
   end;
   
+  
+  %% Create figure directory if needed.
+  % Check it here because processing function produces debugging plots.
+  if ~isdir(figure_dir)
+    [success, error_msg] = mkdir(figure_dir);
+    if ~success
+      disp(['Error creating directory for deployment figures ' figure_dir ':']);
+      disp(error_msg);
+      continue
+    end
+  end
+
   
   %% Process glider trajectory data to vertically gridded data.
   try
@@ -359,10 +341,12 @@ for deployment_idx = 1:numel(active_deployments)
   try
     generateOutputNetCDFL2(ncl2_fullfile, grid_data_aux, grid_meta, ...
                            grid_dims, grid_atts, deployment);
+    disp(['Output NetCDF L2 (gridded data) generated: ' output_ncl2 '.']);
   catch exception
-    disp(['Error creating L2 (gridded data) NetCDF file ' ncl2_fullfile ':']);
+    disp(['Error generating NetCDF L2 (gridded data) output ' ncl2_fullfile ':']);
     disp(getReport(exception, 'extended'));
-  end
+  end;
+
 
   
   %% Generate deployment figures.
