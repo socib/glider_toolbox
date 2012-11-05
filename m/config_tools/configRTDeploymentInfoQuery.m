@@ -1,40 +1,45 @@
 function [sql_query, deployment_fields] = configDBDeploymentInfoQuery()
-%CONFIGDBDEPLOYMENTINFOQUERY  Configure the query used to retrieve glider
-%deployment information from the data base.
+%CONFIGRTDEPLOYMENTINFOQUERY  Configure the query used to retrieve glider deployment information from the data base.
 %
-%  [SQL_QUERY, DEPLOYMENT_FIELDS] = CONFIGDBDEPLOYMENTINFOQUERY() should return
-%  the SQL query to get information about all glider deployments. SQL_QUERY is
-%  the query to execute. When executed, the return value should be a cell array
-%  with information of each deployment at each row. The mapping between
-%  deployment fields and data base table fields (columns of the cell array
-%  returned by the query) is given by the string cell array DEPLOYMENT_FIELDS.
-%  The deployment fields are described in GETDBDEPLOYMENTINFO.
+%  [SQL_QUERY, DEPLOYMENT_FIELDS] = CONFIGRTDEPLOYMENTINFOQUERY() should return
+%  the SQL query to get information about glider deployments to be processed in
+%  real time. SQL_QUERY is the query to execute. When executed, the return 
+%  value should be a cell array with information of each deployment at each row.
+%  The mapping between deployment fields and data base table fields (columns of 
+%  the cell array returned by the query) is given by the string cell array
+%  DEPLOYMENT_FIELDS. The deployment fields are described in GETDBDEPLOYMENTINFO.
 %
 %  Notes:
 %    Edit this file filling in the field mapping of your data base and the
 %    query that returns that fields for each deployment.
 %
 %  Examples:
-%    [sql_query, deployment_fields] = configDBDeploymentInfoQuery()
+%    [sql_query, deployment_fields] = configRTDeploymentInfoQuery()
 %
-%  See also: GETDBDEPLOYMENTINFO
+%  See also:
+%    GETDBDEPLOYMENTINFO
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
   error(nargchk(0, 0, nargin, 'struct'));
 
+  % Select the deployment fields.
+  % First column is deployment field
+  % Second column is column in data base table.
   fields_map = {...
     'deployment_id'            'deployment_id'; ...
     'deployment_name'          'deployment_name'; ...
+    'deployment_start'         'deployment_initial_date'; ...
+    'deployment_end'           'deployment_end_date';...
     'glider_name'              'platform_name'; ...
     'glider_deployment_number' 'deployment_code'; ...
-    'deployment_start'         'deployment_initial_date'; ...
-    'deployment_end'           'deployment_end_date' };
+    'glider_instrument_name'   'instrument_name' };
 
   deployment_fields = fields_map(:,1)';
   db_fields = fields_map(:,2)';
 
+  % Build the query.
   db_fields_str = [sprintf('%s, ', db_fields{1:end-1}) db_fields{end}];
 
   sql_query = ['select ' db_fields_str ...

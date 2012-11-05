@@ -69,7 +69,7 @@ processing_options.debugPlot    = true;
 
 %% Configure data base deployment information source.
 config.db_access = configDBAccess();
-[config.db_query, config.db_fields] = configDBDeploymentInfoQuery();
+[config.db_query, config.db_fields] = configRTDeploymentInfoQuery();
 
 
 %% Configure dockserver glider data source.
