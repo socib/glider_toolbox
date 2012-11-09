@@ -194,8 +194,7 @@ function files = fetchNewAndUpdatedFiles(ftp_handle, remote_dir, local_dir, name
   % Go to remote directory (it should be save here).
   cd(ftp_handle, remote_dir);
   % Select files mathcing name pattern and date.
-  remote_match = ...
-    (1 == cellfun(@length, regexp({remote_files.name}, name, 'match')));
+  remote_match = ~cellfun(@isempty, regexp({remote_files.name}, name, 'match'));
   remote_files = remote_files(remote_match);
   if filter_date
     remote_dates = cellfun(@(s) datenum(date_scan(s)), {remote_files.name});
