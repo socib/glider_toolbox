@@ -82,9 +82,8 @@ config.slocum_options = configRTSlocumFileOptions;
 
 %% Get list of active deployments from database.
 disp('Querying information of glider deployments...');
-active_deployments = getDBDeploymentInfo(config.db_access, ...
-                                         config.db_query, ...
-                                         config.db_fields);
+deployment_list = ...
+  getDBDeploymentInfo(config.db_access, config.db_query, onfig.db_fields);
 %active_deployments = active_deployments([active_deployments.deployment_id] == 99);
 if isempty(active_deployments)
   disp('No glider deployments available.');
@@ -132,7 +131,7 @@ for deployment_idx = 1:numel(active_deployments)
   disp('Downloading deployment new data...');
   download_start = datenum(datestr(deployment_start,'yyyy-mm-dd'),'yyyy-mm-dd');
   if isempty(deployment_end)
-    download_end = now();
+    download_end = posixtime2utc(posixtime());
   else
     download_end = deployment_end;
   end
@@ -165,17 +164,17 @@ for deployment_idx = 1:numel(active_deployments)
   disp('Converting binary data files to ascii format...');
   new_dbas = cell(size(new_xbds));
   for xbd_idx = 1:numel(new_xbds)
-    [~, xbd_name, xbd_ext] = fileparts(new_xbds{xbd_idx});
+    xbd_fullfile = new_xbds{xbd_idx};
+    [~, xbd_name, xbd_ext] = fileparts(xbd_fullfile);
     xbd_name_ext = [xbd_name xbd_ext];
     dba_name_ext = regexprep(xbd_name_ext, ...
                              config.slocum_options.bin_name_pattern, ...
                              config.slocum_options.dba_name_replacement); 
     dba_fullfile = fullfile(ascii_dir, dba_name_ext);
     try
-      new_dbas{xbd_idx} = { xbd2dba(new_xbds{xbd_idx}, dba_fullfile, ...
-                                    'cache', cache_dir) };
+      new_dbas{xbd_idx} = {xbd2dba(xbd_fullfile, dba_fullfile, 'cache', cache_dir)};
     catch exception
-      disp(['Error converting binary file ' [xbd_name xbd_ext] ':']);
+      disp(['Error converting binary file ' xbd_name_ext ':']);
       disp(getReport(exception, 'extended'));
       new_dbas{xbd_idx} = {};
     end
@@ -193,15 +192,13 @@ for deployment_idx = 1:numel(active_deployments)
   
   
   %% Load data from ascii deployment glider files.
-  % Shipped function ETIME ignores leap seconds, day saving time and time zones.
-  % However, this error should not make a significative difference.
   disp('Loading raw deployment data from text files...');
   try
-    load_start_epoch = etime(datevec(deployment_start), [1970 1 1 0 0 0.0]);
+    load_start = deployment_start;
     if isempty(deployment_end)
-      load_end_epoch = etime(datevec(now()), [1970 1 1 0 0 0.0]);
+      load_end = posixtime2utc(posixtime());
     else
-      load_end_epoch = etime(datevec(deployment_end), [1970 1 1 0 0 0.0]);
+      load_end = deployment_end;
     end
     [meta_raw, data_raw] = ...
       loadSlocumData(ascii_dir, ...
@@ -210,7 +207,7 @@ for deployment_idx = 1:numel(active_deployments)
                      'timestamp_nav', config.slocum_options.dba_time_sensor_nav, ...
                      'timestamp_sci', config.slocum_options.dba_time_sensor_sci, ...
                      'sensors', config.slocum_options.dba_sensors, ...
-                     'period', [load_start_epoch load_end_epoch], ...
+                     'period', [load_start load_end], ...
                      'format', 'struct');
   catch exception
     disp('Error loading Slocum data:');

@@ -40,7 +40,8 @@ function ncl0 = generateOutputNetCDFL0(filename, data, meta, dims, atts, deploym
 %  See also:
 %    PREPROCESSGLIDERDATA
 %    WRITENETCDFDATA
-%    UTC_TIME
+%    POSIXTIME2UTC
+%    POSIXTIME
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
@@ -49,11 +50,13 @@ function ncl0 = generateOutputNetCDFL0(filename, data, meta, dims, atts, deploym
 
   %% Set dynamic global attributes.
   dyn_atts = struct();
+  dyn_atts.date_modified = ...
+    datestr(posixtime2utc(posixime()), 'yyyy-mm-ddTHH:MM:SS+00');
   if isfield(data, 'm_present_time')
     dyn_atts.time_coverage_start = ...
-      datestr(utc2datenum(min(data.m_present_time)), 'yyyy-mm-ddTHH:MM:SS+00');
+      datestr(posixtime2utc(min(data.m_present_time)), 'yyyy-mm-ddTHH:MM:SS+00');
     dyn_atts.time_coverage_end = ...
-      datestr(utc2datenum(max(data.m_present_time)), 'yyyy-mm-ddTHH:MM:SS+00');
+      datestr(posixtime2utc(max(data.m_present_time)), 'yyyy-mm-ddTHH:MM:SS+00');
     dyn_atts.time_coverage_resolution = ...
       sprintf('P%.2fS', min(abs(diff(data.m_present_time))));
   end

@@ -7,7 +7,7 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
 %  in string NAME_PATTERN_NAV (navigation files) or in string NAME_PATTERN_SCI 
 %  (science files). META and DATA contain loaded metadata and data in the format 
 %  returned by functions DBACAT and DBAMERGE.
-
+%
 %  [META, DATA] = LOADSLOCUMDATA(..., OPT1, VAL1, ...) accepts the following 
 %  options allowing to restrict the time range or the sensor set of the data 
 %  to load, or specify the output format:
@@ -24,18 +24,23 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
 %      If given, only sensors present in both the input data sets and this list
 %      will be present in output.
 %    'period': a two element numeric array with the start and end of the time
-%      interval of interest (seconds since 1970-01-01 00:0:00.00 UTC).
-%      If given, only sensor cycles with timestamps within this period will be
-%      present in output.
+%      interval of interest (UTC serial date numbers). If given, only sensor 
+%      cycles with timestamps within this period will be present in output.
 %
 %  Notes:
 %    This function is a simple shortcut to load all dba data in a directory
 %    belonging to the same deployment or transect. It just filters the contents
 %    of the directory and calls DBA2MAT, DBACAT and DBAMERGE, bypassing the
-%    given options.
+%    given options (with conversions when needed).
 %
 %  Examples:
 %    [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern_sci)
+%    [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern_sci, ...
+%                                  'timestamp_nav', 'm_present_time', ...
+%                                  'timestamp_sci', 'sci_m_present_time', ...
+%                                  'sensors', sensors_of_interest, ..
+%                                  'period', period_of_interset, ...
+%                                  'format', 'struct');
 %
 %  See also:
 %    DIR
@@ -69,7 +74,7 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
       case 'sensors'
         sensor_filtering_args = {opt val};
       case 'period'
-        time_filtering_args = {opt val};
+        time_filtering_args = {opt utc2posixtime(val)};
       otherwise
         error('glider_toolbox:loadSlocumData:InvalidOption', ...
               'Invalid option: %s.', opt);
@@ -82,7 +87,6 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
   ascii_dir_contents = dir(ascii_dir);
   dba_nav_sel = ~[ascii_dir_contents.isdir] ...
     & ~cellfun(@isempty, regexp({ascii_dir_contents.name}, name_pattern_nav));
-  
   dba_sci_sel = ~[ascii_dir_contents.isdir] ...
     & ~cellfun(@isempty, regexp({ascii_dir_contents.name}, name_pattern_sci));
   %{
