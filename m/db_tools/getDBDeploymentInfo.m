@@ -63,14 +63,22 @@ function data = getDBDeploymentInfo(db_access, query, fields)
   close(conn);
   setdbprefs('DataReturnFormat', data_format);
 
-  % Convert available time fields.
+  % Adapt number of columns when the result of the query is empty.
+  if all(size(data)==0)
+    data = cell(0,numel(fields));
+  end
+  
+  % Convert time fields from timestamp string to serial date number.
   time_fields = {'deployment_start', 'deployment_end'};
   time_field_columns = ismember(fields, time_fields);
   time_data = data(:, time_field_columns);
   if iscellstr(time_data)
+    % DATENUM does not handle empty date string cell arrays properly.
     time_data_null = strcmp('null', time_data);
-    time_data(~time_data_null) = ...
-      num2cell(datenum(time_data(~time_data_null), 'yyyy-mm-dd HH:MM:SS'));
+    if any(~time_data_null)
+      time_data(~time_data_null) = ...
+        num2cell(datenum(time_data(~time_data_null), 'yyyy-mm-dd HH:MM:SS'));
+    end
     time_data(time_data_null) = {[]};
   else
     error('glider_toolbox:db_tools:TimeFieldError', ...
