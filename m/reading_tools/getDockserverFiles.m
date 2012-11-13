@@ -1,10 +1,13 @@
 function [bin_files, log_files] = getDockserverFiles(dockserver, glider_name, local_bin_dir, local_log_dir, varargin)
 %GETDOCKSERVERFILES  Get binary data files and logs from dockserver through FTP.
 %
-%  GETDOCKSERVERFILES(DOCKSERVER, GLIDER_NAME, LOCAL_BIN_DIR, LOCAL_LOG_DIR) and
-%  GETDOCKSERVERFILES(..., 'option1', 'value1', 'option2', 'value2' ...)
+%  Syntax:
+%    GETDOCKSERVERFILES(DOCKSERVER, GLIDER_NAME, LOCAL_BIN_DIR, LOCAL_LOG_DIR)
+%    GETDOCKSERVERFILES(DOCKSERVER, GLIDER_NAME, LOCAL_BIN_DIR, LOCAL_LOG_DIR, OPT1, VAL1, ...)
+%
+%  GETDOCKSERVERFILES(DOCKSERVER, GLIDER_NAME, LOCAL_BIN_DIR, LOCAL_LOG_DIR, ...)
 %  retrieve  new .[smdtne]bd files and surface dialog files of the glider named
-%  GLIDER_NAME from DOCKSERVER to  LOCAL_BIN_DIR and LOCAL_LOG_DIR respectively,
+%  GLIDER_NAME from DOCKSERVER to LOCAL_BIN_DIR and LOCAL_LOG_DIR respectively,
 %  returning string cell arrays  with the list of downloaded files.
 %  Files already existing in the local directories are considered older than the
 %  ones in the dockserver it they are smaller.
@@ -82,7 +85,7 @@ function [bin_files, log_files] = getDockserverFiles(dockserver, glider_name, lo
   for i=1:2:numel(varargin)
     opt = varargin{i};
     val = varargin{i+1};
-    switch opt
+    switch lower(opt)
       case 'start'
         start_date = val;
         date_filtering = true;
@@ -93,6 +96,9 @@ function [bin_files, log_files] = getDockserverFiles(dockserver, glider_name, lo
         bin_name = val;
       case 'log_name'
         log_name = val;
+      otherwise
+        error('glider_toolbox:getDockServerFiles:InvalidOption', ...
+              'Invalid option: %s.', opt);
     end
   end
 
