@@ -127,10 +127,12 @@ function [data json] = parse_object(json)
                 if isempty(name)
                     ME = MException('json:parse_object',['Can not have an empty name: ' json]);
                     ME.throw;
+                elseif ~isvarname(name)
+                    warning('json:parse_object',['Making up invalid name: ' name]);
+                    name = genvarname(name);
                 end
                 data.(name) = value;
                 json = remaining_json;
-                
             case '}' % End of object, so exit the function
                 return
                 
