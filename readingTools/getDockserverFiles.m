@@ -176,7 +176,6 @@ function [fetchedSbdList, fetchedLogList] = getDockserverFiles(gliderName, glide
             end;
         catch MatExcep
             disp('Could not get remote file list');
-            keyboard;
             disp(getReport(MatExcep, 'extended'));
             return;
         end;
