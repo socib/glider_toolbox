@@ -1,6 +1,9 @@
 function [profile_direction, profile_index] = findProfiles(depth)
 %FINDPROFILES  Compute vertical direction and identify individual profiles from depth sequence.
 %
+%  Syntax:
+%    [PROFILE_DIRECTION, PROFILE_INDEX] = FINDPROFILES(DEPTH)
+%
 %  [PROFILE_DIRECTION, PROFILE_INDEX] = FINDPROFILES(DEPTH) identifies upcast
 %  and downcast profiles in depth (or pressure) vector DEPTH, and computes a 
 %  vector of vertical direction PROFILE_DIRECTION and a vector of profile
@@ -16,7 +19,6 @@ function [profile_direction, profile_index] = findProfiles(depth)
 %    Profiles are numbered cumulating changes of direction (depth peaks).
 %    To deal with (the very unusual) points with 0 direction, they are marked as
 %    belonging to the previous profile.
-%
 %
 %  Examples:
 %    depth = [3 2 1 2 3 3 4 5 5 5 4 3 3 4 2 1 1 0 3 3]

@@ -1,6 +1,11 @@
 function [valid, full_rows] = validateProfile(depth, data, varargin)
 %VALIDATEPROFILE  Check if profile sequence is a proper profile and if it is well sampled.
 %
+%  Syntax:
+%    VALID = VALIDATEPROFILE(DEPTH, DATA)
+%    VALID = VALIDATEPROFILE(DEPTH, DATA, OPT1, VAL1, ...)
+%    [VALID, FULL_ROWS]= VALIDATEPROFILE(...)
+%
 %  VALID = VALIDATEPROFILE(DEPTH, DATA, OPT1, VAL1, ...) checks if vector DEPTH
 %  is a proper profile depth sequence and if data in vector or array DATA is
 %  properly sampled over the profile range, according to criteria in option and 
@@ -10,13 +15,14 @@ function [valid, full_rows] = validateProfile(depth, data, varargin)
 %    'range': minimum depth range (in the same units as DEPTH).
 %      A profile is invalid if the difference between the maximum and minimum
 %      depth values is smaller than given threshold.
-%      Default value: 0 (any profile is valid).
+%      Default value: 0 (all profiles are valid).
 %    'gap': maximum gap ratio (in [0,1]).
 %      A profile is invalid if the ratio of the depth range of the largest gap
 %      to the depth range of the whole profile is larger than given threshold.
-%      A is a sequence of incomplete measurements, either because of invalid
-%      values (NaN) in some column of DATA or invalid entries in DEPTH.
-%      Default value: 1 (any profile is valid).
+%      A gap is a sequence of consecutive incomplete measurements, either 
+%      because of invalid values (NaN) in some column of DATA, or because of 
+%      invalid entries in DEPTH.
+%      Default value: 1 (all profiles are valid).
 %
 %  [VALID, FULL_ROWS]= VALIDATEPROFILE(...) also returns a logical column vector
 %  FULL_ROWS with the same number of elements as DEPTH, showing whether
@@ -81,7 +87,9 @@ function [valid, full_rows] = validateProfile(depth, data, varargin)
   end
   
   % Gap check.
-  max_gap = max(abs(diff(depth(full_rows))));
+  max_gap = max([min(depth(full_rows))-min(depth) ...
+                 max(abs(diff(depth(full_rows)))) ...
+                 max(depth) - max(depth(full_rows))]);
   if max_gap > max_gap_ratio * depth_range
     return
   end
