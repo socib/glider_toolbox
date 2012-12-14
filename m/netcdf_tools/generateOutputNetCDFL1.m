@@ -50,7 +50,7 @@ function ncl1 = generateOutputNetCDFL1(filename, data, meta, dims, atts, deploym
   %% Set dynamic global attributes.
   dyn_atts = struct();
   dyn_atts.date_modified = ...
-    datestr(posixtime2utc(posixime()), 'yyyy-mm-ddTHH:MM:SS+00');
+    datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00');
   if isfield(data, 'time_nav')
     dyn_atts.time_coverage_start = ...
       datestr(posixtime2utc(min(data.time_nav)), 'yyyy-mm-ddTHH:MM:SS+00');
