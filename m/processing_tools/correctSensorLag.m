@@ -1,5 +1,8 @@
 function cor = correctSensorLag(time, raw, constant)
-%CORRECTSENSORLAG   Correct data sequence from sensor lag effects.
+%CORRECTSENSORLAG  Correct data sequence from sensor lag effects.
+%
+%  Syntax:
+%    COR = CORRECTSENSORLAG(TIME, RAW, CONSTANT)
 %
 %  COR = CORRECTSENSORLAG(TIME, RAW, CONSTANT) corrects the sequence in vector
 %  RAW with timestamp in vector TIME from sensor lag effects. The correction is
@@ -9,7 +12,8 @@ function cor = correctSensorLag(time, raw, constant)
 %  Notes:
 %    Invalid values (NaN) in input sequence are ignored but preserved in output.
 %
-%    The first order approximation is done using the function GRADIENT.
+%    The first order approximation is done using forward differences with the 
+%    function DIFF.
 %
 %    This function is a rewording of a previous function by Tomeu Garau,
 %    called CORRECTTIMERESPONSE. He is the true glider man.
@@ -36,11 +40,18 @@ function cor = correctSensorLag(time, raw, constant)
   error(nargchk(3, 3, nargin, 'struct'));
 
   cor = nan(size(raw));
-  val = ~(isnan(time) | isnan(raw));
-  if any(val)
-    del = gradient(raw(val), time(val));
-    % del = [diff(raw(val)) ./ diff(time(val)) 0];
-    cor(val) = raw(val) + constant * del;
+  val = find(~isnan(raw) & (time > 0)); % Positive time check to filter out bad initial lines on Slocum data.
+  [time_unique, index_from, index_to] = unique(time(val));
+  raw_unique = raw(val(index_from));
+  if any(raw(val) ~= raw_unique(index_to))
+    error('glider_toolbox:correctSensorLag:InconsistentData', ...
+          'Inconsistent sensor data.');
+  end
+  if numel(time_unique) > 1
+    % del = [0; diff(raw(val)) ./ diff(time(val))];
+    % cor(val) = raw(val) + constant * del;
+    cor(val) = interp1(time_unique, raw_unique, time(val) + constant, ...
+                       'spline', 'extrap');
   end
 
 end
