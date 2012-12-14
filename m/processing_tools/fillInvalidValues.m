@@ -1,6 +1,14 @@
 function [filled, indices] = fillInvalidValues(varargin)
 %FILLINVALIDVALUES  Fill invalid values in sequence with given method.
 %
+%  Syntax:
+%    [FILLED, INDICES] = FILLINVALIDVALUES(X, Y, METHOD)
+%    [FILLED, INDICES] = FILLINVALIDVALUES(X, Y, VALUE)
+%    [FILLED, INDICES] = FILLINVALIDVALUES(X, Y)
+%    [FILLED, INDICES] = FILLINVALIDVALUES(Y, METHOD)
+%    [FILLED, INDICES] = FILLINVALIDVALUES(Y, VALUE)
+%    [FILLED, INDICES] = FILLINVALIDVALUES(Y)
+%
 %  [FILLED, INDICES] = FILLINVALIDVALUES(X, Y, METHOD) fills invalid 
 %  values (nan occurrences) in vector X, using the method specified by string
 %  METHOD, which is one of:

@@ -1,6 +1,9 @@
 function distance = computeCumulativeDistance(latitude, longitude)
 %COMPUTECUMULATIVEDISTANCE  Cumulate distance along given trajectory.
 %
+%  Syntax:
+%    DISTANCE = COMPUTECUMULATIVEDISTANCE(LATITUDE, LONGITUDE)
+%
 %  DISTANCE = COMPUTECUMULATIVEDISTANCE(LATITUDE, LONGITUDE) computes the
 %  cumulative distance (in km) of a trajectory defined by coordinate vectors 
 %  LATITUDE and LONGITUDE. DISTANCE, LATITUDE and LONGITUDE have the same 
