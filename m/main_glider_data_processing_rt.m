@@ -4,9 +4,10 @@
 %    - Check for active deployments from deployment information source.
 %    - Download new or updated deployment raw data files.
 %    - Convert downloaded files to human readable format if needed.
+%    - Load data from all files in a single and consistent structure.
 %    - Preprocess raw data applying simple unit conversions data without 
 %      modifying it:
-%      1. NMEA latitude and longitude to decimal degrees.
+%      01. NMEA latitude and longitude to decimal degrees.
 %    - Produce standarized product version of raw data (NetCDF level 0).
 %    - Process raw data to obtain well referenced trajectory data with new 
 %      derived measurements and corrections. The following steps are applied:
@@ -15,11 +16,12 @@
 %      03. Select sensors of interest: CTD, oxygen, ocean color...
 %      04. Identify transect boundaries at waypoint changes.
 %      05. Identify cast boundaries from vertical direction changes.
-%      06. General sensor processings: sensor lag correction, interpolation.
+%      06. General sensor processings: sensor lag correction, interpolation....
 %      07. Process CTD data: pressure filtering, thermal lag correction...
 %      08. Derive new measurements: depth, salinity, density, ...
 %    - Produce standarized product version of trajectory data (NetCDF level 1).
-%    - Interpolate trajectory data to obtain vertically gridded profile data.
+%    - Interpolate trajectory data to obtain gridded data
+%      (vertical instantaneous profiles).
 %    - Produce standarized product version of gridded data (NetCDF level 2).
 %    - Generate descriptive figures of both trajectory and gridded data.
 %
@@ -35,9 +37,6 @@
 
 %% Configure toolbox and configuration file path.
 glider_toolbox_dir = configGliderToolboxPath();
-% Glider configuration file directory
-% config_dir = fullfile(glider_toolbox_dir, 'config');
-desired_extensions = {'sbd', 'tbd', 'mbd', 'nbd'};
 
 
 %% Configure deployment data paths.
@@ -45,9 +44,9 @@ config.local_paths = configRTLocalPaths();
 
 
 %% Configure NetCDF output.
-config.output_ncl0 = configOutputNetCDFL0();
-config.output_ncl1 = configOutputNetCDFL1();
-config.output_ncl2 = configOutputNetCDFL2();
+config.output_ncl0 = configRTOutputNetCDFL0();
+config.output_ncl1 = configRTOutputNetCDFL1();
+config.output_ncl2 = configRTOutputNetCDFL2();
 
 
 %% Set the path to the data: edit for mission processing.
@@ -55,16 +54,10 @@ output_dirs.image_base_local_path = '/home/jbeltran/public_html/glider';
 output_dirs.imageBaseURLPath    = 'http://www.socib.es/~jbeltran/glider/web';
 
 
-%% Configure preprocessing options.
-config.preprocessing_options = configPreprocessingOptions();
-
-
 %% Configure processing options.
-processing_options.salinityCorrected = 'TH';
-processing_options.allowSciTimeFill = true;
-processing_options.allowPressFilter = true;
-processing_options.allowDesynchroDeletion = true;
-processing_options.debugPlot    = true;
+config.preprocessing_options = configPreprocessingOptions();
+config.processing_options = configProcessingOptions();
+% config.gridding_options = configGriddingOptions();
 
 
 %% Configure data base deployment information source.
@@ -72,12 +65,12 @@ config.db_access = configDBAccess();
 [config.db_query, config.db_fields] = configRTDeploymentInfoQuery();
 
 
+%% Configure Slocum file downloading and conversion, and Slocum data loading.
+config.slocum_options = configRTSlocumFileOptions();
+
+
 %% Configure dockserver glider data source.
 config.dockservers = configDockservers();
-
-
-%% Configure Slocum file downloading and conversion, and Slocum data loading.
-config.slocum_options = configRTSlocumFileOptions;
 
 
 %% Get list of active deployments from database.
@@ -89,15 +82,15 @@ if isempty(active_deployments)
   disp('No glider deployments available.');
   return
 else
-  disp(['Deployments found: ' num2str(numel(active_deployments)) '.']);
+  disp(['Active deployments found: ' num2str(numel(active_deployments)) '.']);
 end
 
                                        
 %% Process active deployments.
-for deployment_idx = 1:numel(active_deployments)
+for deployment_idx = 1:numel(deployment_list)
   %% Set deployment field shortcut variables.
-  disp(['Processing deployment ' num2str(deployment_idx) '...']);
-  deployment = active_deployments(deployment_idx);
+  disp(['Processing deployment ' num2str(deployment_idx) ' ...']);
+  deployment = deployment_list(deployment_idx);
   deployment_name = deployment.deployment_name;
   deployment_id = deployment.deployment_id;
   deployment_start = deployment.deployment_start;
@@ -117,9 +110,9 @@ for deployment_idx = 1:numel(active_deployments)
   disp(['  Deployment name      : ' deployment_name]);
   disp(['  Deployment start     : ' datestr(deployment_start)]);
   if isempty(deployment_end)
-    disp(['  Deployment end   : ' 'undefined']);
+    disp(['  Deployment end       : ' 'undefined']);
   else
-    disp(['  Deployment end   : ' datestr(deployment_end)]);
+    disp(['  Deployment end       : ' datestr(deployment_end)]);
   end
 
     
@@ -186,7 +179,7 @@ for deployment_idx = 1:numel(active_deployments)
 
   %% Quit deployment processing if there is no new data.
   if isempty(new_dbas)
-    disp('No new deployment data, skipping processing and product generation.');
+    disp('No new deployment data, skipping data processing and product generation.');
     continue
   end
   
@@ -220,7 +213,7 @@ for deployment_idx = 1:numel(active_deployments)
   
   %% Add source files to deployment structure.
   deployment.source_files = sprintf('%s\n', meta_raw.headers.filename_label);
-    
+  
   
   %% Preprocess raw glider data.
   disp('Preprocessing raw data...');
@@ -254,8 +247,8 @@ for deployment_idx = 1:numel(active_deployments)
   %% Process preprocessed glider data.
   disp('Processing glider data...');
   try
-    processing_options.debugPlotPath = figure_dir;
-    data_processed = processGliderData(data_preprocessed);
+    data_processed = ...
+      processGliderData(data_preprocessed, config.processing_options);
   catch exception
     disp('Error processing glider deployment data:');
     disp(getReport(exception, 'extended'));
@@ -345,7 +338,6 @@ for deployment_idx = 1:numel(active_deployments)
   end;
 
 
-  
   %% Generate deployment figures.
   try
     %{
@@ -376,4 +368,3 @@ for deployment_idx = 1:numel(active_deployments)
   end
   
 end
-
