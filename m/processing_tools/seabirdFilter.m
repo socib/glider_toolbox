@@ -7,7 +7,8 @@ function outputSignal = seabirdFilter(inputSignal, timeConstant, samplingPeriod)
 % backward through the data. This removes any delays caused by the filter.
 % This filter is described in SeaBird Data Processing Manual (page 91).
 %
-% Syntax: outputSignal = seabirdFilter(inputSignal, timeConstant, samplingPeriod)
+% Syntax:
+%   outputSignal = seabirdFilter(inputSignal, timeConstant, samplingPeriod)
 %
 % Inputs:
 %    inputSignal    - Signal to be filtered
@@ -64,8 +65,7 @@ function outputSignal = seabirdFilter(inputSignal, timeConstant, samplingPeriod)
     % to produce zero phase and thus avoid delays
     theSignal = inputSignal;
     for filterPass = 1:2
-        outputSignal = nan(size(theSignal));
-        outputSignal(1) = theSignal(1);
+        outputSignal = theSignal;
         % Loop through the scans, recursive filter
         for scanIdx = 2:length(theSignal)
             outputSignal(scanIdx) = ...
