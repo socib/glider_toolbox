@@ -42,13 +42,13 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
 %    sets comparing the respective timestamp values. Sensor cycles coming from 
 %    navigation and science data arrays with equal timestamp values are merged
 %    into a single sensor cycle, othewise the missing sensor values are filled 
-%    with NaNs. In addition, if some sensor is present in both data sets, it is
-%    renamed: 'sci_XXX' to 'gld_dup_sci_XXX' and 'YYY' to 'sci_dup_YYY'.
-%    If the sensor originates in the science bay, the navigation bay instance is
-%    prepended with the prefix 'gld_dup_'. Otherwise if the sensor originates in
-%    the navigation bay, the science bay instance is prepended with the prefix 
-%    'sci_dup_'. This renaming is the behaviour of the original program 
-%    'dba_merge', as described here:
+%    with invalid values (NaN). In addition, if some sensor is present in both
+%    data sets, the repeated instance is renamed: 'sci_XXX' to 'gld_dup_sci_XXX'
+%    and 'YYY' to 'sci_dup_YYY'. If the sensor originates in the science bay, 
+%    the navigation bay instance is  prepended with the prefix 'gld_dup_'.
+%    Otherwise if the sensor originates in the navigation bay, the science bay 
+%    instance is prepended with the prefix 'sci_dup_'. This renaming is the 
+%    behaviour of the original program 'dba_merge', as described here:
 %      http://marine.rutgers.edu/~kerfoot/slocum/data/readme/wrc_doco/dbd_file_format.txt
 %
 %  Examples:

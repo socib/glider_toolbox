@@ -15,7 +15,7 @@ function new_pressure = applySeabirdPressureFilter(time, old_pressure, time_cons
 %  pass filter with default duration parameter of 4 time units.
 %
 %  The filtering is performed as follows:
-%    - Invalid (nan) values in input are ignored, but preserved in the result.
+%    - Invalid values (NaN) in input are ignored, but preserved in the result.
 %    - The signal is resampled at regular intervals of unit time length.
 %      Hence, if TIME is given in seconds, the filter is applied to a new
 %      sequence with sampling rate 1 Hz.
