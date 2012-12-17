@@ -101,9 +101,6 @@ for deployment_idx = 1:numel(deployment_list)
   log_dir = strfglider(config.local_paths.log_path, deployment);
   ascii_dir = strfglider(config.local_paths.ascii_path, deployment);
   figure_dir = strfglider(config.local_paths.figure_path, deployment);
-  ncl0_fullfile = strfglider(config.local_paths.netcdf_l0, deployment);
-  ncl1_fullfile = strfglider(config.local_paths.netcdf_l1, deployment);
-  ncl2_fullfile = strfglider(config.local_paths.netcdf_l2, deployment);
   disp('Deployment information:')
   disp(['  Glider name          : ' glider_name]);
   disp(['  Deployment identifier: ' num2str(deployment_id)]);
@@ -228,21 +225,25 @@ for deployment_idx = 1:numel(deployment_list)
   end
   
   
-  %% Generate L0 NetCDF file (raw data).
-  disp('Generating NetCDF L0 output...');
+  %% Generate L0 NetCDF file (raw/preprocessed data), if needed.
   output_ncl0 = [];
-  try
-    output_ncl0 = generateOutputNetCDFL0(ncl0_fullfile, data_raw, ...
-                                         config.output_ncl0.var_meta, ...
-                                         config.output_ncl0.dim_names, ...
-                                         config.output_ncl0.global_atts, ...
-                                         deployment);
+  if isfield(config.local_paths, 'netcdf_l0') && ~isempty(config.local_paths.netcdf_l0)
+    disp('Generating NetCDF L0 output...');
+    try
+      ncl0_file = strfglider(config.local_paths.netcdf_l0, deployment);
+      ncl0_atts = config.output_ncl0.global_atts;
+      ncl0_dims = config.output_ncl0.dim_names;
+      ncl0_meta = config.output_ncl0.var_meta;
+      ncl0_data = data_preprocessed;
+      output_ncl0 = generateOutputNetCDFL0(ncl0_file, ncl0_data, ncl0_meta, ...
+                                           ncl0_dims, ncl0_atts, deployment);
     disp(['Output NetCDF L0 (raw data) generated: ' output_ncl0 '.']);
-  catch exception
-    disp(['Error generating NetCDF L0 (preprocessed data) output ' ncl0_fullfile ':']);
-    disp(getReport(exception, 'extended'));
-  end;
-
+    catch exception
+      disp(['Error generating NetCDF L0 (preprocessed data) output ' ncl0_file ':']);
+      disp(getReport(exception, 'extended'));
+    end;
+  end
+  
   
   %% Process preprocessed glider data.
   disp('Processing glider data...');
@@ -255,47 +256,27 @@ for deployment_idx = 1:numel(deployment_list)
     disp('Skipping storage, gridding and plotting...');
     continue
   end
-
+  
   
   %% Generate L1 NetCDF file (processed data).
-  field_renaming = {
-    'navTime' 'time_nav'
-    'sciTime' 'time_sci'
-    'wptLat'  'waypoint_latitude'
-    'wptLon'  'waypoint_longitude'
-    'distanceOverGround' 'distance_over_ground'
-    'continousDepth'     'continous_depth'
-    'Tcor'               'temperature_corrected'
-    'Ccor'               'conductivity_corrected'
-    'salinity_corrected_TH'            'salinity_corrected_thermal' 
-    'salinity_corrected_Tcor_TH'       'salinity_corrected_temperature_thermal'
-    'salinity_corrected_Tcor_Ccor_TH'  'salinity_corrected_temperature_conductivity_thermal'
-    'backscatter470' 'backscatter_470'
-    'backscatter532' 'backscatter_532'
-    'backscatter660' 'backscatter_660'
-    'irradiance412nm' 'irradiance_412'
-    'irradiance442nm' 'irradiance_442'
-    'irradiance491nm' 'irradiance_491'
-    'irradiance664nm' 'irradiance_664'
-  };
-  proc_data_aux = processed_data;
-  for old_new_name = field_renaming'
-    if isfield(proc_data_aux, old_new_name{1})
-      [proc_data_aux.(old_new_name{2})] = proc_data_aux.(old_new_name{1});
-      proc_data_aux = rmfield(proc_data_aux, old_new_name{1});
-    end
-  end
-  proc_meta = config.output_ncl1.var_meta;
-  proc_dims = config.output_ncl1.dim_names;
-  proc_atts = config.output_ncl1.global_atts; 
-  try
-    generateOutputNetCDFL1(ncl1_fullfile, proc_data_aux, proc_meta, ...
-                           proc_dims, proc_atts, deployment);
-    disp(['Output NetCDF L1 (processed data) generated: ' output_ncl1 '.']);
-  catch exception
-    disp(['Error generating NetCDF L1 (processed data) output ' ncl1_fullfile ':']);
-    disp(getReport(exception, 'extended'));
-  end;
+  output_ncl1 = [];
+  if isfield(config.local_paths, 'netcdf_l1') && ~isempty(config.local_paths.netcdf_l1)
+    disp('Generating NetCDF L1 output...');
+    try
+      ncl1_file = strfglider(config.local_paths.netcdf_l1, deployment);
+      ncl1_atts = config.output_ncl1.global_atts; 
+      ncl1_dims = config.output_ncl1.dim_names;
+      ncl1_meta = config.output_ncl1.var_meta;
+      ncl1_data = data_processed;
+      output_ncl1 = generateOutputNetCDFL1(ncl1_file, ncl1_data, ncl1_meta, ...
+                                           ncl1_dims, ncl1_atts, deployment);
+      disp(['Output NetCDF L1 (processed data) generated: ' output_ncl1 '.']);
+    catch exception
+      disp(['Error generating NetCDF L1 (processed data) output ' ncl1_file ':']);
+      disp(getReport(exception, 'extended'));
+    end;
+  end  
+  return
   
   
   %% Create figure directory if needed.
@@ -308,7 +289,7 @@ for deployment_idx = 1:numel(deployment_list)
       continue
     end
   end
-
+  
   
   %% Process glider trajectory data to vertically gridded data.
   try
@@ -319,25 +300,30 @@ for deployment_idx = 1:numel(deployment_list)
     continue
   end
   
-
+  
   %% Generate L2 (gridded data) netcdf file.
-  grid_data_aux = gridded_data.grids;
-  for f = fieldnames(gridded_data.gridCoords)'
-    grid_data_aux.(strrep(f{:},'Range','')) = gridded_data.gridCoords.(f{:});
+  output_ncl2 = [];
+  if isfield(config.local_paths, 'netcdf_l2') && ~isempty(config.local_paths.netcdf_l2)
+    disp('Generating NetCDF L2 output...');
+    try
+      ncl2_file = strfglider(config.local_paths.netcdf_l2, deployment);
+      ncl2_atts = config.output_ncl2.global_atts; 
+      ncl2_dims = config.output_ncl2.dim_names;
+      ncl2_meta = config.output_ncl2.var_meta;
+      ncl2_data_aux = gridded_data.grids;
+      for f = fieldnames(gridded_data.gridCoords)'
+        ncl2_data_aux.(strrep(f{:},'Range','')) = gridded_data.gridCoords.(f{:});
+      end
+      output_ncl2 = generateOutputNetCDFL2(ncl2_file, ncl2_data_aux, ncl2_meta, ...
+                                           ncl2_dims, ncl2_atts, deployment);
+      disp(['Output NetCDF L2 (gridded data) generated: ' output_ncl2 '.']);
+    catch exception
+      disp(['Error generating NetCDF L2 (gridded data) output ' ncl2_file ':']);
+      disp(getReport(exception, 'extended'));
+    end;
   end
-  grid_meta = config.output_ncl2.var_meta;
-  grid_dims = config.output_ncl2.dim_names;
-  grid_atts = config.output_ncl2.global_atts; 
-  try
-    generateOutputNetCDFL2(ncl2_fullfile, grid_data_aux, grid_meta, ...
-                           grid_dims, grid_atts, deployment);
-    disp(['Output NetCDF L2 (gridded data) generated: ' output_ncl2 '.']);
-  catch exception
-    disp(['Error generating NetCDF L2 (gridded data) output ' ncl2_fullfile ':']);
-    disp(getReport(exception, 'extended'));
-  end;
-
-
+  
+  
   %% Generate deployment figures.
   try
     %{
