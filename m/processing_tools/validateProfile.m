@@ -12,17 +12,17 @@ function [valid, full_rows] = validateProfile(depth, data, varargin)
 %  value pairs OPT1, VAL1... The profile is required to have a minimum depth 
 %  range and contain no significant gaps. Number of rows of DATA and number of 
 %  elements of DEPTH should be the same. Valid options are:
-%    'range': minimum depth range (in the same units as DEPTH).
+%    RANGE: minimum depth range (in the same units as DEPTH).
 %      A profile is invalid if the difference between the maximum and minimum
 %      depth values is smaller than given threshold.
-%      Default value: 0 (all profiles are valid).
-%    'gap': maximum gap ratio (in [0,1]).
+%      Default value: 0 (only empty profiles are invalid).
+%    GAP: maximum gap ratio (in [0,1]).
 %      A profile is invalid if the ratio of the depth range of the largest gap
 %      to the depth range of the whole profile is larger than given threshold.
 %      A gap is a sequence of consecutive incomplete measurements, either 
 %      because of invalid values (NaN) in some column of DATA, or because of 
 %      invalid entries in DEPTH.
-%      Default value: 1 (all profiles are valid).
+%      Default value: 1 (only empty profiles are invalid).
 %
 %  [VALID, FULL_ROWS]= VALIDATEPROFILE(...) also returns a logical column vector
 %  FULL_ROWS with the same number of elements as DEPTH, showing whether
@@ -50,6 +50,7 @@ function [valid, full_rows] = validateProfile(depth, data, varargin)
 %    valid = validateProfile(depth, data, 'range', 5, 'gap', 0.75)
 %
 %  See also:
+%    ISNAN
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
@@ -71,7 +72,8 @@ function [valid, full_rows] = validateProfile(depth, data, varargin)
               'Invalid option: %s.', opt);
     end
   end
-
+  
+  % Initialize output.
   full_rows = ~any(isnan([depth(:) data]), 2);
   valid = false;
   

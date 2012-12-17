@@ -1,17 +1,17 @@
-function [filled, indices] = fillInvalidValues(varargin)
+function [filled, invalid] = fillInvalidValues(varargin)
 %FILLINVALIDVALUES  Fill invalid values in sequence with given method.
 %
 %  Syntax:
-%    [FILLED, INDICES] = FILLINVALIDVALUES(X, Y, METHOD)
-%    [FILLED, INDICES] = FILLINVALIDVALUES(X, Y, VALUE)
-%    [FILLED, INDICES] = FILLINVALIDVALUES(X, Y)
-%    [FILLED, INDICES] = FILLINVALIDVALUES(Y, METHOD)
-%    [FILLED, INDICES] = FILLINVALIDVALUES(Y, VALUE)
-%    [FILLED, INDICES] = FILLINVALIDVALUES(Y)
+%    FILLED = FILLINVALIDVALUES(X, Y, METHOD)
+%    FILLED = FILLINVALIDVALUES(X, Y, VALUE)
+%    FILLED = FILLINVALIDVALUES(X, Y)
+%    FILLED = FILLINVALIDVALUES(Y, METHOD)
+%    FILLED = FILLINVALIDVALUES(Y, VALUE)
+%    FILLED = FILLINVALIDVALUES(Y)
+%    [FILLED, INVALID] = FILLINVALIDVALUES(...)
 %
-%  [FILLED, INDICES] = FILLINVALIDVALUES(X, Y, METHOD) fills invalid 
-%  values (nan occurrences) in vector X, using the method specified by string
-%  METHOD, which is one of:
+%  FILLED = FILLINVALIDVALUES(X, Y, METHOD) fills invalid values (NaN) in vector
+%  Y, using the method specified by string METHOD, which is one of:
 %    'none': do nothing, X is ignored and Y is returned.
 %    'previous': previous valid value found (if any), X is ignored.
 %    'next': next valid value found (if any), X is ignored.
@@ -19,37 +19,42 @@ function [filled, indices] = fillInvalidValues(varargin)
 %      values in Y over corresponding entries in independent variable vector X 
 %      using function INTERP1 with given method. X and Y should have the same 
 %      dimensions.
-%  FILLED is a vector with the same dimension as X with invalid values filled.
-%  INDICES is a vector with the indices of invalid values in X.
+%  FILLED is a a copy of vector Y but with invalid values filled.
 %
-%  [FILLED, INDICES] = FILLINVALIDVALUES(X, Y, VALUE) fills invalid values in X
+%  FILLED = FILLINVALIDVALUES(X, Y, VALUE) fills invalid values in X
 %  using number VALUE as fill value. X is ignored.
 %
-%  [FILLED, INDICES] = FILLINVALIDVALUES(X, Y) fills invalid values in X
+%  FILLED = FILLINVALIDVALUES(X, Y) fills invalid values in X
 %  using 'linear' as default interpolation method.
 %
-%  [FILLED, INDICES] = FILLINVALIDVALUES(Y, ...) assume that X = 1:N, where N
-%  is the length of Y. Please note that this is only relevant when used with
+%  FILLED = FILLINVALIDVALUES(Y, ...) assumes that X = 1:N, where N is the 
+%  length of Y. Please note that this is only relevant when used with
 %  interpolation methods: 'nearest', 'linear', 'spline', 'pchip' or 'cubic'.
+%
+%  [FILLED, INVALID] = FILLINVALIDVALUES(...) also returns a logical vector
+%  INVALID with the same dimensions as Y, showing whether respective entries in
+%  Y are invalid values.
 %
 %  Examples:
 %    x = [0 2 4 8 10 12 14 16 18 20]
 %    y = [0 nan 16 64 nan nan nan 256 324 400] % y = x.^2
 %    % Default linear interpolation over 1:N.
-%    [filled, indices] = fillInvalidValues(y)
+%    filled = fillInvalidValues(y)
 %    % Default linear interpolation over given independent coordinates.
-%    [filled, indices] = fillInvalidValues(x, y)
+%    filled = fillInvalidValues(x, y)
 %    % Interpolation using cubic splines given independent coordinates.
-%    [filled, indices] = fillInvalidValues(x, y, 'cubic')
+%    filled = fillInvalidValues(x, y, 'cubic')
 %    % Fill with previous valid value (x not needed but could be there).
-%    [filled, indices] = fillInvalidValues(y, 'previous')
-%    [filled, indices] = fillInvalidValues(x, y, 'previous')
+%    filled = fillInvalidValues(y, 'previous')
+%    filled = fillInvalidValues(x, y, 'previous')
 %    % Fill with next valid value (x not needed but could be there).
-%    [filled, indices] = fillInvalidValues(y, 'next')
-%    [filled, indices] = fillInvalidValues(x, y, 'next')
+%    filled = fillInvalidValues(y, 'next')
+%    filled = fillInvalidValues(x, y, 'next')
 %    % Fill with given value (x not needed but could be there).
-%    [filled, indices] = fillInvalidValues(y, 0)
-%    [filled, indices] = fillInvalidValues(x, y, 0)
+%    filled = fillInvalidValues(x, y, 0)
+%    filled = fillInvalidValues(y, 0)
+%    % Get also the index of invalid entries in Y.
+%    [filled, invalid] = fillInvalidValues(x, y)
 %
 %  See also:
 %    INTERP1
@@ -87,10 +92,8 @@ function [filled, indices] = fillInvalidValues(varargin)
     % Fill invalid values with given method.
     switch lower(method)
       case 'none'
-        indices = find(invalid);
         filled = y;
       case 'previous'
-        indices = find(invalid);
         filled = y;
         ind_val = find(~invalid);        
         for i = 1:(numel(ind_val)-1)
@@ -100,7 +103,6 @@ function [filled, indices] = fillInvalidValues(varargin)
           filled(first:last) = value;
         end
       case 'next'
-        indices = find(invalid);
         filled = y;
         ind_val = find(~invalid);        
         for i = 1:(numel(ind_val)-1)
@@ -110,7 +112,6 @@ function [filled, indices] = fillInvalidValues(varargin)
           filled(first:last) = value;
         end
       case {'nearest', 'linear', 'spline', 'pchip', 'cubic'}
-        indices = find(invalid);
         filled = y;
         filled(invalid) = ...
           interp1(x(~invalid), y(~invalid), x(invalid), lower(method));
@@ -120,7 +121,6 @@ function [filled, indices] = fillInvalidValues(varargin)
     end
   else
     % Fill invalid values with given scalar value.
-    indices = find(invalid);
     filled = y;
     filled(invalid) = method;
   end
