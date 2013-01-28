@@ -491,229 +491,240 @@ function data_proc = processGliderData(data_pre, varargin)
   
   %% Get list of available sensors.
   sensor_list = fieldnames(data_pre);
-  
-  
+
+
   %% Select time coordinate sensor.
-  % Find time sensor in the list of available sensors.
+  % Find preferred valid time sensor in list of available sensors.
   % For Slocum data please be aware of the efects of program dba_merge,
   % namely the copy of the sci_m_present_time value to the m_present_time for
   % sensor cycles coming from the science board.
-  time_sensor_present = ismember(options.time_sensor_list, sensor_list);
-  if ~any(time_sensor_present)
+  for time_sensor_idx = 1:numel(options.time_sensor_list)
+    time_sensor = options.time_sensor_list{time_sensor_idx};
+    if ismember(time_sensor, sensor_list) && any(data_pre.(time_sensor) > 0)
+      data_proc.time = data_pre.(time_sensor);
+      break;
+    end
+  end
+  if ~isfield(data_proc, 'time')
     error('glider_toolbox:processGliderData:MissingSensorTime', ...
           'No time sensor present in data set.');
   end
-  % Take first time sensor found (preferred).
-  time_sensor_index = find(time_sensor_present, 1, 'first');
-  time_sensor = options.time_sensor_list{time_sensor_index};
-  % Set time sequence, filling missing readings if needed.
+
+
+  %% Select position coordinate sensors.
+  % Find preferred set of valid latitude and longitude sensors in list of 
+  % available sensors.
+  for position_sensor_idx = 1:numel(options.position_sensor_list)
+    lat_sensor = options.position_sensor_list(position_sensor_idx).latitude;
+    lon_sensor = options.position_sensor_list(position_sensor_idx).longitude;
+    if all(ismember({lat_sensor lon_sensor}, sensor_list)) ...
+        && ~all(isnan(data_pre.(lat_sensor))) ...
+        && ~all(isnan(data_pre.(lon_sensor))) 
+      data_proc.latitude = data_pre.(lat_sensor);
+      data_proc.longitude = data_pre.(lon_sensor);
+      break;
+    end
+  end
+  if ~all(isfield(data_proc, {'latitude', 'longitude'}))
+    error('glider_toolbox:processGliderData:MissingSensorPosition', ...
+          'No latitude and longitude sensors present in data set.');
+  end
+
+
+  %% Select depth sensor.
+  % Find preferred valid depth sensor in list of available sensors, if any.
+  for depth_sensor_idx = 1:numel(options.depth_sensor_list)
+    depth_sensor = options.depth_sensor_list{depth_sensor_idx};
+    if ismember(depth_sensor, sensor_list) ...
+        && ~all(isnan(data_pre.(depth_sensor)))
+      data_proc.depth = data_pre.(depth_sensor);
+      break;
+    end
+  end
+
+
+  %% Select pitch sensor.
+  % Find preferred valid pitch sensor in list of available sensors, if any.
+  for pitch_sensor_idx = 1:numel(options.pitch_sensor_list)
+    pitch_sensor = options.pitch_sensor_list{pitch_sensor_idx};
+    if ismember(pitch_sensor, sensor_list) ...
+        && ~all(isnan(data_pre.(pitch_sensor)))
+      data_proc.pitch = data_pre.(pitch_sensor);
+      break;
+    end
+  end
+
+
+  %% Select waypoint coordinate sensors.
+  % Find preferred set of valid waypoint latitude and longitude sensors in list 
+  % of available sensors, if any.
+  for waypoint_sensor_idx = 1:numel(options.waypoint_sensor_list)
+    wpt_lat_sensor = ...
+      options.waypoint_sensor_list(waypoint_sensor_idx).latitude;
+    wpt_lon_sensor = ...
+      options.waypoint_sensor_list(waypoint_sensor_idx).longitude;
+    if all(ismember({wpt_lat_sensor wpt_lon_sensor}, sensor_list)) ...
+        && ~all(isnan(data_pre.(wpt_lat_sensor))) ...
+        && ~all(isnan(data_pre.(wpt_lon_sensor)))
+      data_proc.waypoint_latitude = data_pre.(wpt_lat_sensor);
+      data_proc.waypoint_longitude = data_pre.(wpt_lon_sensor);
+      break;
+    end
+  end
+
+
+  %% Select segment mean water velocity component sensor.
+  % Find preferred set of valid segment mean water velocity sensors in list of 
+  % available sensors, if any.
+  for water_velocity_sensor_idx = 1:numel(options.water_velocity_sensor_list)
+    wat_vel_east_sensor = ...
+      options.water_velocity_sensor_list(water_velocity_sensor_idx).velocity_eastward;
+    wat_vel_north_sensor = ...
+      options.water_velocity_sensor_list(water_velocity_sensor_idx).velocity_northward;
+    if all(ismember({wat_vel_east_sensor wat_vel_north_sensor}, sensor_list)) ...
+        && ~all(isnan(data_pre.(wat_vel_east_sensor))) ...
+        && ~all(isnan(data_pre.(wat_vel_north_sensor)))
+      data_proc.water_velocity_eastward = data_pre.(wat_vel_east_sensor);
+      data_proc.water_velocity_northward = data_pre.(wat_vel_north_sensor);
+      break;
+    end
+  end
+
+  
+  %% Select CTD sensor.
+  % Find preferred valid CTD sensor set in list of available sensors, if any.
+  for ctd_sensor_idx = 1:numel(options.ctd_sensor_list)
+    cond_sensor = options.ctd_sensor_list(ctd_sensor_idx).conductivity;
+    temp_sensor = options.ctd_sensor_list(ctd_sensor_idx).temperature;
+    pres_sensor = options.ctd_sensor_list(ctd_sensor_idx).pressure;
+    if isfield(options.ctd_sensor_list, 'time')
+      time_ctd_sensor = options.ctd_sensor_list(ctd_sensor_idx).time;
+    else
+      time_ctd_sensor = [];
+    end
+    if all(ismember({cond_sensor temp_sensor pres_sensor}, sensor_list)) ...
+        && ~all(isnan(data_pre.(cond_sensor))) ...
+        && ~all(isnan(data_pre.(temp_sensor))) ...
+        && ~all(isnan(data_pre.(pres_sensor)))
+      data_proc.conductivity = data_pre.(cond_sensor);
+      data_proc.temperature = data_pre.(temp_sensor);
+      data_proc.pressure = data_pre.(pres_sensor);
+      if ~isempty(time_ctd_sensor) ...
+          && ismember(time_ctd_sensor, sensor_list) ...
+          && any(data_pre.(time_ctd_sensor) > 0)
+        data_proc.time_ctd = data_pre.(time_ctd_sensor);
+      end
+      break;
+    end
+  end
+
+  
+  %% Select fluor (chlorophyl) and turbidity sensor.
+  % Find preferred set of valid fluor and turbidity sensors in list of available 
+  % sensors, if any.
+  for flntu_sensor_idx = 1:numel(options.flntu_sensor_list)
+    chlr_sensor = options.flntu_sensor_list(flntu_sensor_idx).chlorophyll;
+    turb_sensor = options.flntu_sensor_list(flntu_sensor_idx).turbidity;
+    if all(ismember({chlr_sensor turb_sensor}, sensor_list)) ...
+        && ~all(isnan(data_pre.(chlr_sensor))) ...
+        && ~all(isnan(data_pre.(turb_sensor)))
+      data_proc.chlorophyll = data_pre.(chlr_sensor);
+      data_proc.turbidity = data_pre.(turb_sensor);
+      break;
+    end
+  end
+  
+  
+  %% Select oxygen sensors.
+  % Find preferred set of valid oxygen sensors in list of available sensors, 
+  % if any.
+  for oxygen_sensor_idx = 1:numel(options.oxygen_sensor_list)
+    oxy_con_sensor = ...
+      options.oxygen_sensor_list(oxygen_sensor_idx).oxygen_concentration;
+    oxy_sat_sensor = ...
+      options.oxygen_sensor_list(oxygen_sensor_idx).oxygen_saturation;
+    if all(ismember({oxy_con_sensor oxy_sat_sensor}, sensor_list)) ...
+        && ~all(isnan(data_pre.(oxy_con_sensor))) ...
+        && ~all(isnan(data_pre.(oxy_sat_sensor)))
+      data_proc.oxygen_concentration = data_pre.(oxy_con_sensor);
+      data_proc.oxygen_saturation = data_pre.(oxy_sat_sensor);
+      break;
+    end
+  end
+  
+  
+  %% Select any other extra sensor.
+  % Add the preferred set of valid extra sensors available in list of sensors,
+  % for each extra sensor option given.
+  for extra_sensor_idx = 1:numel(options.extra_sensor_list)
+    extra_sensor_option_list = options.extra_sensor_list{extra_sensor_idx};
+    extra_sensor_field_list = fieldnames(extra_sensor_option_list);
+    % Find preferred set of valid extra sensors in list of available sensors, 
+    % if any.
+    for extra_sensor_option_idx = 1:numel(extra_sensor_option_list)
+      extra_sensor_option = extra_sensor_option_list(extra_sensor_option_idx);
+      if all(structfun(@(s) isempty(s) || (ismember(s, sensor_list) && ~all(isnan(data_pre.(s)))), ...
+                       extra_sensor_option))
+        for extra_sensor_field_idx = 1:numel(extra_sensor_field_list)
+          extra_sensor_field = extra_sensor_field_list{extra_sensor_field_idx};
+          extra_sensor_name = extra_sensor_option.(extra_sensor_field);
+          if ~isempty(extra_sensor_name)
+            data_proc.(extra_sensor_field) = data_pre.(extra_sensor_name);
+          end
+        end
+        break
+      end
+    end
+  end
+
+
+  %% Fill missing time readings, if needed.
   % Regular sampling is assumed on time gaps.
-  data_proc.time = data_pre.(time_sensor);
   if options.time_filling
     data_proc.time = ...
       fillInvalidValues(data_proc.time, 'linear');
   end
 
-  
-  %% Select position coordinate sensors.
-  % Find latitude and longitude sensors in the list of available sensors.
-  latitude_sensor_present = ...
-    ismember({options.position_sensor_list.latitude}, sensor_list);
-  longitude_sensor_present = ...
-    ismember({options.position_sensor_list.longitude}, sensor_list);
-  position_sensor_present = latitude_sensor_present & longitude_sensor_present;
-  if ~any(position_sensor_present)
-    error('glider_toolbox:processGliderData:MissingSensorPosition', ...
-          'No latitude and longitude sensors present in data set.');
-  end
-  % Take first latitude and longitude sensor set found (preferred).
-  position_sensor_index = find(position_sensor_present, 1, 'first');
-  lat_sensor = options.position_sensor_list(position_sensor_index).latitude;
-  lon_sensor = options.position_sensor_list(position_sensor_index).longitude;
-  % Set latitude and longitude sequences filling missing readings if needed.  
-  data_proc.latitude = data_pre.(lat_sensor);
-  data_proc.longitude = data_pre.(lon_sensor);
+
+  %% Fill missing position readings, if needed.
+  % Use linear interpolation of valid coordinate readings.
   if options.position_filling
      data_proc.latitude = ...
        fillInvalidValues(data_proc.time, data_proc.latitude, 'linear');
      data_proc.longitude = ...
        fillInvalidValues(data_proc.time, data_proc.longitude, 'linear');
   end
-  
-  
-  %% Select depth sensor.
-  % Find depth sensor in the list of available sensors, if any.
-  depth_sensor_present = ismember(options.depth_sensor_list, sensor_list);
-  if any(depth_sensor_present)
-    % Take first depth sensor found (preferred).
-    depth_sensor_index = find(depth_sensor_present, 1, 'first');
-    depth_sensor = options.depth_sensor_list{depth_sensor_index};
-    % Set depth sequence, filling missing readings if needed.
-    data_proc.depth = data_pre.(depth_sensor);
-    if options.depth_filling
-      data_proc.depth = ...
-        fillInvalidValues(data_proc.time, data_proc.depth, 'linear');
-    end
-  end
-  
-  
-  %% Select pitch sensor.
-  % Find pitch sensor in the list of available sensors, if any.
-  pitch_sensor_present = ismember(options.pitch_sensor_list, sensor_list);
-  if any(pitch_sensor_present)
-    % Take first pitch sensor found (preferred).
-    pitch_sensor_index = find(pitch_sensor_present, 1, 'first');
-    pitch_sensor = options.pitch_sensor_list{pitch_sensor_index};
-    % Set pitch sequence, filling missing readings if needed.
-    data_proc.pitch = data_pre.(pitch_sensor);
-    if options.pitch_filling
-      data_proc.pitch = ...
-        fillInvalidValues(data_proc.time, data_proc.pitch, 'linear');
-    end
-  end
-  
-  
-  %% Select waypoint coordinate sensors.
-  % Find waypoint latitude and longitude sensor set in the list of available
-  % sensors, if any.
-  wpt_lat_sensor_present = ...
-    ismember({options.waypoint_sensor_list.latitude}, sensor_list);
-  wpt_lon_sensor_present = ...
-    ismember({options.waypoint_sensor_list.longitude}, sensor_list);
-  waypoint_sensor_present = wpt_lat_sensor_present & wpt_lon_sensor_present;
-  if any(waypoint_sensor_present)
-    % Take first waypoint latitude and longitude sensor set found (preferred).
-    waypoint_sensor_index = find(waypoint_sensor_present, 1, 'first');
-    wpt_lat_sensor = ...
-      options.waypoint_sensor_list(waypoint_sensor_index).latitude;
-    wpt_lon_sensor = ...
-      options.waypoint_sensor_list(waypoint_sensor_index).longitude;
-    % Set waypoint latitude and longitude sequences, filling invalid values.
-    % Waypoint coordinates are assumed constant until next waypoint reading.
-    data_proc.waypoint_latitude = data_pre.(wpt_lat_sensor);
-    data_proc.waypoint_longitude = data_pre.(wpt_lon_sensor);
-    if options.waypoint_filling
-      data_proc.waypoint_latitude = ...
-        fillInvalidValues(data_proc.waypoint_latitude, 'previous');
-      data_proc.waypoint_longitude = ...
-        fillInvalidValues(data_proc.waypoint_longitude, 'previous');
-    end
-  end
-  
-  
-  %% Select segment mean water velocity component sensor.
-  % Find full set of segment mean water velocity sensors in the list of 
-  % available sensors, if any.
-  water_vel_east_sensor_present = ...
-    ismember({options.water_velocity_sensor_list.velocity_eastward}, sensor_list);
-  water_vel_north_sensor_present = ...
-    ismember({options.water_velocity_sensor_list.velocity_northward}, sensor_list);
-  water_vel_sensor_present = ...
-    water_vel_east_sensor_present & water_vel_north_sensor_present;
-  if any(water_vel_sensor_present)
-    % Take first water velocity sensor set found (preferred).
-    water_vel_sensor_index = find(water_vel_sensor_present, 1, 'first');
-    water_vel_east_sensor = ...
-      options.water_velocity_sensor_list(water_vel_sensor_index).velocity_eastward;
-    water_vel_north_sensor = ...
-      options.water_velocity_sensor_list(water_vel_sensor_index).velocity_northward;
-    % Set water eastward and northward speed sequences.
-    data_proc.water_velocity_eastward = data_pre.(water_vel_east_sensor);
-    data_proc.water_velocity_northward = data_pre.(water_vel_north_sensor);
-  end
-  
-  
-  %% Select CTD sensor.
-  % Find CTD sensor sets in the list of available sensors, if any.
-  cond_sensor_present = ...
-    ismember({options.ctd_sensor_list.conductivity}, sensor_list);
-  temp_sensor_present = ...
-    ismember({options.ctd_sensor_list.temperature}, sensor_list);
-  pres_sensor_present = ...
-    ismember({options.ctd_sensor_list.pressure}, sensor_list);
-  ctd_sensor_present = ...
-    cond_sensor_present & temp_sensor_present & pres_sensor_present;
-  if any(ctd_sensor_present)
-    % Take first CTD sensor set found (preferred).
-    ctd_sensor_index = find(ctd_sensor_present, 1, 'first');
-    cond_sensor = options.ctd_sensor_list(ctd_sensor_index).conductivity;
-    temp_sensor = options.ctd_sensor_list(ctd_sensor_index).temperature;
-    pres_sensor = options.ctd_sensor_list(ctd_sensor_index).pressure;
-    % Set CTD sequences.
-    data_proc.conductivity = data_pre.(cond_sensor);
-    data_proc.temperature = data_pre.(temp_sensor);
-    data_proc.pressure = data_pre.(pres_sensor);
-    % Look for CTD timestamp.
-    if isfield(options.ctd_sensor_list, 'time') ...
-       && ~isempty(options.ctd_sensor_list(ctd_sensor_index).time) ...
-       && ismember(options.ctd_sensor_list(ctd_sensor_index).time, sensor_list)
-      time_ctd_sensor = options.ctd_sensor_list(ctd_sensor_index).time;
-      data_proc.time_ctd = data_pre.(time_ctd_sensor);
-    end
-  end
-  
-  
-  %% Select fluor (chlorophyl) and turbidity sensor.
-  % Find fluor and turbidity sensors in the list of available sensors, if any.
-  chlr_sensor_present = ...
-    ismember({options.flntu_sensor_list.chlorophyll}, sensor_list);
-  turb_sensor_present = ...
-    ismember({options.flntu_sensor_list.turbidity}, sensor_list);
-  flntu_sensor_present = chlr_sensor_present & turb_sensor_present;
-  if any(flntu_sensor_present)
-    % Take first fluor and turbidity sensor set found (preferred).
-    flntu_sensor_index = find(flntu_sensor_present, 1, 'first');
-    chlr_sensor = options.flntu_sensor_list(flntu_sensor_index).chlorophyll;
-    turb_sensor = options.flntu_sensor_list(flntu_sensor_index).turbidity;
-    % Set fluor and turbidity sequences.
-    data_proc.chlorophyll = data_pre.(chlr_sensor);
-    data_proc.turbidity = data_pre.(turb_sensor);
-  end
-  
-  
-  %% Select oxygen sensors.
-  % Find full set of oxygen sensors in the list of available sensors, if any.
-  oxy_con_sensor_present = ...
-    ismember({options.oxygen_sensor_list.oxygen_concentration}, sensor_list);
-  oxy_sat_sensor_present = ...
-    ismember({options.oxygen_sensor_list.oxygen_saturation}, sensor_list);
-  oxygen_sensor_present = oxy_con_sensor_present & oxy_sat_sensor_present;
-  if any(oxygen_sensor_present)
-    % Take first oxygen sensor set found (preferred).
-    oxygen_sensor_index = find(oxygen_sensor_present, 1, 'first');
-    oxy_con_sensor = ...
-      options.oxygen_sensor_list(oxygen_sensor_index).oxygen_concentration;
-    oxy_sat_sensor = ...
-      options.oxygen_sensor_list(oxygen_sensor_index).oxygen_saturation;
-    % Set oxygen concentration and saturation sequences.
-    data_proc.oxygen_concentration = data_pre.(oxy_con_sensor);
-    data_proc.oxygen_saturation = data_pre.(oxy_sat_sensor);
-  end
-  
-  
-  %% Select any other extra sensor.
-  % Loop over desired extra sensor sets, and add them to processed data if they
-  % are available.
-  for extra_sensor_idx = 1:numel(options.extra_sensor_list)
-    % Find full set of extra sensors in the list of available sensors, if any.
-    extra_sensor_option = options.extra_sensor_list{extra_sensor_idx};
-    extra_sensor_present = ...
-      all(ismember(struct2cell(extra_sensor_option(:)), sensor_list), 1);
-    if any(extra_sensor_present)
-      % Take first extra sensor set found (preferred).
-      extra_sensor_index = find(extra_sensor_present, 1, 'first');
-      extra_sensor = extra_sensor_option(extra_sensor_index);
-      extra_sensor_field_list = fieldnames(extra_sensor_option);
-      % Set extra sensor sequences.
-      for extra_sensor_field_idx = 1:numel(extra_sensor_field_list)
-        extra_sensor_field = extra_sensor_field_list{extra_sensor_field_idx};
-        extra_sensor_name = extra_sensor.(extra_sensor_field);
-        data_proc.(extra_sensor_field) = data_pre.(extra_sensor_name);
-      end
-    end
-  end
-  
 
+
+  %% Fill missing depth readings, if needed.
+  % Use linear interpolation of valid coordinate readings.
+  if options.depth_filling && isfield(data_proc, 'depth');
+    data_proc.depth = ...
+      fillInvalidValues(data_proc.time, data_proc.depth, 'linear');
+  end
+
+
+  %% Fill missing pitch readings, if needed.
+  % Use linear interpolation of valid coordinate readings.
+  if options.pitch_filling && isfield(data_proc, 'pitch')
+    data_proc.pitch = ...
+      fillInvalidValues(data_proc.time, data_proc.pitch, 'linear');
+  end
+  
+  
+  %% Fill missing waypoint coordinate readings, if needed.
+  % Waypoint coordinates are assumed constant until next valid waypoint 
+  % coordinate reading.
+  if options.waypoint_filling ...
+      && isfield(data_proc, 'waypoint_latitude') ...
+      && isfield(data_proc, 'waypoint_longitude')
+    data_proc.waypoint_latitude = ...
+      fillInvalidValues(data_proc.waypoint_latitude, 'previous');
+    data_proc.waypoint_longitude = ...
+      fillInvalidValues(data_proc.waypoint_longitude, 'previous');
+  end
+
+ 
   %% Identify begin and end of transects, if waypoint coordinates available.
   if all(isfield(data_proc, {'waypoint_latitude' 'waypoint_longitude'}))
     data_proc.transect_index = ...
@@ -760,8 +771,8 @@ function data_proc = processGliderData(data_pre, varargin)
   profiling_sequence_present = isfield(data_proc, options.profiling_sequence);
   if any(profiling_sequence_present)
     % Take first profiling sequence found (preferred).
-    profiling_sequence_index = find(profiling_sequence_present, 1, 'first');
-    profiling_sequence = options.profiling_sequence{profiling_sequence_index};
+    profiling_sequence_idx = find(profiling_sequence_present, 1, 'first');
+    profiling_sequence = options.profiling_sequence{profiling_sequence_idx};
     profile_stamp = data_proc.(profiling_sequence);
     % Fill profiling sequence invalid values, if needed.
     if (options.profiling_sequence_filling)
@@ -811,17 +822,19 @@ function data_proc = processGliderData(data_pre, varargin)
     if isfield(data_proc, sensor_lag_raw)
       sensor_lag_raw_avail = true;
     end
-    sensor_lag_time_present = isfield(data_proc, sensor_lag_time_list);
-    if any(sensor_lag_time_present)
-      sensor_lag_time_index = find(sensor_lag_time_present, 1, 'first');
-      sensor_lag_time = sensor_lag_time_list{sensor_lag_time_index};
-      sensor_lag_time_avail = true;
+    for sensor_lag_time_idx = 1:numel(sensor_lag_time_list)
+      sensor_lag_time = sensor_lag_time_list{sensor_lag_time_idx};
+      if isfield(data_proc, sensor_lag_time)
+        sensor_lag_time_avail = true;
+        break
+      end
     end
-    sensor_lag_depth_present = isfield(data_proc, sensor_lag_depth_list);
-    if any(sensor_lag_depth_present)
-      sensor_lag_depth_index = find(sensor_lag_depth_present, 1, 'first');
-      sensor_lag_depth = sensor_lag_depth_list{sensor_lag_depth_index};
-      sensor_lag_depth_avail = true;
+    for sensor_lag_depth_idx = 1:numel(sensor_lag_depth_list)
+      sensor_lag_depth = sensor_lag_depth_list{sensor_lag_depth_idx};
+      if isfield(data_proc, sensor_lag_depth)
+        sensor_lag_depth_avail = true;
+        break
+      end
     end
     sensor_lag_input_avail = ...
       all([sensor_lag_raw_avail sensor_lag_time_avail sensor_lag_depth_avail]);
@@ -963,25 +976,28 @@ function data_proc = processGliderData(data_pre, varargin)
     thermal_lag_cond_raw_avail = false;
     thermal_lag_temp_raw_avail = false;
     thermal_lag_pres_avail = false;
-    thermal_lag_time_present = isfield(data_proc, thermal_lag_time_list);
-    if any(thermal_lag_time_present)
-      thermal_lag_time_index = find(thermal_lag_time_present, 1, 'first');
-      thermal_lag_time = thermal_lag_time_list{thermal_lag_time_index};
-      thermal_lag_time_avail = true;
+    for thermal_lag_time_idx = 1:numel(thermal_lag_time_list)
+      thermal_lag_time = thermal_lag_time_list{thermal_lag_time_idx};
+      if isfield(data_proc, thermal_lag_time)
+        thermal_lag_time_avail = true;
+        break;
+      end
     end
-    thermal_lag_depth_present = isfield(data_proc, thermal_lag_depth_list);
-    if any(thermal_lag_depth_present)
-      thermal_lag_depth_index = find(thermal_lag_depth_present, 1, 'first');
-      thermal_lag_depth = thermal_lag_depth_list{thermal_lag_depth_index};
-      thermal_lag_depth_avail = true;
+    for thermal_lag_depth_idx = 1:numel(thermal_lag_depth_list)
+      thermal_lag_depth = thermal_lag_depth_list{thermal_lag_depth_idx};
+      if isfield(data_proc, thermal_lag_depth)
+        thermal_lag_depth_avail = true;
+        break
+      end
     end
-    thermal_lag_pitch_present = isfield(data_proc, thermal_lag_pitch_list);
-    if any(thermal_lag_pitch_present)
-      thermal_lag_pitch_index = find(thermal_lag_pitch_present, 1, 'first');
-      thermal_lag_pitch = thermal_lag_pitch_list{thermal_lag_pitch_index};
-      thermal_lag_pitch_avail = true;
-    elseif ~isempty(thermal_lag_pitch_missing_value)
-      thermal_lag_pitch = thermal_lag_pitch_missing_value;
+    for thermal_lag_pitch_idx = 1:numel(thermal_lag_pitch_list)
+      thermal_lag_pitch = thermal_lag_pitch_list{thermal_lag_pitch_idx};
+      if isfield(data_proc, thermal_lag_pitch)
+        thermal_lag_pitch_avail = true;
+        break
+      end
+    end
+    if ~isempty(thermal_lag_pitch_missing_value)
       thermal_lag_pitch_missing_value_avail = true;
     end
     if isfield(data_proc, thermal_lag_cond_raw)
