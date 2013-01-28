@@ -37,7 +37,7 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 %    However, note that sensor cycles with the same timestamp in the same data
 %    set are not merged, and the values in the latest sensor cycle will be used.
 %    This may be relevant when binary data files are converted to ascii format 
-%    with the option -o (the initial sensor cycle values may be ommited if the
+%    with the option -o (the initial sensor cycle values may be omited if the
 %    timestamp in the following sensor cycle is the same).
 %
 %    All values in timestamp columns should be valid (not nan).

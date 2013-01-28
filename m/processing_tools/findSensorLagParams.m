@@ -47,8 +47,8 @@ function [constant, exitflag, residual] = findSensorLagParams(time1, depth1, dat
 %  residual area in RESIDUAL. EXITFLAG is positive when minimization succeeds.
 %
 %  Notes:
-%    This function is slightly modified version of a previous function by Tomeu
-%    Garau, called  ADJUSTIMECONSTANT. He is the true glider man.
+%    This function is an improved version of a previous function by Tomeu Garau,
+%    called ADJUSTIMECONSTANT. He is the true glider man.
 %    Introduced changes are:
 %      - Different minimization function (FMINBND instead of FMINCON).
 %      - No initial guess (since FMINBND does not need it).

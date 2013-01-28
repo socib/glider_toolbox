@@ -100,10 +100,10 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
   %% Create base directory of target file if needed.
   [dba_dir, ~, ~] = fileparts(dba_file);
   if ~exist(dba_dir, 'dir')
-    [success, error_msg] = mkdir(dba_dir);
+    [success, message] = mkdir(dba_dir);
     if ~success
       error('glider_toolbox:xbd2ascii:AsciiDirectoryError', ...
-            'Error creating target directory: %s.', error_msg);
+            'Error creating target directory: %s.', message);
     end
   end
   

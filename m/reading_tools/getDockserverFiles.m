@@ -224,9 +224,9 @@ function files = fetchNewAndUpdatedFiles(ftp_handle, remote_dir, local_dir, name
     remote_files = remote_files(to_download);
   else
     % Create local directory because mget does not do it.
-    [success, error_msg] = mkdir(local_dir);
+    [success, message] = mkdir(local_dir);
     if ~success
-      error('glider_toolbox:reading_tools:LocalDirectoryError', error_msg);
+      error('glider_toolbox:reading_tools:LocalDirectoryError', message);
     end
   end
   if isempty(remote_files)

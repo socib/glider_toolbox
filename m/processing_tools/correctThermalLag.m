@@ -24,7 +24,7 @@ function [temp_inside, cond_outside] = correctThermalLag(varargin)
 %  be the constant pitch across the whole profile.
 %
 %  Notes:
-%    This functions is a recoding of the function by Tomeu Garau with the same 
+%    This function is a recoding of the function by Tomeu Garau with the same 
 %    name. He is the true glider man.
 %
 %  References:

@@ -32,7 +32,7 @@ function ncl0 = generateOutputNetCDFL0(filename, data, meta, dims, atts, deploym
 %  Notes:
 %    Usually input data is the output of PREPROCESSGLIDERDATA.
 %    Be aware that only variables present in struct META are added to the NetCDF
-%    file. If there is any field in DATA not present in META, it is ommited.
+%    file. If there is any field in DATA not present in META, it is omited.
 %
 %  Examples:
 %    ncl0 = generateOutputNetCDFL0(filename, data, meta, dims, atts, deployment)
@@ -113,9 +113,9 @@ function ncl0 = generateOutputNetCDFL0(filename, data, meta, dims, atts, deploym
   %% Create base directory of target file if needed.
   [file_dir, ~, ~] = fileparts(filename);
   if ~exist(file_dir, 'dir')
-    [success, error_msg] = mkdir(file_dir);
+    [success, message] = mkdir(file_dir);
     if ~success
-      error('glider_toolbox:netcdf_tools:NetCDFDirectoryError', error_msg);
+      error('glider_toolbox:netcdf_tools:NetCDFDirectoryError', message);
     end
   end
   

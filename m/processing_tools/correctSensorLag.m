@@ -10,13 +10,13 @@ function cor = correctSensorLag(time, raw, constant)
 %  signal is advanced CONSTANT time units.
 %
 %  Notes:
+%    This function is a rewording of a previous function by Tomeu Garau,
+%    called CORRECTTIMERESPONSE. He is the true glider man.
+%
 %    Invalid values (NaN) in input sequence are ignored but preserved in output.
 %
 %    The first order approximation is done using forward differences with the 
 %    function DIFF.
-%
-%    This function is a rewording of a previous function by Tomeu Garau,
-%    called CORRECTTIMERESPONSE. He is the true glider man.
 %
 %  Examples:
 %    time = 0:25

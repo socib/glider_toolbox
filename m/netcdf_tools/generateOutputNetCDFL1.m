@@ -8,7 +8,7 @@ function ncl1 = generateOutputNetCDFL1(filename, data, meta, dims, atts, deploym
 %  the absolute name of the generated file in string NCL1.
 %  DATA and META should be structs with one field per variable with the variable
 %  data and the variable metadata respectively, as needed by WRITENETCDFDATA.
-%  For precessed data, the DIMS argument should be a struct with the following 
+%  For processed data, the DIMS argument should be a struct with the following 
 %  fields defining dimension names:
 %    TIME: name of the time dimension (record dimension).
 %  ATTS should be a struct array as needed by WRITENETCDFDATA, too. To allow 
@@ -32,7 +32,7 @@ function ncl1 = generateOutputNetCDFL1(filename, data, meta, dims, atts, deploym
 %  Notes:
 %    Usually input data is the output of PROCESSGLIDERDATA.
 %    Be aware that only variables present in struct META are added to the NetCDF
-%    file. If there is any field in DATA not present in META, it is ommited.
+%    file. If there is any field in DATA not present in META, it is omited.
 %
 %  Examples:
 %    ncl1 = generateOutputNetCDFL0(filename, data, meta, dims, atts, deployment)
@@ -112,9 +112,9 @@ function ncl1 = generateOutputNetCDFL1(filename, data, meta, dims, atts, deploym
   %% Create base directory of target file if needed.
   [file_dir, ~, ~] = fileparts(filename);
   if ~exist(file_dir, 'dir')
-    [success, error_msg] = mkdir(file_dir);
+    [success, message] = mkdir(file_dir);
     if ~success
-      error('glider_toolbox:netcdf_tools:NetCDFDirectoryError', error_msg);
+      error('glider_toolbox:netcdf_tools:NetCDFDirectoryError', message);
     end
   end
   

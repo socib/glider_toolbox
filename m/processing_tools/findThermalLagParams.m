@@ -72,8 +72,8 @@ function [constants, exitflag, residual] = findThermalLagParams(varargin)
 %  residual area in RESIDUAL. EXITFLAG is positive when minimization succeeds.
 %
 %  Notes:
-%    This function is an improved version of a previous function by Tomeu
-%    Garau, called  ADJUSTTHERMALLAGPARAMS. He is the true glider man.
+%    This function is an improved version of a previous function by Tomeu Garau,
+%    called ADJUSTTHERMALLAGPARAMS. He is the true glider man.
 %    Introduced changes are:
 %      - Different minimization algorithm (interior-point instead of active-set).
 %      - Support for custom minimization options.
