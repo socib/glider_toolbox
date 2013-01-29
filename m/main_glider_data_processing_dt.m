@@ -82,7 +82,7 @@ else
   disp(['Selected deployments found: ' num2str(numel(deployment_list)) '.']);
 end
 
-                                       
+
 %% Process active deployments.
 for deployment_idx = 1:numel(deployment_list)
   %% Set deployment field shortcut variables.
