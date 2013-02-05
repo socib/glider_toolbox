@@ -154,14 +154,10 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
 
 
   %% Combine data from each bay.
-  if ~isempty(meta_nav)
-    [meta_nav, data_nav] = ...
-      dbacat(meta_nav, data_nav, timestamp_nav_args{2});
-  end
-  if ~isempty(meta_sci)
-    [meta_sci, data_sci] = ...
-      dbacat(meta_sci, data_sci, timestamp_sci_args{2});
-  end
+  [meta_nav, data_nav] = ...
+    dbacat(meta_nav, data_nav, timestamp_nav_args{2});
+  [meta_sci, data_sci] = ...
+    dbacat(meta_sci, data_sci, timestamp_sci_args{2});
   
   
   %% Merge data from both bays.

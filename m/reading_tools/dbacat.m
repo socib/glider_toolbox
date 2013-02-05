@@ -80,7 +80,6 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
   end
   
   % Check for trivial empty input.
-  
   if isempty(meta_list)
     meta_struct.sources = {};
     meta_struct.headers = ...

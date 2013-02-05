@@ -95,12 +95,12 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
   end
 
   % Merge data and metadata checking for empty input cases.
-  if isempty(meta_sci)
+  if isempty(meta_sci.sources)
     % Only navigation data.
     meta = meta_nav;
     data = data_nav;
     ts_unique = timestamp_nav; % Unique timestamp to be used for time filtering.
-  elseif isempty(meta_nav)
+  elseif isempty(meta_nav.sources)
     % Only sciend data.
     meta = meta_sci;
     data = data_sci;
