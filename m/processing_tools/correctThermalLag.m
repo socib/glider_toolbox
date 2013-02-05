@@ -124,7 +124,7 @@ function [temp_inside, cond_outside] = correctThermalLag(varargin)
                            1.58, 1.15, 0.70]; % 2nd order degree.
   % First order approximation, second row of the matrix.
   speed_factor_degree_choice = 1; 
-  speed_factor = ....
+  speed_factor = ...
     polyval(speed_factor_polynoms(speed_factor_degree_choice+1,:), surge_speed);
   flow_speed = speed_factor .* surge_speed;
   
