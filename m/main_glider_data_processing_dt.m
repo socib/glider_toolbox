@@ -98,6 +98,15 @@ for deployment_idx = 1:numel(deployment_list)
   log_dir = strfglider(config.local_paths.log_path, deployment);
   ascii_dir = strfglider(config.local_paths.ascii_path, deployment);
   figure_dir = strfglider(config.local_paths.figure_path, deployment);
+  processing_log = strfglider(config.local_paths.processing_log, deployment);
+  
+  
+  %% Start deployment processing logging.
+  diary(processing_log);
+  diary('on');
+  
+  
+  %% Report deployment information.
   disp('Deployment information:')
   disp(['  Glider name          : ' glider_name]);
   disp(['  Deployment identifier: ' num2str(deployment_id)]);
@@ -109,7 +118,7 @@ for deployment_idx = 1:numel(deployment_list)
     disp(['  Deployment end       : ' datestr(deployment_end)]);
   end
 
-    
+
   %% Convert binary glider files to ascii human readable format, if needed.
   % Check deployment files available in binary directory,
   % convert them to ascii format in the ascii directory,
@@ -127,19 +136,26 @@ for deployment_idx = 1:numel(deployment_list)
     disp(['Binary files found: ' num2str(numel(xbd_names)) ...
         ' (' num2str(sum(xbd_sizes)*2^-10) ' kB).']);
     new_dbas = cell(size(xbd_names));
-    for xbd_idx = 1:numel(xbd_names)
-      xbd_name_ext = xbd_names{xbd_idx};
-      dba_name_ext = regexprep(xbd_name_ext, ...
-                               config.slocum_options.bin_name_pattern, ...
-                               config.slocum_options.dba_name_replacement);
-      xbd_fullfile = fullfile(binary_dir, xbd_name_ext);
-      dba_fullfile = fullfile(ascii_dir, dba_name_ext);
-      try
-        new_dbas{xbd_idx} = {xbd2dba(xbd_fullfile, dba_fullfile, 'cache', cache_dir)};
-      catch exception
-        disp(['Error converting binary file ' xbd_name_ext ':']);
-        disp(getReport(exception, 'extended'));
-        new_dbas{xbd_idx} = {};
+    for conversion_retry = 1:2
+      for xbd_idx = 1:numel(xbd_names)
+        if isempty(new_dbas{xbd_idx})
+          xbd_name_ext = xbd_names{xbd_idx};
+          dba_name_ext = regexprep(xbd_name_ext, ...
+                                   config.slocum_options.bin_name_pattern, ...
+                                   config.slocum_options.dba_name_replacement);
+          xbd_fullfile = fullfile(binary_dir, xbd_name_ext);
+          dba_fullfile = fullfile(ascii_dir, dba_name_ext);
+          try
+            new_dbas{xbd_idx} = ...
+              {xbd2dba(xbd_fullfile, dba_fullfile, 'cache', cache_dir)};
+          catch exception
+            new_dbas{xbd_idx} = {};
+            if conversion_retry == 2
+              disp(['Error converting binary file ' xbd_name_ext ':']);
+              disp(getReport(exception, 'extended'));
+            end
+          end
+        end
       end
     end
     new_dbas = [new_dbas{:}];
@@ -147,7 +163,7 @@ for deployment_idx = 1:numel(deployment_list)
           num2str(numel(new_dbas)) ' of ' num2str(numel(xbd_names)) '.']);
   end
   
-  
+
   %% Load data from ascii deployment glider files.
   disp('Loading raw deployment data from text files...');
   try
@@ -210,14 +226,14 @@ for deployment_idx = 1:numel(deployment_list)
                                config.output_ncl0.var_meta, ...
                                config.output_ncl0.dim_names, ...
                                config.output_ncl0.global_atts, deployment);
-      disp(['Output NetCDF L0 (raw data) generated: ' output_ncl0 '.']);
+      disp(['Output NetCDF L0 (raw data) generated: ' outputs.netcdf_l0 '.']);
     catch exception
       disp(['Error generating NetCDF L0 (preprocessed data) output ' ncl0_file ':']);
       disp(getReport(exception, 'extended'));
     end;
   end
-  
-  
+
+
   %% Process preprocessed glider data.
   disp('Processing glider data...');
   try
@@ -285,10 +301,11 @@ for deployment_idx = 1:numel(deployment_list)
   disp('Copying public outputs...');
   output_list = {'netcdf_l0', 'netcdf_l1', 'netcdf_l2'};
   for output_idx = 1:numel(output_list)
-    output = output_list{output_idx};
-    if isfield(config.public_paths, output) ...
-         && ~isempty(config.public_paths.(output)) ...
-         && ~isempty(outputs.(output))
+    output_name = output_list{output_idx};
+    if isfield(config.public_paths, output_name) ...
+         && ~isempty(config.public_paths.(output_name)) ...
+         && isfield(outputs, output_name) ...
+         && ~isempty(outputs.(output_name))
       output_local_file = outputs.(output);
       output_public_file = strfglider(config.public_paths.(output), deployment);
       output_public_dir = fileparts(output_public_file);
@@ -342,5 +359,9 @@ for deployment_idx = 1:numel(deployment_list)
     disp(getReport(exception, 'extended'));
   end
   %}
+  
+  
+  %% Stop deployment processing logging.
+  diary('off');
   
 end
