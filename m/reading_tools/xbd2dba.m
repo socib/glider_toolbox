@@ -33,10 +33,12 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
 %  Examples:
 %    % Convert a simple file.
 %    dbd_file = 'happyglider-1970-000-0-0.sbd'
+%    dba_file = 'happyglider-1970-000-0-0-sbd.dba'
 %    dba_file_full = xbd2dba(dbd_file, dba_file)
 %    % Convert all navigation files of the same mission in current directory,
 %    % using it as cache directory and setting the path of the dbd2asc program.
 %    dbd_files = 'happyglider-1970-000-0-*.[smd]bd'
+%    dba_file = 'happyglider-1970-000-0-x-xbd.dba'
 %    dba_file_full = xbd2dba(dbd_file, dba_file, 'cache', pwd(), ...
 %                            'program', '~/bin/dbd2asc')
 %
