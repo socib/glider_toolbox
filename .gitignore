@@ -1,4 +1,1 @@
-# Ignore configuration files when they contain private data.
-config_tools/configDBAccess.m
-config_tools/configDBDeploymentInfoQuery.m
-config_tools/configDockservers.m
+m/private/
