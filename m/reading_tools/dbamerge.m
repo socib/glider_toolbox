@@ -101,7 +101,7 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
     data = data_nav;
     ts_unique = timestamp_nav; % Unique timestamp to be used for time filtering.
   elseif isempty(meta_nav.sources)
-    % Only sciend data.
+    % Only science data.
     meta = meta_sci;
     data = data_sci;
     ts_unique = timestamp_sci; % Unique timestamp to be used for time filtering.

@@ -89,12 +89,6 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
     & ~cellfun(@isempty, regexp({ascii_dir_contents.name}, name_pattern_nav));
   dba_sci_sel = ~[ascii_dir_contents.isdir] ...
     & ~cellfun(@isempty, regexp({ascii_dir_contents.name}, name_pattern_sci));
-  %{
-  dba_nav_names = regexp(dba_all_names, name_pattern_nav, 'match');
-  dba_sci_names = regexp(dba_all_names, name_pattern_sci, 'match');
-  dba_nav_names = [dba_nav_names{:}];
-  dba_sci_names = [dba_sci_names{:}];
-  %}
   dba_nav_names = {ascii_dir_contents(dba_nav_sel).name};
   dba_nav_sizes = [ascii_dir_contents(dba_nav_sel).bytes];
   dba_sci_names = {ascii_dir_contents(dba_sci_sel).name};

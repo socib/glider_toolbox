@@ -164,7 +164,7 @@ function [bin_files, log_files] = getDockserverFiles(dockserver, glider_name, lo
                                          log_date_filtering_params{:});
     catch exception
       warning('glider_toolbox:reading_tools:LogDownloadingError', ...
-              'Error downloading surface log files: %s', exception.message);
+              'Error downloading surface log files: %s.', exception.message);
     end
     disp([num2str(numel(log_files)) ' new/updated surface log files fetched.']);
   end
@@ -226,7 +226,8 @@ function files = fetchNewAndUpdatedFiles(ftp_handle, remote_dir, local_dir, name
     % Create local directory because mget does not do it.
     [success, message] = mkdir(local_dir);
     if ~success
-      error('glider_toolbox:reading_tools:LocalDirectoryError', message);
+      error('glider_toolbox:reading_tools:LocalDirectoryError', ...
+            'Could not create local directory %s: %s.', local_dir, message);
     end
   end
   if isempty(remote_files)

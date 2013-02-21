@@ -95,7 +95,7 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
   [status, cmd_output] = system(cmd_str);
   if status~=0
     error('glider_toolbox:xbd2ascii:SystemCallError', ...
-          'Error executing call: %s\n%s', cmd_str, cmd_output);
+          'Error executing call: %s\n%s.', cmd_str, cmd_output);
   end
   
   
@@ -105,7 +105,7 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
     [success, message] = mkdir(dba_dir);
     if ~success
       error('glider_toolbox:xbd2ascii:AsciiDirectoryError', ...
-            'Error creating target directory: %s.', message);
+            'Error creating target directory %s: %s.', dba_dir, message);
     end
   end
   
@@ -113,7 +113,7 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
   [fid, fid_msg] = fopen(dba_file, 'w');
   if fid < 0
     error('glider_toolbox:xbd2ascii:WriteFileError', ...
-          'Error creating target file: %s.', fid_msg);
+          'Error creating target file %s: %s.', dba_file, fid_msg);
   end
   fprintf(fid, '%s', cmd_output);
   fclose(fid);
@@ -124,7 +124,7 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
   if status==0
     % We should never get here (if conversion succeed, ascii file must exist).
     error('glider_toolbox:xbd2ascii:AsciiFileError', ...
-          'Conversion call succeed but problems with output file %s:\n%s.', ...
+          'Conversion call succeed but problems with output file %s: %s.', ...
           dba_file, att_output);
   end
   dba_file_full = att_output.Name;  

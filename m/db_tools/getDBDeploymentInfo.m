@@ -49,7 +49,7 @@ function data = getDBDeploymentInfo(db_access, query, fields)
                   db_access.driver, db_access.url);
   if (~isconnection(conn))
     error('glider_toolbox:db_tools:ConnectionError', ...
-          ['Error connecting to database: ' conn.Message]);
+          'Error connecting to database: %s.', conn.Message);
   end
   data_format = setdbprefs('DataReturnFormat');
   setdbprefs('DataReturnFormat', 'cellarray');

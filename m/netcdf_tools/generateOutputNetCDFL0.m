@@ -16,7 +16,7 @@ function ncl0 = generateOutputNetCDFL0(filename, data, meta, dims, atts, deploym
 %  in struct DEPLOYMENT are overwritten with the field value.
 %  In addition, if the following global attributes are present in struct ATTS, 
 %  they are updated with values computed from deployment data:
-%    DATE_MODIFIED: modification time given by UTC_TIME ('yyyy-mm-ddTHH:MM:SSZ').
+%    DATE_MODIFIED: modification time given by POSIXTIME ('yyyy-mm-ddTHH:MM:SSZ').
 %    GEOSPATIAL_LAT_MAX: maximum latitude value inferred from data (M_GPS_LAT).
 %    GEOSPATIAL_LAT_MIN: minimum latitude value inferred from data (M_GPS_LAT).
 %    GEOSPATIAL_LAT_RESOLUTION: mean latitude step inferred from data (M_GPS_LAT).
@@ -82,7 +82,7 @@ function ncl0 = generateOutputNetCDFL0(filename, data, meta, dims, atts, deploym
         meta.m_gps_lon.attributes(lon_units_idx).value;
     end
   end
- 
+
 
   %% Overwrite default attributes with deployment fields or dynamic values.
   global_atts = atts;
@@ -115,7 +115,8 @@ function ncl0 = generateOutputNetCDFL0(filename, data, meta, dims, atts, deploym
   if ~exist(file_dir, 'dir')
     [success, message] = mkdir(file_dir);
     if ~success
-      error('glider_toolbox:netcdf_tools:NetCDFDirectoryError', message);
+      error('glider_toolbox:netcdf_tools:NetCDFDirectoryError', ...
+            'Could not create output directory %s: %s.', file_dir, message);
     end
   end
   
