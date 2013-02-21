@@ -7,8 +7,8 @@ function t = posixtime()
 %  Notes:
 %    This function provides a compatibility interface for MATLAB and Octave,
 %    computing the POSIX time using lower level tools available in each system:
-%    In MATLAB, through the Java function JAVA.LANG.SYSTEM.CURRENTTIMEMILLIS.
-%    In Octave, through the built-in ANSI C function TIME.    
+%    In Octave, through the built-in interface to the ANSI C function TIME.    
+%    In MATLAB, through a mex file interface to the ANSI C function TIME.
 %
 %  Examples:
 %    t = posixtime()
@@ -24,7 +24,7 @@ function t = posixtime()
 %  Email: joanpau.beltran@socib.cat
 
   error(nargchk(0, 0, nargin, 'struct'));
-  
+
   % Consider making the variable persistent
   % (the needed emptiness check may be more expensive than the existence check).
   ISOCTAVE = exist('OCTAVE_VERSION','builtin');
@@ -32,7 +32,8 @@ function t = posixtime()
   if ISOCTAVE
     t = time();
   else
-    t = 1e-3 * java.lang.System.currentTimeMillis();
+    error('glider_toolbox:posixtime:MissingMexFile', ...
+          'Missing required mex file.');
   end
 
 end
