@@ -12,9 +12,9 @@ function a = profileArea(x1, y1, x2, y2)
 %    called BUILDPOLYGON. He is the true glider man.
 %
 %    The union of the two profiles may be a complex polygon (self-intersecting).
-%    Hence, the area is computed decomposing it in triangles with the functions
-%    POLY2CW and POLY2FV, and adding the area of each triangular component 
-%    returned by POLYAREA.
+%    Hence, the area is computed decomposing it in triangles with the function
+%    POLY2TRY, and adding the absolute value of the area of each triangular 
+%    component returned by POLYAREA.
 %
 %    Profile points with invalid coordinates (NaN) are ignored when building the
 %    polygonal contour.
@@ -33,8 +33,6 @@ function a = profileArea(x1, y1, x2, y2)
 %    a = polyarea([x1(:); x2(:)], [y1(:); y2(:)])
 %
 %  See also:
-%    POLY2CW
-%    POLY2FV
 %    POLYAREA
 %
 %  Author: Joan Pau Beltran
@@ -50,8 +48,7 @@ function a = profileArea(x1, y1, x2, y2)
   % infinite triangles, and their contribution to the total area would be 0.
   xy = [x1(:) y1(:); x2(:) y2(:)];
   xy = xy(~any(isnan(xy), 2), :);
-  [x, y] = poly2cw(xy(:,1), xy(:,2));
-  [f, v] = poly2fv(x, y);
-  a = sum(polyarea(reshape(v(f,1),size(f))', reshape(v(f,2),size(f))'));
+  [x, y] = poly2tri(xy(:,1), xy(:,2));
+  a = sum(polyarea(x, y));
 
 end
