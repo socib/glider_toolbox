@@ -16,6 +16,10 @@ function [xtri, ytri] = poly2tri(x, y)
 %    of the General Polygon Clipper library (GPC), written by Alan Murta.
 %    This function is called in the companion mex file.
 %
+%    An alternative implementation using constrained Delaunay triangulation
+%    functions provided by MATLAB is commented in this source file.
+%    If you can not build or use the GPC based mex file, uncoment those lines.
+%
 %  Examples:
 %    x = [0 -1 -1  0  0  1  1  0]
 %    y = [0  0 -1 -1  1  1  0  0]
@@ -33,4 +37,15 @@ function [xtri, ytri] = poly2tri(x, y)
 
   error('glider_toolbox:poly2tri:MissingMexfile', 'Missing required mex file.');
 
+  % Altrernative implementation using Delaunay Triangulation built in MATLAB.
+  %{
+  nv = numel(x);
+  triangulation =  DelaunayTri(x(:), y(:), [1 (2:nv); (2:nv) 1]');
+  indices = triangulation.inOutStatus;
+  faces = triangulation.Triangulation(indices, :);
+  vertices = triangulation.X;
+  xtri = reshape(vertices(faces, 1), size(faces))';
+  ytri = reshape(vertices(faces, 2), size(faces))'; 
+  %}
+  
 end

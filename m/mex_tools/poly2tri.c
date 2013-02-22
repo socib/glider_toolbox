@@ -20,6 +20,8 @@
  * Alternatively, it is possible to build the mex file using the GPC sources 
  * directly, extracting the GPC sources downloaded from the official web site 
  * to a directory called 'gpcl' in the same directory than the mex file source.
+ * Please note that in this case mex file and library sources are compiled 
+ * together. Hence, the resulting binary might be slightly bigger.
  * The mex file may be built with the command:
  *   mex poly2tri.c gpcl/gpc.c
  */
