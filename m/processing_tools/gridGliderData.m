@@ -190,15 +190,18 @@ function data_grid = gridGliderData(data_proc, varargin)
   data_proc_variables = ...
     rmfield(data_proc, setdiff(sequence_list, options.variables));
   variable_name_list = fieldnames(data_proc_variables);
-  variables = nan(numel(time), numel(variable_name_list));
-  for variable_name_idx = 1:numel(variable_name_list)
+  num_variables = numel(variable_name_list);
+  num_instants = numel(time);
+  variables = nan(num_instants, num_variables);
+  for variable_name_idx = 1:num_variables
     variable_name = variable_name_list{variable_name_idx};
     variables(:, variable_name_idx) = data_proc_variables.(variable_name)(:);
   end
+  
 
 
   %% Compute number of casts.
-  num_casts = max(profile);
+  num_casts = fix(max(profile));
   profile_range = (1:num_casts);
 
 
@@ -216,7 +219,7 @@ function data_grid = gridGliderData(data_proc, varargin)
   data_grid.time = nan(num_casts, 1);
   data_grid.longitude = nan(num_casts, 1);
   data_grid.latitude = nan(num_casts, 1);
-  data_grid_variables = nan(num_levels, num_casts, numel(variable_name_list));
+  data_grid_variables = nan(num_levels, num_casts, num_variables);
 
   
   %% Compute profile coordinates and profile data.
@@ -242,7 +245,7 @@ function data_grid = gridGliderData(data_proc, varargin)
     end
   end
   % Move binned variable data to output struct.
-  for variable_name_idx = 1:numel(variable_name_list)
+  for variable_name_idx = 1:num_variables
     variable_name = variable_name_list{variable_name_idx};
     data_grid.(variable_name) = data_grid_variables(:, :, variable_name_idx);
   end
