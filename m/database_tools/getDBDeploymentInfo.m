@@ -1,13 +1,12 @@
 function data = getDBDeploymentInfo(db_access, query, fields)
 %GETDBDEPLOYMENTINFO  Get deployment information from data base.
 %
-%  DATA = GETDBDEPLOYMENTINFO(DB_ACCESS, QUERY, FIELDS) Executes the given QUERY
-%  on the data base described in struct DB_ACCESS and returns a struct DATA
-%  with fields given by FIELDS cell array mapped to the corresponding columns in
-%  the query result.
+%  DATA = GETDBDEPLOYMENTINFO(DB_ACCESS, QUERY, FIELDS) executes the given QUERY
+%  on the data base described in struct DB_ACCESS, and returns a struct DATA
+%  with fields given by string cell array FIELDS mapped to the corresponding 
+%  columns in the query result.
 %
-%  DB_ACCESS should be a struct with the needed fields to access
-%  the data base:
+%  DB_ACCESS should be a struct with the needed fields to access the data base:
 %    URL: url of the data base (string).
 %    NAME: name of the data base (string).
 %    USER: user of the data base (string).
@@ -16,8 +15,8 @@ function data = getDBDeploymentInfo(db_access, query, fields)
 %
 %  The number of elements in FIELDS must match the number of columns queried.
 %
-%  For the returned DATA be a deployment structure, it should have the following
-%  minimal set of fields:
+%  The returned struct DATA should have the following fields to be considered 
+%  a deployment structure:
 %    DEPLOYMENT_ID: deployment identifier (invariant over time).
 %    DEPLOYMENT_NAME: deployment name (may eventually change).
 %    DEPLOYMENT_START: deployment start date (see note on time format).
@@ -25,12 +24,12 @@ function data = getDBDeploymentInfo(db_access, query, fields)
 %    GLIDER_NAME: glider platform name (as used in glider file names).
 %    GLIDER_INSTRUMENT_NAME: glider instrument name (e.g. internal unit name).
 %    GLIDER_DEPLOYMENT_NUMBER: number of deployment of this glider.
-%  The returned structure may include other fields which are considered to be
+%  The returned structure may include other fields, which are considered to be
 %  global deployment attributes by functions generating final products like
 %  GENERATEOUTPUTNETCDFL0, GENERATEOUTPUTNETCDFL1 and GENERATEOUTPUTNETCDFL2.
 %
 %  Notes:
-%    Time columns returned by the query should be returned as UTC timestamp
+%    Time columns selected in the query should be returned as UTC timestamp
 %    strings in ISO 8601 format ('yyyy-mm-dd HH:MM:SS'), and are converted to
 %    serial date number format. Null fields are set to the empty matrix ([]).
 %
@@ -38,6 +37,11 @@ function data = getDBDeploymentInfo(db_access, query, fields)
 %    db_access = configDBAccess()
 %    [query, fields] = configDBDeploymentInfoQuery()
 %    deployment_info = getDBDeploymentInfo(db_access, query, fields)
+%
+%  See also:
+%    GENERATEOUTPUTNETCDFL0
+%    GENERATEOUTPUTNETCDFL1
+%    GENERATEOUTPUTNETCDFL2
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
