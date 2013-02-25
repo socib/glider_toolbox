@@ -780,10 +780,10 @@ function data_proc = processGliderData(data_pre, varargin)
     end
     % Find profile directions and indices.
     [data_proc.profile_direction, data_proc.profile_index] = ...
-      findProfiles(profile_stamp);
+      findProfiles(profile_stamp, 'range', options.profile_min_range);
   end
   
-  
+
   %% Perform sensor lag estimation and correction, if needed.
   % Sensor, time and depth sequences must be present in already processed data.
   for sensor_lag_option_idx = 1:numel(options.sensor_lag_list)
@@ -819,12 +819,14 @@ function data_proc = processGliderData(data_pre, varargin)
     sensor_lag_raw_avail = false;
     sensor_lag_time_avail = false;
     sensor_lag_depth_avail = false;
-    if isfield(data_proc, sensor_lag_raw)
+    if isfield(data_proc, sensor_lag_raw) ...
+        && ~all(isnan(data_proc.(sensor_lag_raw)))
       sensor_lag_raw_avail = true;
     end
     for sensor_lag_time_idx = 1:numel(sensor_lag_time_list)
       sensor_lag_time = sensor_lag_time_list{sensor_lag_time_idx};
-      if isfield(data_proc, sensor_lag_time)
+      if isfield(data_proc, sensor_lag_time) ...
+          && any(data_proc.(sensor_lag_time) > 0)
         sensor_lag_time_avail = true;
         break
       end
@@ -840,11 +842,12 @@ function data_proc = processGliderData(data_pre, varargin)
       all([sensor_lag_raw_avail sensor_lag_time_avail sensor_lag_depth_avail]);
     % Perform sensor lag correction if needed input fields are there.
     if isfield(data_proc, 'profile_index') && sensor_lag_input_avail 
-      num_profiles = max(data_proc.profile_index);
+      num_profiles = fix(max(data_proc.profile_index));
       % Estimate sensor lag time constant, if needed.
       if ischar(sensor_lag_params) && strcmpi(sensor_lag_params, 'auto')
+        fprintf('Performing %s sensor lag estimation...\n', sensor_lag_cor);
         % Estimate sensor lag time constant for each pofile.
-        sensor_lag_param_estimates = nan(num_profiles-1, 1);
+        sensor_lag_estimates = nan(num_profiles-1, 1);
         sensor_lag_exitflags = nan(num_profiles-1, 1);
         sensor_lag_residuals = nan(num_profiles-1, 1);
         for profile_idx = 1:(num_profiles-1)
@@ -870,10 +873,8 @@ function data_proc = processGliderData(data_pre, varargin)
                             'gap', options.profile_max_gap_ratio);
           prof_opposite_dir = (prof1_dir * prof2_dir < 0);
           if prof1_valid && prof2_valid && prof_opposite_dir
-            fprintf('Performing %s sensor lag estimation for casts: %d and %d.\n', ...
-                    sensor_lag_cor, profile_idx, profile_idx+1);
             try
-              [sensor_lag_param_estimates(profile_idx), ...
+              [sensor_lag_estimates(profile_idx), ...
                sensor_lag_exitflags(profile_idx), ...
                sensor_lag_residuals(profile_idx)] = ...
                 findSensorLagParams(prof1_time(prof1_full_rows), prof1_depth(prof1_full_rows), prof1_raw(prof1_full_rows), ...
@@ -881,8 +882,8 @@ function data_proc = processGliderData(data_pre, varargin)
                                     sensor_lag_options);
               if sensor_lag_exitflags(profile_idx) <= 0
                  warning('glider_toolbox:processGliderData:SensorLagMinimizationError', ...
-                         'Minimization did not converge, residual area: %f.', ...
-                         sensor_lag_residuals(profile_idx));
+                         'Minimization did not converge for casts %d and %d, residual area: %f.', ...
+                         profile_idx, profile_idx+1, sensor_lag_residuals(profile_idx));
               end
             catch exception
               fprintf('Sensor lag estimation failed for casts: %d and %d.\n', ...
@@ -894,9 +895,7 @@ function data_proc = processGliderData(data_pre, varargin)
         % Compute statistical estimate from individual profile estimates.
         % Use feval to allow estimator as either function handle or name string.
         sensor_lag_constant = ...
-          feval(sensor_lag_estimator, sensor_lag_param_estimates);
-        fprintf('Sensor lag parameter estimated value: %s.\n', ...
-                num2str(sensor_lag_constant));
+          feval(sensor_lag_estimator, sensor_lag_estimates);
       elseif isnumeric(sensor_lag_params) && isscalar(sensor_lag_params)
         % Sensor lag time constant given.
         sensor_lag_constant = sensor_lag_params;
@@ -910,6 +909,8 @@ function data_proc = processGliderData(data_pre, varargin)
         fprintf('Omitting %s sensor lag correction: %s.\n', ...
                 sensor_lag_cor, 'no valid sensor lag parameter available');
       else
+        fprintf('Performing %s sensor lag correction with parameters %f...\n', ...
+                sensor_lag_cor, sensor_lag_constant);
         data_proc.(sensor_lag_cor) = nan(size(data_proc.(sensor_lag_raw)));
         for profile_idx = 1:num_profiles
           prof_select = (data_proc.profile_index == profile_idx);
@@ -978,21 +979,24 @@ function data_proc = processGliderData(data_pre, varargin)
     thermal_lag_pres_avail = false;
     for thermal_lag_time_idx = 1:numel(thermal_lag_time_list)
       thermal_lag_time = thermal_lag_time_list{thermal_lag_time_idx};
-      if isfield(data_proc, thermal_lag_time)
+      if isfield(data_proc, thermal_lag_time) ...
+          && any(data_proc.(thermal_lag_time) > 0)
         thermal_lag_time_avail = true;
         break;
       end
     end
     for thermal_lag_depth_idx = 1:numel(thermal_lag_depth_list)
       thermal_lag_depth = thermal_lag_depth_list{thermal_lag_depth_idx};
-      if isfield(data_proc, thermal_lag_depth)
+      if isfield(data_proc, thermal_lag_depth) ...
+          && ~all(isnan(data_proc.(thermal_lag_depth)))
         thermal_lag_depth_avail = true;
         break
       end
     end
     for thermal_lag_pitch_idx = 1:numel(thermal_lag_pitch_list)
       thermal_lag_pitch = thermal_lag_pitch_list{thermal_lag_pitch_idx};
-      if isfield(data_proc, thermal_lag_pitch)
+      if isfield(data_proc, thermal_lag_pitch) ...
+          && ~all(isnan(data_proc.(thermal_lag_pitch)))
         thermal_lag_pitch_avail = true;
         break
       end
@@ -1000,13 +1004,16 @@ function data_proc = processGliderData(data_pre, varargin)
     if ~isempty(thermal_lag_pitch_missing_value)
       thermal_lag_pitch_missing_value_avail = true;
     end
-    if isfield(data_proc, thermal_lag_cond_raw)
+    if isfield(data_proc, thermal_lag_cond_raw) ...
+        && ~all(isnan(data_proc.(thermal_lag_cond_raw))) 
       thermal_lag_cond_raw_avail = true;
     end
-    if isfield(data_proc, thermal_lag_temp_raw)
+    if isfield(data_proc, thermal_lag_temp_raw) ...
+        && ~all(isnan(data_proc.(thermal_lag_temp_raw)))
       thermal_lag_temp_raw_avail = true;
     end
-    if isfield(data_proc, thermal_lag_pres_raw)
+    if isfield(data_proc, thermal_lag_pres_raw) ...
+        && ~all(isnan(data_proc.(thermal_lag_pres_raw)))
       thermal_lag_pres_avail = true;
     end
     thermal_lag_input_avail = ...
@@ -1015,11 +1022,13 @@ function data_proc = processGliderData(data_pre, varargin)
            (thermal_lag_pitch_avail | thermal_lag_pitch_missing_value_avail)]);
     % Perform thermal lag correction if needed input fields are there.
     if isfield(data_proc, 'profile_index') && thermal_lag_input_avail
+      num_profiles = fix(max(data_proc.profile_index));
       % Estimate thermal lag constant, if needed.
       if ischar(thermal_lag_params) && strcmpi(thermal_lag_params, 'auto')
+        fprintf('Performing %s and %s thermal lag parameter estimation...\n', ...
+                thermal_lag_cond_cor, thermal_lag_temp_cor);
         % Estimate sensor lag time constant for each pofile.
-        num_profiles = fix(max(data_proc.profile_index));
-        thermal_lag_param_estimates = nan(num_profiles-1, 4);
+        thermal_lag_estimates = nan(num_profiles-1, 4);
         thermal_lag_residuals = nan(num_profiles-1, 1);
         thermal_lag_exitflags = nan(num_profiles-1, 1);
         for profile_idx = 1:(num_profiles-1)
@@ -1063,11 +1072,8 @@ function data_proc = processGliderData(data_pre, varargin)
                              'gap', options.profile_max_gap_ratio);
           prof_opposite_dir = (prof1_dir * prof2_dir < 0);
           if prof1_valid && prof2_valid && prof_opposite_dir
-            fprintf('Performing %s and %s thermal lag estimation for casts: %d and %d.\n', ...
-                    thermal_lag_temp_cor, thermal_lag_cond_cor, ...
-                    profile_idx, profile_idx+1);
             try
-              [thermal_lag_param_estimates(profile_idx, :), ...
+              [thermal_lag_estimates(profile_idx, :), ...
                thermal_lag_exitflags(profile_idx), ...
                thermal_lag_residuals(profile_idx)] = ...
                 findThermalLagParams(prof1_time(prof1_full_rows), prof1_depth(prof1_full_rows), prof1_pitch(prof1_full_rows), ...
@@ -1077,8 +1083,8 @@ function data_proc = processGliderData(data_pre, varargin)
                                      thermal_lag_options);
               if thermal_lag_exitflags(profile_idx) <= 0
                  warning('glider_toolbox:processGliderData:ThermalLagMinimizationError', ...
-                         'Minimization did not converge, residual area: %f.', ...
-                         thermal_lag_residuals(profile_idx));
+                         'Minimization did not converge for casts %d and %d, residual area: %f.', ...
+                         profile_idx, profile_idx+1, thermal_lag_residuals(profile_idx));
               end
             catch exception
               fprintf('Thermal lag estimation failed for casts: %d and %d.\n', ...
@@ -1090,9 +1096,7 @@ function data_proc = processGliderData(data_pre, varargin)
         % Compute statistical estimate from individual profile estimates.
         % Use feval to allow estimator as either function handle or name string.
         thermal_lag_constants = ...
-          feval(thermal_lag_estimator, thermal_lag_param_estimates);
-        fprintf('Thermal lag parameter estimated values: %s.\n', ...
-                num2str(thermal_lag_constants));
+          feval(thermal_lag_estimator, thermal_lag_estimates);
       elseif isnumeric(thermal_lag_params) && (numel(thermal_lag_params) == 4)
         % Thermal lag parameters given.
         thermal_lag_constants = thermal_lag_params;
@@ -1108,6 +1112,8 @@ function data_proc = processGliderData(data_pre, varargin)
                 thermal_lag_cond_cor, thermal_lag_temp_cor, ...
                 'no valid thermal lag parameters available');
       else
+        fprintf('Performing %s and %s thermal lag correction with parameters %f %f %f %f...\n', ...
+                thermal_lag_cond_cor, thermal_lag_temp_cor, thermal_lag_constants);
         data_proc.(thermal_lag_cond_cor) = ...
           nan(size(data_proc.(thermal_lag_cond_raw)));
         data_proc.(thermal_lag_temp_cor) = ...
@@ -1151,7 +1157,7 @@ function data_proc = processGliderData(data_pre, varargin)
                 data_proc.(salinity_temp), data_proc.(salinity_pres));
     end
   end
-
+  
   
   %% Derive density from pressure, salinity and temperature, if available.
   for density_option_idx = 1:numel(options.density_list)
