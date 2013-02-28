@@ -375,7 +375,7 @@ function data_proc = processGliderData(data_pre, varargin)
   default_sensor_lag_time_list = {'time'};
   default_sensor_lag_depth_list = {'depth'};
   default_sensor_lag_estimator = @nanmedian;
-  default_sensor_lag_options = struct();
+  default_sensor_lag_minopts = struct();
   
   
   %% Configure default values for optional thermal lag settings. 
@@ -385,7 +385,7 @@ function data_proc = processGliderData(data_pre, varargin)
   default_thermal_lag_pitch_list = {'pitch'};
   default_thermal_lag_pitch_missing_value = [];
   default_thermal_lag_estimator = @nanmedian;
-  default_thermal_lag_options = struct();
+  default_thermal_lag_minopts = struct();
   
   
   %% Set processing options and default values.
@@ -502,6 +502,7 @@ function data_proc = processGliderData(data_pre, varargin)
     time_sensor = options.time_sensor_list{time_sensor_idx};
     if ismember(time_sensor, sensor_list) && any(data_pre.(time_sensor) > 0)
       data_proc.time = data_pre.(time_sensor);
+      fprintf('Selected time sensor: %s.\n', time_sensor);
       break;
     end
   end
@@ -522,6 +523,8 @@ function data_proc = processGliderData(data_pre, varargin)
         && ~all(isnan(data_pre.(lon_sensor))) 
       data_proc.latitude = data_pre.(lat_sensor);
       data_proc.longitude = data_pre.(lon_sensor);
+      fprintf('Selected latitude and longitude sensors: %s %s.\n', ...
+              lat_sensor, lon_sensor);
       break;
     end
   end
@@ -538,6 +541,7 @@ function data_proc = processGliderData(data_pre, varargin)
     if ismember(depth_sensor, sensor_list) ...
         && ~all(isnan(data_pre.(depth_sensor)))
       data_proc.depth = data_pre.(depth_sensor);
+      fprintf('Selected depth sensor: %s.\n', depth_sensor);
       break;
     end
   end
@@ -550,6 +554,7 @@ function data_proc = processGliderData(data_pre, varargin)
     if ismember(pitch_sensor, sensor_list) ...
         && ~all(isnan(data_pre.(pitch_sensor)))
       data_proc.pitch = data_pre.(pitch_sensor);
+      fprintf('Selected pitch sensor: %s.\n', pitch_sensor);
       break;
     end
   end
@@ -568,6 +573,8 @@ function data_proc = processGliderData(data_pre, varargin)
         && ~all(isnan(data_pre.(wpt_lon_sensor)))
       data_proc.waypoint_latitude = data_pre.(wpt_lat_sensor);
       data_proc.waypoint_longitude = data_pre.(wpt_lon_sensor);
+      fprintf('Selected waypoint latitude and longitude sensors: %s %s.\n', ...
+              wpt_lat_sensor, wpt_lon_sensor);
       break;
     end
   end
@@ -577,15 +584,17 @@ function data_proc = processGliderData(data_pre, varargin)
   % Find preferred set of valid segment mean water velocity sensors in list of 
   % available sensors, if any.
   for water_velocity_sensor_idx = 1:numel(options.water_velocity_sensor_list)
-    wat_vel_east_sensor = ...
-      options.water_velocity_sensor_list(water_velocity_sensor_idx).velocity_eastward;
     wat_vel_north_sensor = ...
       options.water_velocity_sensor_list(water_velocity_sensor_idx).velocity_northward;
-    if all(ismember({wat_vel_east_sensor wat_vel_north_sensor}, sensor_list)) ...
-        && ~all(isnan(data_pre.(wat_vel_east_sensor))) ...
-        && ~all(isnan(data_pre.(wat_vel_north_sensor)))
-      data_proc.water_velocity_eastward = data_pre.(wat_vel_east_sensor);
+    wat_vel_east_sensor = ...
+      options.water_velocity_sensor_list(water_velocity_sensor_idx).velocity_eastward;
+    if all(ismember({wat_vel_north_sensor wat_vel_east_sensor}, sensor_list)) ...
+        && ~all(isnan(data_pre.(wat_vel_north_sensor))) ...
+        && ~all(isnan(data_pre.(wat_vel_east_sensor)))
       data_proc.water_velocity_northward = data_pre.(wat_vel_north_sensor);
+      data_proc.water_velocity_eastward = data_pre.(wat_vel_east_sensor);
+      fprintf('Selected northward and eastward water velocity sensors: %s %s.\n', ...
+              wat_vel_north_sensor, wat_vel_east_sensor);
       break;
     end
   end
@@ -609,10 +618,13 @@ function data_proc = processGliderData(data_pre, varargin)
       data_proc.conductivity = data_pre.(cond_sensor);
       data_proc.temperature = data_pre.(temp_sensor);
       data_proc.pressure = data_pre.(pres_sensor);
+      fprintf('Selected conductivity, temperature and pressure sensors (CTD): %s %s %s.\n', ...
+              cond_sensor, temp_sensor, pres_sensor);
       if ~isempty(time_ctd_sensor) ...
           && ismember(time_ctd_sensor, sensor_list) ...
           && any(data_pre.(time_ctd_sensor) > 0)
         data_proc.time_ctd = data_pre.(time_ctd_sensor);
+        fprintf('Selected CTD timestamp sensor: %s.\n', time_ctd_sensor);
       end
       break;
     end
@@ -630,6 +642,8 @@ function data_proc = processGliderData(data_pre, varargin)
         && ~all(isnan(data_pre.(turb_sensor)))
       data_proc.chlorophyll = data_pre.(chlr_sensor);
       data_proc.turbidity = data_pre.(turb_sensor);
+      fprintf('Selected chlorophyll and turbitidy sensors: %s %s.\n', ...
+              chlr_sensor, turb_sensor);
       break;
     end
   end
@@ -648,6 +662,8 @@ function data_proc = processGliderData(data_pre, varargin)
         && ~all(isnan(data_pre.(oxy_sat_sensor)))
       data_proc.oxygen_concentration = data_pre.(oxy_con_sensor);
       data_proc.oxygen_saturation = data_pre.(oxy_sat_sensor);
+      fprintf('Selected oxygen concentration and saturation sensors: %s %s.\n', ...
+              oxy_con_sensor, oxy_sat_sensor);
       break;
     end
   end
@@ -670,6 +686,8 @@ function data_proc = processGliderData(data_pre, varargin)
           extra_sensor_name = extra_sensor_option.(extra_sensor_field);
           if ~isempty(extra_sensor_name)
             data_proc.(extra_sensor_field) = data_pre.(extra_sensor_name);
+            fprintf('Selected %s sensor of extra sensor option %d: %s.\n', ...
+                     extra_sensor_field, extra_sensor_option_idx, extra_sensor_name);
           end
         end
         break
@@ -681,6 +699,7 @@ function data_proc = processGliderData(data_pre, varargin)
   %% Fill missing time readings, if needed.
   % Regular sampling is assumed on time gaps.
   if options.time_filling
+    fprintf('Filling missing time readings...\n');
     data_proc.time = ...
       fillInvalidValues(data_proc.time, 'linear');
   end
@@ -689,16 +708,18 @@ function data_proc = processGliderData(data_pre, varargin)
   %% Fill missing position readings, if needed.
   % Use linear interpolation of valid coordinate readings.
   if options.position_filling
-     data_proc.latitude = ...
-       fillInvalidValues(data_proc.time, data_proc.latitude, 'linear');
-     data_proc.longitude = ...
-       fillInvalidValues(data_proc.time, data_proc.longitude, 'linear');
+    fprintf('Filling missing position readings...\n');
+    data_proc.latitude = ...
+      fillInvalidValues(data_proc.time, data_proc.latitude, 'linear');
+    data_proc.longitude = ...
+      fillInvalidValues(data_proc.time, data_proc.longitude, 'linear');
   end
 
 
   %% Fill missing depth readings, if needed.
   % Use linear interpolation of valid coordinate readings.
   if options.depth_filling && isfield(data_proc, 'depth');
+    fprintf('Filling missing depth readings...\n');
     data_proc.depth = ...
       fillInvalidValues(data_proc.time, data_proc.depth, 'linear');
   end
@@ -707,6 +728,7 @@ function data_proc = processGliderData(data_pre, varargin)
   %% Fill missing pitch readings, if needed.
   % Use linear interpolation of valid coordinate readings.
   if options.pitch_filling && isfield(data_proc, 'pitch')
+    fprintf('Filling missing pitch readings...\n');
     data_proc.pitch = ...
       fillInvalidValues(data_proc.time, data_proc.pitch, 'linear');
   end
@@ -718,6 +740,7 @@ function data_proc = processGliderData(data_pre, varargin)
   if options.waypoint_filling ...
       && isfield(data_proc, 'waypoint_latitude') ...
       && isfield(data_proc, 'waypoint_longitude')
+    fprintf('Filling missing commanded waypoint readings...\n');
     data_proc.waypoint_latitude = ...
       fillInvalidValues(data_proc.waypoint_latitude, 'previous');
     data_proc.waypoint_longitude = ...
@@ -725,14 +748,16 @@ function data_proc = processGliderData(data_pre, varargin)
   end
 
  
-  %% Identify begin and end of transects, if waypoint coordinates available.
+  %% Identify transect bounadaries, if waypoint coordinates available.
   if all(isfield(data_proc, {'waypoint_latitude' 'waypoint_longitude'}))
+    fprintf('Computing transect index by transect boundary identification...\n');
     data_proc.transect_index = ...
       findTransects(data_proc.waypoint_latitude, data_proc.waypoint_longitude);
   end
   
   
   %% Compute navigated distance over ground.
+  fprintf('Computing covered horizontal distance...\n');
   data_proc.distance_over_ground = ...
     computeCumulativeDistance(data_proc.latitude, data_proc.longitude);
   
@@ -741,15 +766,18 @@ function data_proc = processGliderData(data_pre, varargin)
   if isfield(data_proc, 'pressure')
     % Convert pressure from bars to decibars, if needed (by later processings).
     if options.pressure_conversion
+      fprintf('Performing pressure unit conversion (bars to decibars)...\n');
       data_proc.pressure = 10 * data_proc.pressure;
     end
     % Apply pressure filter, if needed.
     if options.pressure_filtering
       if isfield(data_proc, 'time_ctd')
+        fprintf('Filtering pressure sequence using CTD time stamp...\n');
         data_proc.pressure = ...
           applySeabirdPressureFilter(data_proc.time_ctd, data_proc.pressure, ...
                                      options.pressure_filter_constant);
       else
+        fprintf('Filtering pressure sequence using global time stamp...\n');
         data_proc.pressure = ...
           applySeabirdPressureFilter(data_proc.time, data_proc.pressure, ...
                                      options.pressure_filter_constant);
@@ -761,6 +789,7 @@ function data_proc = processGliderData(data_pre, varargin)
   %% Derive depth from pressure, if pressure available and needed.
   if options.depth_ctd_derivation ...
       && all(isfield(data_proc, {'pressure' 'latitude'}))
+    fprintf('Deriving CTD depth from pressure and latitude readings...\n');
     data_proc.depth_ctd = sw_dpth(data_proc.pressure, data_proc.latitude);
   end
   
@@ -779,6 +808,9 @@ function data_proc = processGliderData(data_pre, varargin)
       profile_stamp = fillInvalidValues(data_proc.time, profile_stamp, 'linear');
     end
     % Find profile directions and indices.
+    fprintf('Computing vertical direction and profile index with settings:\n');
+    fprintf('  profiling sequence : %s.\n', profiling_sequence);
+    fprintf('  minimum depth range: %f.\n', options.profile_min_range);
     [data_proc.profile_direction, data_proc.profile_index] = ...
       findProfiles(profile_stamp, 'range', options.profile_min_range);
   end
@@ -800,7 +832,7 @@ function data_proc = processGliderData(data_pre, varargin)
     sensor_lag_time_list = default_sensor_lag_time_list;
     sensor_lag_depth_list = default_sensor_lag_depth_list;
     sensor_lag_estimator = default_sensor_lag_estimator;
-    sensor_lag_options = default_sensor_lag_options;
+    sensor_lag_minopts = default_sensor_lag_minopts;
     if isfield(sensor_lag_option, 'time') && ~isempty(sensor_lag_option.time)
       sensor_lag_time_list = sensor_lag_option.time;
     end
@@ -809,11 +841,29 @@ function data_proc = processGliderData(data_pre, varargin)
     end
     if isfield(sensor_lag_option, 'estimator') ...
         && ~isempty(sensor_lag_option.estimator)
-      sensor_lag_estimator = sensor_lag_option.estimator;
+      % Convert estimator function name string to function handle, if needed.
+      if ischar(sensor_lag_option.estimator) 
+        sensor_lag_estimator = str2func(sensor_lag_option.estimator);
+      else
+        sensor_lag_estimator = sensor_lag_option.estimator;
+      end
     end
     if isfield(sensor_lag_option, 'options') ...
         && ~isempty(sensor_lag_option.options)
-      sensor_lag_options = sensor_lag_option.options;
+      sensor_lag_minopts = sensor_lag_option.options;
+    end
+    % Check if parameters are given or need to be estimated.
+    if isnumeric(sensor_lag_params) && isscalar(sensor_lag_params)
+      % Sensor lag time constant preset.
+      sensor_lag_params_avail = true;
+    elseif strcmpi(sensor_lag_params, 'auto')
+      % Sensor lag time constant estimation requested.
+      sensor_lag_params_avail = false;
+    else
+      % Invalid sensor lag parameter specification.
+      error('glider_toolbox:processGliderData:InvalidSensorLagParam', ...
+            'Invalid sensor lag settings %d: bad parameter specification.', ...
+            sensor_lag_option_idx);
     end
     % Find input fields needed for sensor lag estimation or correction.
     sensor_lag_raw_avail = false;
@@ -838,14 +888,21 @@ function data_proc = processGliderData(data_pre, varargin)
         break
       end
     end
-    sensor_lag_input_avail = ...
-      all([sensor_lag_raw_avail sensor_lag_time_avail sensor_lag_depth_avail]);
     % Perform sensor lag correction if needed input fields are there.
-    if isfield(data_proc, 'profile_index') && sensor_lag_input_avail 
+    if isfield(data_proc, 'profile_index') ... 
+        && sensor_lag_raw_avail && sensor_lag_time_avail ...
+        && (sensor_lag_params_avail || sensor_lag_depth_avail);
       num_profiles = fix(max(data_proc.profile_index));
       % Estimate sensor lag time constant, if needed.
-      if ischar(sensor_lag_params) && strcmpi(sensor_lag_params, 'auto')
-        fprintf('Performing %s sensor lag estimation...\n', sensor_lag_cor);
+      if sensor_lag_params_avail
+        % Sensor lag time constant given (do not perform estimation).
+        sensor_lag_constant = sensor_lag_params;
+      else
+        fprintf('Performing sensor lag parameter estimation %d with settings:\n', sensor_lag_option_idx);
+        fprintf('  sensor sequence : %s\n', sensor_lag_raw);
+        fprintf('  time sequence   : %s\n', sensor_lag_time);
+        fprintf('  depth sequence  : %s\n', sensor_lag_depth);
+        fprintf('  estimator       : %s\n', func2str(sensor_lag_estimator));
         % Estimate sensor lag time constant for each pofile.
         sensor_lag_estimates = nan(num_profiles-1, 1);
         sensor_lag_exitflags = nan(num_profiles-1, 1);
@@ -879,7 +936,7 @@ function data_proc = processGliderData(data_pre, varargin)
                sensor_lag_residuals(profile_idx)] = ...
                 findSensorLagParams(prof1_time(prof1_full_rows), prof1_depth(prof1_full_rows), prof1_raw(prof1_full_rows), ...
                                     prof2_time(prof2_full_rows), prof2_depth(prof2_full_rows), prof2_raw(prof2_full_rows), ...
-                                    sensor_lag_options);
+                                    sensor_lag_minopts);
               if sensor_lag_exitflags(profile_idx) <= 0
                  warning('glider_toolbox:processGliderData:SensorLagMinimizationError', ...
                          'Minimization did not converge for casts %d and %d, residual area: %f.', ...
@@ -893,24 +950,19 @@ function data_proc = processGliderData(data_pre, varargin)
           end
         end
         % Compute statistical estimate from individual profile estimates.
-        % Use feval to allow estimator as either function handle or name string.
-        sensor_lag_constant = ...
-          feval(sensor_lag_estimator, sensor_lag_estimates);
-      elseif isnumeric(sensor_lag_params) && isscalar(sensor_lag_params)
-        % Sensor lag time constant given.
-        sensor_lag_constant = sensor_lag_params;
-      else
-        % Invalid sensor lag parameters given.
-        error('glider_toolbox:processGliderData:InvalidSensorLagParam', ...
-              'Invalid sensor lag parameter for %s', sensor_lag_cor);
+        sensor_lag_constant = sensor_lag_estimator(sensor_lag_estimates);
       end
       % Correct sensor lag, if possible.
       if isnan(sensor_lag_constant)
-        fprintf('Omitting %s sensor lag correction: %s.\n', ...
-                sensor_lag_cor, 'no valid sensor lag parameter available');
+        fprintf('Omiting sensor lag correction %d (%s): %s.\n', ...
+                sensor_lag_option_idx, sensor_lag_cor, ...
+                'no valid parameter available');
       else
-        fprintf('Performing %s sensor lag correction with parameters %f...\n', ...
-                sensor_lag_cor, sensor_lag_constant);
+        fprintf('Performing sensor lag correction %d with settings:\n', sensor_lag_option_idx);
+        fprintf('  output sensor sequence: %s\n', sensor_lag_cor);
+        fprintf('  input sensor sequence : %s\n', sensor_lag_raw);
+        fprintf('  input time sequence   : %s\n', sensor_lag_time);
+        fprintf('  parameter             : %f\n', sensor_lag_constant);
         data_proc.(sensor_lag_cor) = nan(size(data_proc.(sensor_lag_raw)));
         for profile_idx = 1:num_profiles
           prof_select = (data_proc.profile_index == profile_idx);
@@ -923,7 +975,7 @@ function data_proc = processGliderData(data_pre, varargin)
     end
   end
 
-  
+
   %% Perform thermal lag estimation and correction, if needed.
   % Conductivity, temperature, pressure, time and depth sequences must be 
   % present in already processed data. Pitch may be also a sequence in processed 
@@ -947,7 +999,7 @@ function data_proc = processGliderData(data_pre, varargin)
     thermal_lag_pitch_list = default_thermal_lag_pitch_list;
     thermal_lag_pitch_missing_value = default_thermal_lag_pitch_missing_value;
     thermal_lag_estimator = default_thermal_lag_estimator;
-    thermal_lag_options = default_thermal_lag_options;
+    thermal_lag_minopts = default_thermal_lag_minopts;
     if isfield(thermal_lag_option, 'time') && ~isempty(thermal_lag_option.time)
       thermal_lag_time_list = thermal_lag_option.time;
     end
@@ -964,10 +1016,28 @@ function data_proc = processGliderData(data_pre, varargin)
       thermal_lag_pitch_missing_value = thermal_lag_option.pitch_missing_value;
     end
     if isfield(thermal_lag_option, 'estimator');
-      thermal_lag_estimator = thermal_lag_option.estimator;
+      % Convert estimator function name string to function handle, if needed.
+      if ischar(thermal_lag_option.estimator) 
+        thermal_lag_estimator = str2func(thermal_lag_option.estimator);
+      else
+        thermal_lag_estimator = thermal_lag_option.estimator;
+      end
     end
     if isfield(thermal_lag_option, 'options');
-      thermal_lag_options = thermal_lag_option.options;
+      thermal_lag_minopts = thermal_lag_option.options;
+    end
+    % Check if parameters are given or need to be estimated.
+    if isnumeric(thermal_lag_params) && (numel(thermal_lag_params) == 4)
+      % Thermal lag parameters preset.
+      thermal_lag_params_avail = true;
+    elseif strcmpi(thermal_lag_params, 'auto')
+      % Thermal lag parameter estimation requested.
+      thermal_lag_params_avail = false;
+    else
+      % Invalid thermal lag parameters given.
+      error('glider_toolbox:processGliderData:InvalidThermalLagParam', ...
+            'Invalid thermal lag settings %d: bad parameter specification.', ...
+            thermal_lag_option_idx);
     end
     % Find input fields needed for thermal lag estimation or correction.
     thermal_lag_time_avail = false;
@@ -1016,18 +1086,30 @@ function data_proc = processGliderData(data_pre, varargin)
         && ~all(isnan(data_proc.(thermal_lag_pres_raw)))
       thermal_lag_pres_avail = true;
     end
-    thermal_lag_input_avail = ...
-      all([thermal_lag_cond_raw_avail thermal_lag_temp_raw_avail ...
-           thermal_lag_pres_avail thermal_lag_time_avail thermal_lag_depth_avail ...
-           (thermal_lag_pitch_avail | thermal_lag_pitch_missing_value_avail)]);
-    % Perform thermal lag correction if needed input fields are there.
-    if isfield(data_proc, 'profile_index') && thermal_lag_input_avail
+    % Perform thermal lag correction if input fields are there.
+    if isfield(data_proc, 'profile_index') ...
+        && thermal_lag_cond_raw_avail && thermal_lag_temp_raw_avail ...
+        && thermal_lag_pres_avail && thermal_lag_time_avail && thermal_lag_depth_avail ...
+        && (thermal_lag_pitch_avail || thermal_lag_pitch_missing_value_avail)
       num_profiles = fix(max(data_proc.profile_index));
       % Estimate thermal lag constant, if needed.
-      if ischar(thermal_lag_params) && strcmpi(thermal_lag_params, 'auto')
-        fprintf('Performing %s and %s thermal lag parameter estimation...\n', ...
-                thermal_lag_cond_cor, thermal_lag_temp_cor);
-        % Estimate sensor lag time constant for each pofile.
+      if thermal_lag_params_avail
+        % Thermal lag parameters given.
+        thermal_lag_constants = thermal_lag_params;
+      else
+        fprintf('Performing thermal lag parameter estimation %d with settings:\n', thermal_lag_option_idx);
+        fprintf('  conductivity sequence: %s\n', thermal_lag_cond_raw);
+        fprintf('  temperature sequence : %s\n', thermal_lag_temp_raw);
+        fprintf('  pressure sequence    : %s\n', thermal_lag_pres_raw);
+        fprintf('  time sequence        : %s\n', thermal_lag_time);
+        fprintf('  depth sequence       : %s\n', thermal_lag_depth);
+        if thermal_lag_pitch_avail
+          fprintf('  pitch sequence       : %s\n', thermal_lag_pitch);
+        else
+          fprintf('  pitch value          : %f\n', thermal_lag_pitch_missing_value);
+        end
+        fprintf('  estimator            : %s\n', func2str(thermal_lag_estimator));
+        % Estimate thermal lag time constant for each pofile.
         thermal_lag_estimates = nan(num_profiles-1, 4);
         thermal_lag_residuals = nan(num_profiles-1, 1);
         thermal_lag_exitflags = nan(num_profiles-1, 1);
@@ -1080,7 +1162,7 @@ function data_proc = processGliderData(data_pre, varargin)
                                      prof1_cond(prof1_full_rows), prof1_temp(prof1_full_rows), prof1_pres(prof1_full_rows), ...
                                      prof2_time(prof2_full_rows), prof2_depth(prof2_full_rows), prof2_pitch(prof2_full_rows), ...
                                      prof2_cond(prof2_full_rows), prof2_temp(prof2_full_rows), prof2_pres(prof2_full_rows), ...
-                                     thermal_lag_options);
+                                     thermal_lag_minopts);
               if thermal_lag_exitflags(profile_idx) <= 0
                  warning('glider_toolbox:processGliderData:ThermalLagMinimizationError', ...
                          'Minimization did not converge for casts %d and %d, residual area: %f.', ...
@@ -1095,25 +1177,28 @@ function data_proc = processGliderData(data_pre, varargin)
         end
         % Compute statistical estimate from individual profile estimates.
         % Use feval to allow estimator as either function handle or name string.
-        thermal_lag_constants = ...
-          feval(thermal_lag_estimator, thermal_lag_estimates);
-      elseif isnumeric(thermal_lag_params) && (numel(thermal_lag_params) == 4)
-        % Thermal lag parameters given.
-        thermal_lag_constants = thermal_lag_params;
-      else
-        % Invalid thermal lag parameters given.
-        error('glider_toolbox:processGliderData:InvalidThermalLagParam', ...
-              'Invalid sensor lag parameter for %s and %s.', ...
-              thermal_lag_cond_cor, thermal_lag_temp_cor);
+        thermal_lag_constants = thermal_lag_estimator(thermal_lag_estimates);
       end
       % Correct thermal lag, if possible.
       if any(isnan(thermal_lag_constants))
-        fprintf('Omitting %s and %s thermal lag correction: %s.\n', ...
-                thermal_lag_cond_cor, thermal_lag_temp_cor, ...
-                'no valid thermal lag parameters available');
+        fprintf('Omiting thermal lag correction %d (%s and %s): %s.\n', ...
+                thermal_lag_option_idx, thermal_lag_cond_cor, ...
+                thermal_lag_temp_cor, 'no valid parameters available');
       else
-        fprintf('Performing %s and %s thermal lag correction with parameters %f %f %f %f...\n', ...
-                thermal_lag_cond_cor, thermal_lag_temp_cor, thermal_lag_constants);
+        fprintf('Performing thermal lag correction %d with settings:\n', thermal_lag_option_idx);
+        fprintf('  output temperature sequence : %s\n', thermal_lag_temp_cor);
+        fprintf('  output conductivity sequence: %s\n', thermal_lag_cond_cor);
+        fprintf('  input conductivity sequence : %s\n', thermal_lag_cond_raw);
+        fprintf('  input temperature sequence  : %s\n', thermal_lag_temp_raw);        
+        fprintf('  input pressure sequence     : %s\n', thermal_lag_pres_raw);
+        fprintf('  input time sequence         : %s\n', thermal_lag_time);
+        fprintf('  input depth sequence        : %s\n', thermal_lag_depth);
+        if thermal_lag_pitch_avail
+          fprintf('  input pitch sequence        : %s\n', thermal_lag_pitch);
+        else
+          fprintf('  input pitch value           : %f\n', thermal_lag_pitch_missing_value);
+        end
+        fprintf('  parameters                  : %f %f %f %f\n', thermal_lag_constants);
         data_proc.(thermal_lag_cond_cor) = ...
           nan(size(data_proc.(thermal_lag_cond_raw)));
         data_proc.(thermal_lag_temp_cor) = ...
@@ -1152,6 +1237,11 @@ function data_proc = processGliderData(data_pre, varargin)
       % Compute salinity from temperature, pressure and conductivity ratio.
       % Input conductivity is given in S/m (Siemens per metre), 
       % but reference conductivity returned by sw_c3515 is in mS/cm.
+      fprintf('Deriving salinity %d with settings:\n', salinity_option_idx);
+      fprintf('  output salinity sequence   : %s.\n', salinity_salt);
+      fprintf('  input conductivity sequence: %s.\n', salinity_cond);
+      fprintf('  input temperature sequence : %s.\n', salinity_temp);
+      fprintf('  input pressure sequence    : %s.\n', salinity_pres);
       data_proc.(salinity_salt) = ...
         sw_salt(data_proc.(salinity_cond) * (10 / sw_c3515()), ...
                 data_proc.(salinity_temp), data_proc.(salinity_pres));
@@ -1168,6 +1258,11 @@ function data_proc = processGliderData(data_pre, varargin)
     density_pres = density_option.pressure;
     if all(isfield(data_proc, {density_salt density_temp density_pres}))
       % Compute density from temperature, pressure and salinity.
+      fprintf('Deriving density %d with settings:\n', density_option_idx);
+      fprintf('  output density sequence   : %s.\n', density_dens);
+      fprintf('  input salinity sequence   : %s.\n', density_salt);
+      fprintf('  input temperature sequence: %s.\n', density_temp);
+      fprintf('  input pressure sequence   : %s.\n', density_pres);
       data_proc.(density_dens) = ...
         sw_dens(data_proc.(density_salt), ...
                 data_proc.(density_temp), data_proc.(density_pres));
