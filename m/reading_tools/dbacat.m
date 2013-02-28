@@ -4,9 +4,11 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 %  [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP) combines data from 
 %  arrays in cell array DATA_LIST and metadata from structs in cell array 
 %  META_LIST into a single data set with data in array DATA and metadata in 
-%  struct META according to a time from sensor named by string TIMESTAMP.
-%  META, DATA, and the elements of META_LIST and DATA_LIST follow the format 
-%  returned by the function DBA2MAT.
+%  struct array META. Elements in META_LIST and DATA_LIST should have the format 
+%  returned by function DBA2MAT. META is a struct array resulting from simple
+%  concatenation of elements in META_LIST. DATA results from combining the rows
+%  of arrays in DATA_LIST and sorting them according to a timestamp from sensor
+%  named by string TIMESTAMP.
 %
 %  [META, DATA] = DBACAT(..., OPT1, VAL1, ...) accepts the following options:
 %    'format': a string setting the format of the output DATA. Valid values are:
