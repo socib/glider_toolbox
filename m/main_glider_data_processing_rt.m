@@ -45,9 +45,9 @@ config.public_paths = configRTPublicPaths();
 
 
 %% Configure NetCDF output.
-config.output_ncl0 = configRTOutputNetCDFL0();
-config.output_ncl1 = configRTOutputNetCDFL1();
-config.output_ncl2 = configRTOutputNetCDFL2();
+config.output_netcdf_l0 = configRTOutputNetCDFL0();
+config.output_netcdf_l1 = configRTOutputNetCDFL1();
+config.output_netcdf_l2 = configRTOutputNetCDFL2();
 
 
 %% Set the path to the data: edit for mission processing.
@@ -90,7 +90,9 @@ end
 
 %% Process active deployments.
 for deployment_idx = 1:numel(deployment_list)
-  %% Set deployment field shortcut variables.
+  %% Set deployment field shortcut variables and initialize other ones.
+  % Initialization of big data variables may reduce out of memory problems,
+  % provided memory is properly freed and not fragmented.
   disp(['Processing deployment ' num2str(deployment_idx) ' ...']);
   deployment = deployment_list(deployment_idx);
   deployment_name = deployment.deployment_name;
@@ -98,17 +100,28 @@ for deployment_idx = 1:numel(deployment_list)
   deployment_start = deployment.deployment_start;
   deployment_end = deployment.deployment_end;
   glider_name = deployment.glider_name;
+  processing_log = strfglider(config.local_paths.processing_log, deployment);
   binary_dir = strfglider(config.local_paths.binary_path, deployment);
   cache_dir = strfglider(config.local_paths.cache_path, deployment);
   log_dir = strfglider(config.local_paths.log_path, deployment);
   ascii_dir = strfglider(config.local_paths.ascii_path, deployment);
   figure_dir = strfglider(config.local_paths.figure_path, deployment);
-  processing_log = strfglider(config.local_paths.processing_log, deployment);
+  netcdf_l0_file = strfglider(config.local_paths.netcdf_l0, deployment);
+  netcdf_l1_file = strfglider(config.local_paths.netcdf_l1, deployment);
+  netcdf_l2_file = strfglider(config.local_paths.netcdf_l2, deployment);
+  meta_raw = [];
+  data_raw = [];
+  data_preprocessed = [];
+  data_processed = [];
+  data_gridded = [];
+  outputs = [];
   
   
   %% Start deployment processing logging.
   diary(processing_log);
   diary('on');
+  disp(['Deployment processing start time: ' ...
+        datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00')]);
   
   
   %% Report deployment information.
@@ -162,6 +175,8 @@ for deployment_idx = 1:numel(deployment_list)
   % directory and store the returned absolute path for use later.
   % Since some conversion may fail use a cell array of string cell arrays and
   % flatten it when finished, leaving only the succesfully created dbas.
+  % Give a second try to failing files, because they might have failed due to 
+  % a missing cache file generated later.
   disp('Converting binary data files to ascii format...');
   new_dbas = cell(size(new_xbds));
   for conversion_retry = 1:2
@@ -192,166 +207,176 @@ for deployment_idx = 1:numel(deployment_list)
         num2str(numel(new_dbas)) ' of ' num2str(numel(new_xbds)) '.']);
 
 
-  %% Quit deployment processing if there is no new data.
+  %% Load data from ascii deployment glider files.there is new data.
   if isempty(new_dbas)
     disp('No new deployment data, skipping data processing and product generation.');
-    continue
-  end
-
-
-  %% Load data from ascii deployment glider files.
-  disp('Loading raw deployment data from text files...');
-  try
-    load_start = deployment_start;
-    if isempty(deployment_end)
-      load_end = posixtime2utc(posixtime());
-    else
-      load_end = deployment_end;
+  else
+    disp('Loading raw deployment data from text files...');
+    try
+      load_start = deployment_start;
+      if isempty(deployment_end)
+        load_end = posixtime2utc(posixtime());
+      else
+        load_end = deployment_end;
+      end
+      [meta_raw, data_raw] = ...
+        loadSlocumData(ascii_dir, ...
+                       config.slocum_options.dba_name_pattern_nav, ...
+                       config.slocum_options.dba_name_pattern_sci, ...
+                       'timestamp_nav', config.slocum_options.dba_time_sensor_nav, ...
+                       'timestamp_sci', config.slocum_options.dba_time_sensor_sci, ...
+                       'sensors', config.slocum_options.dba_sensors, ...
+                       'period', [load_start load_end], ...
+                       'format', 'struct');
+      disp(['Slocum files loaded: ' num2str(numel(meta_raw.sources)) '.']);
+    catch exception
+      disp('Error loading Slocum data:');
+      disp(getReport(exception, 'extended'));
     end
-    [meta_raw, data_raw] = ...
-      loadSlocumData(ascii_dir, ...
-                     config.slocum_options.dba_name_pattern_nav, ...
-                     config.slocum_options.dba_name_pattern_sci, ...
-                     'timestamp_nav', config.slocum_options.dba_time_sensor_nav, ...
-                     'timestamp_sci', config.slocum_options.dba_time_sensor_sci, ...
-                     'sensors', config.slocum_options.dba_sensors, ...
-                     'period', [load_start load_end], ...
-                     'format', 'struct');
-  catch exception
-    disp('Error loading Slocum data:');
-    disp(getReport(exception, 'extended'));
-    disp(['Deployment ' num2str(deployment_id) ' processing aborted!']);
-    continue
   end
-  disp(['Slocum files loaded: ' num2str(numel(meta_raw.sources)) '.']);
   
   
-  %% Add source files to deployment structure.
-  deployment.source_files = sprintf('%s\n', meta_raw.headers.filename_label);
+  %% Add source files to deployment structure if loading succeeded.
+  if ~isempty(meta_raw) 
+    deployment.source_files = sprintf('%s\n', meta_raw.headers.filename_label);
+  end
   
   
   %% Preprocess raw glider data.
+  if ~isempty(data_raw)
   disp('Preprocessing raw data...');
-  try
-    data_preprocessed = ...
-      preprocessGliderData(data_raw, config.preprocessing_options);
-  catch exception
-    disp('Error preprocessing raw data:');
-    disp(getReport(exception, 'extended'));
-    disp(['Deployment ' num2str(deployment_id) ' processing aborted!']);
-    continue
+    try
+      data_preprocessed = ...
+        preprocessGliderData(data_raw, config.preprocessing_options);
+    catch exception
+      disp('Error preprocessing glider deployment data:');
+      disp(getReport(exception, 'extended'));
+    end
   end
   
   
-  %% Generate L0 NetCDF file (raw/preprocessed data), if needed.
-  outputs.netcdf_l0 = [];
-  if isfield(config.local_paths, 'netcdf_l0') && ~isempty(config.local_paths.netcdf_l0)
+  %% Generate L0 NetCDF file (raw/preprocessed data), if needed and possible.
+  if ~isempty(data_preprocessed) ...
+      && isfield(config.local_paths, 'netcdf_l0') ...
+      && ~isempty(config.local_paths.netcdf_l0)
     disp('Generating NetCDF L0 output...');
-    ncl0_file = strfglider(config.local_paths.netcdf_l0, deployment);
     try
       outputs.netcdf_l0 = ...
-        generateOutputNetCDFL0(ncl0_file, data_preprocessed, ...
-                               config.output_ncl0.var_meta, ...
-                               config.output_ncl0.dim_names, ...
-                               config.output_ncl0.global_atts, deployment);
-      disp(['Output NetCDF L0 (raw data) generated: ' outputs.netcdf_l0 '.']);
+        generateOutputNetCDFL0(netcdf_l0_file, data_preprocessed, ...
+                               config.output_netcdf_l0.var_meta, ...
+                               config.output_netcdf_l0.dim_names, ...
+                               config.output_netcdf_l0.global_atts, ...
+                               deployment);
+      disp(['Output NetCDF L0 (preprocessed data) generated: ' ...
+            outputs.netcdf_l0 '.']);
     catch exception
-      disp(['Error generating NetCDF L0 (preprocessed data) output ' ncl0_file ':']);
+      disp(['Error generating NetCDF L0 (preprocessed data) output ' ...
+            netcdf_l0_file ':']);
       disp(getReport(exception, 'extended'));
-    end;
+    end
   end
   
   
   %% Process preprocessed glider data.
-  disp('Processing glider data...');
-  try
-    data_processed = ...
-      processGliderData(data_preprocessed, config.processing_options);
-  catch exception
-    disp('Error processing glider deployment data:');
-    disp(getReport(exception, 'extended'));
-    disp(['Deployment ' num2str(deployment_id) ' processing aborted!']);
-    continue
+  if ~isempty(data_preprocessed)
+    disp('Processing glider data...');
+    try
+      data_processed = ...
+        processGliderData(data_preprocessed, config.processing_options);
+    catch exception
+      disp('Error processing glider deployment data:');
+      disp(getReport(exception, 'extended'));
+    end
   end
   
   
-  %% Generate L1 NetCDF file (processed data).
-  outputs.netcdf_l1 = [];
-  if isfield(config.local_paths, 'netcdf_l1') && ~isempty(config.local_paths.netcdf_l1)
+  %% Generate L1 NetCDF file (processed data), if needed and possible.
+  if ~isempty(data_processed) ...
+      && isfield(config.local_paths, 'netcdf_l1') ...
+      && ~isempty(config.local_paths.netcdf_l1)
     disp('Generating NetCDF L1 output...');
-    ncl1_file = strfglider(config.local_paths.netcdf_l1, deployment);
     try
       outputs.netcdf_l1 = ...
-        generateOutputNetCDFL1(ncl1_file, data_processed, ...
-                               config.output_ncl1.var_meta, ...
-                               config.output_ncl1.dim_names, ...
-                               config.output_ncl1.global_atts, deployment);
-      disp(['Output NetCDF L1 (processed data) generated: ' outputs.netcdf_l1 '.']);
+        generateOutputNetCDFL1(netcdf_l1_file, data_processed, ...
+                               config.output_netcdf_l1.var_meta, ...
+                               config.output_netcdf_l1.dim_names, ...
+                               config.output_netcdf_l1.global_atts, ...
+                               deployment);
+      disp(['Output NetCDF L1 (processed data) generated: ' ...
+            outputs.netcdf_l1 '.']);
     catch exception
-      disp(['Error generating NetCDF L1 (processed data) output ' ncl1_file ':']);
+      disp(['Error generating NetCDF L1 (processed data) output ' ...
+            netcdf_l1_file ':']);
       disp(getReport(exception, 'extended'));
-    end;
+    end
   end
   
   
-  %% Process glider trajectory data to vertically gridded data.
-  disp('Gridding glider data...');
-  try
-    data_gridded = gridGliderData(data_processed, config.gridding_options);
-  catch exception
-    disp('Error processing glider deployment data:');
-    disp(getReport(exception, 'extended'));
-    disp(['Deployment ' num2str(deployment_id) ' processing aborted!']);
-    continue
+  %% Grid processed glider data.
+  if ~isempty(data_processed)
+    disp('Gridding glider data...');
+    try
+      data_gridded = gridGliderData(data_processed, config.gridding_options);
+    catch exception
+        disp('Error gridding glider deployment data:');
+      disp(getReport(exception, 'extended'));
+    end
   end
   
   
-  %% Generate L2 (gridded data) netcdf file.
-  outputs.netcdf_l2 = [];
-  if isfield(config.local_paths, 'netcdf_l2') && ~isempty(config.local_paths.netcdf_l2)
+  %% Generate L2 (gridded data) netcdf file, if needed and possible.
+  if ~isempty(data_gridded) ...
+      && isfield(config.local_paths, 'netcdf_l2') ...
+      && ~isempty(config.local_paths.netcdf_l2)
     disp('Generating NetCDF L2 output...');
     ncl2_file = strfglider(config.local_paths.netcdf_l2, deployment);
     try
       outputs.netcdf_l2 = ...
-        generateOutputNetCDFL2(ncl2_file, data_gridded, ...
-                               config.output_ncl2.var_meta, ...
-                               config.output_ncl2.dim_names, ...
-                               config.output_ncl2.global_atts, deployment);
-      disp(['Output NetCDF L2 (gridded data) generated: ' outputs.netcdf_l2 '.']);
+        generateOutputNetCDFL2(netcdf_l2_file, data_gridded, ...
+                               config.output_netcdf_l2.var_meta, ...
+                               config.output_netcdf_l2.dim_names, ...
+                               config.output_netcdf_l2.global_atts, ...
+                               deployment);
+      disp(['Output NetCDF L2 (gridded data) generated: ' ...
+            outputs.netcdf_l2 '.']);
     catch exception
-      disp(['Error generating NetCDF L2 (gridded data) output ' ncl2_file ':']);
+      disp(['Error generating NetCDF L2 (gridded data) output ' ...
+            netcdf_l2_file ':']);
       disp(getReport(exception, 'extended'));
     end
   end
   
   
   %% Copy selected products to corresponding public location, if needed.
-  disp('Copying public outputs...');
-  output_list = {'netcdf_l0', 'netcdf_l1', 'netcdf_l2'};
-  for output_idx = 1:numel(output_list)
-    output_name = output_list{output_idx};
-    if isfield(config.public_paths, output_name) ...
-         && ~isempty(config.public_paths.(output_name)) ...
-         && isfield(outputs, output_name) ...
-         && ~isempty(outputs.(output_name))
-      output_local_file = outputs.(output);
-      output_public_file = strfglider(config.public_paths.(output), deployment);
-      output_public_dir = fileparts(output_public_file);
-      if ~isdir(output_public_dir)
-        [success, message] = mkdir(output_public_dir);
-        if ~success
-          disp(['Error creating public directory for deployment product ' ...
-                output ': ' output_public_dir '.']);
-          disp(message);
-          continue
+  if ~isempty(outputs)
+    disp('Copying public outputs...');
+    output_name_list = fieldnames(outputs);
+    for output_name_idx = 1:numel(output_name_list)
+      output_name = output_name_list{output_name_idx};
+      if isfield(config.public_paths, output_name) ...
+           && ~isempty(config.public_paths.(output_name))
+        output_local_file = outputs.(output_name);
+        output_public_file = ...
+          strfglider(config.public_paths.(output_name), deployment);
+        output_public_dir = fileparts(output_public_file);
+        if ~isdir(output_public_dir)
+          [success, message] = mkdir(output_public_dir);
+          if ~success
+            disp(['Error creating public directory for deployment product ' ...
+                  output_name ': ' output_public_dir '.']);
+            disp(message);
+            continue
+          end
         end
-      end
-      [success, message] = copyfile(output_local_file, output_public_file);
-      if success
-        disp(['Public output ' output ' succesfully created: ' output_public_file '.']);
-      else
-        disp(['Error creating public copy of deployment product ' output ': ' output_public_file '.']);
-        disp(message);
+        [success, message] = copyfile(output_local_file, output_public_file);
+        if success
+          disp(['Public output ' output_name ' succesfully copied: ' ...
+                output_public_file '.']);
+        else
+          disp(['Error creating public copy of deployment product ' ...
+                output_name ': ' output_public_file '.']);
+          disp(message);
+        end
       end
     end
   end
@@ -390,6 +415,8 @@ for deployment_idx = 1:numel(deployment_list)
   
   
   %% Stop deployment processing logging.
+  disp(['Deployment processing end time: ' ...
+        datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00')]);
   diary('off');
   
 end
