@@ -32,13 +32,13 @@ function [meta, data] = dba2mat(filename, varargin)
 %      NUM_SEGMENTS: ascii tag in dba header.
 %      SEGMENT_FILENAMES: string cell array with the contents of the ascii tags
 %        SEGMENT_FILENAME_0, ..., SEGMENT_FILENAME_N-1.
-%    SENSORS: cell array of strings with the names of the sensors present in the
+%    SENSORS: string cell array with the names of the sensors present in the
 %      returned data array (in the same column order as the data).
-%    UNITS: cell array of strings with the units of the sensors present in the
+%    UNITS: string cell array with the units of the sensors present in the
 %      returned data array.
 %    BYTES: array with the number of bytes of each sensor present in the 
 %      returned data array.
-%    SOURCES: cell array of strings containing FILENAME.
+%    SOURCES: string cell array containing FILENAME.
 %
 %  Notes:
 %    A description of the dba format may be found here:

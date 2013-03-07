@@ -4,11 +4,27 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 %  [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP) combines data from 
 %  arrays in cell array DATA_LIST and metadata from structs in cell array 
 %  META_LIST into a single data set with data in array DATA and metadata in 
-%  struct array META. Elements in META_LIST and DATA_LIST should have the format 
-%  returned by function DBA2MAT. META is a struct array resulting from simple
-%  concatenation of elements in META_LIST. DATA results from combining the rows
-%  of arrays in DATA_LIST and sorting them according to a timestamp from sensor
-%  named by string TIMESTAMP.
+%  struct array META. Elements in META_LIST and DATA_LIST should have the format
+%  returned by function DBA2MAT, but do not need to have the same sensor set.
+%  Outputs META and DATA have the same format, too.
+%  META is a struct array combining the information in elements of META_LIST.
+%  It has following fields:
+%    HEADERS: struct array built concatenating the HEADERS field of all elements
+%      in META_LIST.
+%    SENSORS: string cell array with the names of the sensors present in the
+%      returned data array (in the same column order), built merging the SENSORS
+%      field of all elements in META_LIST.
+%    UNITS: string cell array with the units of the sensors present in the
+%      returned data array (in the same column order), built merging the UNITS
+%      field of all elements in META_LIST.
+%    BYTES: array with the number of bytes of each sensor present in the 
+%      returned data array, (in the same column order), built merging the BYTES
+%      field of all elements in META_LIST.
+%    SOURCES: string cell array built concatenating the SOURCES field of all 
+%      elements in META_LIST.
+%  DATA is a numeric array combining the rows of arrays in DATA_LIST, reordering
+%  the sensor columns if needed, and sorting the resulting rows according to a 
+%  timestamp from sensor named by string TIMESTAMP.
 %
 %  [META, DATA] = DBACAT(..., OPT1, VAL1, ...) accepts the following options:
 %    'format': a string setting the format of the output DATA. Valid values are:
