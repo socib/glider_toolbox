@@ -200,7 +200,7 @@ function data_proc = processGliderData(data_pre, varargin)
 %        ESTIMATOR: function handle or string with the name of the estimator to
 %          use to combine the parameter estimates computed for each cast pair.
 %          Default: @nanmedian
-%        OPTIONS: struct to pass custom minimization options for estimation,
+%        MINOPTS: struct to pass custom minimization options for estimation,
 %          in the format accepted by function FINDSENSORLAGPARAMS.
 %          Default: struct()
 %      Each struct in the struct array specifies a sensor lag correction.
@@ -243,7 +243,7 @@ function data_proc = processGliderData(data_pre, varargin)
 %        ESTIMATOR: function handle or string with the name of the estimator to
 %          use to combine the parameter estimates computed for each cast pair.
 %          Default: @nanmedian
-%        OPTIONS: struct to pass custom minimization options for estimation,
+%        MINOPTS: struct to pass custom minimization options for estimation,
 %          in the format accepted by function FINDTHERMALLAGPARAMS.
 %          Default: struct()
 %      Each struct in the struct array specifies a thermal lag correction.
@@ -367,9 +367,9 @@ function data_proc = processGliderData(data_pre, varargin)
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
-
+  
   error(nargchk(1, 55, nargin, 'struct'));
-
+  
   
   %% Configure default values for optional sensor lag settings. 
   default_sensor_lag_time_list = {'time'};
@@ -384,6 +384,7 @@ function data_proc = processGliderData(data_pre, varargin)
   default_thermal_lag_depth_list = {'depth_ctd' 'depth'};
   default_thermal_lag_pitch_list = {'pitch'};
   default_thermal_lag_pitch_missing_value = [];
+  default_thermal_lag_pitch_min_value = 0;
   default_thermal_lag_estimator = @nanmedian;
   default_thermal_lag_minopts = struct();
   
@@ -431,7 +432,7 @@ function data_proc = processGliderData(data_pre, varargin)
   
   options.sensor_lag_list = ...
     struct('corrected', {}, 'original', {}, 'parameters', {});
-
+  
   options.thermal_lag_list = ...
     struct('conductivity_corrected', {}, 'temperature_corrected',  {}, ...         
            'conductivity_original',  {}, 'temperature_original', {}, ...
@@ -491,8 +492,8 @@ function data_proc = processGliderData(data_pre, varargin)
   
   %% Get list of available sensors.
   sensor_list = fieldnames(data_pre);
-
-
+  
+  
   %% Select time coordinate sensor.
   % Find preferred valid time sensor in list of available sensors.
   % For Slocum data please be aware of the efects of program dba_merge,
@@ -510,8 +511,8 @@ function data_proc = processGliderData(data_pre, varargin)
     error('glider_toolbox:processGliderData:MissingSensorTime', ...
           'No time sensor present in data set.');
   end
-
-
+  
+  
   %% Select position coordinate sensors.
   % Find preferred set of valid latitude and longitude sensors in list of 
   % available sensors.
@@ -532,8 +533,8 @@ function data_proc = processGliderData(data_pre, varargin)
     error('glider_toolbox:processGliderData:MissingSensorPosition', ...
           'No latitude and longitude sensors present in data set.');
   end
-
-
+  
+  
   %% Select depth sensor.
   % Find preferred valid depth sensor in list of available sensors, if any.
   for depth_sensor_idx = 1:numel(options.depth_sensor_list)
@@ -545,8 +546,8 @@ function data_proc = processGliderData(data_pre, varargin)
       break;
     end
   end
-
-
+  
+  
   %% Select pitch sensor.
   % Find preferred valid pitch sensor in list of available sensors, if any.
   for pitch_sensor_idx = 1:numel(options.pitch_sensor_list)
@@ -558,8 +559,8 @@ function data_proc = processGliderData(data_pre, varargin)
       break;
     end
   end
-
-
+  
+  
   %% Select waypoint coordinate sensors.
   % Find preferred set of valid waypoint latitude and longitude sensors in list 
   % of available sensors, if any.
@@ -578,8 +579,8 @@ function data_proc = processGliderData(data_pre, varargin)
       break;
     end
   end
-
-
+  
+  
   %% Select segment mean water velocity component sensor.
   % Find preferred set of valid segment mean water velocity sensors in list of 
   % available sensors, if any.
@@ -598,7 +599,7 @@ function data_proc = processGliderData(data_pre, varargin)
       break;
     end
   end
-
+  
   
   %% Select CTD sensor.
   % Find preferred valid CTD sensor set in list of available sensors, if any.
@@ -629,7 +630,7 @@ function data_proc = processGliderData(data_pre, varargin)
       break;
     end
   end
-
+  
   
   %% Select fluor (chlorophyl) and turbidity sensor.
   % Find preferred set of valid fluor and turbidity sensors in list of available 
@@ -694,8 +695,8 @@ function data_proc = processGliderData(data_pre, varargin)
       end
     end
   end
-
-
+  
+  
   %% Fill missing time readings, if needed.
   % Regular sampling is assumed on time gaps.
   if options.time_filling
@@ -703,8 +704,8 @@ function data_proc = processGliderData(data_pre, varargin)
     data_proc.time = ...
       fillInvalidValues(data_proc.time, 'linear');
   end
-
-
+  
+  
   %% Fill missing position readings, if needed.
   % Use linear interpolation of valid coordinate readings.
   if options.position_filling
@@ -714,8 +715,8 @@ function data_proc = processGliderData(data_pre, varargin)
     data_proc.longitude = ...
       fillInvalidValues(data_proc.time, data_proc.longitude, 'linear');
   end
-
-
+  
+  
   %% Fill missing depth readings, if needed.
   % Use linear interpolation of valid coordinate readings.
   if options.depth_filling && isfield(data_proc, 'depth');
@@ -723,8 +724,8 @@ function data_proc = processGliderData(data_pre, varargin)
     data_proc.depth = ...
       fillInvalidValues(data_proc.time, data_proc.depth, 'linear');
   end
-
-
+  
+  
   %% Fill missing pitch readings, if needed.
   % Use linear interpolation of valid coordinate readings.
   if options.pitch_filling && isfield(data_proc, 'pitch')
@@ -746,8 +747,8 @@ function data_proc = processGliderData(data_pre, varargin)
     data_proc.waypoint_longitude = ...
       fillInvalidValues(data_proc.waypoint_longitude, 'previous');
   end
-
- 
+  
+  
   %% Identify transect bounadaries, if waypoint coordinates available.
   if all(isfield(data_proc, {'waypoint_latitude' 'waypoint_longitude'}))
     fprintf('Computing transect index by transect boundary identification...\n');
@@ -761,7 +762,7 @@ function data_proc = processGliderData(data_pre, varargin)
   data_proc.distance_over_ground = ...
     computeCumulativeDistance(data_proc.latitude, data_proc.longitude);
   
-
+  
   %% Convert and filter pressure, if pressure available and needed.
   if isfield(data_proc, 'pressure')
     % Convert pressure from bars to decibars, if needed (by later processings).
@@ -815,7 +816,7 @@ function data_proc = processGliderData(data_pre, varargin)
       findProfiles(profile_stamp, 'range', options.profile_min_range);
   end
   
-
+  
   %% Perform sensor lag estimation and correction, if needed.
   % Sensor, time and depth sequences must be present in already processed data.
   for sensor_lag_option_idx = 1:numel(options.sensor_lag_list)
@@ -848,9 +849,9 @@ function data_proc = processGliderData(data_pre, varargin)
         sensor_lag_estimator = sensor_lag_option.estimator;
       end
     end
-    if isfield(sensor_lag_option, 'options') ...
-        && ~isempty(sensor_lag_option.options)
-      sensor_lag_minopts = sensor_lag_option.options;
+    if isfield(sensor_lag_option, 'minopts') ...
+        && ~isempty(sensor_lag_option.minopts)
+      sensor_lag_minopts = sensor_lag_option.minopts;
     end
     % Check if parameters are given or need to be estimated.
     if isnumeric(sensor_lag_params) && isscalar(sensor_lag_params)
@@ -974,8 +975,8 @@ function data_proc = processGliderData(data_pre, varargin)
       end
     end
   end
-
-
+  
+  
   %% Perform thermal lag estimation and correction, if needed.
   % Conductivity, temperature, pressure, time and depth sequences must be 
   % present in already processed data. Pitch may be also a sequence in processed 
@@ -998,6 +999,7 @@ function data_proc = processGliderData(data_pre, varargin)
     thermal_lag_depth_list = default_thermal_lag_depth_list;
     thermal_lag_pitch_list = default_thermal_lag_pitch_list;
     thermal_lag_pitch_missing_value = default_thermal_lag_pitch_missing_value;
+    thermal_lag_pitch_min_value = default_thermal_lag_pitch_min_value;
     thermal_lag_estimator = default_thermal_lag_estimator;
     thermal_lag_minopts = default_thermal_lag_minopts;
     if isfield(thermal_lag_option, 'time') && ~isempty(thermal_lag_option.time)
@@ -1015,6 +1017,10 @@ function data_proc = processGliderData(data_pre, varargin)
         && ~isempty(thermal_lag_option.pitch_missing_value)
       thermal_lag_pitch_missing_value = thermal_lag_option.pitch_missing_value;
     end
+    if isfield(thermal_lag_option, 'pitch_min_value') ...
+        && ~isempty(thermal_lag_option.pitch_min_value)
+      thermal_lag_pitch_min_value = thermal_lag_option.pitch_min_value;
+    end
     if isfield(thermal_lag_option, 'estimator');
       % Convert estimator function name string to function handle, if needed.
       if ischar(thermal_lag_option.estimator) 
@@ -1023,8 +1029,8 @@ function data_proc = processGliderData(data_pre, varargin)
         thermal_lag_estimator = thermal_lag_option.estimator;
       end
     end
-    if isfield(thermal_lag_option, 'options');
-      thermal_lag_minopts = thermal_lag_option.options;
+    if isfield(thermal_lag_option, 'minopts');
+      thermal_lag_minopts = thermal_lag_option.minopts;
     end
     % Check if parameters are given or need to be estimated.
     if isnumeric(thermal_lag_params) && (numel(thermal_lag_params) == 4)
@@ -1127,6 +1133,7 @@ function data_proc = processGliderData(data_pre, varargin)
           else
             prof1_pitch = repmat(thermal_lag_pitch_missing_value, size(prof1_time));
           end
+          prof1_pitch(abs(prof1_pitch)<thermal_lag_pitch_min_value) = nan;
           [prof1_valid, prof1_full_rows] = ...
             validateProfile(prof1_depth, ...
                             [prof1_time prof1_pitch ...
@@ -1146,6 +1153,7 @@ function data_proc = processGliderData(data_pre, varargin)
           else
             prof2_pitch = repmat(thermal_lag_pitch_missing_value, size(prof2_time));
           end
+          prof2_pitch(abs(prof2_pitch)<thermal_lag_pitch_min_value) = nan;
           [prof2_valid, prof2_full_rows] = ...
             validateProfile(prof2_depth, ...
                             [prof2_time prof2_pitch ...
@@ -1214,6 +1222,7 @@ function data_proc = processGliderData(data_pre, varargin)
           else
             prof_pitch = thermal_lag_pitch_missing_value;
           end
+          prof_pitch(abs(prof_pitch)<thermal_lag_pitch_min_value) = nan;
           [prof_temp_cor, prof_cond_cor] = ...
             correctThermalLag(prof_time, prof_depth, prof_pitch, ...
                               prof_cond_raw, prof_temp_raw, ...
