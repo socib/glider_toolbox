@@ -95,7 +95,7 @@ function ncl1 = generateOutputNetCDFL1(filename, data, meta, dims, atts, deploym
   end
   
   
-    %% Select only data properly described by metadata.
+  %% Select only data properly described by metadata.
   data_selected = struct();
   data_field_name_list = fieldnames(data);
   for data_field_name_idx = 1:numel(data_field_name_list)
@@ -103,21 +103,27 @@ function ncl1 = generateOutputNetCDFL1(filename, data, meta, dims, atts, deploym
     if isfield(meta, data_field_name);
       data_selected.(data_field_name) = data.(data_field_name);
     end
-  end  
-    
+  end
+  
   
   %% Set dimension lengths.
   dim_info = struct(dims.time, {0});
   
   
   %% Create base directory of target file if needed.
+  % This seems to be the best way to check if a relative path points to
+  % an existing directory (EXIST checks for existance in the whole load path).
   [file_dir, ~, ~] = fileparts(filename);
-  if ~exist(file_dir, 'dir')
+  [status, attrout] = fileattrib(file_dir);
+  if ~status
     [success, message] = mkdir(file_dir);
     if ~success
       error('glider_toolbox:netcdf_tools:NetCDFDirectoryError', ...
-            'Could not create output directory %s: %s.', file_dir, message);
+            'Could not create directory %s: %s.', file_dir, message);
     end
+  elseif ~attrout.directory
+    error('glider_toolbox:netcdf_tools:NetCDFDirectoryError', ...
+          'Not a directory: %s.', attrout.Name);
   end
   
   
@@ -126,13 +132,13 @@ function ncl1 = generateOutputNetCDFL1(filename, data, meta, dims, atts, deploym
   
   
   %% Return the absolute name of the generated file.
-  [status, att_output, ~] = fileattrib(filename);
+  [status, attrout, ~] = fileattrib(filename);
   if status==0
     % We should never get here (if NetCDF creation succeed, file must exist).
     error('glider_toolbox:netcdf_tools:NetCDFFileError', ...
           'NetCDF generation succeed but problems with output file %s: %s.', ...
-          filename, att_output);
+          filename, attrout);
   end
-  ncl1 = att_output.Name;
+  ncl1 = attrout.Name;
 
 end

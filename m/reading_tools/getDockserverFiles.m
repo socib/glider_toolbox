@@ -213,7 +213,19 @@ function files = fetchNewAndUpdatedFiles(ftp_handle, remote_dir, local_dir, name
     return;
   end
   % Check for files already existing in the local directory.
-  if exist(local_dir, 'dir')
+  [status, attrout] = fileattrib(local_dir);
+  if ~status
+    % Create local directory.
+    [success, message] = mkdir(local_dir);
+    if ~success
+      error('glider_toolbox:reading_tools:LocalDirectoryError', ...
+            'Could not create directory %s: %s.', local_dir, message);
+    end
+  elseif ~attrout.directory
+    % Given local directory path points to a file, not a directory.
+    error('glider_toolbox:getDockServerFiles:LocalDirectoryError', ...
+          'Not a directory: %s.', attrout.Name);
+  else
     % Select only new files or files whose size is bigger in the dockserver.
     local_files = dir(local_dir);
     [existing, local_idx] = ismember({remote_files.name}, {local_files.name});
@@ -222,13 +234,6 @@ function files = fetchNewAndUpdatedFiles(ftp_handle, remote_dir, local_dir, name
     to_download = ~existing;
     to_download(existing) = updated;
     remote_files = remote_files(to_download);
-  else
-    % Create local directory because mget does not do it.
-    [success, message] = mkdir(local_dir);
-    if ~success
-      error('glider_toolbox:reading_tools:LocalDirectoryError', ...
-            'Could not create local directory %s: %s.', local_dir, message);
-    end
   end
   if isempty(remote_files)
     disp(['No new/updated files in remote directory ' remote_dir '.']);

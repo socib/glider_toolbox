@@ -3,29 +3,51 @@
 %  This script develops the full processing chain for real time glider data:
 %    - Check for active deployments from deployment information source.
 %    - Download new or updated deployment raw data files.
-%    - Convert downloaded files to human readable format if needed.
+%    - Convert downloaded files to human readable format, if needed.
 %    - Load data from all files in a single and consistent structure.
 %    - Preprocess raw data applying simple unit conversions data without 
 %      modifying it:
-%      01. NMEA latitude and longitude to decimal degrees.
+%        -- NMEA latitude and longitude to decimal degrees.
 %    - Generate standarized product version of raw data (NetCDF level 0).
 %    - Process raw data to obtain well referenced trajectory data with new 
 %      derived measurements and corrections. The following steps are applied:
-%      01. Select reference sensors for time and space coordinates.
-%      02. Select extra navigation sensors: commanded waypoints, pitch, depth...
-%      03. Select sensors of interest: CTD, oxygen, ocean color...
-%      04. Identify transect boundaries at waypoint changes.
-%      05. Identify cast boundaries from vertical direction changes.
-%      06. General sensor processings: sensor lag correction, interpolation...
-%      07. Process CTD data: pressure filtering, thermal lag correction...
-%      08. Derive new measurements: depth, salinity, density, ...
+%        -- Select reference sensors for time and space coordinates.
+%        -- Select extra navigation sensors: waypoints, pitch, depth...
+%        -- Select sensors of interest: CTD, oxygen, ocean color...
+%        -- Identify transect boundaries at waypoint changes.
+%        -- Identify cast boundaries from vertical direction changes.
+%        -- General sensor processings: sensor lag correction, interpolation...
+%        -- Process CTD data: pressure filtering, thermal lag correction...
+%        -- Derive new measurements: depth, salinity, density, ...
 %    - Generate standarized product version of trajectory data (NetCDF level 1).
 %    - Interpolate trajectory data to obtain gridded data (vertical 
 %      instantaneous profiles of already processed data).
 %    - Generate standarized product version of gridded data (NetCDF level 2).
 %    - Generate descriptive figures of both trajectory and gridded data.
+%    - Copy generated products to its public location.
+%
+%  Deployment information is queried from a data base with GETDBDEPLOYMENTINFO.
+%  Data base access parameters may be configured in CONFIGDBACCESS.
+%  Selected deployments and their metadata fields may be configured in 
+%  CONFIGRTDEPLOYMENTINFOQUERY.
+%
+%  Input deployment raw data is loaded from a directory of raw text files with 
+%  LOADSLOCUMDATA.
+%  For Slocum gliders a directory of raw binary files may be specified, 
+%  and automatic conversion to text file format may be enabled.
+%  Output products, figures and processing logs are generated to local paths.
+%  Input and output paths may be configured using expressions built upon
+%  deployment field value replacements in CONFIGRTLOCALPATHS.
+%  Input file conversion and data loading options may be configured in
+%  CONFIGRTSLOCUMFILEOPTIONS.
 %
 %  See also:
+%    CONFIGDBACCESS
+%    CONFIGRTDEPLOYMENTINFOQUERY
+%    CONFIGRTLOCALPATHS
+%    CONFIGRTSLOCUMFILEOPTIONS
+%    GETDBDEPLOYMENTINFO
+%    LOADSLOCUMDATA
 %
 %  Notes:
 %    This script is based on the previous work by Tomeu Garau. He is the true
@@ -93,7 +115,7 @@ for deployment_idx = 1:numel(deployment_list)
   %% Set deployment field shortcut variables and initialize other ones.
   % Initialization of big data variables may reduce out of memory problems,
   % provided memory is properly freed and not fragmented.
-  disp(['Processing deployment ' num2str(deployment_idx) ' ...']);
+  disp(['Processing deployment ' num2str(deployment_idx) '...']);
   deployment = deployment_list(deployment_idx);
   deployment_name = deployment.deployment_name;
   deployment_id = deployment.deployment_id;
@@ -115,15 +137,37 @@ for deployment_idx = 1:numel(deployment_list)
   data_processed = [];
   data_gridded = [];
   outputs = [];
-  
-  
+
+
   %% Start deployment processing logging.
-  diary(processing_log);
-  diary('on');
+  % DIARY will fail if log file base directory does not exist.
+  % Create the base directory first, if needed.
+  % This is an ugly hack (the best known way) to check if the directory exists.
+  [processing_log_dir, ~, ~] = fileparts(processing_log);  
+  [status, attrout] = fileattrib(processing_log_dir);
+  if ~status 
+    [status, message] = mkdir(processing_log_dir);
+  elseif ~attrout.directory
+    status = false;
+    message = 'not a directory';
+  end
+  % Enable log only if directory was already there or has been created properly.
+  if status
+    try
+      diary(processing_log);
+      diary('on');
+    catch exception
+      disp(['Error enabling processing log diary ' processing_log ':']);
+      disp(getReport(exception, 'extended'));
+    end
+  else
+    disp(['Error creating processing log directory ' processing_log_dir ':']);
+    disp(message);
+  end
   disp(['Deployment processing start time: ' ...
         datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00')]);
-  
-  
+
+
   %% Report deployment information.
   disp('Deployment information:')
   disp(['  Glider name          : ' glider_name]);
@@ -136,7 +180,7 @@ for deployment_idx = 1:numel(deployment_list)
     disp(['  Deployment end       : ' datestr(deployment_end)]);
   end
 
-    
+
   %% Download deployment glider files from station(s).
   % Check for new or updated deployment files in every dockserver.
   % Deployment start time must be truncated to days because the date of 
@@ -168,11 +212,11 @@ for deployment_idx = 1:numel(deployment_list)
   new_logs = [new_logs{:}];
   disp(['Binary data files downloaded: '  num2str(numel(new_xbds)) '.']);
   disp(['Surface log files downloaded: '  num2str(numel(new_logs)) '.']);
-  
-  
+
+
   %% Convert binary glider files to ascii human readable format.
   % For each downloaded binary file, convert it to ascii format in the ascii
-  % directory and store the returned absolute path for use later.
+  % directory and store the returned absolute path for later use.
   % Since some conversion may fail use a cell array of string cell arrays and
   % flatten it when finished, leaving only the succesfully created dbas.
   % Give a second try to failing files, because they might have failed due to 
@@ -207,9 +251,9 @@ for deployment_idx = 1:numel(deployment_list)
         num2str(numel(new_dbas)) ' of ' num2str(numel(new_xbds)) '.']);
 
 
-  %% Load data from ascii deployment glider files.there is new data.
+  %% Load data from ascii deployment glider files if there is new data.
   if isempty(new_dbas)
-    disp('No new deployment data, skipping data processing and product generation.');
+    disp('No new deployment data, processing and product generation will be skipped.');
   else
     disp('Loading raw deployment data from text files...');
     try
@@ -234,17 +278,17 @@ for deployment_idx = 1:numel(deployment_list)
       disp(getReport(exception, 'extended'));
     end
   end
-  
-  
+
+
   %% Add source files to deployment structure if loading succeeded.
   if ~isempty(meta_raw) 
     deployment.source_files = sprintf('%s\n', meta_raw.headers.filename_label);
   end
-  
-  
+
+
   %% Preprocess raw glider data.
   if ~isempty(data_raw)
-  disp('Preprocessing raw data...');
+    disp('Preprocessing raw data...');
     try
       data_preprocessed = ...
         preprocessGliderData(data_raw, config.preprocessing_options);
@@ -253,8 +297,8 @@ for deployment_idx = 1:numel(deployment_list)
       disp(getReport(exception, 'extended'));
     end
   end
-  
-  
+
+
   %% Generate L0 NetCDF file (raw/preprocessed data), if needed and possible.
   if ~isempty(data_preprocessed) ...
       && isfield(config.local_paths, 'netcdf_l0') ...
@@ -275,8 +319,8 @@ for deployment_idx = 1:numel(deployment_list)
       disp(getReport(exception, 'extended'));
     end
   end
-  
-  
+
+
   %% Process preprocessed glider data.
   if ~isempty(data_preprocessed)
     disp('Processing glider data...');
@@ -288,8 +332,8 @@ for deployment_idx = 1:numel(deployment_list)
       disp(getReport(exception, 'extended'));
     end
   end
-  
-  
+
+
   %% Generate L1 NetCDF file (processed data), if needed and possible.
   if ~isempty(data_processed) ...
       && isfield(config.local_paths, 'netcdf_l1') ...
@@ -310,26 +354,25 @@ for deployment_idx = 1:numel(deployment_list)
       disp(getReport(exception, 'extended'));
     end
   end
-  
-  
+
+
   %% Grid processed glider data.
   if ~isempty(data_processed)
     disp('Gridding glider data...');
     try
       data_gridded = gridGliderData(data_processed, config.gridding_options);
     catch exception
-        disp('Error gridding glider deployment data:');
+      disp('Error gridding glider deployment data:');
       disp(getReport(exception, 'extended'));
     end
   end
-  
-  
+
+
   %% Generate L2 (gridded data) netcdf file, if needed and possible.
   if ~isempty(data_gridded) ...
       && isfield(config.local_paths, 'netcdf_l2') ...
       && ~isempty(config.local_paths.netcdf_l2)
     disp('Generating NetCDF L2 output...');
-    ncl2_file = strfglider(config.local_paths.netcdf_l2, deployment);
     try
       outputs.netcdf_l2 = ...
         generateOutputNetCDFL2(netcdf_l2_file, data_gridded, ...
@@ -345,8 +388,8 @@ for deployment_idx = 1:numel(deployment_list)
       disp(getReport(exception, 'extended'));
     end
   end
-  
-  
+
+
   %% Copy selected products to corresponding public location, if needed.
   if ~isempty(outputs)
     disp('Copying public outputs...');
@@ -380,8 +423,8 @@ for deployment_idx = 1:numel(deployment_list)
       end
     end
   end
-  
-  
+
+
   %% Generate deployment figures.
   %{
   try

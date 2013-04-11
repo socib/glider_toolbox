@@ -135,8 +135,30 @@ for deployment_idx = 1:numel(deployment_list)
 
 
   %% Start deployment processing logging.
-  diary(processing_log);
-  diary('on');
+  % DIARY will fail if log file base directory does not exist.
+  % Create the base directory first, if needed.
+  % This is an ugly hack (the best known way) to check if the directory exists.
+  [processing_log_dir, ~, ~] = fileparts(processing_log);  
+  [status, attrout] = fileattrib(processing_log_dir);
+  if ~status 
+    [status, message] = mkdir(processing_log_dir);
+  elseif ~attrout.directory
+    status = false;
+    message = 'not a directory';
+  end
+  % Enable log only if directory was already there or has been created properly.
+  if status
+    try
+      diary(processing_log);
+      diary('on');
+    catch exception
+      disp(['Error enabling processing log diary ' processing_log ':']);
+      disp(getReport(exception, 'extended'));
+    end
+  else
+    disp(['Error creating processing log directory ' processing_log_dir ':']);
+    disp(message);
+  end
   disp(['Deployment processing start time: ' ...
         datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00')]);
 
@@ -157,7 +179,7 @@ for deployment_idx = 1:numel(deployment_list)
   %% Convert binary glider files to ascii human readable format, if needed.
   % Check deployment files available in binary directory,
   % convert them to ascii format in the ascii directory,
-  % and store the returned absolute path for use later.
+  % and store the returned absolute path for later use.
   % Since some conversion may fail use a cell array of string cell arrays and
   % flatten it when finished, leaving only the succesfully created dbas.
   % Give a second try to failing files, because they might have failed due to 
@@ -199,7 +221,7 @@ for deployment_idx = 1:numel(deployment_list)
     disp(['Binary files converted: ' ...
           num2str(numel(new_dbas)) ' of ' num2str(numel(xbd_names)) '.']);
   end
-  
+
 
   %% Load data from ascii deployment glider files.
   disp('Loading raw deployment data from text files...');
@@ -225,16 +247,15 @@ for deployment_idx = 1:numel(deployment_list)
     disp(getReport(exception, 'extended'));
   end
 
-  
+
   %% Add source files to deployment structure if loading succeeded.
-  if ~isempty(meta_raw) 
+  if isempty(meta_raw) || isempty(meta_raw.headers)
+    disp('No deployment data, processing and product generation will be skipped.');
+  else
     deployment.source_files = sprintf('%s\n', meta_raw.headers.filename_label);
-    if isempty(meta_raw.sources)
-      disp('No deployment data, processing and product generation skipped.');
-    end
   end
-    
-  
+
+
   %% Preprocess raw glider data.
   if ~isempty(data_raw)
     disp('Preprocessing raw data...');
@@ -246,8 +267,8 @@ for deployment_idx = 1:numel(deployment_list)
       disp(getReport(exception, 'extended'));
     end
   end
-  
-  
+
+
   %% Generate L0 NetCDF file (raw/preprocessed data), if needed and possible.
   if ~isempty(data_preprocessed) ...
       && isfield(config.local_paths, 'netcdf_l0') ...
@@ -268,8 +289,8 @@ for deployment_idx = 1:numel(deployment_list)
       disp(getReport(exception, 'extended'));
     end
   end
-  
-  
+
+
   %% Process preprocessed glider data.
   if ~isempty(data_preprocessed)
     disp('Processing glider data...');
@@ -303,8 +324,8 @@ for deployment_idx = 1:numel(deployment_list)
       disp(getReport(exception, 'extended'));
     end
   end
-  
-  
+
+
   %% Grid processed glider data.
   if ~isempty(data_processed)
     disp('Gridding glider data...');
@@ -315,8 +336,8 @@ for deployment_idx = 1:numel(deployment_list)
       disp(getReport(exception, 'extended'));
     end
   end
-  
-  
+
+
   %% Generate L2 (gridded data) netcdf file, if needed and possible.
   if ~isempty(data_gridded) ...
       && isfield(config.local_paths, 'netcdf_l2') ...
@@ -337,8 +358,8 @@ for deployment_idx = 1:numel(deployment_list)
       disp(getReport(exception, 'extended'));
     end
   end
-  
-  
+
+
   %% Copy selected products to corresponding public location, if needed.
   if ~isempty(outputs)
     disp('Copying public outputs...');
@@ -372,8 +393,8 @@ for deployment_idx = 1:numel(deployment_list)
       end
     end
   end
-  
-  
+
+
   %% Generate deployment figures.
   %{
   try

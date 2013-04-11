@@ -67,7 +67,8 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
       case 'options'
         extra_options = val;
       otherwise
-        error('glider_toolbox:xbd2ascii:InvalidOption', 'Invalid option: %s.', opt);
+        error('glider_toolbox:xbd2dba:InvalidOption', ...
+              'Invalid option: %s.', opt);
     end
   end
   
@@ -94,39 +95,46 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
   end
   [status, cmd_output] = system(cmd_str);
   if status~=0
-    error('glider_toolbox:xbd2ascii:SystemCallError', ...
+    error('glider_toolbox:xbd2dba:SystemCallError', ...
           'Error executing call: %s\n%s.', cmd_str, cmd_output);
   end
   
   
   %% Create base directory of target file if needed.
+  % This seems to be the better way to check if a relative path points to
+  % an existing directory (EXIST checks for existance in the whole load path).
   [dba_dir, ~, ~] = fileparts(dba_file);
-  if ~exist(dba_dir, 'dir')
+  [status, attrout] = fileattrib(dba_dir);
+  if ~status
     [success, message] = mkdir(dba_dir);
     if ~success
-      error('glider_toolbox:xbd2ascii:AsciiDirectoryError', ...
-            'Error creating target directory %s: %s.', dba_dir, message);
+      error('glider_toolbox:xbd2dba:AsciiDirectoryError', ...
+            'Could not create directory %s: %s.', dba_dir, message);
     end
+  elseif ~attrout.directory
+    error('glider_toolbox:xbd2dba:AsciiDirectoryError', ...
+          'Not a directory: %s.', attrout.Name);
   end
+
   
   %% Write output of conversion command to the file.
   [fid, fid_msg] = fopen(dba_file, 'w');
   if fid < 0
-    error('glider_toolbox:xbd2ascii:WriteFileError', ...
-          'Error creating target file %s: %s.', dba_file, fid_msg);
+    error('glider_toolbox:xbd2dba:WriteFileError', ...
+          'Could not create file %s: %s.', dba_file, fid_msg);
   end
   fprintf(fid, '%s', cmd_output);
   fclose(fid);
   
    
   %% Return the absolute name of the produced file.
-  [status, att_output, ~] = fileattrib(dba_file);
+  [status, attrout, ~] = fileattrib(dba_file);
   if status==0
     % We should never get here (if conversion succeed, ascii file must exist).
-    error('glider_toolbox:xbd2ascii:AsciiFileError', ...
+    error('glider_toolbox:xbd2dba:AsciiFileError', ...
           'Conversion call succeed but problems with output file %s: %s.', ...
-          dba_file, att_output);
+          dba_file, attrout);
   end
-  dba_file_full = att_output.Name;  
+  dba_file_full = attrout.Name;  
   
 end
