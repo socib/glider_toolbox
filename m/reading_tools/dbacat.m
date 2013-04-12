@@ -99,6 +99,7 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
   
   % Check for trivial empty input.
   if isempty(meta_list)
+    meta_struct = struct();
     meta_struct.sources = {};
     meta_struct.headers = ...
       struct('dbd_label', {}, 'encoding_ver', {}, 'num_ascii_tags', {}, ...
@@ -109,7 +110,7 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
              'num_segments', {}, 'segment_filenames', {});
     meta_struct.sensors = {};
     meta_struct.units = {};
-    meta_struct.bytes = {};
+    meta_struct.bytes = [];
   else
     meta_struct = [meta_list{:}];
   end
