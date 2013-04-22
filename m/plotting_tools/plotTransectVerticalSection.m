@@ -1,4 +1,4 @@
-function [hfig, haxs, hsct, hcba] = plotTransectVerticalSection(varargin)
+function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
 %PLOTTRANSECTVERTICALSECTION  Plot vertical section of scatter data from a glider transect.
 %
 %  Syntax:
@@ -6,23 +6,27 @@ function [hfig, haxs, hsct, hcba] = plotTransectVerticalSection(varargin)
 %    PLOTTRANSECTVERTICALSECTION(OPT1, VAL1, ...)
 %    PLOTTRANSECTVERTICALSECTION(H, OPTIONS)
 %    PLOTTRANSECTVERTICALSECTION(H, OPT1, VAL1, ...)
-%    [HFIG, HAXS, HSCT, HCBA] = PLOTTRANSECTVERTICALSECTION(...)
+%    [HFIG, HAXS, HCBA, HSCT] = PLOTTRANSECTVERTICALSECTION(...)
 %
 %  PLOTTRANSECTVERTICALSECTION(OPTIONS) and 
 %  PLOTTRANSECTVERTICALSECTION(OPT1, VAL1, ...) generate a new figure with a
 %  scatter plot of scalar data collected during a glider transect according to
 %  options in string key-value pairs OPT1, VAL1... or in option struct OPTIONS.
+%  The scatter plot is generated with the function SCATTER.
 %  Allowed options are:
 %    XDATA: horizontal coordinate data.
-%      Vector of data to be passed as x coordindate to the function SCATTER, 
+%      Vector of data to be passed as x coordindate to function SCATTER, 
 %      usually distance or time.
 %      Default value: []
 %    YDATA: vertical coordinate data.
-%      Vector of data to be passed as y coordindate to the function SCATTER,
+%      Vector of data to be passed as y coordindate to function SCATTER,
 %      usually pressure or depth.
 %      Default value: []
 %    CDATA: measured variable data.
-%      Vector of data to be passed as color coordindate to the function SCATTER.
+%      Vector of data to be passed as color coordindate to function SCATTER.
+%      Default value: []
+%    SDATA: data marker size.
+%      Vector or scalar to be passed as size coordindate to function SCATTER.
 %      Default value: []
 %    XLABEL: horizontal axis label data.
 %      Struct defining x label properties. Label's text is in property 'String'.
@@ -40,8 +44,7 @@ function [hfig, haxs, hsct, hcba] = plotTransectVerticalSection(varargin)
 %      Default value: struct()
 %    LOGSCALE: use logarithmic color scale instead of linear scale.
 %      Boolean specifying whether color scale should be logarithmic instead of
-%      linear. There is no built-in graphic option for logarithmic color scaling
-%      so the effect is produced hacking the color data and the color bar ticks.
+%      linear. See note on logarithmic color scaling.
 %      Default value: false
 %    DATETICKS: use date formatted tick labels for selected axes.
 %      Substring of 'xyz' specifying which axes should be labeled with date
@@ -57,19 +60,21 @@ function [hfig, haxs, hsct, hcba] = plotTransectVerticalSection(varargin)
 %  PLOTTRANSECTVERTICALSECTION(H, ...) does not create a new figure, but plots 
 %  to figure given by figure handle H.
 %  
-%  [HFIG, HAXS, HSCT, HCBA] = PLOTTRANSECTVERTICALSECTION(...) returns handles
-%  for the figure, axes, scatter group, and color bar in HFIG, HAXS, HSCT and
+%  [HFIG, HAXS, HCBA, HSCT] = PLOTTRANSECTVERTICALSECTION(...) returns handles
+%  for the figure, axes, color bar, and scatter group in HFIG, HAXS, HSCT, and
 %  HCBA, respectively.
 %
 %  Notes:
+%    There is no built-in support for logarithmic color scaling. 
+%    The effect is emulated hacking the color data and the color bar ticks.
 %
 %  Examples:
-%    [hfig, haxs, hsct, hcba] = ...
-%      plotTransectVerticalSection( gcf, ...
-%        'xdata', now+1*rand(100,1), 'xlabel', struct('String', 'x'), ...
+%    [hfig, haxs, hcba, hsct] = ...
+%      plotTransectVerticalSection(gcf, ...
+%        'xdata', now+30*rand(100,1), 'xlabel', struct('String', 'x'), ...
 %        'ydata', rand(100,1), 'ylabel', struct('String', 'y'), ...
 %        'cdata', 10.^(3*rand(100,1)), 'clabel', struct('String', 'c'), ...
-%        'logscale', true, 'dateticks', 'x', ...
+%        'sdata', 25, 'logscale', true, 'dateticks', 'x', ...
 %        'title', struct('String', 'Random scatter plot'), ...
 %        'axsprops', struct('XGrid', 'on', 'YGrid', 'on', 'PlotBoxAspectRatio', [2 1 1]), ...
 %        'figprops', struct('Name', 'Vertical section example') )
@@ -90,6 +95,7 @@ function [hfig, haxs, hsct, hcba] = plotTransectVerticalSection(varargin)
   options.xdata = [];
   options.ydata = [];
   options.cdata = [];
+  options.sdata = [];
   options.xlabel = struct();
   options.ylabel = struct();
   options.clabel = struct();
@@ -153,25 +159,34 @@ function [hfig, haxs, hsct, hcba] = plotTransectVerticalSection(varargin)
   
   
   %% Set properties of plot elements.
+  crange = quantile(options.cdata(:), [0.01 0.99]);
   if options.logscale
     % Hack to plot a color bar with logarithmic scale and linear ticks.
     % This code should go after colormap call, otherwise colormap resets ticks.
     set(hsct, ...
-        'XData', options.xdata, 'YData', options.ydata, 'CData', log10(options.cdata));
-    crange = log10([min(options.cdata)  max(options.cdata)]);
-    ctick = log10((1:9)' * 10 .^ (floor(crange(1)) : floor(crange(2))));
+        'XData', options.xdata(:), 'YData', options.ydata(:), ...
+        'CData', log10(options.cdata(:)), 'SizeData', options.sdata(:));
+    crange = log10(crange);
+    ctick = bsxfun(@plus, log10(1:9)', floor(crange(1)) : floor(crange(2)));
     ctick = ctick(crange(1) <= ctick & ctick <= crange(2));
-    ctick_mask = ( rem(ctick, 1) == 0 );
-    if sum(ctick_mask) == 1
-      ctick_mask([1 end]) = true;
+    ctick_label = cell(size(ctick));
+    switch floor(diff(crange))
+      case 0
+        ctick_show = true(size(ctick));
+      case 1
+        ctick_show = [true ; rem(ctick(2:end-1), 1) == 0 ; true];
+      otherwise
+        ctick_show = (rem(ctick, 1) == 0);
     end
-    ctick_label = cellstr(num2str(10.^ctick(:)));
-    ctick_label(~ctick_mask) = {''};
+    ctick_label(ctick_show) = strtrim(cellstr(num2str(10.^ctick(ctick_show))));
     drawnow(); % Hack to force plot update before setting color axis properties.
+    set(haxs, 'CLim', crange);
     set(hcba, 'XTick', ctick, 'XTickLabel', ctick_label);
   else
     set(hsct, ...
-        'XData', options.xdata, 'YData', options.ydata, 'CData', options.cdata);
+        'XData', options.xdata(:), 'YData', options.ydata(:), ...
+        'CData', options.cdata(:), 'SizeData', options.sdata(:));
+    set(haxs, 'CLim', crange);
   end
   for a = 'xyz'
     if ismember(a, options.dateticks)
@@ -186,6 +201,7 @@ function [hfig, haxs, hsct, hcba] = plotTransectVerticalSection(varargin)
       datetick(a, datetick_format, 'keeplimits');
     end
   end
+  axis(haxs, 'tight');
   set(haxs, options.axsprops);
   set(haxstit, options.title);
   set(haxsxlb, options.xlabel);
