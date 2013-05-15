@@ -1,4 +1,4 @@
-%MAIN_GLIDER_DATA_PROCESSING_NRT  Run near real time glider processing chain.
+%MAIN_GLIDER_DATA_PROCESSING_RT  Run near real time glider processing chain.
 %
 %  This script develops the full processing chain for real time glider data:
 %    - Check for active deployments from deployment information source.
