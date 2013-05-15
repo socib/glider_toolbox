@@ -1,21 +1,119 @@
 function figure_info = generateGliderFigures(data, figure_list, varargin)
-%GENERATEFIGURES  One-line description here, please.
+%GENERATEFIGURES  Generate figures from glider data.
 %
 %  Syntax:
-%    FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST, VARARGIN)
+%    FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST)
+%    FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST, OPTIONS)
+%    FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST, OPT1, VAL1, ...)
 %
-%  FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST, VARARGIN) Detailed description here, please.
-%
-%  following fields:
+%  FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST) generate figures 
+%  specified in struct FIGURE_LIST from glider data in struct DATA, and
+%  returns information about generated image files in struct FIGURE_INFO.
+%  FIGURE_LIST is a struct where each field specifies a figure to be generated, 
+%  Field names are figure keys identifying each particular figure, and field 
+%  values are structs with the following fields:
 %    PLOTFUNC: plotting function.
 %      String or function handle specifying which function should be used to
-%      generate the figure plot. 
-%  Notes:
+%      generate the figure plot.
+%    DATAOPTS: data options.
+%      Struct array with the mapping between data plot options (field names) 
+%      and variables in struct DATA (field values). Each field value may be
+%      either a string or a string cell array with a list of variable name 
+%      choices in order of preference. The first variable present in DATA 
+%      containing some valid value will be added to the plot options given in 
+%      option PLOTOPTS, using the same field name given in DATAOPTS.
+%    PLOTOPTS: plot style options.
+%      Struct array with extra plot options to pass to plotting function given
+%      in PLOTFUNC. It can also serve to specify default data option values.
+%      These values will be used when none of the choices specified in DATAOPTS 
+%      is present in DATA.
+%    PRNTOPTS: print options.
+%      Struct array with print options to pass to function PRINTFIGURE.
+%  FIGURE_INFO is a struct containing information about the generated figures.
+%  Fields are named after corresponding figure keys, and their value is the
+%  output of the call to PRINTFIGURE. Only figures whose data is available in 
+%  struct DATA are generated, other figures are silently omitted.
+%
+%  FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST, OPT1, VAL1, ...) and
+%  FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST, OPTIONS) allows
+%  passing default values for the following options of PRINTFIGURE, in either
+%  option key - value pairs or in scalar option struct OPTIONS:
+%    DIRNAME: image file directory.
+%      Default value: '' (empty, use current directory)
+%    FORMAT: image file format (extension)
+%      Default value: 'eps'
+%    RESOLUTION: image resolution in dots per inch.
+%      Default value: 72
+%    DRIVER: driver to print intermediate vector image file.
+%      Default value: 'epsc2'
+%    RENDER: renderer to use when printing intermediate vector file.
+%      Default value: [] (renderer automatically selected)
 %
 %  Examples:
-%    figure_info = generateGliderFigures(data, figure_list, varargin)
+%    % Assuming data is a processed glider data structure, 
+%    % plot CTD trajectory data:
+%    % Plot a transect vertical section of temperature.  
+%    figure_list.temperature = struct();
+%    figure_list.temperature.plotfunc = @plotTransectVerticalSection;
+%    % Using covered planar distance as horizontal coordinate, and using
+%    % depth from CTD pressure if available, otherwise use navigation depth.
+%    figure_list.temperature.dataopts.xdata = 'distance_over_ground';
+%    figure_list.temperature.dataopts.ydata = {'depth_ctd' 'depth'}; 
+%    figure_list.temperature.dataopts.cdata = 'temperature';
+%    % Add labels, title and some extra options.
+%    figure_list.temperature.plotopts.sdata = 4;
+%    figure_list.temperature.plotopts.xlabel = struct('String', 'distance (km)');
+%    figure_list.temperature.plotopts.ylabel = struct('String', 'depth (m)');
+%    figure_list.temperature.plotopts.clabel = struct('String', 'temperature (deg C)');
+%    figure_list.temperature.plotopts.title = struct('String', 'In situ temperature');
+%    figure_list.temperature.plotopts.axsprops = struct('Ydir', 'reverse');
+%    % Set printing options.
+%    figure_list.temperature.prntopts = struct('filename', 'ctd_temp', ...
+%                                             'title',  'Temperature section', ...
+%                                             'comment', 'Cross section of in situ measured temperature.');
+%    % Make similar figures for salinity and density:
+%    figure_list.salinity = struct();
+%    figure_list.salinity.plotfunc = @plotTransectVerticalSection;
+%    figure_list.salinity.dataopts.xdata = 'distance_over_ground';
+%    figure_list.salinity.dataopts.ydata = {'depth_ctd' 'depth'}; 
+%    figure_list.salinity.dataopts.cdata = 'salinity';
+%    figure_list.salinity.plotopts.sdata = 4;
+%    figure_list.salinity.plotopts.xlabel = struct('String', 'distance (km)');
+%    figure_list.salinity.plotopts.ylabel = struct('String', 'depth (m)');
+%    figure_list.salinity.plotopts.clabel = struct('String', 'salinity (PSU)');
+%    figure_list.salinity.plotopts.title = struct('String', 'In situ salinity');
+%    figure_list.salinity.plotopts.axsprops = struct('Ydir', 'reverse');
+%    figure_list.salinity.prntopts = struct('filename', 'ctd_salt', ...
+%                                           'title',  'Temperature section', ...
+%                                           'comment', 'Cross section of in situ derived salinity.');
+%    figure_list.density = struct();
+%    figure_list.density.plotfunc = @plotTransectVerticalSection;
+%    figure_list.density.dataopts.xdata = 'distance_over_ground';
+%    figure_list.density.dataopts.ydata = {'depth_ctd' 'depth'}; 
+%    figure_list.density.dataopts.cdata = 'density';
+%    figure_list.density.plotopts.sdata = 4;
+%    figure_list.density.plotopts.xlabel = struct('String', 'distance (km)');
+%    figure_list.density.plotopts.ylabel = struct('String', 'depth (m)');
+%    figure_list.density.plotopts.clabel = struct('String', 'density (PSU)');
+%    figure_list.density.plotopts.title = struct('String', 'In situ density');
+%    figure_list.density.plotopts.axsprops = struct('Ydir', 'reverse');
+%    figure_list.density.prntopts = struct('filename', 'ctd_dens', ...
+%                                          'title',  'Temperature section', ...
+%                                          'comment', 'Cross section of in situ derived density.');
+%    % Plot them at once to current directory, using default format.
+%    figure_info = generateGliderFigures(data, figure_list)
+%    % Plot them to desired image directory, selecting format and resolution.
+%    figure_info = generateGliderFigures(data, figure_list, ...
+%                                        'dirname', 'figures', ...
+%                                        'format', 'png', ...
+%                                        'resolution', 150)
 %
 %  See also:
+%    PRINTFIGURE
+%    PLOTTRANSECTVERTICALSECTION
+%    PLOTTSDIAGRAM
+%    PLOTPROFILESTATISTICS
+%    CONFIGFIGURES
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
@@ -59,6 +157,10 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
   end
   
   
+  %% Initialize output.
+  figure_info = struct();
+  
+  
   %% Generate figures given in figure list, if data is available.
   figure_key_list = fieldnames(figure_list);
   for figure_key_idx = 1:numel(figure_key_list);
@@ -80,6 +182,12 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
     if ~isfield(print_options, 'resolution')
       print_options.resolution = options.resolution;
     end
+    if ~isfield(print_options, 'driver')
+      print_options.driver = options.driver;
+    end
+    if ~isfield(print_options, 'render')
+      print_options.render = options.render;
+    end
     % Get plot function as function handle.
     plot_function = figure_plot.plotfunc;
     if ischar(figure_plot.plotfunc)
@@ -93,36 +201,79 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
     end
     % Get plot data options.
     data_option_field_list = fieldnames(figure_plot.dataopts);
-    for data_option_field_idx = 1:numel(data_option_field_list)
-      data_option_field = data_option_field_list{data_option_field_idx};
-      if ischar(figure_plot.dataopts.(data_option_field))
-        data_option_value_list = {figure_plot.dataopts.(data_option_field)};
-      else
-        data_option_value_list = figure_plot.dataopts.(data_option_field);
-      end
-      for data_option_value_idx = 1:numel(data_option_value_list)
-        data_option_value = data_option_value_list{data_option_value_idx};
-        if isfield(data, data_option_value) ...
-            && ~all(isnan(data.(data_option_value)))
-          data_options.(data_option_field) = data_option_value;
-          break;
+    data_options = repmat(struct(), size(figure_plot.dataopts));
+    for data_option_idx = 1:numel(figure_plot.dataopts)
+      dataopt = figure_plot.dataopts(data_option_idx);
+      for data_option_field_idx = 1:numel(data_option_field_list)
+        data_option_field = data_option_field_list{data_option_field_idx};
+        data_options(data_option_idx).(data_option_field) = '';
+        if ischar(dataopt.(data_option_field))
+          data_option_value_list = {dataopt.(data_option_field)};
+        else
+          data_option_value_list = dataopt.(data_option_field);
+        end
+        for data_option_value_idx = 1:numel(data_option_value_list)
+          data_option_value = data_option_value_list{data_option_value_idx};
+          if isfield(data, data_option_value) ...
+              && ~all(isnan(data.(data_option_value)(:)))
+            data_options(data_option_idx).(data_option_field) = data_option_value;
+            break;
+          end
         end
       end
     end
-    data_available = all(isfield(data_options, data_option_field_list));
     % Generate figure if all data is there.
+    % Data specified in dataopts should be in data options,
+    % data_available = all(isfield(data_options, data_option_field_list)) ...
+    %                  && ~any(any(cellfun(@isempty, struct2cell(data_options))));
+    data_option_field_missing = ...
+      any(cellfun(@isempty, struct2cell(data_options(:))), 2);               
+    data_available = ...
+      ~any(data_option_field_missing) || ...
+       all(isfield(plot_options, data_option_field_list(data_option_field_missing)));
     if data_available
       fprintf('Generating figure %s with settings:\n', figure_key);
       fprintf('  plot function    : %s\n', func2str(plot_function));
       for data_option_field_idx = 1:numel(data_option_field_list)
         data_option_field = data_option_field_list{data_option_field_idx};
-        data_option_value = data_options.(data_option_field);
-        fprintf('  %-16s : %s\n', data_option_field, data_option_value);
-        plot_options.(data_option_field) = data.(data_option_value);
+        data_option_value_str = cell(size(data_options));
+        if isscalar(data_options)
+            data_option_value = data_options.(data_option_field);
+            if isempty(data_option_value)
+              data_option_value_str{1} = ...
+                sprintf('[%dx%d %s]', ...
+                        size(plot_options.(data_option_field)), ...
+                        class(plot_options.(data_option_field)));
+            else
+              data_option_value_str{1} = data_option_value;
+              plot_options.(data_option_field) = data.(data_option_value);
+            end
+        else
+          for data_option_idx = 1:numel(data_options)
+            data_option_value = data_options(data_option_idx).(data_option_field);
+            if isempty(data_option_value)
+              data_option_value_str{data_option_idx} = ...
+                sprintf('[%dx%d %s]', ...
+                        size(plot_options.(data_option_field){data_option_idx}), ...
+                        class(plot_options.(data_option_field){data_option_idx}));
+            else
+              data_option_value_str{data_option_idx} = data_option_value;
+              plot_options.(data_option_field){data_option_idx} = ...
+                data.(data_option_value);
+            end
+          end
+        end
+        fprintf('  %-16s :%s\n', ...
+                data_option_field, sprintf(' %-16s', data_option_value_str{:}));
       end
       figure_handle = figure();
-      plot_function(figure_handle, plot_options);
-      figure_info.(figure_key) = printFigure(figure_handle, print_options);
+      try
+        plot_function(figure_handle, plot_options);
+        figure_info.(figure_key) = printFigure(figure_handle, print_options);
+      catch exception
+        fprintf('Figure generation failed:\n');
+        disp(getReport(exception, 'extended'));
+      end
       close(figure_handle);
     end
     
