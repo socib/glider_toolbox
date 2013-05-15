@@ -147,7 +147,7 @@ function imginfo = printFigure(varargin)
   options.title = '';
   options.comment = '';
   options.driver = 'epsc2';
-  options.render = 'painters'; 
+  options.render = []; 
   
   
   %% Get options from extra arguments.
@@ -208,6 +208,8 @@ function imginfo = printFigure(varargin)
   if ~strcmpi(options.format, 'eps')
     [failure, output] = system( ...
         ['convert' ...
+         ' -depth 8' ...        % needed because ImageMagick identifies the eps as 16 bit color depth.
+         ' -colorspace RGB' ... % needed because ImageMagick identifies the eps as CMYK due to the %%DocumentProcessColor comment.
          ' -density ' num2str(options.resolution) ... 
          ' ' fullfile_eps ...
          ' -set date ''' options.date '''' ...
