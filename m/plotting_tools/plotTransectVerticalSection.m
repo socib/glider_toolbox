@@ -159,14 +159,27 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
   
   
   %% Set properties of plot elements.
-  crange = quantile(options.cdata(:), [0.01 0.99]);
+  % Equivalent way to compute quantile without using the function QUANTILE in
+  % statistical toolbox. See documentation there for algorithm details.
+  % crange = quantile(options.cdata(:), crange_quantiles);
+  crange_quantiles = [0.01 0.99];
+  cdata_sorted = sort(options.cdata(~isnan(options.cdata)));
+  if isempty(cdata_sorted)
+    crange = [0.5 1.5]; % some arbitrary value to let the rest of code work.
+  else
+    crange = interp1(cdata_sorted([1 1:end end]),...
+                     crange_quantiles * numel(cdata_sorted) + 1.5);
+  end
   if options.logscale
     % Hack to plot a color bar with logarithmic scale and linear ticks.
     % This code should go after colormap call, otherwise colormap resets ticks.
     set(hsct, ...
         'XData', options.xdata(:), 'YData', options.ydata(:), ...
         'CData', log10(options.cdata(:)), 'SizeData', options.sdata(:));
-    crange = log10(crange);
+    % Force range to prevent error due to wrong zero or negative values.
+    % These values should not be there for logarithmic scale magnitudes
+    % (e.g. chlorophyll or oxygen concentration).
+    crange = log10(max(crange, [min(options.cdata(options.cdata>0)) -Inf])); 
     ctick = bsxfun(@plus, log10(1:9)', floor(crange(1)) : floor(crange(2)));
     ctick = ctick(crange(1) <= ctick & ctick <= crange(2));
     ctick_label = cell(size(ctick));
