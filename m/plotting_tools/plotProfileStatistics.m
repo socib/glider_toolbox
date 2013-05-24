@@ -22,11 +22,13 @@ function [hfig, haxs, hlgs, hlns] = plotProfileStatistics(varargin)
 %      Cell array of matrices with variable data from which the profile
 %      statistics will be computed. One subplot will be produced for each
 %      matrix. The subplot layout is given by the size of the cell array.
+%      The first dimension of each matrix should be the profile instance.
+%      The second dimension of each matrix should be the depth level.
 %      Default value: {[]}
 %    YDATA: vertical coordinate data.
 %      Cell array of vectors with the vertical coordinate data for each sublot.
 %      The number of vectors in the cell array should match the number of 
-%      matrices in VDATA, and their lengths should match the vertical dimension
+%      matrices in MDATA, and their lengths should match the second dimension
 %      of the corresponding matrix.
 %      Default value: {[]}
 %    XLABEL: horizontal axis label data.
@@ -157,8 +159,8 @@ function [hfig, haxs, hlgs, hlns] = plotProfileStatistics(varargin)
     mdata = options.mdata{s};
     % mrange = quantile(options.mdata{s}, [0.01 0.99]);
     % mdata(mdata < mrange(1) | mdata > mrange(2)) = nan;
-    mmean = nanmean(mdata, 2);
-    mstd = nanstd(mdata, 1, 2); % 1 to compute the second moment biased estimator.
+    mmean = nanmean(mdata, 1);
+    mstd = nanstd(mdata, 1, 1); % 1 to compute the second moment biased estimator.
     haxs(s) = subplot(m, n, s);
     % Use 0 because plot does not return lineseries handles if empty inputs.
     hlns(:,s) = plot(haxs(s), 0, 0, '-', 0, 0, ':'); 

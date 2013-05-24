@@ -54,11 +54,11 @@ function data_grid = gridGliderData(data_proc, varargin)
 %      Default value: {} (do nothing except compute profile coordinates)
 %
 %  DATA_GRID is a struct with two kind of fields: bidimensional arrays with 
-%  profiles of gridded variables as columns, and one dimensional reference 
+%  profiles of gridded variables as rows, and one dimensional reference 
 %  coordinate sequences: LATITUDE, LONTGITUDE, DEPTH, TIME and PROFILE_INDEX.
 %  Coordinate sequences are selected according to preferred choices in options.
-%  Only variables selected options and also present in DATA_PROC are gridded.
-%  Selected variables not present DATA_PROC are silently omited
+%  Only variables selected in options and also present in DATA_PROC are gridded.
+%  Selected variables not present in DATA_PROC are silently omited
 %
 %  Notes:
 %    This function is an improved version of a previous function by Tomeu Garau
@@ -136,6 +136,8 @@ function data_grid = gridGliderData(data_proc, varargin)
     if ismember(profile_sequence, sequence_list) ...
         && ~all(isnan(data_proc.(profile_sequence)))
       profile = data_proc.(profile_sequence);
+      fprintf('Selected profile index coordinate sequence:\n');
+      fprintf('  profile: %s\n', profile_sequence);
       profile_available = true;
       break;
     end
@@ -146,6 +148,8 @@ function data_grid = gridGliderData(data_proc, varargin)
     if ismember(time_sequence, sequence_list) ...
         && any(data_proc.(time_sequence) > 0)
       time = data_proc.(time_sequence);
+      fprintf('Selected time coordinate sequence:\n');
+      fprintf('  time: %s\n', time_sequence);
       time_available = true;
       break;
     end
@@ -159,6 +163,9 @@ function data_grid = gridGliderData(data_proc, varargin)
         && ~all(isnan(data_proc.(lon_sequence))) 
       latitude = data_proc.(lat_sequence);
       longitude = data_proc.(lon_sequence);
+      fprintf('Selected position coordinate sequences:\n');
+      fprintf('  latitude : %s\n', lat_sequence);
+      fprintf('  longitude: %s\n', lon_sequence);
       position_available = true;
       break;
     end
@@ -169,6 +176,8 @@ function data_grid = gridGliderData(data_proc, varargin)
     if ismember(depth_sequence, sequence_list) ...
         && ~all(isnan(data_proc.(depth_sequence)))
       depth = data_proc.(depth_sequence);
+      fprintf('Selected depth coordinate sequence:\n');
+      fprintf('  depth: %s\n', depth_sequence);
       depth_available = true;
       break;
     end
@@ -186,20 +195,23 @@ function data_grid = gridGliderData(data_proc, varargin)
 
 
   %% Select variables to grid.
+  variable_name_list = intersect(sequence_list, options.variables);
+  fprintf('Selected variables to interpolate:\n');
+  %%{
   % Store variable as columns in a single array to accelerate binning below.
-  data_proc_variables = ...
-    rmfield(data_proc, setdiff(sequence_list, options.variables));
-  variable_name_list = fieldnames(data_proc_variables);
   num_variables = numel(variable_name_list);
   num_instants = numel(time);
   variables = nan(num_instants, num_variables);
   for variable_name_idx = 1:num_variables
     variable_name = variable_name_list{variable_name_idx};
-    variables(:, variable_name_idx) = data_proc_variables.(variable_name)(:);
+    variables(:, variable_name_idx) = data_proc.(variable_name)(:);
+    fprintf('  %s\n', variable_name);
   end
+  %%}
+  % fprintf('  %s\n', variable_name_list{:});
   
 
-
+  
   %% Compute number of casts.
   num_casts = fix(max(profile));
   profile_range = (1:num_casts);
@@ -219,10 +231,39 @@ function data_grid = gridGliderData(data_proc, varargin)
   data_grid.time = nan(num_casts, 1);
   data_grid.longitude = nan(num_casts, 1);
   data_grid.latitude = nan(num_casts, 1);
-  data_grid_variables = nan(num_levels, num_casts, num_variables);
+  for variable_name_idx = 1:numel(variable_name_list)
+    variable_name = variable_name_list{variable_name_idx};
+    data_grid.(variable_name) = nan(num_casts, num_levels);
+  end
+  data_grid_variables = nan(num_casts, num_levels, num_variables);
 
   
   %% Compute profile coordinates and profile data.
+  % Spatial and temporal coordinates are the mean values among cast readings.
+  % Selected variable data is interpolated at selected depth levels.
+  %{
+  for cast_idx = 1:num_casts
+    cast_select = (profile == cast_idx);
+    cast_lat = latitude(cast_select);
+    cast_lon = longitude(cast_select);
+    cast_depth = depth(cast_select);
+    cast_time = time(cast_select);
+    data_grid.time(cast_idx) = nanmean(cast_time);
+    data_grid.latitude(cast_idx) = nanmean(cast_lat);
+    data_grid.longitude(cast_idx) = nanmean(cast_lon);
+    for variable_name_idx = 1:numel(variable_name_list)
+      variable_name = variable_name_list{variable_name_idx};
+      cast_variable = data_proc.(variable_name)(cast_select);
+      cast_valid = ~(isnan(cast_depth(:)) | isnan(cast_variable(:)));
+      if sum(cast_valid) > 2
+        data_grid.(variable_name)(cast_idx, :) = ...
+          interp1(cast_depth(cast_valid), cast_variable(cast_valid), ...
+          depth_range(:));
+      end
+    end
+  end
+  %}
+  %%{
   % Spatial and temporal coordinates are the mean values among cast readings.
   % Selected variable data is binned taking the mean values of readings in depth
   % intervals centered at selected depth levels.
@@ -239,7 +280,7 @@ function data_grid = gridGliderData(data_proc, varargin)
     data_grid.latitude(cast_idx) = nanmean(cast_lat);
     data_grid.longitude(cast_idx) = nanmean(cast_lon);
     if ~isempty(cast_variables) % Speed up when there are no variables.
-      data_grid_variables(:, cast_idx, :) = ...
+      data_grid_variables(cast_idx, :, :) = ...
         cell2mat(arrayfun(@(d) nanmean(cast_variables(abs(cast_depth-d)<=0.5*depth_resolution, :), 1), ...
                           depth_range(:), 'UniformOutput', false));
     end
@@ -249,5 +290,6 @@ function data_grid = gridGliderData(data_proc, varargin)
     variable_name = variable_name_list{variable_name_idx};
     data_grid.(variable_name) = data_grid_variables(:, :, variable_name_idx);
   end
-  
+  %%}
+
 end
