@@ -200,13 +200,13 @@ function [hfig, haxs, hlgn, hcba, htrj, hwpt, hcur] = plotTransectCurrentMap(var
   %% Plot the map.
   % Compute axis limits such that data aspect ratio is 1 with axes' current
   % position, and glider trajectory is centered in the plot.
-  lat_bounds = [37 45]; % arbitrary value when there is no latitude data.
-  lon_bounds = [-1  8]; % arbitrary value when there is no longitude data.
-  if ~isempty(options.latdata)
-    lat_bounds = [min(options.latdata) max(options.latdata)];
+  lat_bounds = [min(options.latdata) max(options.latdata)];
+  lon_bounds = [min(options.londata) max(options.londata)];
+  if (numel(lat_bounds) ~= 2) || (max(abs(lat_bounds)) > 90)
+    lat_bounds = [-90 90]; % arbitrary value when bad latitude data.
   end
-  if ~isempty(options.londata)
-    lon_bounds = [min(options.londata) max(options.londata)];
+  if (numel(lon_bounds) ~= 2) || (max(abs(lat_bounds)) > 180)
+    lon_bounds = [-180  180]; % arbitrary value when bad longitude data.  
   end
   max_range = 1.1 * max(diff(lat_bounds), diff(lon_bounds));
   if strcmpi(get(haxs, 'Units'), 'normalized')
@@ -244,8 +244,15 @@ function [hfig, haxs, hlgn, hcba, htrj, hwpt, hcur] = plotTransectCurrentMap(var
   % m_grid('box', 'on', 'backcolor', ocean_color);
   [haxs_xlims, haxs_ylims] = m_ll2xy(lon_lims, lat_lims, 'clip', 'off');
   set(haxs, 'XLim', haxs_xlims, 'YLim', haxs_ylims);
-  lat_ticks = (floor(lat_lims(1)): 0.5 : ceil(lat_lims(2)));
-  lon_ticks = (floor(lon_lims(1)): 0.5 : ceil(lon_lims(2)));
+  
+  lat_tick_step = (10/2) ...
+                * (floor((2/10) * 10 .^ mod(log10(diff(lat_lims)), 1)) + 1) ...
+                * 10 .^ (floor(log10(diff(lat_lims))) - 1);
+  lon_tick_step = (10/2) ...
+                * (floor((2/10) * 10 .^ mod(log10(diff(lon_lims)), 1)) + 1) ...
+                * 10 .^ (floor(log10(diff(lon_lims))) - 1);
+  lat_ticks = (-200 : lat_tick_step : 200);
+  lon_ticks = (-100 : lon_tick_step : 100);
   haxs_xticks = ...
     haxs_xlims(1) + (lon_ticks - lon_lims(1)) * diff(haxs_xlims) / diff(lon_lims);
   haxs_yticks = ...
