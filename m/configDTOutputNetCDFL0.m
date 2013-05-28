@@ -10,13 +10,18 @@ function nc_l0_info = configDTOutputNetCDFL0()
 %      processing, so only dimension names need to be provided. It should have
 %      the following fields:
 %        TIME: time dimension name.
+%    GLOBAL_ATTS: A struct array with fields 'NAME' and 'VALUE' defining global
+%      attributes of the file.
 %    VAR_META: A struct defining variable metadata. Field names are variable
 %      names and field values are structs as needed by function WRITENETCDFDATA.
+%      They should have the following fields:
+%        DIMENSIONS: string cell array with the name of the dimensions of the
+%          variable.
+%        ATTRIBUTES: struct array with fields 'NAME' and 'VALUE' defining the
+%          attributes of the variable.
 %      More variables than the ones present in one specific deployment may be
 %      described here. Only metadata corresponding variables in the deployment
 %      data will be used.
-%    GLOBAL_ATTS: A struct array with fields 'NAME' and 'VALUE' defining global
-%      attributes of the file.
 %
 %  Notes:
 %    The NetCDF file will be created by the function GENERATEOUTPUTNETCDFL0 with
@@ -32,15 +37,15 @@ function nc_l0_info = configDTOutputNetCDFL0()
 %  See also:
 %    GENERATENETCDFL0
 %    WRITENETCDFDATA
-%    LOADDBADATA
+%    PREPROCESSGLIDERDATA
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
   error(nargchk(0, 0, nargin, 'struct'));
 
-  %% Define variable attributes.
-  % To define the variable attribute easily and readably, add the corresponding
+  %% Define variable information.
+  % To define the variable attributes easily and readably, add the corresponding
   % variable field to the struct defined below, with its attributes defined in 
   % a cell array (attribute name in first column and attribute value in second).
   % This cell array will be converted at the end of the function to the proper
@@ -50,9 +55,9 @@ function nc_l0_info = configDTOutputNetCDFL0()
 
   % Navigation time.
   var_attr_list.m_present_time = { 
-    'standard_name' 'time'
     'long_name'     'epoch time (navigation board)'
-    'units'         'seconds since 1970-01-01 00:00:00'  
+    'standard_name' 'time'
+    'units'         'seconds since 1970-01-01 00:00:00 +00:00'  
     '_FillValue'    default_fill_value };
 
   % Navigation data.
@@ -200,13 +205,13 @@ function nc_l0_info = configDTOutputNetCDFL0()
   var_attr_list.m_dr_fix_time = {
     'long_name'     'dead reckoning fix time'
     'standard_name' 'dead_reckoning_fix_time'
-    'units'         'seconds since 1970-01-01 00:00:00'  
+    'units'         'seconds since 1970-01-01 00:00:00 +00:00'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_dr_postfix_time = {
     'long_name'     'dead reckoning postfix time'
     'standard_name' 'dead_reckoning_postfix_time'
-    'units'         'seconds since 1970-01-01 00:00:00'  
+    'units'         'seconds since 1970-01-01 00:00:00 +00:00'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_fix_x_lmc = {
@@ -348,7 +353,7 @@ function nc_l0_info = configDTOutputNetCDFL0()
   var_attr_list.sci_m_present_time = {
     'long_name'     'epoch time (science bay)'
     'standard_name' 'time'
-    'units'         'seconds since 1970-01-01 00:00:00'  
+    'units'         'seconds since 1970-01-01 00:00:00 +00:00'
     '_FillValue'    default_fill_value };
 
   % Science CTD.
@@ -373,7 +378,7 @@ function nc_l0_info = configDTOutputNetCDFL0()
   var_attr_list.sci_ctd41cp_timestamp = {
     'long_name'     'epoch time (CTD sensor)'
     'standard_name' 'time'
-    'units'         'seconds since 1970-01-01 00:00:00'  
+    'units'         'seconds since 1970-01-01 00:00:00 +00:00'
     '_FillValue'    default_fill_value };
 
   % BB3SLO sensor.
@@ -481,12 +486,18 @@ function nc_l0_info = configDTOutputNetCDFL0()
     'standard_name' 'turbidity'
     'units'         'NTU' 
     '_FillValue'    default_fill_value };
+  
+  var_attr_list.sci_flntu_timestamp = {
+    'long_name'     'epoch time (FLNTU sensor)'
+    'standard_name' 'time'
+    'units'         'seconds since 1970-01-01 00:00:00 +00:00'
+    '_FillValue'    default_fill_value };
 
   % OXY3835 sensor.
   var_attr_list.sci_oxy3835_oxygen = {
-    'long_name'     'oxygen'
-    'standard_name' 'moles_of_oxygen_per_unit_mass_in_sea_water'
-    'units'         'mol kg-1'  
+    'long_name'     'oxygen concentration'
+    'standard_name' 'mole_concentration_of_dissolved_molecular_oxygen_in_sea_water'
+    'units'         'umol l-1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_oxy3835_saturation = {
@@ -499,6 +510,12 @@ function nc_l0_info = configDTOutputNetCDFL0()
     'long_name'     'temperature'
     'standard_name' 'temperature_of_sensor_for_oxygen_in_sea_water'
     'units'         'Celsius'  
+    '_FillValue'    default_fill_value };
+  
+  var_attr_list.sci_oxy3835_timestamp = {
+    'long_name'     'epoch time (OXY3835 sensor)'
+    'standard_name' 'time'
+    'units'         'seconds since 1970-01-01 00:00:00 +00:00'
     '_FillValue'    default_fill_value };
 
 
@@ -517,21 +534,19 @@ function nc_l0_info = configDTOutputNetCDFL0()
     'citation'                     '' % deployment_citation
     'comment'                      'Data provided as it comes from the glider.'
     'Conventions'                  'CF-1.6'
-    'creator_email'                '' % deployment_author
-    'creator_name'                 '' % deployment_author_email
+    'creator_email'                '' % deployment_author_email
+    'creator_name'                 '' % deployment_author
     'creator_url'                  '' % deployment_author_url
     'data_center'                  '' % deployment_data_center
     'data_center_email'            '' % deployment_data_center_email
     'data_mode'                    'delayed time'
-    'date_modified'                datestr(utc2datenum(utc_time), 'yyyy-mm-ddTHH:MM:SS+00')
+    'date_modified'                'undefined'
     'featureType'                  'trajectory'
     'geospatial_lat_max'           'undefined'
     'geospatial_lat_min'           'undefined'
-    'geospatial_lat_resolution'    'undefined'
     'geospatial_lat_units'         'undefined'
     'geospatial_lon_max'           'undefined'
     'geospatial_lon_min'           'undefined'
-    'geospatial_lon_resolution'    'undefined'
     'geospatial_lon_units'         'undefined'
     'history'                      ''
     'institution'                  '' % institution_name
@@ -553,7 +568,6 @@ function nc_l0_info = configDTOutputNetCDFL0()
     'standard_name_vocabulary'     'http://cf-pcmdi.llnl.gov/documents/cf-standard-names/standard-name-table/16/cf-standard-name-table.html'
     'summary'                      '' % deployment_description
     'time_coverage_end'            'undefined'
-    'time_coverage_resolution'     'undefined'
     'time_coverage_start'          'undefined'
     'title'                        'Glider deployment delayed time raw data'
     'transmission_system'          'IRIDIUM'
@@ -564,9 +578,13 @@ function nc_l0_info = configDTOutputNetCDFL0()
   time_dim_name = 'time';
 
 
-  %% Return variable metadata in the correct format.
-  % Set the dimensions.
+  %% Return global and variable metadata in the correct format.
+  nc_l0_info = struct();
+  % Set the dimension names.
   nc_l0_info.dim_names.time = time_dim_name;
+  % Set the global attributes.
+  nc_l0_info.global_atts = ...
+    struct('name', global_atts(:,1), 'value', global_atts(:,2));
   % Set the variable metadata.
   nc_l0_info.var_meta = struct();
   var_name_list = fieldnames(var_attr_list);
@@ -574,11 +592,8 @@ function nc_l0_info = configDTOutputNetCDFL0()
     var_name = var_name_list{var_name_idx};
     var_atts = var_attr_list.(var_name);
     nc_l0_info.var_meta.(var_name).dimensions = {time_dim_name};
-    nc_l0_info.var_meta.(var_name).attributes = struct('name',  var_atts(:,1), ...
-                                                       'value', var_atts(:,2));
+    nc_l0_info.var_meta.(var_name).attributes = ...
+      struct('name',  var_atts(:,1), 'value', var_atts(:,2));
   end
-  % Set the global attributes.
-  nc_l0_info.global_atts = struct('name', global_atts(:,1), ...
-                                  'value', global_atts(:,2));
 
 end

@@ -1,12 +1,11 @@
-function gridding_options = configGriddingOptions()
-%CONFIGGRIDDINGOPTIONS  Configure glider data gridding.
+function gridding_options = configDataGridding()
+%CONFIGDATAGRIDDING  Configure glider data gridding.
 %
-%  GRIDDING_OPTIONS = CONFIGGRIDDINGOPTIONS() should return a struct
-%  setting the options for glider data processing as needed by the function
-%  GRIDGLIDERDATA.
+%  GRIDDING_OPTIONS = CONFIGDATAGRIDDING() should return a struct setting the 
+%  options for glider data gridding as needed by the function GRIDGLIDERDATA.
 %
 %  Examples:
-%    gridding_options = configGriddngOptions()
+%    gridding_options = configDataGridding()
 %
 %  See also:
 %    GRIDGLIDERDATA
@@ -15,24 +14,24 @@ function gridding_options = configGriddingOptions()
 %  Email: joanpau.beltran@socib.cat
 
   error(nargchk(0, 0, nargin, 'struct'));
-  
+
   gridding_options = struct();
-  
+
   gridding_options.profile = {'profile_index'};
   
   gridding_options.time = {'time'};
-  
+
   gridding_options.position(1).latitude = 'latitude';
   gridding_options.position(1).longitude = 'longitude';
-  
+
   gridding_options.depth = {'depth'};
-  
+
   gridding_options.depth_step = 1;
 
   gridding_options.variables = { 
-    'conductivity' 
-    'temperature' 
-    'pressure'   
+    'conductivity'
+    'temperature'
+    'pressure'
     'chlorophyll'
     'turbidity'
     'oxygen_concentration'
@@ -46,3 +45,4 @@ function gridding_options = configGriddingOptions()
   };
 
 end
+

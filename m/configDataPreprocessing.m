@@ -1,12 +1,12 @@
-function preprocessing_options = configPreprocessingOptions()
-%CONFIGPREPROCESSINGOPTIONS  Configure glider data preprocessing.
+function preprocessing_options = configDataPreprocessing()
+%CONFIGDATAPREPROCESSING  Configure glider data preprocessing.
 %
-%  PREPROCESSING_OPTIONS = CONFIGPREPROCESSINGOPTIONS() should return a struct
+%  PREPROCESSING_OPTIONS = CONFIGDATAPREPROCESSING() should return a struct
 %  setting the options for glider data preprocessing as needed by the function
 %  PREPROCESSGLIDERDATA.
 %
 %  Examples:
-%    preprocessing_options = configPreprocessingOptions()
+%    preprocessing_options = configDataPreprocessing()
 %
 %  See also:
 %    PREPROCESSGLIDERDATA
@@ -16,7 +16,7 @@ function preprocessing_options = configPreprocessingOptions()
 
   error(nargchk(0, 0, nargin, 'struct'));
   
-  preprocessing_options.nmea_coord_sensors = {
+  preprocessing_options.nmea_conversion_sensor_list = {
     'm_gps_lat'
     'm_gps_lon'
     'm_lat'
@@ -26,3 +26,4 @@ function preprocessing_options = configPreprocessingOptions()
   };
 
 end
+

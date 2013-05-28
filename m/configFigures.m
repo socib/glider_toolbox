@@ -67,6 +67,7 @@ function [figures_proc, figures_grid] = configFigures()
   default_prntopts = struct();
   default_prntopts.resolution = 150;
   default_prntopts.format = 'png';
+  default_prntopts.render = 'painters';
   
   
   %% Set default figure and axes properties.
@@ -239,7 +240,7 @@ function [figures_proc, figures_grid] = configFigures()
   figures_proc.oxygen_concentration.dataopts.ydata = {'depth_ctd' 'depth'};
   figures_proc.oxygen_concentration.dataopts.cdata = 'oxygen_concentration';
   figures_proc.oxygen_concentration.plotopts.sdata = 2;
-  figures_proc.oxygen_concentration.plotopts.logscale = true;
+  figures_proc.oxygen_concentration.plotopts.logscale = false;
   figures_proc.oxygen_concentration.plotopts.xlabel = setfield(default_label, 'String', 'distance (km)');
   figures_proc.oxygen_concentration.plotopts.ylabel = setfield(default_label, 'String', 'depth (m)');
   figures_proc.oxygen_concentration.plotopts.clabel = setfield(default_label, 'String', 'oxygen concentration (\mumol l-1)');
@@ -317,10 +318,9 @@ function [figures_proc, figures_grid] = configFigures()
   figures_proc.current_map.dataopts.cureasdata = 'water_velocity_eastward';
   figures_proc.current_map.plotopts.wptlatdata = [];
   figures_proc.current_map.plotopts.wptlondata = [];
-  figures_proc.current_map.dataopts.curnordata = [];
-  figures_proc.current_map.dataopts.cureasdata = [];
+  figures_proc.current_map.plotopts.curnordata = [];
+  figures_proc.current_map.plotopts.cureasdata = [];
   figures_proc.current_map.plotopts.curscale = 0.2;
-  figures_proc.current_map.plotopts.coastfile = 'private/coast_wmed_h';
   figures_proc.current_map.plotopts.xlabel = setfield(default_label, 'String', 'longitude');
   figures_proc.current_map.plotopts.ylabel = setfield(default_label, 'String', 'latitude');
   figures_proc.current_map.plotopts.clabel = setfield(default_label, 'String', 'column-averaged sea water speed (m s-1)');
@@ -341,25 +341,26 @@ function [figures_proc, figures_grid] = configFigures()
   default_axes.XMinorTick = 'on';
 
   figures_grid = struct();
-  
+
   % Profile statistics plots.
   figures_grid.profiles_ctd.plotfunc = @plotProfileStatistics;
   figures_grid.profiles_ctd.dataopts(1).mdata = 'temperature';
   figures_grid.profiles_ctd.dataopts(1).ydata = 'depth';
   figures_grid.profiles_ctd.plotopts.xlabel(1) = setfield(default_label, 'String', 'temperature (deg C)');
   figures_grid.profiles_ctd.plotopts.ylabel(1) = setfield(default_label, 'String', 'depth (m)');
-  figures_grid.profiles_ctd.plotopts.title(1) = setfield(default_title, 'String', {'Temperature profiles'; ''});
+  figures_grid.profiles_ctd.plotopts.title(1) = setfield(default_title, 'String', 'Temperature profiles');
   figures_grid.profiles_ctd.dataopts(2).mdata = 'salinity';
   figures_grid.profiles_ctd.dataopts(2).ydata = 'depth';
   figures_grid.profiles_ctd.plotopts.xlabel(2) = setfield(default_label, 'String', 'salinity (PSU)');
   figures_grid.profiles_ctd.plotopts.ylabel(2) = setfield(default_label, 'String', 'depth (m)');
-  figures_grid.profiles_ctd.plotopts.title(2) = setfield(default_title, 'String', {'Salinity profiles'; '(corrected thermal lag)'});
+  figures_grid.profiles_ctd.plotopts.title(2) = setfield(default_title, 'String', 'Salinity profiles');
   figures_grid.profiles_ctd.dataopts(3).mdata = 'density';
   figures_grid.profiles_ctd.dataopts(3).ydata = 'depth';
   figures_grid.profiles_ctd.plotopts.xlabel(3) = setfield(default_label, 'String', 'density (kg m-1)');
   figures_grid.profiles_ctd.plotopts.ylabel(3) = setfield(default_label, 'String', 'depth (m)');
-  figures_grid.profiles_ctd.plotopts.title(3) = setfield(default_title, 'String', {'Density profiles'; '(corrected thermal lag)'});
+  figures_grid.profiles_ctd.plotopts.title(3) = setfield(default_title, 'String', 'Density profiles');
   figures_grid.profiles_ctd.plotopts.axsprops(1:3) = default_axes;
+  figures_grid.profiles_ctd.prntopts = default_prntopts;
   figures_grid.profiles_ctd.prntopts.filename = 'ctd_profiles';
   figures_grid.profiles_ctd.prntopts.title = 'CTD profiles';
   figures_grid.profiles_ctd.prntopts.comment = 'Profile statistics of temperature, salinity and density, derived from raw CTD measurements.';
@@ -369,18 +370,19 @@ function [figures_proc, figures_grid] = configFigures()
   figures_grid.profiles_ctd_corrected_thermal.dataopts(1).ydata = 'depth';
   figures_grid.profiles_ctd_corrected_thermal.plotopts.xlabel(1) = setfield(default_label, 'String', 'temperature (deg C)');
   figures_grid.profiles_ctd_corrected_thermal.plotopts.ylabel(1) = setfield(default_label, 'String', 'depth (m)');
-  figures_grid.profiles_ctd_corrected_thermal.plotopts.title(1) = setfield(default_title, 'String', 'Temperature profiles');
+  figures_grid.profiles_ctd_corrected_thermal.plotopts.title(1) = setfield(default_title, 'String', {'Temperature profiles'; ''});
   figures_grid.profiles_ctd_corrected_thermal.dataopts(2).mdata = 'salinity_corrected_thermal';
   figures_grid.profiles_ctd_corrected_thermal.dataopts(2).ydata = 'depth';
   figures_grid.profiles_ctd_corrected_thermal.plotopts.xlabel(2) = setfield(default_label, 'String', 'salinity (PSU)');
   figures_grid.profiles_ctd_corrected_thermal.plotopts.ylabel(2) = setfield(default_label, 'String', 'depth (m)');
-  figures_grid.profiles_ctd_corrected_thermal.plotopts.title(2) = setfield(default_title, 'String', 'Salinity profiles');
+  figures_grid.profiles_ctd_corrected_thermal.plotopts.title(2) = setfield(default_title, 'String', {'Salinity profiles'; '(corrected thermal lag)'});
   figures_grid.profiles_ctd_corrected_thermal.dataopts(3).mdata = 'density_corrected_thermal';
   figures_grid.profiles_ctd_corrected_thermal.dataopts(3).ydata = 'depth';
   figures_grid.profiles_ctd_corrected_thermal.plotopts.xlabel(3) = setfield(default_label, 'String', 'Density (kg m-1)');
   figures_grid.profiles_ctd_corrected_thermal.plotopts.ylabel(3) = setfield(default_label, 'String', 'depth (m)');
-  figures_grid.profiles_ctd_corrected_thermal.plotopts.title(3) = setfield(default_title, 'String', 'density profiles');
+  figures_grid.profiles_ctd_corrected_thermal.plotopts.title(3) = setfield(default_title, 'String', {'Density profiles'; '(corrected thermal lag)'});
   figures_grid.profiles_ctd_corrected_thermal.plotopts.axsprops(1:3) = default_axes;
+  figures_grid.profiles_ctd_corrected_thermal.prntopts = default_prntopts;
   figures_grid.profiles_ctd_corrected_thermal.prntopts.filename = 'ctd_profiles_corrected_thermal';
   figures_grid.profiles_ctd_corrected_thermal.prntopts.title = 'CTD profiles with corrected thermal lag';
   figures_grid.profiles_ctd_corrected_thermal.prntopts.comment = 'Profile statistics of temperature, salinity and density, derived from CTD measurements with thermal lag corrections.';
@@ -397,6 +399,7 @@ function [figures_proc, figures_grid] = configFigures()
   figures_grid.profiles_flntu.plotopts.ylabel(2) = setfield(default_label, 'String', 'depth (m)');
   figures_grid.profiles_flntu.plotopts.title(2) = setfield(default_title, 'String', 'Turbidity profiles');
   figures_grid.profiles_flntu.plotopts.axsprops(1:2) = default_axes;
+  figures_grid.profiles_flntu.prntopts = default_prntopts;
   figures_grid.profiles_flntu.prntopts.filename = 'flntu_profiles';
   figures_grid.profiles_flntu.prntopts.title = 'Chlorohpyll and turbidity profiles';
   figures_grid.profiles_flntu.prntopts.comment = 'Profile statistics of chlorophyll and turbidity.';
@@ -413,10 +416,11 @@ function [figures_proc, figures_grid] = configFigures()
   figures_grid.profiles_oxygen.plotopts.ylabel(2) = setfield(default_label, 'String', 'depth (m)');
   figures_grid.profiles_oxygen.plotopts.title(2) = setfield(default_title, 'String', 'O2 saturation profiles');
   figures_grid.profiles_oxygen.plotopts.axsprops(1:2) = default_axes;
+  figures_grid.profiles_oxygen.prntopts = default_prntopts;
   figures_grid.profiles_oxygen.prntopts.filename = 'oxygen_profiles';
   figures_grid.profiles_oxygen.prntopts.title = 'Oxygen profiles';
   figures_grid.profiles_oxygen.prntopts.comment = 'Profile statistics of oxygen concentration and saturation.';
-  
+
   close(hfig);
   
 end

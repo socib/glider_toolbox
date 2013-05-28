@@ -25,13 +25,13 @@ function wrc_progs = configWRCPrograms()
 %  Notes:
 %    The executables required are provided by the Webb Research Company and
 %    should be available in your system binary path as required by the
-%    XBD2ASCII function.
+%    XBD2DBA function.
 %
 %  Examples:
 %    wrc_progs = configWRCPrograms()
 %
 %  See also:
-%    XBD2ASCII
+%    XBD2DBA
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat

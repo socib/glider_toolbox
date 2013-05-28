@@ -1,12 +1,12 @@
-function processing_options = configProcessingOptions()
-%CONFIGPREPROCESSINGOPTIONS  Configure glider data processing.
+function processing_options = configDataProcessing()
+%CONFIGDATAPROCESSING  Configure glider data processing.
 %
-%  PROCESSING_OPTIONS = CONFIGPROCESSINGOPTIONS() should return a struct
-%  setting the options for glider data processing as needed by the function
+%  PROCESSING_OPTIONS = CONFIGDATAPROCESSING() should return a struct setting 
+%  the options for glider data processing as needed by the function
 %  PROCESSGLIDERDATA.
 %
 %  Examples:
-%    preprocessing_options = configProcessingOptions()
+%    preprocessing_options = configDataProcessing()
 %
 %  See also:
 %    PREPROCESSGLIDERDATA
@@ -50,7 +50,7 @@ function processing_options = configProcessingOptions()
   processing_options.oxygen_sensor_list(1).oxygen_concentration = 'sci_oxy3835_oxygen';
   processing_options.oxygen_sensor_list(1).oxygen_saturation = 'sci_oxy3835_saturation';
   
-  processing_options.extra_sensor_list = {};
+  processing_options.extra_sensor_list = struct();
   
   processing_options.time_filling = true;
   processing_options.position_filling = true;
