@@ -19,15 +19,12 @@ function ncl1 = generateOutputNetCDFL1(filename, data, meta, dims, atts, deploym
 %    DATE_MODIFIED: modification time given by POSIXTIME ('yyyy-mm-ddTHH:MM:SSZ').
 %    GEOSPATIAL_LAT_MAX: maximum latitude value inferred from data (LATITUDE).
 %    GEOSPATIAL_LAT_MIN: minimum latitude value inferred from data (LATITUDE).
-%    GEOSPATIAL_LAT_RESOLUTION: mean latitude step inferred from data (LATITUDE).
 %    GEOSPATIAL_LAT_UNITS: latitude units inferred from metadata (LATITUDE).
 %    GEOSPATIAL_LON_MAX: maximum longitude value inferred from data (LONGITUDE).
 %    GEOSPATIAL_LON_MIN: minimum longitude value inferred from data (LONGITUDE).
-%    GEOSPATIAL_LON_RESOLUTION: mean longitude step inferred from data (LONGITUDE).
 %    GEOSPATIAL_LON_UNITS: longitude units inferred from metadata (LONGITUDE).
-%    TIME_COVERAGE_END: maximum time value inferred from value (TIME_NAV).
-%    TIME_COVERAGE_RESOLUTION:  mean time step inferred from data (TIME_NAV).
-%    TIME_COVERAGE_START: minimum time value inferred from data (TIME_NAV).
+%    TIME_COVERAGE_END: maximum time value inferred from value (TIME).
+%    TIME_COVERAGE_START: minimum time value inferred from data (TIME).
 %
 %  Notes:
 %    Usually input data is the output of PROCESSGLIDERDATA.
@@ -48,22 +45,19 @@ function ncl1 = generateOutputNetCDFL1(filename, data, meta, dims, atts, deploym
 
   error(nargchk(6, 6, nargin, 'struct'));
 
-  %% Set dynamic global attributes.
+  %% Get dynamic global attribute values.
   dyn_atts = struct();
   dyn_atts.date_modified = ...
-    datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00');
-  if isfield(data, 'time_nav')
+    datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00:00');
+  if isfield(data, 'time')
     dyn_atts.time_coverage_start = ...
-      datestr(posixtime2utc(min(data.time_nav)), 'yyyy-mm-ddTHH:MM:SS+00');
+      datestr(posixtime2utc(min(data.time)), 'yyyy-mm-ddTHH:MM:SS+00:00');
     dyn_atts.time_coverage_end = ...
-      datestr(posixtime2utc(max(data.time_nav)), 'yyyy-mm-ddTHH:MM:SS+00');
-    dyn_atts.time_coverage_resolution = ...
-      sprintf('P%.2fS', min(abs(diff(data.time_nav))));
+      datestr(posixtime2utc(max(data.time)), 'yyyy-mm-ddTHH:MM:SS+00:00');
   end
   if isfield(data, 'latitude') && isfield(meta, 'latitude')
     dyn_atts.geospatial_lat_min = min(data.latitude);
     dyn_atts.geospatial_lat_max = max(data.latitude);
-    dyn_atts.geospatial_lat_resolution = min(abs(diff(data.latitude)));
     [lat_has_units, lat_units_idx] = ...
       ismember('units', {meta.latitude.attributes.name});
     if lat_has_units
@@ -74,7 +68,6 @@ function ncl1 = generateOutputNetCDFL1(filename, data, meta, dims, atts, deploym
   if isfield(data, 'longitude') && isfield(meta, 'longitude')
     dyn_atts.geospatial_lon_min = min(data.longitude);
     dyn_atts.geospatial_lon_max = max(data.longitude);
-    dyn_atts.geospatial_lon_resolution = min(abs(diff(data.longitude)));
     [lon_has_units, lon_units_idx] = ...
       ismember('units', {meta.longitude.attributes.name});
     if lon_has_units
@@ -84,30 +77,22 @@ function ncl1 = generateOutputNetCDFL1(filename, data, meta, dims, atts, deploym
   end
 
 
-  %% Overwrite default attributes with deployment fields or dynamic values.
-  global_atts = atts;
-  for atts_idx = 1:numel(atts)
-    if isfield(deployment, atts(atts_idx).name)
-      global_atts(atts_idx).value = deployment.(atts(atts_idx).name);
-    elseif isfield(dyn_atts, atts(atts_idx).name)
-      global_atts(atts_idx).value = dyn_atts.(atts(atts_idx).name);
+  %% Aggregate global metadata (global attributes and dimension definitions).
+  global_meta = struct();
+  % Set dimension lengths.
+  global_meta.dimensions = struct('name', {dims.time}, 'length', {0});
+  % Set global attributes.
+  global_meta.attributes = atts;
+  % Overwrite default attributes with deployment fields or dynamic values.
+  for att_idx = 1:numel(global_meta.attributes)
+    if isfield(deployment, global_meta.attributes(att_idx).name)
+      global_meta.attributes(att_idx).value = ...
+        deployment.(global_meta.attributes(att_idx).name);
+    elseif isfield(dyn_atts, global_meta.attributes(att_idx).name)
+      global_meta.attributes(att_idx).value = ...
+        dyn_atts.(global_meta.attributes(att_idx).name);
     end
   end
-  
-  
-  %% Select only data properly described by metadata.
-  data_selected = struct();
-  data_field_name_list = fieldnames(data);
-  for data_field_name_idx = 1:numel(data_field_name_list)
-    data_field_name = data_field_name_list{data_field_name_idx};
-    if isfield(meta, data_field_name);
-      data_selected.(data_field_name) = data.(data_field_name);
-    end
-  end
-  
-  
-  %% Set dimension lengths.
-  dim_info = struct(dims.time, {0});
   
   
   %% Create base directory of target file if needed.
@@ -128,7 +113,7 @@ function ncl1 = generateOutputNetCDFL1(filename, data, meta, dims, atts, deploym
   
   
   %% Generate the file.
-  writeNetCDFData(filename, data_selected, meta, dim_info, global_atts);
+  writeNetCDFData(data, meta, global_meta, filename);
   
   
   %% Return the absolute name of the generated file.
