@@ -1,0 +1,50 @@
+function wrc_progs = configWRCPrograms()
+%CONFIGWRCPROGRAMS  Configure path of the Slocum glider programs provided by WRC.
+%
+%  WRC_PROGS = CONFIGWRCPROGRAMS() should return a struct with the path to
+%  the executables provided by the Webb Research Company to deal with Slocum
+%  glider data files. It should have the following fields:
+%    DBD2ASC: path to the program to convert Slocum binary data files to ascii 
+%     data ('dbd2asc').
+%
+%  The following fields are optional. The glider processing functions do not use
+%  them in any way. They are here just for completeness and to allow using these
+%  programs from the MATLAB/Octave environment in which the glider processing
+%  toolbox is used.
+%    DBA_MERGE: path to the program to merge ascii versions of the navigation
+%      and science files ('dba_merge').
+%    DBA_SENSOR_FILTER: path to the program to filter data in ascii versions of
+%      the Slocum data files based on the source sensor ('dba_sensor_filter').
+%    DBA_TIME_FILTER: path to the program to filter data in ascii versions of
+%      the Slocum data files based on the time stamp ('dba_time_filter').
+%    DBA2_ORIG_MATLAB: path to the program to convert ascii versions of the 
+%      Slocum data files to MATLAB/Octave loadable files ('dba2_orig_matlab').
+%    RENAME_DBD_FILES: path to the program to perform 8x3 DOS name format 
+%      renaming of the Slocum binary data files ('rename_dbd_files').
+%
+%  Notes:
+%    The executables required are provided by the Webb Research Company and
+%    should be available in your system binary path as required by the
+%    XBD2DBA function.
+%
+%  Examples:
+%    wrc_progs = configWRCPrograms()
+%
+%  See also:
+%    XBD2DBA
+%
+%  Author: Joan Pau Beltran
+%  Email: joanpau.beltran@socib.cat
+
+  error(nargchk(0, 0, nargin, 'struct'));
+  
+  % This program is needed.
+  wrc_progs.dbd2asc           = '/path/to/dbd2asc';
+  % These programs are optional.
+  wrc_progs.dba_merge         = '/path/to/dba_emrge';
+  wrc_progs.dba_sensor_filter = '/path/to/dba_sensor_filter';
+  wrc_progs.dba_time_filter   = '/path/to/dba_time_filter';
+  wrc_progs.dba2_orig_matlab  = '/path/to/dba2_orig_matlab';
+  wrc_progs.rename_dbd_files  = '/path/to/rename_dbd_files';
+
+end
