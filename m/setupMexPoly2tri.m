@@ -57,7 +57,8 @@ function setupMexPoly2tri()
 %    % or that GPC sources are present in the directory private/gpcl
 %    setupMexPoly2tri()
 %
-%    % Incompatible versions of compiler and shipped may cause build failure.
+%    % Incompatible versions of system compiler and libraries shipped with the
+%    % the interpreter may cause build failure.
 %    % Try to build the target against system libraries instead of shipped ones.
 %    ld_library_path = getenv('LD_LIBRARY_PATH')
 %    setenv('LD_LIBRARY_PATH')

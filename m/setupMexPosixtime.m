@@ -29,21 +29,17 @@ function setupMexPosixtime()
 %    overwrite the environment variable LD_LIBRARY_PATH from the MATLAB session.
 %
 %  Examples:
-%    % Check that GPC development files are installed on your system,
-%    % or that GPC sources are present in the directory private/gpcl
-%    setupMexPoly2tri()
+%    % Compile interface function for low level C function TIME.
+%    setupMexPosixtime();
 %
-%    % Incompatible versions of compiler and shipped may cause build failure.
+%    % Incompatible versions of system compiler and libraries shipped with the
+%    % interpreter may cause build failure.
 %    % Try to build the target against system libraries instead of shipped ones.
 %    ld_library_path = getenv('LD_LIBRARY_PATH')
 %    setenv('LD_LIBRARY_PATH')
-%    setupMexPoly2tri()
+%    setupMexPosixtime()
 %    setenv('LD_LIBRARY_PATH', ld_library_path)
 %    clear('ld_library_path')
-%
-%  References:
-%    Alan Murta, GPC - General Polygon Clipper library:
-%    http://www.cs.man.ac.uk/~amurta/software/index.html#gpc
 %
 %  See also:
 %    POSIXTIME
