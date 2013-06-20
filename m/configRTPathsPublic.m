@@ -56,11 +56,11 @@ function public_paths = configRTPathsPublic()
 
   error(nargchk(0, 0, nargin, 'struct'));
 
-  public_paths.netcdf_l0   = '/path/to/public/real_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START_DATE}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START_DATE}_l0.nc';
-  public_paths.netcdf_l1   = '/path/to/public/real_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START_DATE}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START_DATE}_l1.nc';
-  public_paths.netcdf_l2   = '/path/to/public/real_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START_DATE}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START_DATE}_l2.nc';
-  public_paths.figure_dir  = '/path/to/public/real_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START_DATE}/figures';
-  public_paths.figure_url  = 'http://myserver/url/to/real_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START_DATE}/figures';
+  public_paths.netcdf_l0   = '/path/to/public/real_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l0.nc';
+  public_paths.netcdf_l1   = '/path/to/public/real_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l1.nc';
+  public_paths.netcdf_l2   = '/path/to/public/real_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l2.nc';
+  public_paths.figure_dir  = '/path/to/public/real_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/figures';
+  public_paths.figure_url  = 'http://myserver/url/to/real_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/figures';
   public_paths.figure_info = 'http://myserver/url/to/real_time/glider_data/figures/${DEPLOYMENT_ID}.json';
 
 end
