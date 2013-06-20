@@ -3,50 +3,83 @@ function str = strfglider(pattern, deployment)
 %
 %  STR = STRFGLIDER(PATTERN, DEPLOYMENT) replaces deployment field specifiers in
 %  string PATTERN with the corresponding field values in struct DEPLOYMENT.
-%  Recognized field specifiers match deployment struct fields returned by 
-%  GETDBDEPLOYMENTINFO. They are deployment field names in capital letters 
-%  enclosed in curly braces prefixed with a dollar sign.
-%  Some specifiers accept a modifier, separated from the specifier by a comma, 
-%  affecting the replacement format. This is the list of valid specifiers:
-%    ${GLIDER_NAME}: glider platform name.
-%    ${GLIDER_INSTRUMENT_NAME}: glider instrument name.
-%    ${GLIDER_DEPLOYMENT_CODE}: glider deployment code.
-%    ${DEPLOYMENT_ID}: deployment unique identifier.
-%    ${DEPLOYMENT_NAME}: deployment name.
-%    ${DEPLOYMENT_START_DATE}: deployment start date as 'yyyymmdd'.
-%    ${DEPLOYMENT_END_DATE}: deployment end date as 'yyyymmdd'.
-%    ${DEPLOYMENT_START,...}: formatted deployment start date and time (described below).
-%    ${DEPLOYMENT_END,...}: formatted deployment end date an time (described below).
-%
-%  Time fields may include a modifier selecting the date and time format.
-%  The modifier is any date field specifier string accepted by the function 
-%  DATESTR. See the examples below.
-%
-%  Text fields may include a modifier to imply conversion to lower case (,) or 
-%  upper case (^). When one of these modifiers is present, the replacement value
-%  is converted using LOWER and UPPER functions respectively.
-%
+%  Recognized field specifier keys match the fields in the deployment structure.
+%  They are deployment field names in capital letters enclosed in curly braces 
+%  and prefixed with a dollar sign. Specifiers may also include a comma 
+%  separatated list of modifiers, separated from the specifier key by a comma. 
+%  These modifiers are intended to allow transformations affecting the format 
+%  of the replacement value. These transformations are applied sequentially as 
+%  they appear in the specifier, from left to right. Each transformation is 
+%  applied to the output of the previous one, starting from value of the 
+%  deployment field matching the specifier key, or the empty string if there is
+%  no such field. Finally, if the resulting replacement value is a numeric
+%  value, it is converted to string by function NUM2STRING before applying the
+%  replacement. Recognized modifiers are:
+%    %...: string conversion with desired format using SPRINTF.
+%      The current replacement value is passed to function SPRINTF using the
+%      modifier value as format string.
+%      Example:
+%        '${DEPLOYMENT_ID,%04d}' with DEPLOYMENT_ID=2 is replaced by 0002.
+%    ^: upper case conversion.
+%      The current replacement value is converted to upper case by passing it to
+%      function UPPER.
+%      Example:
+%        '${GLIDER_NAME,^}' with GLIDER_NAME='deepy' is replaced by 'DEEPY'.
+%    v: lower case conversion.
+%      The current replacement value is converted to lower case by passing it to
+%      function LOWER.
+%      Example:
+%        '${GLIDER_NAME,^}' with GLIDER_NAME='DEEPY' is replaced by 'deepy'.
+%    T...: time string representation.
+%      The current replacement value is passed to function DATESTR using the
+%      the modifier value as format string with leading T removed.
+%      Example:
+%        ${DEPLOYMENT_END,Tyyyymmmdd} with DEPLOYMENT_END=datestr([2001 01 17]) 
+%        is replaced by '2001Jan17'.
+%    s/.../...: regular expression replacement.
+%      The current replacement value is passed to function REGEXPREP to replace
+%      the occurrences of a pattern subexpression by a replacement, both
+%      specified in the modifier as substrings separated by a delimiter. The 
+%      delimiter is the second character in the modifier (here is '/', but any
+%      other character may be used). The pattern is the substring between the 
+%      first and the second occurrence of the delimiter in the modifier. The 
+%      replacement is the substring starting right after the second occurence 
+%      of the delimiter until the end of the modifier. If the replacement is
+%      the null string, the second delimiter is optional, and subexpressions in
+%      the current replacement value matching the pattern are deleted.
+%      Example:
+%        ${GLIDER_NAME,s/(-|\s*)/_} with 
+%        GLIDER_NAME='complex-compound  glider name' is replaced by 
+%        'complex_compound_glider_name'.
+%    
 %  Notes:
 %    This function is inspired by the C function STRFTIME, the shell 
 %    command DATE, and Bash parameter expansion.
 %
 %  Examples:
-%    deployment.id = 2;
+%    deployment.deployment_id = 2;
 %    deployment.deployment_name = 'funnymission';
 %    deployment.glider_name = 'happyglider';
 %    deployment.glider_deployment_code = '0001';
-%    deployment.start_time = datenum([2000 1 1 0 0 0]);
-%    deployment.end_time =  datenum([2001 1 1 0 0 0]);
+%    deployment.deployment_start = datenum([2000 1 1 0 0 0]);
+%    deployment.deployment_end =  datenum([2001 1 1 0 0 0]);
 %    pattern = '/base/path/${GLIDER_NAME}/${DEPLOYMENT_NAME}'
 %    str = strfglider(pattern, deployment)
-%    date_pattern = '/base/path/${GLIDER_NAME,^}/${DEPLOYMENT_START,yyyy-mm-dd}'
+%    nums_pattern = '/base/path/${GLIDER_NAME}/${DEPLOYMENT_ID,%04d}'
+%    nums_str = strfglider(nums_pattern, deployment)
+%    case_pattern = '/base/path/${GLIDER_NAME,^}/${DEPLOYMENT_NAME}'
+%    case_str = strfglider(case_pattern, deployment)
+%    date_pattern = '/base/path/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyy-mm-dd}'
 %    date_str = strfglider(date_pattern, deployment)
+%    subs_pattern = '/base/path/${GLIDER_NAME}/${DEPLOYMENT_NAME,s/funny/boring}'
+%    subs_str = strfglider(subs_pattern, deployment)
 %
 %  See also:
-%    GETDBDEPLOYMENTINFO
+%    SPRINTF
 %    DATESTR
 %    UPPER
 %    LOWER
+%    REGEXPREP
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
@@ -69,37 +102,56 @@ function str = strfglider(pattern, deployment)
 
   error(nargchk(2, 2, nargin, 'struct'));
 
-  condsel = @(p,v) (v{p});
-  casefun = @(s,m) (feval(condsel(ismember({',' '^'}, m), {@lower @upper}), s));
-  rep_map = ...
-  {
-    '\$\{GLIDER_NAME\}'                   @(d,m)(d.glider_name)
-    '\$\{GLIDER_NAME,([,^])\}'            @(d,m)(casefun(d.glider_name, m))
-    '\$\{GLIDER_INSTRUMENT_NAME\}'        @(d,m)(d.glider_instrument_name)
-    '\$\{GLIDER_INSTRUMENT_NAME,([,^])\}' @(d,m)(casefun(d.glider_instrument_name, m))
-    '\$\{GLIDER_DEPLOYMENT_CODE\}'        @(d,m)(d.glider_deployment_code)
-    '\$\{GLIDER_DEPLOYMENT_CODE,([,^])\}' @(d,m)(casefun(d.glider_deployment_code, m))
-    '\$\{DEPLOYMENT_NAME\}'               @(d,m)(d.deployment_name)
-    '\$\{DEPLOYMENT_NAME,([,^])\}'        @(d,m)(casefun(d.deployment_name, m))
-    '\$\{DEPLOYMENT_ID\}'                 @(d,m)(num2str(d.deployment_id))
-    '\$\{DEPLOYMENT_START_DATE\}'         @(d,m)(datestr(d.deployment_start,'yyyymmdd'))
-    '\$\{DEPLOYMENT_END_DATE\}'           @(d,m)(datestr(d.deployment_end,'yyyymmdd'))
-    '\$\{DEPLOYMENT_START,([^}]+)\}'      @(d,m)(datestr(d.deployment_start,m))
-    '\$\{DEPLOYMENT_END,([^}]+)\}'        @(d,m)(datestr(d.deployment_end,m))
-  };
-  
-  specifiers = rep_map(:,1);
-  repl_funcs = rep_map(:,2);
-  
+  repflds = fieldnames(deployment);
+  repvals = struct2cell(deployment);
+  repkeys = upper(repflds);
+  specprefix = '${';
+  specsuffix = '}';
+  specinchar = ',';
+  expression = [regexptranslate('escape', specprefix) ...
+                '.*?' ...
+                regexptranslate('escape', specsuffix)];
+  match_list = unique(regexp(pattern, expression, 'match'));
   str = pattern;
-  for s = 1:numel(specifiers)
-    spec = specifiers{s};
-    func = repl_funcs{s};
-    [matches, tokens] = regexp(pattern, spec, 'match', 'tokens');
-    [matches, indices] = unique(matches);
-    tokens = tokens(indices);
-    values = cellfun(@(t) func(deployment,t{:}), tokens, 'UniformOutput', false);
-    str = regexprep(str, regexptranslate('escape', matches), values);
+  for match_idx = 1:numel(match_list)
+    match = match_list{match_idx};
+    rep = '';
+    token_list = ...
+      regexp(match(length(specprefix)+1:end-length(specsuffix)), ...
+             regexptranslate('escape', specinchar), 'split');
+    key = token_list{1};
+    [key_present, key_index] = ismember(key, repkeys);
+    if key_present
+      rep = repvals{key_index};
+    end
+    for token_idx = 2:numel(token_list)
+      modtok = token_list{token_idx};
+      switch modtok(1)
+        case '%'
+          rep = sprintf(modtok, rep);
+        case '^'
+          rep = upper(rep);
+        case 'v'
+          rep = lower(rep);
+        case 'T'
+          rep = datestr(rep, modtok(2:end));
+        case 's'
+          subsdelim = modtok(2);
+          subsbound = 2 + find(modtok(3:end) == subsdelim, 1, 'first');
+          if isempty(subsbound)
+            subspatstr = modtok(3:end);
+            subsrepstr = '';
+          else
+            subspatstr = modtok(3:subsbound(1)-1);
+            subsrepstr = modtok(subsbound(1)+1:end);
+          end
+          rep = regexprep(rep, subspatstr, subsrepstr);
+      end
+      if isnumeric(rep)
+        rep = num2str(rep);
+      end
+    end
+    str = regexprep(str, regexptranslate('escape', match), rep);
   end
   
 end
