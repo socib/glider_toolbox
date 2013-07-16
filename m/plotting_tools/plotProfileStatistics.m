@@ -199,7 +199,7 @@ function [hfig, haxs, hlgs, hlns] = plotProfileStatistics(varargin)
         'XData', [(mmean(:) - mstd(:)); nan; (mmean(:) + mstd(:))]);
     reverse_x = strcmp(get(haxs(s), 'XDir'), 'reverse');
     reverse_y = strcmp(get(haxs(s), 'YDir'), 'reverse');
-    increasing = [1 0] * nancov(mmean(:), ydata(:), 1) * [0 1]';
+    increasing = [1 0] * nancov(mmean(:), ydata(:), 1) * [0 1]' > 0;
     legend_location_list = {'NorthWest' 'NorthEast'; 'SouthWest' 'SouthEast'};
     legend_location = ...
       legend_location_list{1 + reverse_y, ...
