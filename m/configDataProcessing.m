@@ -61,10 +61,13 @@ function processing_options = configDataProcessing()
   processing_options.ctd_sensor_list(2).time         = [];
 
   processing_options.flntu_sensor_list(1).chlorophyll = 'sci_flntu_chlor_units';
-  processing_options.flntu_sensor_list(1).turbidity = 'sci_flntu_turb_units';
+  processing_options.flntu_sensor_list(1).turbidity   = 'sci_flntu_turb_units';
+  processing_options.flntu_sensor_list(1).time        = 'sci_flntu_timestamp';
   
   processing_options.oxygen_sensor_list(1).oxygen_concentration = 'sci_oxy3835_oxygen';
-  processing_options.oxygen_sensor_list(1).oxygen_saturation = 'sci_oxy3835_saturation';
+  processing_options.oxygen_sensor_list(1).oxygen_saturation    = 'sci_oxy3835_saturation';
+  processing_options.oxygen_sensor_list(1).temperature          = 'sci_oxy3835_temp';
+  processing_options.oxygen_sensor_list(1).time                 = 'sci_oxy3835_timestamp';
   
   processing_options.extra_sensor_list = struct();
   
@@ -79,7 +82,7 @@ function processing_options = configDataProcessing()
   processing_options.pressure_filter_constant = 4; % Recommended setting from Seabird Data Processing Manual.
   processing_options.depth_ctd_derivation = true;
   
-  processing_options.profiling_sequence = {'depth_ctd' 'depth'};
+  processing_options.profiling_sequence_list = {'depth_ctd' 'depth'};
   processing_options.profiling_sequence_filling = true;
   processing_options.profile_min_range = 10;
   processing_options.profile_max_gap_ratio = 0.8;

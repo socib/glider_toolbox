@@ -343,6 +343,14 @@ function nc_l1_info = configRTOutputNetCDFL1()
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value };
 
+  var_attr_list.time_flntu = {
+    'long_name'     'FLNTU sensor epoch time'
+    'standard_name' 'time'
+    'units'         'seconds since 1970-01-01 00:00:00 +00:00'
+    'comment'       'FLNTU time stamp'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.cdom = {
     'long_name'     'cdom'
     'standard_name' 'cdom'
@@ -364,9 +372,17 @@ function nc_l1_info = configRTOutputNetCDFL1()
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value };
 
-  var_attr_list.oxygen_temperature = {
-    'long_name'     'temperature'
-    'standard_name' 'temperature_of_sensor_for_oxygen_in_sea_water'
+  var_attr_list.time_oxygen = {
+    'long_name'     'oxygen sensor epoch time'
+    'standard_name' 'time'
+    'units'         'seconds since 1970-01-01 00:00:00 +00:00'
+    'comment'       'oxygen sensor time stamp'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.temperature_oxygen = {
+    'long_name'     'oxygen sensor temperature'
+    'standard_name' ''
     'units'         'Celsius'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value };
