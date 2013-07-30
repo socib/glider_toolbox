@@ -269,6 +269,8 @@ function [hfig, haxs, hlgn, hcba, htrj, hwpt, hcur] = plotTransectCurrentMap(var
                 * 10 .^ (floor(log10(diff(lon_lims))) - 1);
   lat_ticks = (-200 : lat_tick_step : 200);
   lon_ticks = (-100 : lon_tick_step : 100);
+  lat_ticks = lat_ticks(lat_lims(1) <= lat_ticks & lat_ticks <= lat_lims(2));
+  lon_ticks = lon_ticks(lon_lims(1) <= lon_ticks & lon_ticks <= lon_lims(2));
   haxs_xticks = ...
     haxs_xlims(1) + (lon_ticks - lon_lims(1)) * diff(haxs_xlims) / diff(lon_lims);
   haxs_yticks = ...
