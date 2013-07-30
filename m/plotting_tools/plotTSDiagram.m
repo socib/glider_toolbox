@@ -158,7 +158,6 @@ function [hfig, haxs, hcts, hlbs, hlns] = plotTSDiagram(varargin)
                                     linspace(trange(1), trange(2), 30));
   dns0_grid = sw_dens0(salt_grid, temp_grid) - 1000;
   set(hcts, 'XData', salt_grid, 'YData', temp_grid, 'ZData', dns0_grid);
-  hlbs = clabel(get(hcts, 'ContourMatrix'), hcts, 'Rotation', 0);
   set(haxs, 'XLim', srange, 'YLim', trange);
   set(haxs, 'NextPlot', haxs_next);
   set(haxs, options.axsprops);
@@ -166,6 +165,8 @@ function [hfig, haxs, hcts, hlbs, hlns] = plotTSDiagram(varargin)
   set(haxsxlb, options.xlabel);
   set(haxsylb, options.ylabel);
   set(hcts, 'LineColor', 0.125 * (get(haxs, 'XColor') + get(haxs, 'YColor')));
+  % Contour labels must be created here after setting axes properties.
+  hlbs = clabel(get(hcts, 'ContourMatrix'), hcts, 'Rotation', 0);
   set(hlbs, 'FontSize', get(haxs, 'FontSize'), 'FontWeight', 'bold');
   set(hlns, ...
       'XData', options.sdata, ...
