@@ -101,6 +101,13 @@ function nc_l0_info = configDTOutputNetCDFL0()
     'units'         'degree_east'  
     '_FillValue'    default_fill_value };
 
+  var_attr_list.m_gps_status = {
+    'long_name'     'GPS status'
+    'standard_name' 'gps_status'
+    'units'         '1'
+    'comments'      '0 = good fix, >0 = no fix'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.c_wpt_lat = {
     'long_name'     'next waypoint latitude'
     'standard_name' 'latitude'
