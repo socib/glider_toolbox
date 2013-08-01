@@ -60,7 +60,7 @@ function slocum_options = configRTSlocumFileOptions()
   error(nargchk(0, 0, nargin, 'struct'));
   
   % Surface log files of any kind.
-  slocum_options.log_name_pattern = '^\w+_(modem|network)_\d{8}T\d{6}\.log$';
+  slocum_options.log_name_pattern = '^\w+_(modem|network|freewave)_\d{8}T\d{6}\.log$';
 
   % All binary files, renamed or not:
   % slocum_options.bin_name_pattern = '^(.*)\.([smdtne]bd)$';
