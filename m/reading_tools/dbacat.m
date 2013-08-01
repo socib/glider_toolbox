@@ -163,12 +163,14 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
     col_indices = sensor_index_list{data_idx};
     data_old = data(row_indices, col_indices);
     data_new = data_list{data_idx};
-    data_nan = isnan(data_new);
-    if ~all(isnan(data_old(data_old(~data_nan)~=data_new(~data_nan))))
+    data_old_nan = isnan(data_old);
+    data_new_nan = isnan(data_new);
+    data_compare = ~(data_old_nan | data_new_nan);
+    if any(data_old(data_compare) ~= data_new(data_compare))
       error('glider_toolbox:dbacat:InconsistentData', 'Inconsistent data.');
     end
-    data_new(data_nan) = data_old(data_nan);
-    data(row_indices, col_indices) = data_new;
+    data_old(data_old_nan) = data_new(data_old_nan);
+    data(row_indices, col_indices) = data_old;
   end
   
   % Perform time filtering if needed.
