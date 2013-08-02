@@ -1,7 +1,10 @@
-function slocum_options = configRTSlocumFileOptions()
+function slocum_options = configRTFileOptionsSlocum()
 %CONFIGRTFILEOPTIONSSLOCUM  Configure download, conversion and loading options for Slocum files in real time.
 %
-%  slocum_options = CONFIGRTFILEOPTIONSSLOCUM() should return a struct with the
+%  Syntax:
+%    SLOCUM_OPTIONS = CONFIGRTFILEOPTIONSSLOCUM()
+%
+%  SLOCUM_OPTIONS = CONFIGRTFILEOPTIONSSLOCUM() should return a struct with the
 %  parameters that control the files to retrieve, how they will be converted,
 %  and which files and data should be used in real time mode. The returned 
 %  struct should have the following fields:

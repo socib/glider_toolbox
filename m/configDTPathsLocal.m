@@ -1,6 +1,9 @@
 function local_paths = configDTPathsLocal()
 %CONFIGDTPATHSLOCAL  Config local paths for glider deployment delayed time data and figures.
 %
+%  Syntax:
+%    LOCAL_PATHS = CONFIGDTPATHSLOCAL()
+%
 %  LOCAL_PATHS = CONFIGDTPATHSLOCAL() should return a struct with the path 
 %  patterns for the deployment files generated during the glider processing
 %  chain in delayed time mode. It should have the following fields:

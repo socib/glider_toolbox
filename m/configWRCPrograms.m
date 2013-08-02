@@ -1,6 +1,9 @@
 function wrc_progs = configWRCPrograms()
 %CONFIGWRCPROGRAMS  Configure path of the Slocum glider programs provided by WRC.
 %
+%  Syntax:
+%    WRC_PROGS = CONFIGWRCPROGRAMS()
+%
 %  WRC_PROGS = CONFIGWRCPROGRAMS() should return a struct with the path to
 %  the executables provided by the Webb Research Company to deal with Slocum
 %  glider data files. It should have the following fields:

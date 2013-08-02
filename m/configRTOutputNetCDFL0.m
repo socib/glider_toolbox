@@ -1,6 +1,9 @@
 function nc_l0_info = configRTOutputNetCDFL0()
 %CONFIGRTOUTPUTNETCDFL0  Configure NetCDF output for raw glider deployment data in real time.
 %
+%  Syntax:
+%    NC_L0_INFO = CONFIGRTOUTPUTNETCDFL0()
+%
 %  NC_L0_INFO = CONFIGRTOUTPUTNETCDFL0() should return a struct describing the
 %  structure of the NetCDF file for raw glider deployment data in real time 
 %  (see the note about the file generation for more details).

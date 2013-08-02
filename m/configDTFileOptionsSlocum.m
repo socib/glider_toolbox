@@ -1,6 +1,9 @@
 function slocum_options = configDTFileOptionsSlocum()
 %CONFIGDTFILEOPTIONSSLOCUM  Configure conversion and loading options for Slocum files in delayed time.
 %
+%  Syntax:
+%    SLOCUM_OPTIONS = CONFIGDTFILEOPTIONSSLOCUM()
+%
 %  SLOCUM_OPTIONS = CONFIGDTFILEOPTIONSSLOCUM() should return a struct with the
 %  parameters that control which are the deployment files, whether they need to
 %  be converted, and which files and data should be used in delayed time mode.

@@ -1,6 +1,9 @@
 function dockservers = configDockservers()
 %CONFIGDOCKSERVERS  Configure dockserver parameters for glider data processing.
 %
+%  Syntax:
+%    DOCKSERVERS = CONFIGDOCKSERVERS()
+%
 %  DOCKSERVERS = CONFIGDOCKSERVERS() should return a struct array with the
 %  access parameters for the dockservers containing Slocum glider data, as
 %  needed by the function GETDOCKSERVERFILES.

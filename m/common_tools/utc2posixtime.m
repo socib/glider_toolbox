@@ -1,6 +1,9 @@
 function s = utc2posixtime(d)
 %UTC2POSIXTIME  Convert serial date number in UTC to POSIX time.
 %
+%  Syntax:
+%    S = UTC2POSIXTIME(D)
+%
 %  S = UTC2POSIXTIME(D) returns the POSIX times S corresponding to the serial 
 %  date numbers in scalar, vector or array D (using the straight forward method).
 %

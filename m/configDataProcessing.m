@@ -1,6 +1,9 @@
 function processing_options = configDataProcessing()
 %CONFIGDATAPROCESSING  Configure glider data processing.
 %
+%  Syntax:
+%    PROCESSING_OPTIONS = CONFIGDATAPROCESSING()
+%
 %  PROCESSING_OPTIONS = CONFIGDATAPROCESSING() should return a struct setting 
 %  the options for glider data processing as needed by the function
 %  PROCESSGLIDERDATA.

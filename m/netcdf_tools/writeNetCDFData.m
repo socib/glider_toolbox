@@ -1,6 +1,10 @@
 function writeNetCDFData(var_data, var_meta, global_meta, filename)
 %WRITENETCDFDATA  Interface to low level functions to write data to a NetCDF file.
 %
+%  Syntax:
+%    WRITENETCDFDATA(VAR_DATA, VAR_META, GLOBAL_META)
+%    WRITENETCDFDATA(VAR_DATA, VAR_META, GLOBAL_META, FILENAME)
+%
 %  WRITENETCDFDATA(VAR_DATA, VAR_META, GLOBAL_META)  creates a NetCDF file 
 %  according to global properties given in struct GLOBAL_META with the variables 
 %  defined by the structs VAR_META and VAR_DATA.

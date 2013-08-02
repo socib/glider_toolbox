@@ -1,6 +1,9 @@
 function nc_l2_info = configRTOutputNetCDFL2()
 %CONFIGRTOUTPUTNETCDFL2  Configure NetCDF output for gridded glider deployment data in real time.
 %
+%  Syntax:
+%    NC_L2_INFO = CONFIGRTOUTPUTNETCDFL2()
+%
 %  NC_L2_INFO = CONFIGRTOUTPUTNETCDFL2() should return a struct describing the
 %  structure of the NetCDF file for gridded glider deployment data in real time
 %  (see the note about the file generation for more details).

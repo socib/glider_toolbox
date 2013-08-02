@@ -1,6 +1,9 @@
 function data = getDBDeploymentInfo(db_access, query, fields)
 %GETDBDEPLOYMENTINFO  Get deployment information from data base.
 %
+%  Syntax:
+%    DATA = GETDBDEPLOYMENTINFO(DB_ACCESS, QUERY, FIELDS)
+%
 %  DATA = GETDBDEPLOYMENTINFO(DB_ACCESS, QUERY, FIELDS) executes the given QUERY
 %  on the data base described in struct DB_ACCESS, and returns a struct DATA
 %  with fields given by string cell array FIELDS mapped to the corresponding 

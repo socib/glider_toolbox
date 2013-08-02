@@ -1,6 +1,9 @@
 function deg = nmea2deg(nmea)
 %NMEA2DEG  Convert NMEA latitude/longitude degrees to decimal degrees.
 %
+%  Syntax:
+%    DEG = NMEA2DEG(NMEA)
+%
 %  DEG = NMEA2DEG(NMEA) Converts the scalar or array NMEA from NMEA
 %  latitude/longitude degrees to decimal degrees applying the transformation:
 %    

@@ -1,6 +1,9 @@
 function [glider_toolbox_dir] = configGliderToolboxPath()
 %CONFIGGLIDERTOOLBOXPATH  Configure path to include the glider toolbox.
 %
+%  Syntax:
+%    GLIDER_TOOLBOX_DIR = CONFIGGLIDERTOOLBOXPATH()
+%
 %  GLIDER_TOOLBOX_DIR = CONFIGGLIDERTOOLBOXPATH() adds the directory
 %  containing this function and all its subdirectories to the workspace
 %  path and returns the full directory path.

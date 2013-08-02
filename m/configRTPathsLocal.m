@@ -1,6 +1,9 @@
 function local_paths = configRTPathsLocal()
 %CONFIGRTPATHSLOCAL  Config local paths for glider deployment real time data and figures.
 %
+%  Syntax:
+%    LOCAL_PATHS = CONFIGRTPATHSLOCAL()
+%
 %  LOCAL_PATHS = CONFIGRTPATHSLOCAL() should return a struct with the path 
 %  patterns for the deployment files generated during the glider processing
 %  chain in real time mode. It should have the following fields:

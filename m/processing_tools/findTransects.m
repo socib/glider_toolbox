@@ -1,6 +1,9 @@
 function transect_index = findTransects(waypoint_latitude, waypoint_longitude)
 %FINDTRANSECTS  Identify transects from waypoint coordinates.
 %
+%  Syntax:
+%    TRANSECT_INDEX = FINDTRANSECTS(WAYPOINT_LATITUDE, WAYPOINT_LONGITUDE)
+%
 %  TRANSECT_INDEX = FINDTRANSECTS(WAYPOINT_LATITUDE, WAYPOINT_LONGITUDE) 
 %  identifies transects (travels from one waypoint to the next one) from 
 %  waypoint coordinates in vectors WAYPOINT_LATITUDE and WAIPONT_LONGITUDE, 
