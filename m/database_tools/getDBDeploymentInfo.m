@@ -22,8 +22,6 @@ function data = getDBDeploymentInfo(db_access, query, fields)
 %    DEPLOYMENT_START: deployment start date (see note on time format).
 %    DEPLOYMENT_END: deployment end date (see note on time format).
 %    GLIDER_NAME: glider platform name (as used in glider file names).
-%    GLIDER_INSTRUMENT_NAME: glider instrument name (e.g. internal unit name).
-%    GLIDER_DEPLOYMENT_NUMBER: number of deployment of this glider.
 %  The returned structure may include other fields, which are considered to be
 %  global deployment attributes by functions generating final products like
 %  GENERATEOUTPUTNETCDFL0, GENERATEOUTPUTNETCDFL1 and GENERATEOUTPUTNETCDFL2.
