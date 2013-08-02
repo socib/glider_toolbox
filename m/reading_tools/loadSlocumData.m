@@ -1,6 +1,11 @@
 function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern_sci, varargin)
 %LOADSLOCUMDATA  Load Slocum data from dba files in directory.
 %
+%  Syntax:
+%    [META, DATA] = LOADSLOCUMDATA(ASCII_DIR, NAME_PATTERN_NAV, NAME_PATTERN_SCI)
+%    [META, DATA] = LOADSLOCUMDATA(ASCII_DIR, NAME_PATTERN_NAV, NAME_PATTERN_SCI, OPTIONS)
+%    [META, DATA] = LOADSLOCUMDATA(ASCII_DIR, NAME_PATTERN_NAV, NAME_PATTERN_SCI, OPT1, VAL1, ...)
+%
 %  [META, DATA] = LOADSLOCUMDATA(ASCII_DIR, NAME_PATTERN_NAV, NAME_PATTERN_SCI)
 %  loads data and from Slocum files in ascii text format (dba) contained in 
 %  directory named by string ASCII_DIR and whose name matches regular expression
@@ -8,24 +13,42 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
 %  (science files). META and DATA contain loaded metadata and data in the format 
 %  returned by functions DBACAT and DBAMERGE.
 %
-%  [META, DATA] = LOADSLOCUMDATA(..., OPT1, VAL1, ...) accepts the following 
-%  options allowing to restrict the time range or the sensor set of the data 
-%  to load, or specify the output format:
-%    'format': a string setting the format of the output DATA. Valid values are:
-%      'array' (default): DATA is a matrix whith sensor readings as columns 
-%         ordered as in the 'sensors' metadata field.
-%      'struct': DATA is a struct with sensor names as field names and column 
-%         vectors of sensor readings as field values.
-%    'timestamp_nav': a string setting the time sensor from navigation data for
-%      merging and sorting sensor cycles. Default value is 'm_present_time'.
-%    'timestamp_sci': a string setting the time sensor from science data for 
-%      merging and sorting sensor cycles. Default value is 'sci_m_present_time'.
-%    'sensors': a string cell array with the names of the sensors of interest.
-%      If given, only sensors present in both the input data sets and this list
-%      will be present in output.
-%    'period': a two element numeric array with the start and end of the time
-%      interval of interest (UTC serial date numbers). If given, only sensor 
+%  [META, DATA] = LOADSLOCUMDATA(ASCII_DIR, NAME_PATTERN_NAV, NAME_PATTERN_SCI, OPTIONS) and
+%  [META, DATA] = LOADSLOCUMDATA(ASCII_DIR, NAME_PATTERN_NAV, NAME_PATTERN_SCI, OPT1, VAL1, ...) 
+%  accept the following options, given in key-value pairs OPT1, VAL1... or in 
+%  struct OPTIONS with field names as option keys and field values as option 
+%  values, allowing to restrict the time range or the sensor set of the data to
+%  load, or to specify the output format:
+%    FORMAT: data output format.
+%      String setting the format of the output DATA. Valid values are:
+%        'array': DATA is a matrix whith sensor readings as columns 
+%           ordered as in the 'sensors' metadata field.
+%        'struct': DATA is a struct with sensor names as field names and column 
+%           vectors of sensor readings as field values.
+%      Default value: 'array'
+%    TIMENAV: navigation data time stamp.
+%      String setting the navigation data time sensor for merging and sorting 
+%      sensor cycles.
+%      Default value: 'm_present_time'
+%    TIMESCI: scientific data time stamp.
+%      String setting the scientific data time sensor for merging and sorting 
+%      sensor cycles.
+%      Default value: 'sci_m_present_time'
+%    SENSORS: sensor filtering list.
+%      String cell array with the names of the sensors of interest. If given,
+%      only sensors present in both the input data sets and this list will be 
+%      present in output. The string 'all' may also be given, in which case 
+%      sensor filtering is not performed and all sensors in input list will be 
+%      present in output.
+%      Default value: 'all' (do not perform sensor filtering).
+%    PERIOD: time filtering boundaries.
+%      Two element numeric array with the start and end of the time interval of 
+%      interest (seconds since 1970-01-01 00:0:00.00 UTC). If given, only sensor
 %      cycles with timestamps within this period will be present in output.
+%      The string 'all' may also be given, in which case time filtering is not
+%      performed and all sensors cycles in input data sets will be present in 
+%      output.
+%      Default value: 'all' (do not perform time filtering).
 %
 %  Notes:
 %    This function is a simple shortcut to load all dba data in a directory
@@ -34,13 +57,13 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
 %    given options (with conversions when needed).
 %
 %  Examples:
-%    [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern_sci)
-%    [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern_sci, ...
-%                                  'timestamp_nav', 'm_present_time', ...
-%                                  'timestamp_sci', 'sci_m_present_time', ...
-%                                  'sensors', sensors_of_interest, ..
-%                                  'period', period_of_interset, ...
-%                                  'format', 'struct');
+%    [meta, data] = ...
+%      loadSlocumData(ascii_dir, name_pattern_nav, name_pattern_sci)
+%    [meta, data] = ...
+%      loadSlocumData(ascii_dir, name_pattern_nav, name_pattern_sci, ...
+%                     'timenav', 'm_present_time', 'timesci', 'sci_m_present_time', ...
+%                     'sensors', sensors_of_interest, 'period', period_of_interset, ...
+%                     'format', 'struct');
 %
 %  See also:
 %    DIR
@@ -71,29 +94,39 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
   error(nargchk(3, 13, nargin, 'struct'));
   
   
-  %% Set option values.
-  timestamp_nav_args = {'timestamp_nav' 'm_present_time'};
-  timestamp_sci_args = {'timestamp_sci' 'sci_m_present_time'};
-  format_args = {};
-  sensor_filtering_args = {};
-  time_filtering_args = {};
-  for opt_idx = 1:2:numel(varargin)
-    opt = varargin{opt_idx};
-    val = varargin{opt_idx+1};
-    switch lower(opt)
-      case 'format'
-        format_args = {opt val};
-      case 'timestamp_nav'
-        timestamp_nav_args = {opt val};
-      case 'timestamp_sci'
-        timestamp_sci_args = {opt val};
-      case 'sensors'
-        sensor_filtering_args = {opt val};
-      case 'period'
-        time_filtering_args = {opt utc2posixtime(val)};
-      otherwise
-        error('glider_toolbox:loadSlocumData:InvalidOption', ...
-              'Invalid option: %s.', opt);
+  %% Set options and default values.
+  options.format = 'array';
+  options.timenav = 'm_present_time';
+  options.timesci = 'sci_m_present_time';
+  options.sensors = 'all';
+  options.period = 'all';
+  
+  
+  %% Parse optional arguments.
+  % Get option key-value pairs in any accepted call signature.
+  argopts = varargin;
+  if isscalar(argopts) && isstruct(argopts{1})
+    % Options passed as a single option struct argument:
+    % field names are option keys and field values are option values.
+    opt_key_list = fieldnames(argopts{1});
+    opt_val_list = struct2cell(argopts{1});
+  elseif mod(numel(argopts), 2) == 0
+    % Options passed as key-value argument pairs.
+    opt_key_list = argopts(1:2:end);
+    opt_val_list = argopts(2:2:end);
+  else
+    error('glider_toolbox:loadSlocumData:InvalidOptions', ...
+          'Invalid optional arguments (neither key-value pairs nor struct).');
+  end
+  % Overwrite default options with values given in extra arguments.
+  for opt_idx = 1:numel(opt_key_list)
+    opt = lower(opt_key_list{opt_idx});
+    val = opt_val_list{opt_idx};
+    if isfield(options, opt)
+      options.(opt) = val;
+    else
+      error('glider_toolbox:loadSlocumData:InvalidOption', ...
+            'Invalid option: %s.', opt);
     end
   end
   
@@ -126,7 +159,7 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
      dba_nav_files{dba_nav_idx} = ...
        fullfile(ascii_dir, dba_nav_names{dba_nav_idx});
      [meta_nav{dba_nav_idx}, data_nav{dba_nav_idx}] = ...
-       dba2mat(dba_nav_files{dba_nav_idx}, sensor_filtering_args{:});
+       dba2mat(dba_nav_files{dba_nav_idx}, 'sensors', options.sensors);
      dba_nav_success(dba_nav_idx) = true;
     catch exception
       disp(['Error loading ascii file ' dba_nav_files{dba_nav_idx} ':']);
@@ -150,7 +183,7 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
      dba_sci_files{dba_sci_idx} = ...
        fullfile(ascii_dir, dba_sci_names{dba_sci_idx});
      [meta_sci{dba_sci_idx}, data_sci{dba_sci_idx}] = ...
-       dba2mat(dba_sci_files{dba_sci_idx}, sensor_filtering_args{:});
+       dba2mat(dba_sci_files{dba_sci_idx}, 'sensors', options.sensors);
      dba_sci_success(dba_sci_idx) = true;
     catch exception
       disp(['Error loading ascii file ' dba_sci_files{dba_sci_idx} ':']);
@@ -164,15 +197,14 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
 
 
   %% Combine data from each bay.
-  [meta_nav, data_nav] = ...
-    dbacat(meta_nav, data_nav, timestamp_nav_args{2});
-  [meta_sci, data_sci] = ...
-    dbacat(meta_sci, data_sci, timestamp_sci_args{2});
+  [meta_nav, data_nav] = dbacat(meta_nav, data_nav, options.timenav);
+  [meta_sci, data_sci] = dbacat(meta_sci, data_sci, options.timesci);
   
   
   %% Merge data from both bays.
   [meta, data] = ...
     dbamerge(meta_nav, data_nav, meta_sci, data_sci, ...
-             format_args{:}, sensor_filtering_args{:}, time_filtering_args{:});
+             'sensors', options.sensors, 'period', options.period, ...
+             'format', options.format);
 
 end

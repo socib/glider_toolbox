@@ -1,6 +1,11 @@
 function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargin)
 %DBAMERGE  Merge data from combined navigation and science data sets into a single data set.
 %
+%  Syntax:
+%    [META, DATA] = DBAMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI)
+%    [META, DATA] = DBAMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI, OPTIONS)
+%    [META, DATA] = DBAMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI, OPT1, VAL1, ...) 
+%
 %  [META, DATA] = DBAMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI) merges the
 %  navigation and science data sets described by metadata structs META_NAV and
 %  META_SCI, and data arrays DATA_NAV and DATA_SCI into a single data set
@@ -9,23 +14,41 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
 %  returned by the function DBACAT. Sensor cycles from both data sets are merged
 %  based on the order of the respective timestamps. See note on merging process.
 %
-%  [META, DATA] = DBAMERGE(..., OPT1, VAL1, ...) accepts the following options:
-%    'format': a string setting the format of the output DATA. Valid values are:
-%      'array' (default): DATA is a matrix whith sensor readings as columns 
-%         ordered as in the 'sensors' metadata field.
-%      'struct': DATA is a struct with sensor names as field names and column 
-%         vectors of sensor readings as field values.
-%    'timestamp_nav': a string setting the time sensor from navigation data for
-%      merging and sorting sensor cycles. Default value is 'm_present_time'.
-%    'timestamp_sci': a string setting the time sensor from science data for 
-%      merging and sorting sensor cycles. Default value is 'sci_m_present_time'.
-%    'sensors': a string cell array with the names of the sensors of interest.
-%      If given, only sensors present in both the input data sets and this list
-%      will be present in output.
-%    'period': a two element numeric array with the start and end of the time
-%      interval of interest (seconds since 1970-01-01 00:0:00.00 UTC).
-%      If given, only sensor cycles with timestamps within this period will be
+%  [META, DATA] = DBAMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI, OPTIONS) and
+%  [META, DATA] = DBAMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI, OPT1, VAL1, ...) 
+%  accept the following options given in key-value pairs OPT1, VAL1... or in 
+%  struct OPTIONS with field names as option keys and field values as option 
+%  values:
+%    FORMAT: data output format.
+%      String setting the format of the output DATA. Valid values are:
+%        'array': DATA is a matrix whith sensor readings as columns 
+%           ordered as in the 'sensors' metadata field.
+%        'struct': DATA is a struct with sensor names as field names and column 
+%           vectors of sensor readings as field values.
+%      Default value: 'array'
+%    TIMENAV: navigation data time stamp.
+%      String setting the navigation data time sensor for merging and sorting 
+%      sensor cycles.
+%      Default value: 'm_present_time'
+%    TIMESCI: scientific data time stamp.
+%      String setting the scientific data time sensor for merging and sorting 
+%      sensor cycles.
+%      Default value: 'sci_m_present_time'
+%    SENSORS: sensor filtering list.
+%      String cell array with the names of the sensors of interest. If given,
+%      only sensors present in both the input data sets and this list will be 
+%      present in output. The string 'all' may also be given, in which case 
+%      sensor filtering is not performed and all sensors in input list will be 
 %      present in output.
+%      Default value: 'all' (do not perform sensor filtering).
+%    PERIOD: time filtering boundaries.
+%      Two element numeric array with the start and end of the time interval of 
+%      interest (seconds since 1970-01-01 00:0:00.00 UTC). If given, only sensor
+%      cycles with timestamps within this period will be present in output.
+%      The string 'all' may also be given, in which case time filtering is not
+%      performed and all sensors cycles in input data sets will be present in 
+%      output.
+%      Default value: 'all' (do not perform time filtering).
 %
 %  Notes:
 %    This function should be used to merge data from navigation and science data
@@ -52,7 +75,7 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
 %      http://marine.rutgers.edu/~kerfoot/slocum/data/readme/wrc_doco/dbd_file_format.txt
 %
 %  Examples:
-%    [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargin)
+%    [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci)
 %
 %  See also:
 %    XBD2DBA
@@ -80,37 +103,61 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
 
   error(nargchk(4, 14, nargin, 'struct'));
   
-  % Set option values.
-  output_format = 'array';
-  timestamp_nav = 'm_present_time';
-  timestamp_sci = 'sci_m_present_time';
-  sensor_filtering = false;
-  sensor_list = [];
-  time_filtering = false;
-  time_range = [];
-  for opt_idx = 1:2:numel(varargin)
-    opt = varargin{opt_idx};
-    val = varargin{opt_idx+1};
-    switch lower(opt)
-      case 'format'
-        output_format = val;
-      case 'timestamp_nav'
-        timestamp_nav = val;
-      case 'timestamp_sci'
-        timestamp_sci = val;
-      case 'sensors'
-        sensor_filtering = true;
-        sensor_list = val;
-      case 'period'
-        time_filtering = true;
-        time_range = val;
-      otherwise
-        error('glider_toolbox:dbamerge:InvalidOption', ...
-              'Invalid option: %s.', opt);
+  
+  %% Set options and default values.
+  options.format = 'array';
+  options.timenav = 'm_present_time';
+  options.timesci = 'sci_m_present_time';
+  options.sensors = 'all';
+  options.period = 'all';
+  
+  
+  %% Parse optional arguments.
+  % Get option key-value pairs in any accepted call signature.
+  argopts = varargin;
+  if isscalar(argopts) && isstruct(argopts{1})
+    % Options passed as a single option struct argument:
+    % field names are option keys and field values are option values.
+    opt_key_list = fieldnames(argopts{1});
+    opt_val_list = struct2cell(argopts{1});
+  elseif mod(numel(argopts), 2) == 0
+    % Options passed as key-value argument pairs.
+    opt_key_list = argopts(1:2:end);
+    opt_val_list = argopts(2:2:end);
+  else
+    error('glider_toolbox:dbamerge:InvalidOptions', ...
+          'Invalid optional arguments (neither key-value pairs nor struct).');
+  end
+  % Overwrite default options with values given in extra arguments.
+  for opt_idx = 1:numel(opt_key_list)
+    opt = lower(opt_key_list{opt_idx});
+    val = opt_val_list{opt_idx};
+    if isfield(options, opt)
+      options.(opt) = val;
+    else
+      error('glider_toolbox:dbamerge:InvalidOption', ...
+            'Invalid option: %s.', opt);
     end
   end
 
-  % Merge data and metadata checking for empty input cases.
+  
+  %% Set option flags and values.
+  output_format = options.format;
+  timestamp_nav = options.timenav;
+  timestamp_sci = options.timesci;
+  sensor_filtering = true;
+  sensor_list = options.sensors;
+  time_filtering = true;
+  time_range = options.period;
+  if ischar(options.sensors) && strcmp(options.sensors, 'all')
+    sensor_filtering = false;
+  end
+  if ischar(options.period) && strcmp(options.period, 'all')
+    time_filtering = false;
+  end
+  
+  
+  %% Merge data and metadata checking for empty input cases.
   if isempty(meta_sci.sources)
     % Only navigation data.
     meta = meta_nav;
@@ -190,7 +237,8 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
     timestamp_merged = timestamp_nav; % Unique timestamp to be used for time filtering.
   end
   
-  % Perform sensor filtering if needed.
+  
+  %% Perform sensor filtering if needed.
   if sensor_filtering
     [sensor_select, ~] = ismember(meta.sensors, sensor_list);
     meta.sensors = meta.sensors(sensor_select);
@@ -199,7 +247,8 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
     data = data(:,sensor_select);
   end
   
-  % Perform time filtering if needed.
+  
+  %% Perform time filtering if needed.
   if time_filtering
     [ts_merged_present, ts_merged_col] = ...
       ismember(timestamp_merged, meta.sensors);
@@ -213,7 +262,8 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
     data = data(ts_select,:);
   end
   
-  % Convert output data to struct format if needed.
+  
+  %% Convert output data to struct format if needed.
   switch output_format
     case 'array'
     case 'struct'

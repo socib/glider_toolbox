@@ -1,6 +1,11 @@
 function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 %DBACAT  Combine data from several dba data sets into a single data set.
 %
+%  Syntax:
+%    [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP)
+%    [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP, OPTIONS)
+%    [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP, OPT1, VAL1, ...)
+%
 %  [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP) combines data from 
 %  arrays in cell array DATA_LIST and metadata from structs in cell array 
 %  META_LIST into a single data set with data in array DATA and metadata in 
@@ -26,19 +31,33 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 %  the sensor columns if needed, and sorting the resulting rows according to a 
 %  timestamp from sensor named by string TIMESTAMP.
 %
-%  [META, DATA] = DBACAT(..., OPT1, VAL1, ...) accepts the following options:
-%    'format': a string setting the format of the output DATA. Valid values are:
-%      'array' (default): DATA is a matrix whith sensor readings as columns 
-%         ordered as in the 'sensors' metadata field.
-%      'struct': DATA is a struct with sensor names as field names and column 
-%         vectors of sensor readings as field values.
-%    'sensors': a string cell array with the names of the sensors of interest.
-%      If given, only sensors present in both the input data sets and this list
-%      will be present in output.
-%    'period': a two element numeric array with the start and end of the time
-%      interval of interest (seconds since 1970-01-01 00:0:00.00 UTC).
-%      If given, only sensor cycles with timestamps within this period will be
+%  [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP, OPTIONS) and 
+%  [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP, OPT1, VAL1, ...) 
+%  accept the following options given in key-value pairs OPT1, VAL1... or in 
+%  struct OPTIONS with field names as option keys and field values as option 
+%  values:
+%    FORMAT: data output format.
+%      String setting the format of the output DATA. Valid values are:
+%        'array': DATA is a matrix whith sensor readings as columns 
+%           ordered as in the 'sensors' metadata field.
+%        'struct': DATA is a struct with sensor names as field names and column 
+%           vectors of sensor readings as field values.
+%      Default value: 'array'
+%    SENSORS: sensor filtering list.
+%      String cell array with the names of the sensors of interest. If given,
+%      only sensors present in both the input data sets and this list will be 
+%      present in output. The string 'all' may also be given, in which case 
+%      sensor filtering is not performed and all sensors in input list will be 
 %      present in output.
+%      Default value: 'all' (do not perform sensor filtering).
+%    PERIOD: time filtering boundaries.
+%      Two element numeric array with the start and end of the time interval of 
+%      interest (seconds since 1970-01-01 00:0:00.00 UTC). If given, only sensor
+%      cycles with timestamps within this period will be present in output.
+%      The string 'all' may also be given, in which case time filtering is not
+%      performed and all sensors cycles in input data sets will be present in 
+%      output.
+%      Default value: 'all' (do not perform time filtering).
 %
 %  Notes:
 %    This function should be used to combine data from several navigation files,
@@ -89,31 +108,57 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 
   error(nargchk(3, 9, nargin, 'struct'));
   
-  % Set option values.
-  output_format = 'array';
-  sensor_filtering = false;
-  sensor_list = [];
-  time_filtering = false;
-  time_range = [];
-  for opt_idx = 1:2:numel(varargin)
-    opt = varargin{opt_idx};
-    val = varargin{opt_idx+1};
-    switch lower(opt)
-      case 'format'
-        output_format = val;
-      case 'sensors'
-        sensor_filtering = true;
-        sensor_list = val;
-      case 'period'
-        time_filtering = true;
-        time_range = val;
-      otherwise
-        error('glider_toolbox:dbacat:InvalidOption', ...
-              'Invalid option: %s.', opt);
+  
+  %% Set options and default values.
+  options.format = 'array';
+  options.sensors = 'all';
+  options.period = 'all';
+
+
+  %% Parse optional arguments.
+  % Get option key-value pairs in any accepted call signature.
+  argopts = varargin;
+  if isscalar(argopts) && isstruct(argopts{1})
+    % Options passed as a single option struct argument:
+    % field names are option keys and field values are option values.
+    opt_key_list = fieldnames(argopts{1});
+    opt_val_list = struct2cell(argopts{1});
+  elseif mod(numel(argopts), 2) == 0
+    % Options passed as key-value argument pairs.
+    opt_key_list = argopts(1:2:end);
+    opt_val_list = argopts(2:2:end);
+  else
+    error('glider_toolbox:dbacat:InvalidOptions', ...
+          'Invalid optional arguments (neither key-value pairs nor struct).');
+  end
+  % Overwrite default options with values given in extra arguments.
+  for opt_idx = 1:numel(opt_key_list)
+    opt = lower(opt_key_list{opt_idx});
+    val = opt_val_list{opt_idx};
+    if isfield(options, opt)
+      options.(opt) = val;
+    else
+      error('glider_toolbox:dbacat:InvalidOption', ...
+            'Invalid option: %s.', opt);
     end
   end
+
   
-  % Check for trivial empty input.
+  %% Set option flags and values.
+  output_format = options.format;
+  sensor_filtering = true;
+  sensor_list = options.sensors;
+  time_filtering = true;
+  time_range = options.period;
+  if ischar(options.sensors) && strcmp(options.sensors, 'all')
+    sensor_filtering = false;
+  end
+  if ischar(options.period) && strcmp(options.period, 'all')
+    time_filtering = false;
+  end
+  
+  
+  %% Check for trivial empty input.
   if isempty(meta_list)
     meta_struct = struct();
     meta_struct.sources = {};
@@ -131,7 +176,8 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
     meta_struct = [meta_list{:}];
   end
   
-  % Cat metadata.
+  
+  %% Cat metadata.
   all_sources = vertcat(meta_struct.sources);
   all_headers = vertcat(meta_struct.headers);
   all_sensors = vertcat(meta_struct.sensors);
@@ -145,7 +191,8 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
   meta.units   = all_units(sensors_idx);
   meta.bytes   = all_bytes(sensors_idx);
   
-  % Cat data.
+  
+  %% Cat data.
   [~, sensor_index_list] = cellfun(@(m) ismember(m.sensors, sensors_list), ...
                                    meta_list, 'UniformOutput', false);
   ts_list = cellfun(@(d,m) d(:,strcmp(timestamp, m.sensors)), ...
@@ -173,13 +220,15 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
     data(row_indices, col_indices) = data_old;
   end
   
-  % Perform time filtering if needed.
+  
+  %% Perform time filtering if needed.
   if time_filtering
     ts_select = ~(ts_unique < time_range(1) | ts_unique > time_range(2));
     data = data(ts_select,:);
   end
   
-  % Perform sensor filtering if needed.
+  
+  %% Perform sensor filtering if needed.
   if sensor_filtering
     [sensor_select, ~] = ismember(meta.sensors, sensor_list);
     meta.sensors = meta.sensors(sensor_select);
@@ -188,7 +237,8 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
     data = data(:,sensor_select);
   end
   
-  % Convert output data to struct format if needed.
+  
+  %% Convert output data to struct format if needed.
   switch output_format
     case 'array'
     case 'struct'
