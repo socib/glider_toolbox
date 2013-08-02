@@ -17,7 +17,7 @@ function local_paths = configDTPathsLocal()
 %      (already processed data interpolated on vertical instantaneous profiles).
 %    PROCESSING_LOG: path pattern of the processing log file.
 %  These path patterns are converted to true paths through the function
-%  STRFGLIDER.
+%  STRFSTRUCT.
 %
 %  Notes:
 %    Edit this file filling in the paths to reflect your desired file layout.
@@ -27,7 +27,7 @@ function local_paths = configDTPathsLocal()
 %
 %  See also:
 %    MAIN_GLIDER_DATA_PROCESSING_DT
-%    STRFGLIDER
+%    STRFSTRUCT
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat

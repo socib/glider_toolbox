@@ -111,7 +111,7 @@
 %    GENERATEOUTPUTNETCDFL2
 %    GENERATEFIGURES
 %    DIARY
-%    STRFGLIDER
+%    STRFSTRUCT
 %    XBD2DBA
 %    WRITEJSON
 %
@@ -197,15 +197,15 @@ for deployment_idx = 1:numel(deployment_list)
   deployment_start = deployment.deployment_start;
   deployment_end = deployment.deployment_end;
   glider_name = deployment.glider_name;
-  processing_log = strfglider(config.paths_local.processing_log, deployment);
-  binary_dir = strfglider(config.paths_local.binary_path, deployment);
-  cache_dir = strfglider(config.paths_local.cache_path, deployment);
-  log_dir = strfglider(config.paths_local.log_path, deployment);
-  ascii_dir = strfglider(config.paths_local.ascii_path, deployment);
-  figure_dir = strfglider(config.paths_local.figure_path, deployment);
-  netcdf_l0_file = strfglider(config.paths_local.netcdf_l0, deployment);
-  netcdf_l1_file = strfglider(config.paths_local.netcdf_l1, deployment);
-  netcdf_l2_file = strfglider(config.paths_local.netcdf_l2, deployment);
+  processing_log = strfstruct(config.paths_local.processing_log, deployment);
+  binary_dir = strfstruct(config.paths_local.binary_path, deployment);
+  cache_dir = strfstruct(config.paths_local.cache_path, deployment);
+  log_dir = strfstruct(config.paths_local.log_path, deployment);
+  ascii_dir = strfstruct(config.paths_local.ascii_path, deployment);
+  figure_dir = strfstruct(config.paths_local.figure_path, deployment);
+  netcdf_l0_file = strfstruct(config.paths_local.netcdf_l0, deployment);
+  netcdf_l1_file = strfstruct(config.paths_local.netcdf_l1, deployment);
+  netcdf_l2_file = strfstruct(config.paths_local.netcdf_l2, deployment);
   meta_raw = [];
   data_raw = [];
   data_preprocessed = [];
@@ -472,7 +472,7 @@ for deployment_idx = 1:numel(deployment_list)
            && ~isempty(config.paths_public.(output_name))
         output_local_file = outputs.(output_name);
         output_public_file = ...
-          strfglider(config.paths_public.(output_name), deployment);
+          strfstruct(config.paths_public.(output_name), deployment);
         output_public_dir = fileparts(output_public_file);
         [status, attrout] = fileattrib(output_public_dir);
         if ~status
@@ -509,9 +509,9 @@ for deployment_idx = 1:numel(deployment_list)
       && ~isempty(config.paths_public.figure_dir)
     disp('Copying public figures...');
     public_figure_baseurl = ...
-      strfglider(config.paths_public.figure_url, deployment);
+      strfstruct(config.paths_public.figure_url, deployment);
     public_figure_dir = ...
-      strfglider(config.paths_public.figure_dir, deployment);
+      strfstruct(config.paths_public.figure_dir, deployment);
     public_figure_include_all = true;
     public_figure_exclude_none = true;
     public_figure_include_list = [];
@@ -587,7 +587,7 @@ for deployment_idx = 1:numel(deployment_list)
         && ~isempty(config.paths_public.figure_info)
       disp('Generating figure information service file...');
       public_figure_info_file = ...
-        strfglider(config.paths_public.figure_info, deployment);
+        strfstruct(config.paths_public.figure_info, deployment);
       try
         writeJSON(public_figures, public_figure_info_file);
         disp(['Figure information service file successfully generated: ' ...

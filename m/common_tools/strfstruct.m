@@ -1,40 +1,47 @@
-function str = strfglider(pattern, deployment)
-%STRFGLIDER  Replace deployment field specifiers in pattern with deployment field values.
+function str = strfstruct(pattern, repstruct)
+%STRFSTRUCT  Replace structure field specifiers in pattern with structure field values.
 %
-%  STR = STRFGLIDER(PATTERN, DEPLOYMENT) replaces deployment field specifiers in
-%  string PATTERN with the corresponding field values in struct DEPLOYMENT.
-%  Recognized field specifier keys match the fields in the deployment structure.
-%  They are deployment field names in capital letters enclosed in curly braces 
-%  and prefixed with a dollar sign. Specifiers may also include a comma 
-%  separatated list of modifiers, separated from the specifier key by a comma. 
+%  Syntax:
+%    STR = STRFSTRUCT(PATTERN, REPSTRUCT)
+%
+%  STR = STRFSTRUCT(PATTERN, REPSTRUCT) replaces structure field specifiers in
+%  string PATTERN with the corresponding field values in struct REPSTRUCT.
+%  Recognized field specifier keys match the fields in structure REPSTRUCT.
+%  They are names of fields of REPSTRUCT in capital letters, enclosed in curly 
+%  braces and prefixed with a dollar sign. Specifiers may also include a comma 
+%  separated list of modifiers, separated from the specifier key by a comma. 
 %  These modifiers are intended to allow transformations affecting the format 
 %  of the replacement value. These transformations are applied sequentially as 
 %  they appear in the specifier, from left to right. Each transformation is 
-%  applied to the output of the previous one, starting from value of the 
-%  deployment field matching the specifier key, or the empty string if there is
-%  no such field. Finally, if the resulting replacement value is a numeric
+%  applied to the output of the previous one, starting from the value of the 
+%  field of REPSTRUCT matching the specifier key, or the empty string if there 
+%  is no such field. Finally, if the resulting replacement value is a numeric
 %  value, it is converted to string by function NUM2STRING before applying the
 %  replacement. Recognized modifiers are:
 %    %...: string conversion with desired format using SPRINTF.
 %      The current replacement value is passed to function SPRINTF using the
 %      modifier value as format string.
 %      Example:
-%        '${DEPLOYMENT_ID,%04d}' with DEPLOYMENT_ID=2 is replaced by 0002.
+%        '${DEPLOYMENT_ID,%04d}' with REPSTRUCT.DEPLOYMENT_ID=2 
+%         is replaced by 0002.
 %    ^: upper case conversion.
 %      The current replacement value is converted to upper case by passing it to
 %      function UPPER.
 %      Example:
-%        '${GLIDER_NAME,^}' with GLIDER_NAME='deepy' is replaced by 'DEEPY'.
+%        '${GLIDER_NAME,^}' with REPSTRUCT.GLIDER_NAME='deepy' 
+%         is replaced by 'DEEPY'.
 %    v: lower case conversion.
 %      The current replacement value is converted to lower case by passing it to
 %      function LOWER.
 %      Example:
-%        '${GLIDER_NAME,^}' with GLIDER_NAME='DEEPY' is replaced by 'deepy'.
+%        '${GLIDER_NAME,^}' with REPSTRUCT.GLIDER_NAME='DEEPY' 
+%        is replaced by 'deepy'.
 %    T...: time string representation.
 %      The current replacement value is passed to function DATESTR using the
 %      the modifier value as format string with leading T removed.
 %      Example:
-%        ${DEPLOYMENT_END,Tyyyymmmdd} with DEPLOYMENT_END=datestr([2001 01 17]) 
+%        ${DEPLOYMENT_END,Tyyyymmmdd} 
+%        with REPSTRUCT.DEPLOYMENT_END=datenum([2001 01 17 0 0 0]) 
 %        is replaced by '2001Jan17'.
 %    s/.../...: regular expression replacement.
 %      The current replacement value is passed to function REGEXPREP to replace
@@ -48,9 +55,9 @@ function str = strfglider(pattern, deployment)
 %      the null string, the second delimiter is optional, and subexpressions in
 %      the current replacement value matching the pattern are deleted.
 %      Example:
-%        ${GLIDER_NAME,s/(-|\s*)/_} with 
-%        GLIDER_NAME='complex-compound  glider name' is replaced by 
-%        'complex_compound_glider_name'.
+%        ${GLIDER_NAME,s/(-|\s*)/_}
+%        with REPSTRUCT.GLIDER_NAME='complex-compound  glider name'
+%        is replaced by 'complex_compound_glider_name'.
 %    
 %  Notes:
 %    This function is inspired by the C function STRFTIME, the shell 
@@ -64,15 +71,15 @@ function str = strfglider(pattern, deployment)
 %    deployment.deployment_start = datenum([2000 1 1 0 0 0]);
 %    deployment.deployment_end =  datenum([2001 1 1 0 0 0]);
 %    pattern = '/base/path/${GLIDER_NAME}/${DEPLOYMENT_NAME}'
-%    str = strfglider(pattern, deployment)
+%    str = strfstruct(pattern, deployment)
 %    nums_pattern = '/base/path/${GLIDER_NAME}/${DEPLOYMENT_ID,%04d}'
-%    nums_str = strfglider(nums_pattern, deployment)
+%    nums_str = strfstruct(nums_pattern, deployment)
 %    case_pattern = '/base/path/${GLIDER_NAME,^}/${DEPLOYMENT_NAME}'
-%    case_str = strfglider(case_pattern, deployment)
+%    case_str = strfstruct(case_pattern, deployment)
 %    date_pattern = '/base/path/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyy-mm-dd}'
-%    date_str = strfglider(date_pattern, deployment)
+%    date_str = strfstruct(date_pattern, deployment)
 %    subs_pattern = '/base/path/${GLIDER_NAME}/${DEPLOYMENT_NAME,s/funny/boring}'
-%    subs_str = strfglider(subs_pattern, deployment)
+%    subs_str = strfstruct(subs_pattern, deployment)
 %
 %  See also:
 %    SPRINTF
@@ -102,16 +109,16 @@ function str = strfglider(pattern, deployment)
 
   error(nargchk(2, 2, nargin, 'struct'));
 
-  repflds = fieldnames(deployment);
-  repvals = struct2cell(deployment);
+  repflds = fieldnames(repstruct);
+  repvals = struct2cell(repstruct);
   repkeys = upper(repflds);
   specprefix = '${';
   specsuffix = '}';
   specinchar = ',';
-  expression = [regexptranslate('escape', specprefix) ...
+  specregexp = [regexptranslate('escape', specprefix) ...
                 '.*?' ...
                 regexptranslate('escape', specsuffix)];
-  match_list = unique(regexp(pattern, expression, 'match'));
+  match_list = unique(regexp(pattern, specregexp, 'match'));
   str = pattern;
   for match_idx = 1:numel(match_list)
     match = match_list{match_idx};
@@ -155,5 +162,4 @@ function str = strfglider(pattern, deployment)
   end
   
 end
-
  

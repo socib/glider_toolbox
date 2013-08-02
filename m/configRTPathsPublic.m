@@ -22,7 +22,7 @@ function public_paths = configRTPathsPublic()
 %    NETCDF_L2: path pattern of the public NetCDF file for gridded data
 %      (already processed data interpolated on vertical instantaneous profiles).
 %  These path patterns are converted to true paths through the function
-%  STRFGLIDER.
+%  STRFSTRUCT.
 %
 %  Notes:
 %    Edit this file filling in the paths to reflect your desired file layout.
@@ -33,7 +33,7 @@ function public_paths = configRTPathsPublic()
 %  See also:
 %    MAIN_GLIDER_DATA_PROCESSING_RT
 %    CONFIGRTPATHSLOCAL
-%    STRFGLIDER
+%    STRFSTRUCT
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
