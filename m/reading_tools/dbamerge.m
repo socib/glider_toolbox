@@ -158,7 +158,16 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
   
   
   %% Merge data and metadata checking for empty input cases.
-  if isempty(meta_sci.sources)
+  if isempty(meta_sci.sources) && isempty(meta_nav.sources)
+    % No input data.
+    % Both META_NAV and DATA_NAV, and META_SCI and DATA_SCI
+    % are equal to the trivial output of DBACAT.
+    % Disable filtering.
+    meta = meta_nav; 
+    data = data_nav;
+    sensor_filtering = false;
+    time_filtering = false;
+  elseif isempty(meta_sci.sources)
     % Only navigation data.
     meta = meta_nav;
     data = data_nav;
