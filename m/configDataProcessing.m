@@ -90,6 +90,19 @@ function processing_options = configDataProcessing()
   processing_options.profile_min_range = 10;
   processing_options.profile_max_gap_ratio = 0.8;
   
+  processing_options.flow_ctd_list(1).time  = 'time_ctd';
+  processing_options.flow_ctd_list(1).depth = 'depth_ctd';
+  processing_options.flow_ctd_list(1).pitch = 'pitch';
+  processing_options.flow_ctd_list(2).time  = 'time';
+  processing_options.flow_ctd_list(2).depth = 'depth_ctd';
+  processing_options.flow_ctd_list(2).pitch = 'pitch';
+  processing_options.flow_ctd_list(3).time  = 'time';
+  processing_options.flow_ctd_list(3).depth = 'depth';
+  processing_options.flow_ctd_list(3).pitch = 'pitch';
+  processing_options.flow_ctd_pitch_value = [];
+  processing_options.flow_ctd_min_pitch = deg2rad(11);
+  processing_options.flow_ctd_min_velocity = 0;
+  
   processing_options.sensor_lag_list = ...
      struct('corrected', {}, 'original', {}, 'parameters', {});
   
@@ -98,6 +111,7 @@ function processing_options = configDataProcessing()
   processing_options.thermal_lag_list(1).conductivity_original  = 'conductivity';
   processing_options.thermal_lag_list(1).temperature_original   = 'temperature';
   processing_options.thermal_lag_list(1).pressure_original      = 'pressure';
+  processing_options.thermal_lag_list(1).constant_flow          = false;
   processing_options.thermal_lag_list(1).parameters             = 'auto';
 
   processing_options.salinity_list(1).salinity     = 'salinity';

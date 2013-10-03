@@ -63,7 +63,7 @@ function slocum_options = configDTFileOptionsSlocum()
   
   % Enable binary file conversion to text format.
   % Disable it when reprocessing deployments with no new binary data.
-  slocum_options.format_conversion = false;
+  slocum_options.format_conversion = true;
   
   % All binary files, renamed or not:
   % slocum_options.bin_name_pattern = '^(.*)\.([smdtne]bd)$';
@@ -95,7 +95,9 @@ function slocum_options = configDTFileOptionsSlocum()
     'm_gps_status'
     'c_wpt_lat'
     'c_wpt_lon'
+    'm_roll'
     'm_pitch'
+    'm_heading'
     'm_depth'
     'm_final_water_vx'
     'm_final_water_vy'

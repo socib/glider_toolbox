@@ -55,8 +55,6 @@ function [sql_query, deployment_fields] = configDTDeploymentInfoQuery()
     'deployment_start'         'deployment_initial_date'
     'deployment_end'           'deployment_end_date'
     'glider_name'              'platform_name'
-    'glider_instrument_name'   'instrument_name'
-    'glider_deployment_code'   'deployment_code'
   };
 
   deployment_fields = fields_map(:,1)';
