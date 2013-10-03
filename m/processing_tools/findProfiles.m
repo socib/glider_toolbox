@@ -3,6 +3,7 @@ function [profile_direction, profile_index] = findProfiles(depth, varargin)
 %
 %  Syntax:
 %    [PROFILE_DIRECTION, PROFILE_INDEX] = FINDPROFILES(DEPTH)
+%    [PROFILE_DIRECTION, PROFILE_INDEX] = FINDPROFILES(DEPTH, OPTIONS)
 %    [PROFILE_DIRECTION, PROFILE_INDEX] = FINDPROFILES(DEPTH, OPT1, VAL1)
 %
 %  [PROFILE_DIRECTION, PROFILE_INDEX] = FINDPROFILES(DEPTH) identifies upcast
@@ -15,8 +16,10 @@ function [profile_direction, profile_index] = findProfiles(depth, varargin)
 %  number, starting from 1 and increased by 1 every time a new cast is 
 %  identified, while samples between profiles are flagged with an offset of 0.5.
 %
-%  [PROFILE_DIRECTION, PROFILE_INDEX] = FINDPROFILES(DEPTH, OPT1, VAL1) accepts
-%  the following options in key-value pairs:
+%  [PROFILE_DIRECTION, PROFILE_INDEX] = FINDPROFILES(DEPTH, OPTIONS) and
+%  [PROFILE_DIRECTION, PROFILE_INDEX] = FINDPROFILES(DEPTH, OPT1, VAL1) accept
+%  the following options given in key-value pairs OPT1, VAL1... or in a struct 
+%  OPTIONS with field names as option keys and field values as option values:
 %    RANGE: minimum depth range (in the same units as DEPTH).
 %      Only monotonic intervals of depth spanning a range greater or equal than
 %      the given value are considered valid profiles.
@@ -67,19 +70,41 @@ function [profile_direction, profile_index] = findProfiles(depth, varargin)
 
   error(nargchk(1, 3, nargin, 'struct'));
 
-  min_range = 0;
-  for opt_idx = 1:2:numel(varargin)
-    opt = varargin{opt_idx};
-    val = varargin{opt_idx+1};
-    switch lower(opt)
-      case 'range'
-        min_range = val;
-      otherwise
-        error('glider_toolbox:findProfiles:InvalidOption', ...
-              'Invalid option: %s.', opt);
+  
+  %% Set options and default values.
+  options.range = 0;
+
+  
+  %% Parse optional arguments.
+  % Get option key-value pairs in any accepted call signature.
+  argopts = varargin;
+  if isscalar(argopts) && isstruct(argopts{1})
+    % Options passed as a single option struct argument:
+    % field names are option keys and field values are option values.
+    opt_key_list = fieldnames(argopts{1});
+    opt_val_list = struct2cell(argopts{1});
+  elseif mod(numel(argopts), 2) == 0
+    % Options passed as key-value argument pairs.
+    opt_key_list = argopts(1:2:end);
+    opt_val_list = argopts(2:2:end);
+  else
+    error('glider_toolbox:findProfiles:InvalidOptions', ...
+          'Invalid optional arguments (neither key-value pairs nor struct).');
+  end
+  % Overwrite default options with values given in extra arguments.
+  for opt_idx = 1:numel(opt_key_list)
+    opt = lower(opt_key_list{opt_idx});
+    val = opt_val_list{opt_idx};
+    if isfield(options, opt)
+      options.(opt) = val;
+    else
+      error('glider_toolbox:findProfiles:InvalidOption', ...
+            'Invalid option: %s.', opt);
     end
   end
+
   
+  %% Identify the profiles.
   profile_direction = nan(size(depth));
   profile_index = nan(size(depth));
   depth_valid_ind = find(~isnan(depth));
@@ -91,7 +116,7 @@ function [profile_direction, profile_index] = findProfiles(depth, varargin)
     sdy = sdy_flat(sdy_ind);
     sdy_peak = [false; (sdy(1:(end-1)).*sdy(2:end) < 0)];
     depth_peak_ind = depth_valid_ind([1; sdy_ind(sdy_peak); end]);
-    cast_found = (abs(diff(depth(depth_peak_ind))) >= min_range);
+    cast_found = (abs(diff(depth(depth_peak_ind))) >= options.range);
     cast_head = zeros(size(depth));
     cast_tail = zeros(size(depth));
     cast_head(depth_peak_ind([cast_found(:); false])+1) = 0.5;
