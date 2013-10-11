@@ -1,5 +1,5 @@
 function nc_l2_info = configDTOutputNetCDFL2()
-%CONFIGRTOUTPUTNETCDFL2  Configure NetCDF output for gridded glider deployment data in delayed time.
+%CONFIGDTOUTPUTNETCDFL2  Configure NetCDF output for gridded glider deployment data in delayed time.
 %
 %  Syntax:
 %    NC_L2_INFO = CONFIGDTOUTPUTNETCDFL2()
