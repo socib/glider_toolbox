@@ -1,5 +1,5 @@
 function setupMexPoly2tri()
-%CONFIGMEXPOLY2TRI  Build mex file for polygon triangulation function POLY2TRI.
+%SETUPMEXPOLY2TRI  Build mex file for polygon triangulation function POLY2TRI.
 %
 %  Syntax:
 %    SETUPMEXPOLY2TRI()
