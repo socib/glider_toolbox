@@ -10,8 +10,9 @@ function data_proc = processGliderData(data_pre, varargin)
 %  deployment data according to given options, performing the following actions:
 %    - Selection of reference sensors: 
 %      Time, latitude and longitude sequences are selected.
-%      Optionally, missing values are filled by interpolation.
-%      This sequences are mandatory, processing aborts if missing.
+%      Optionally, bad position values are masked as missing,
+%      and missing values are filled by interpolation.
+%      These sequences are mandatory, processing aborts if missing.
 %    - Selection of optional reference sensors:
 %      Navigation depth and pitch sequences are selected, if any.
 %      Optionally, missing values are filled by interpolation.
@@ -66,6 +67,10 @@ function data_proc = processGliderData(data_pre, varargin)
 %  DATA_PRE should be a struct in the format returned by PREPROCESSGLIDERDATA,
 %  where each field is a time sequence from the sensor with the same name.
 %
+%  DATA_PROC is a struct in the same format as DATA_PRE, with time sequences 
+%  resulting from the processing actions described above, performed according
+%  to the options described below.
+%
 %  Options may be given either as key-value pairs OPT1, VAL1 ... or in a struct
 %  OPTIONS with field names as option keys and field values as option values.
 %  Recognized options are:
@@ -74,11 +79,19 @@ function data_proc = processGliderData(data_pre, varargin)
 %      Default value: {'m_present_time' 'sci_m_present_time'}
 %    POSITION_SENSOR_LIST: latitude and longitude sensor choices.
 %      Struct array selecting latitude and longitude sensor sets in order
-%      of preference. It should have the following fields:
+%      of preference, with optional mask of valid position readings.
+%      It should have the following fields:
 %        LATITUDE: latitude sensor name.
 %        LONGITUDE: longitude sensor name.
+%      It may have the following optional fields (empty or missing):
+%        POSITION_STATUS: position status sensor name.
+%        POSITION_STATUS_GOOD: position status good values.
+%        POSITION_STATUS_BAD:  position status bad values.
 %      Default value: struct('latitude',  {'m_gps_lat' 'm_lat'}, ...
-%                            'longitude', {'m_gps_lon' 'm_lon'})
+%                            'longitude', {'m_gps_lon' 'm_lon'}, ...
+%                            'position_status',      {'m_gps_status' []}, ...
+%                            'position_status_good', { 0 []}, ...
+%                            'position_status_bad',  {[] []})
 %    DEPTH_SENSOR_LIST: depth sensor choices.
 %      String cell array with the name of depth sensors, in order of preference.
 %      Default value: {'m_depth'}
@@ -337,56 +350,6 @@ function data_proc = processGliderData(data_pre, varargin)
 %                            'salinity',    {'salinity'    'salinity_corrected_thermal'}, ...
 %                            'temperature', {'temperature' 'temperature'}, ...
 %                            'pressure',    {'pressure'    'pressure'})
-%
-%  DATA_PROC is a struct in the same format as DATA_PRE, with time sequences 
-%  resulting from the following processes:
-%    - Selection of reference sensors: 
-%      Time, latitude and longitude sequences are selected.
-%      Optionally, missing values are filled by interpolation.
-%      This sequences are mandatory, processing aborts if missing.
-%    - Selection of optional reference sensors:
-%      Navigation depth and pitch sequences are selected, if any.
-%      Optionally, missing values are filled by interpolation.
-%    - Selection of water velocity sensors.
-%      Mean segment water eastward and northward speed sequences are selected,
-%      if any.
-%    - Selection of commanded trajectory sensors:
-%      Commanded waypoint latitude and longitude sequences are selected, if any.
-%    - Selection of CTD sensor:
-%      Conductivity, temperature and pressure sequences are selected, if any.
-%      Optionally the CTD timestamp sequence is selected, too.
-%    - Selection of chlorophyl sensor:
-%      Fluor and turbidity sequences are selected, if any.
-%    - Selection of oxygen sensors:
-%      Oxygen concentration and saturation sequences are selected, if any.
-%    - Selection of other sensors of interest:
-%      Sequences from extra sensors configured in options are selected.
-%    - Identification of transects:
-%      Transects are identified finding their boundaries at changes of waypoint
-%      coordinates.
-%    - Computation of distance over ground:
-%      The planar distance covered along the trajectory is computed cumulating
-%      the distance between consecutive points with valid position coordinates.
-%    - Pressure processing:
-%      Pressure is optionally filtered using a filter proposed by Seabird.
-%      Depth is optionally derived from pressure and longitude sequences.
-%    - Identification of casts:
-%      Upcasts and downcasts are identified finding local extrema of the chosen 
-%      depth or pressure sequence, and the glider vertical direction is deduced.
-%    - Sensor lag correction:
-%      Any already selected sequence may be corrected from sensor lag effects.
-%      The sensor lag time constant may be provided as option or estimated from
-%      identified consecutive casts with opposed directions.
-%    - Thermal lag correction:
-%      Any temperature and conductivity sequence pair may be corrected from
-%      thermal lag effects. The thermal lag parameters may be provided as option
-%      or estimated from identified consecutive casts with opposed directions.
-%    - Salinity derivation:
-%      In situ salinity may be derived from any set of conductivity, temperature
-%      and pressure sequences already selected or produced.
-%    - Density derivation:
-%      In situ density may be derived from any set of conductivity, temperature 
-%      and pressure sequences already selected or produced.
 %  
 %  Notes:
 %    This function is based on the previous work by Tomeu Garau. He is the true
@@ -450,8 +413,12 @@ function data_proc = processGliderData(data_pre, varargin)
   %% Set processing options and default values.
   options = struct();
   options.time_sensor_list = {'m_present_time' 'sci_m_present_time'};
-  options.position_sensor_list = struct('latitude',  {'m_gps_lat' 'm_lat'}, ...
-                                        'longitude', {'m_gps_lon' 'm_lon'});
+  options.position_sensor_list = ...
+    struct('latitude',        {'m_gps_lat'    'm_lat'}, ...
+           'longitude',       {'m_gps_lon'    'm_lon'}, ...
+           'position_status',      {'m_gps_status' []}, ...
+           'position_status_good', {0              []}, ...
+           'position_status_bad',  {[]             []});
   options.depth_sensor_list = {'m_depth'};
   options.pitch_sensor_list = {'m_pitch'};
   options.waypoint_sensor_list = struct('latitude',  {'c_wpt_lat'}, ...
@@ -584,19 +551,55 @@ function data_proc = processGliderData(data_pre, varargin)
   
   %% Select position coordinate sensors.
   % Find preferred set of valid latitude and longitude sensors in list of 
-  % available sensors.
+  % available sensors. Optionally set flagged readings as invalid (NaN),
+  % if position status sensor, and good or bad values are available.
   position_sensor_list = options.position_sensor_list;
   for position_sensor_idx = 1:numel(position_sensor_list)
     lat_sensor = position_sensor_list(position_sensor_idx).latitude;
     lon_sensor = position_sensor_list(position_sensor_idx).longitude;
+    position_status_sensor = [];
+    position_status_good = [];
+    position_status_bad = [];
+    if isfield(position_sensor_list, 'position_status')
+      position_status_sensor = ...
+        position_sensor_list(position_sensor_idx).position_status;
+    end
+    if isfield(position_sensor_list, 'position_status_good')
+      position_status_good = ...
+        position_sensor_list(position_sensor_idx).position_status_good;
+    end
+    if isfield(position_sensor_list, 'position_status_bad')
+      position_status_bad = ...
+        position_sensor_list(position_sensor_idx).position_status_bad;
+    end
     if all(ismember({lat_sensor lon_sensor}, sensor_list)) ...
         && ~all(isnan(data_pre.(lat_sensor))) ...
         && ~all(isnan(data_pre.(lon_sensor))) 
       data_proc.latitude = data_pre.(lat_sensor);
       data_proc.longitude = data_pre.(lon_sensor);
       fprintf('Selected position sensors:\n');
-      fprintf('  latitude : %s\n', lat_sensor);
-      fprintf('  longitude: %s\n', lon_sensor);
+      fprintf('  latitude  : %s\n', lat_sensor);
+      fprintf('  longitude : %s\n', lon_sensor);
+      if ~isempty(position_status_sensor) ...
+          && ismember(position_status_sensor, sensor_list) ...
+          && ~all(isnan(data_pre.(position_status_sensor)))
+        position_status_flag = data_pre.(position_status_sensor);
+        position_status = true(size(position_status_flag));
+        if ~isempty(position_status_good)
+            position_status = position_status ...
+                            & ismember(position_status_flag, position_status_good);
+        end
+        if ~isempty(position_status_bad)
+            position_status = position_status ...
+                            & ~ismember(position_status_flag, position_status_bad);
+        end
+        data_proc.position_status = position_status;
+        data_proc.latitude(~position_status) = nan;
+        data_proc.longitude(~position_status) = nan;
+        fprintf('  position status      : %s\n', position_status_sensor);
+        fprintf('  position status good : %s\n', num2str(position_status_good));
+        fprintf('  position status bad  : %s\n', num2str(position_status_bad));
+      end
       break;
     end
   end
@@ -816,7 +819,7 @@ function data_proc = processGliderData(data_pre, varargin)
       end
     end
   end
-  
+    
   
   %% Fill missing time readings, if needed.
   % Regular sampling is assumed on time gaps.

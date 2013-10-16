@@ -41,6 +41,8 @@ function processing_options = configDataProcessing()
   
   processing_options.position_sensor_list(1).latitude  = 'm_gps_lat';
   processing_options.position_sensor_list(1).longitude = 'm_gps_lon';
+  processing_options.position_sensor_list(1).position_status = 'm_gps_status';
+  processing_options.position_sensor_list(1).position_status_good = 0;
   processing_options.position_sensor_list(2).latitude  = 'm_lat';
   processing_options.position_sensor_list(2).longitude = 'm_lon';
   
