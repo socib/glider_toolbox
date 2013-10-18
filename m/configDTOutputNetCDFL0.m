@@ -123,16 +123,10 @@ function nc_l0_info = configDTOutputNetCDFL0()
     'units'         'degree_east'  
     '_FillValue'    default_fill_value };
 
-  var_attr_list.m_speed = {
-    'long_name'     'glider speed through water'
-    'standard_name' 'speed'
-    'units'         'm s-1'  
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.m_pitch = {
-    'long_name'     'glider pitch angle'
-    'standard_name' 'pitch'
-    'units'         'rad'  
+  var_attr_list.m_depth = {
+    'long_name'     'glider measured depth'
+    'standard_name' 'depth'
+    'units'         'm'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_roll = {
@@ -142,9 +136,9 @@ function nc_l0_info = configDTOutputNetCDFL0()
     'comments'      'greater than 0 is port wing up'  
     '_FillValue'    default_fill_value };
 
-  var_attr_list.m_fin = {
-    'long_name'     'glider rudder'
-    'standard_name' 'fin_position'
+  var_attr_list.m_pitch = {
+    'long_name'     'glider pitch angle'
+    'standard_name' 'pitch'
     'units'         'rad'  
     '_FillValue'    default_fill_value };
 
@@ -160,10 +154,16 @@ function nc_l0_info = configDTOutputNetCDFL0()
     'units'         'rad'  
     '_FillValue'    default_fill_value };
 
-  var_attr_list.m_depth = {
-    'long_name'     'glider measured depth'
-    'standard_name' 'depth'
-    'units'         'm'  
+  var_attr_list.m_speed = {
+    'long_name'     'glider speed through water'
+    'standard_name' 'speed'
+    'units'         'm s-1'  
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_fin = {
+    'long_name'     'glider rudder'
+    'standard_name' 'fin_position'
+    'units'         'rad'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.x_inflecting = {

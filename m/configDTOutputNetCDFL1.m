@@ -105,6 +105,27 @@ function nc_l1_info = configDTOutputNetCDFL1()
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value };
 
+  var_attr_list.heading = {
+    'long_name'     'glider heading angle'
+    'standard_name' 'heading'
+    'units'         'rad'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.roll = {
+    'long_name'     'glider roll angle'
+    'standard_name' 'roll'
+    'units'         'rad'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.pitch = {
+    'long_name'     'glider pitch angle'
+    'standard_name' 'pitch'
+    'units'         'rad'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.waypoint_latitude = {
     'long_name'     'waypoint latitude'
     'standard_name' 'latitude'
@@ -145,13 +166,6 @@ function nc_l1_info = configDTOutputNetCDFL1()
     'standard_name' ''
     'units'         '1'
     'comment'       '-1 = ascending, 0 = inflecting, 1 = descending'
-    'coordinates'   'time depth latitude longitude'
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.pitch = {
-    'long_name'     'glider pitch angle'
-    'standard_name' 'pitch'
-    'units'         'rad'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value };
 

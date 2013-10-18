@@ -48,8 +48,11 @@ function processing_options = configDataProcessing()
   
   processing_options.depth_sensor_list = {'m_depth'};
   
-  processing_options.pitch_sensor_list = {'m_pitch'};
+  processing_options.attitude_sensor_list(1).roll = 'm_roll';
+  processing_options.attitude_sensor_list(1).pitch = 'm_pitch';
   
+  processing_options.heading_sensor_list = 'm_heading';
+
   processing_options.waypoint_sensor_list(1).latitude = 'c_wpt_lat';
   processing_options.waypoint_sensor_list(1).longitude = 'c_wpt_lon';
   
@@ -79,7 +82,8 @@ function processing_options = configDataProcessing()
   processing_options.time_filling = true;
   processing_options.position_filling = true;
   processing_options.depth_filling = true;
-  processing_options.pitch_filling = true;
+  processing_options.attitude_filling = true;
+  processing_options.heading_filling = true;
   processing_options.waypoint_filling = true;
   
   processing_options.pressure_conversion = true;
