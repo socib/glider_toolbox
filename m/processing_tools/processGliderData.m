@@ -14,7 +14,7 @@ function data_proc = processGliderData(data_pre, varargin)
 %      and missing values are filled by interpolation.
 %      These sequences are mandatory, processing aborts if missing.
 %    - Selection of optional reference sensors:
-%      Navigation depth and pitch sequences are selected, if any.
+%      Navigation depth, pitch, roll and heading sequences are selected, if any.
 %      Optionally, missing values are filled by interpolation.
 %    - Selection of water velocity sensors.
 %      Mean segment water eastward and northward velocity sequences are 
@@ -95,9 +95,16 @@ function data_proc = processGliderData(data_pre, varargin)
 %    DEPTH_SENSOR_LIST: depth sensor choices.
 %      String cell array with the name of depth sensors, in order of preference.
 %      Default value: {'m_depth'}
-%    PITCH_SENSOR_LIST: pitch sensor choices.
-%      String cell array with the name of pitch sensors, in order of preference.
-%      Default value: {'m_pitch'}
+%    ATTITUDE_SENSOR_LIST: roll and pitch sensor choices.
+%      Struct array selecting roll and pitch sensor sets, in order of 
+%      preference. It should have the following fields:
+%        ROLL: roll sensor name.
+%        PITCH: pitch sensor name.
+%      Default value: struct('roll', {'m_roll'}, 'pitch', {'m_pitch'})
+%    HEADING_SENSOR_LIST: heading sensor choices.
+%      String cell array with the name of heading sensors, in order of 
+%      preference.
+%      Default value: {'m_heading'}
 %    WAYPOINT_SENSOR_LIST: waypoint latitude and longitude sensor choices.
 %      Struct array selecting waypoint latitude and longitude sensor sets in
 %      order of preference. It should have the following fields:
@@ -166,6 +173,14 @@ function data_proc = processGliderData(data_pre, varargin)
 %      Default value: false
 %    DEPTH_FILLING: depth interpolation switch.
 %      Boolean setting whether depth missing values should be filled by
+%      interpolation.
+%      Default value: false
+%    ATTITUDE_FILLING: attitude interpolation switch.
+%      Boolean setting whether roll and pitch missing values should be filled by
+%      interpolation.
+%      Default value: false
+%    HEADING_FILLING: heading interpolation switch.
+%      Boolean setting whether heading missing values should be filled by
 %      interpolation.
 %      Default value: false
 %    WAYPOINT_FILLING: waypoint interpolation switch.
@@ -420,7 +435,9 @@ function data_proc = processGliderData(data_pre, varargin)
            'position_status_good', {0              []}, ...
            'position_status_bad',  {[]             []});
   options.depth_sensor_list = {'m_depth'};
-  options.pitch_sensor_list = {'m_pitch'};
+  options.attitude_sensor_list = struct('roll',  {'m_roll'}, ...
+                                        'pitch', {'m_pitch'});
+  options.heading_sensor_list = {'m_heading'};
   options.waypoint_sensor_list = struct('latitude',  {'c_wpt_lat'}, ...
                                         'longitude', {'c_wpt_lon'});
   options.water_velocity_sensor_list = ...
@@ -445,7 +462,8 @@ function data_proc = processGliderData(data_pre, varargin)
   options.time_filling = false;
   options.position_filling = false;
   options.depth_filling = false;
-  options.pitch_filling = false;
+  options.attitude_filling = false;
+  options.heading_filling = false;
   options.waypoint_filling = false;
   
   options.pressure_conversion = true;
@@ -625,17 +643,37 @@ function data_proc = processGliderData(data_pre, varargin)
   end
   
   
-  %% Select pitch sensor.
-  % Find preferred valid pitch sensor in list of available sensors, if any.
-  % Convert char array to string cell array if needed (safe if cell array).
-  pitch_sensor_list = cellstr(options.pitch_sensor_list);
-  for pitch_sensor_idx = 1:numel(pitch_sensor_list)
-    pitch_sensor = pitch_sensor_list{pitch_sensor_idx};
-    if ismember(pitch_sensor, sensor_list) ...
-        && ~all(isnan(data_pre.(pitch_sensor)))
+  %% Select attitude sensors.
+  % Find preferred set of valid roll and pitch sensors in list of available 
+  % sensors.
+  attitude_sensor_list = options.attitude_sensor_list;
+  for attitude_sensor_idx = 1:numel(attitude_sensor_list)
+    roll_sensor = attitude_sensor_list(attitude_sensor_idx).roll;
+    pitch_sensor = attitude_sensor_list(attitude_sensor_idx).pitch;
+    if all(ismember({roll_sensor pitch_sensor}, sensor_list)) ...
+        && ~all(isnan(data_pre.(roll_sensor))) ...
+        && ~all(isnan(data_pre.(pitch_sensor))) 
+      data_proc.roll = data_pre.(roll_sensor);
       data_proc.pitch = data_pre.(pitch_sensor);
-      fprintf('Selected pitch sensor:\n');
-      fprintf('  pitch: %s\n', pitch_sensor);
+      fprintf('Selected attitude sensors:\n');
+      fprintf('  roll  : %s\n', roll_sensor);
+      fprintf('  pitch : %s\n', pitch_sensor);
+      break;
+    end
+  end
+  
+  
+  %% Select heading sensor.
+  % Find preferred valid heading sensor in list of available sensors, if any.
+  % Convert char array to string cell array if needed (safe if cell array).
+  heading_sensor_list = cellstr(options.heading_sensor_list);
+  for heading_sensor_idx = 1:numel(heading_sensor_list)
+    heading_sensor = heading_sensor_list{heading_sensor_idx};
+    if ismember(heading_sensor, sensor_list) ...
+        && ~all(isnan(data_pre.(heading_sensor)))
+      data_proc.heading = data_pre.(heading_sensor);
+      fprintf('Selected heading sensor:\n');
+      fprintf('  heading: %s\n', heading_sensor);
       break;
     end
   end
@@ -842,7 +880,7 @@ function data_proc = processGliderData(data_pre, varargin)
   
   
   %% Fill missing depth readings, if needed.
-  % Use linear interpolation of valid coordinate readings.
+  % Use linear interpolation of valid depth readings.
   if options.depth_filling && isfield(data_proc, 'depth');
     fprintf('Filling missing depth readings...\n');
     data_proc.depth = ...
@@ -850,12 +888,25 @@ function data_proc = processGliderData(data_pre, varargin)
   end
   
   
-  %% Fill missing pitch readings, if needed.
-  % Use linear interpolation of valid coordinate readings.
-  if options.pitch_filling && isfield(data_proc, 'pitch')
-    fprintf('Filling missing pitch readings...\n');
+  %% Fill missing attitude readings, if needed.
+  % Use linear interpolation of valid roll and pitch readings.
+  if options.attitude_filling ...
+      && isfield(data_proc, 'roll') ...
+      && isfield(data_proc, 'pitch')
+    fprintf('Filling missing attitude readings...\n');
+    data_proc.roll = ...
+      fillInvalidValues(data_proc.time, data_proc.roll, 'linear');
     data_proc.pitch = ...
       fillInvalidValues(data_proc.time, data_proc.pitch, 'linear');
+  end
+  
+  
+  %% Fill missing heading readings, if needed.
+  % Use linear interpolation of valid coordinate readings.
+  if options.heading_filling && isfield(data_proc, 'heading')
+    fprintf('Filling missing heading readings...\n');
+    data_proc.heading = ...
+      fillInvalidValues(data_proc.time, data_proc.heading, 'linear');
   end
   
   
