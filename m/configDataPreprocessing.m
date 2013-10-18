@@ -1,6 +1,9 @@
 function preprocessing_options = configDataPreprocessing()
 %CONFIGDATAPREPROCESSING  Configure glider data preprocessing.
 %
+%  Syntax:
+%    PREPROCESSING_OPTIONS = CONFIGDATAPREPROCESSING()
+%
 %  PREPROCESSING_OPTIONS = CONFIGDATAPREPROCESSING() should return a struct
 %  setting the options for glider data preprocessing as needed by the function
 %  PREPROCESSGLIDERDATA.

@@ -1,7 +1,10 @@
-function slocum_options = configRTSlocumFileOptions()
+function slocum_options = configRTFileOptionsSlocum()
 %CONFIGRTFILEOPTIONSSLOCUM  Configure download, conversion and loading options for Slocum files in real time.
 %
-%  slocum_options = CONFIGRTFILEOPTIONSSLOCUM() should return a struct with the
+%  Syntax:
+%    SLOCUM_OPTIONS = CONFIGRTFILEOPTIONSSLOCUM()
+%
+%  SLOCUM_OPTIONS = CONFIGRTFILEOPTIONSSLOCUM() should return a struct with the
 %  parameters that control the files to retrieve, how they will be converted,
 %  and which files and data should be used in real time mode. The returned 
 %  struct should have the following fields:
@@ -60,7 +63,7 @@ function slocum_options = configRTSlocumFileOptions()
   error(nargchk(0, 0, nargin, 'struct'));
   
   % Surface log files of any kind.
-  slocum_options.log_name_pattern = '^\w+_(modem|network)_\d{8}T\d{6}\.log$';
+  slocum_options.log_name_pattern = '^\w+_(modem|network|freewave)_\d{8}T\d{6}\.log$';
 
   % All binary files, renamed or not:
   % slocum_options.bin_name_pattern = '^(.*)\.([smdtne]bd)$';
@@ -92,7 +95,9 @@ function slocum_options = configRTSlocumFileOptions()
     'm_gps_status'
     'c_wpt_lat'
     'c_wpt_lon'
+    'm_roll'
     'm_pitch'
+    'm_heading'
     'm_depth'
     'm_final_water_vx'
     'm_final_water_vy'

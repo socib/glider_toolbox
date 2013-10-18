@@ -1,19 +1,32 @@
 function [meta, data] = dba2mat(filename, varargin)
 %DBA2MAT  Load data and metadata from a dba file.
 %
+%  Syntax:
+%    [META, DATA] = DBA2MAT(FILENAME)
+%    [META, DATA] = DBA2MAT(FILENAME, OPTIONS)
+%    [META, DATA] = DBA2MAT(FILENAME, OPT1, VAL1, ...)
+%
 %  [META, DATA] = DBA2MAT(FILENAME) reads the dba file named by string FILENAME,
 %  loading its metadata in struct META and its data in array DATA.
 %
-%  [META, DATA] = DBA2MAT(FILENAME, OPT1, VAL1, ...) accepts the following
-%  options:
-%    'format': a string setting the format of the output DATA. Valid values are:
-%      'array' (default): DATA is a matrix whith sensor readings as columns 
-%         ordered as in the SENSORS metadata field.
-%      'struct': DATA is a struct with sensor names as field names and column 
-%         vectors of sensor readings as field values.
-%    'sensors': a string cell array with the names of the sensors of interest.
-%      If given, only sensors present in both the file and this list will be 
+%  [META, DATA] = DBA2MAT(FILENAME, OPTIONS) and 
+%  [META, DATA] = DBA2MAT(FILENAME, OPT1, VAL1, ...) accept the following 
+%  options given in key-value pairs OPT1, VAL1... or in struct OPTIONS with 
+%  field names as option keys and field values as option values:
+%    FORMAT: data output format.
+%      String setting the format of the output DATA. Valid values are:
+%        'array': DATA is a matrix whith sensor readings as columns 
+%           ordered as in the 'sensors' metadata field.
+%        'struct': DATA is a struct with sensor names as field names and column 
+%           vectors of sensor readings as field values.
+%      Default value: 'array'
+%    SENSORS: sensor filtering list.
+%      String cell array with the names of the sensors of interest. If given,
+%      only sensors present in both the input data sets and this list will be 
+%      present in output. The string 'all' may also be given, in which case 
+%      sensor filtering is not performed and all sensors in input list will be 
 %      present in output.
+%      Default value: 'all' (do not perform sensor filtering).
 %
 %  META has the following fields based on the tags of the ascii header:
 %    HEADERS: a struct with the ascii tags present in dba header with fields:
@@ -79,30 +92,56 @@ function [meta, data] = dba2mat(filename, varargin)
 
   error(nargchk(1, 5, nargin, 'struct'));
   
-  %% Set option values.
-  sensor_filtering = false;
-  sensor_list = [];
-  output_format = 'array';
-  for opt_idx = 1:2:numel(varargin)
-    opt = varargin{opt_idx};
-    val = varargin{opt_idx+1};
-    switch lower(opt)
-      case 'format'
-        output_format = val;
-      case 'sensors'
-        sensor_filtering = true;
-        sensor_list = val;
-      otherwise
-        error('glider_toolbox:dba2mat:InvalidOption', ...
-              'Invalid option: %s.', opt);
+  
+  %% Set options and default values.
+  options.format = 'array';
+  options.sensors = 'all';
+  
+  
+    %% Parse optional arguments.
+  % Get option key-value pairs in any accepted call signature.
+  argopts = varargin;
+  if isscalar(argopts) && isstruct(argopts{1})
+    % Options passed as a single option struct argument:
+    % field names are option keys and field values are option values.
+    opt_key_list = fieldnames(argopts{1});
+    opt_val_list = struct2cell(argopts{1});
+  elseif mod(numel(argopts), 2) == 0
+    % Options passed as key-value argument pairs.
+    opt_key_list = argopts(1:2:end);
+    opt_val_list = argopts(2:2:end);
+  else
+    error('glider_toolbox:dba2mat:InvalidOptions', ...
+          'Invalid optional arguments (neither key-value pairs nor struct).');
+  end
+  % Overwrite default options with values given in extra arguments.
+  for opt_idx = 1:numel(opt_key_list)
+    opt = lower(opt_key_list{opt_idx});
+    val = opt_val_list{opt_idx};
+    if isfield(options, opt)
+      options.(opt) = val;
+    else
+      error('glider_toolbox:dba2mat:InvalidOption', ...
+            'Invalid option: %s.', opt);
     end
   end
+
+  
+  %% Set option flags and values.
+  output_format = options.format;
+  sensor_filtering = true;
+  sensor_list = options.sensors;
+  if ischar(options.sensors) && strcmp(options.sensors, 'all')
+    sensor_filtering = false;
+  end
+  
   
   %% Open the file.
   [fid, fid_msg] = fopen(filename, 'r');
   if fid < 0
     error('glider_toolbox:dba2mat:FileError', fid_msg)
   end
+  
   
   %% Process the file.
   try
@@ -178,6 +217,7 @@ function [meta, data] = dba2mat(filename, varargin)
     fclose(fid);
     rethrow(exception);
   end
+  
   
   %% Close the file after successful reading.
   fclose(fid); 

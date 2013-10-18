@@ -1,6 +1,9 @@
 function db_access = configDBAccess()
 %CONFIGDBACCESS  Configure data base access parameters for glider processing.
 %
+%  Syntax:
+%    DB_ACCESS = CONFIGDBACCESS()
+%
 %  DB_ACCESS = CONFIGDBACCESS() should return a struct with the access
 %  parameters for the data base to be used during the glider processing, as
 %  needed by the function GETDBDEPLOYMENTINFO.

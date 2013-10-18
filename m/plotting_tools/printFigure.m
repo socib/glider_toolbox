@@ -242,7 +242,7 @@ function imginfo = printFigure(varargin)
   
   
   %% Report image information with absolute name of the generated file.
-  [status, attrout, ~] = fileattrib(fullfile_ext);
+  [status, attrout] = fileattrib(fullfile_ext);
   if status == 0
     % We should never get here (if image creation succeed, file must exist).
     error('glider_toolbox:printFigure:ImageFileError', ...

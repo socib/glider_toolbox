@@ -1,6 +1,9 @@
 function nc_l1_info = configDTOutputNetCDFL1()
 %CONFIGDTOUTPUTNETCDFL1  Configure NetCDF output for processed glider deployment data in delayed time.
 %
+%  Syntax:
+%    NC_L1_INFO = CONFIGDTOUTPUTNETCDFL1()
+%
 %  NC_L1_INFO = CONFIGDTOUTPUTNETCDFL1() should return a struct describing the
 %  structure of the NetCDF file for processed glider deployment data in delayed
 %  time (see the  note about the file generation for more details).
@@ -102,6 +105,27 @@ function nc_l1_info = configDTOutputNetCDFL1()
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value };
 
+  var_attr_list.heading = {
+    'long_name'     'glider heading angle'
+    'standard_name' 'heading'
+    'units'         'rad'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.roll = {
+    'long_name'     'glider roll angle'
+    'standard_name' 'roll'
+    'units'         'rad'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.pitch = {
+    'long_name'     'glider pitch angle'
+    'standard_name' 'pitch'
+    'units'         'rad'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.waypoint_latitude = {
     'long_name'     'waypoint latitude'
     'standard_name' 'latitude'
@@ -142,13 +166,6 @@ function nc_l1_info = configDTOutputNetCDFL1()
     'standard_name' ''
     'units'         '1'
     'comment'       '-1 = ascending, 0 = inflecting, 1 = descending'
-    'coordinates'   'time depth latitude longitude'
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.pitch = {
-    'long_name'     'glider pitch angle'
-    'standard_name' 'pitch'
-    'units'         'rad'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value };
 
@@ -343,6 +360,14 @@ function nc_l1_info = configDTOutputNetCDFL1()
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value };
 
+  var_attr_list.time_flntu = {
+    'long_name'     'FLNTU sensor epoch time'
+    'standard_name' 'time'
+    'units'         'seconds since 1970-01-01 00:00:00 +00:00'
+    'comment'       'FLNTU time stamp'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.cdom = {
     'long_name'     'cdom'
     'standard_name' 'cdom'
@@ -364,9 +389,17 @@ function nc_l1_info = configDTOutputNetCDFL1()
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value };
 
-  var_attr_list.oxygen_temperature = {
-    'long_name'     'temperature'
-    'standard_name' 'temperature_of_sensor_for_oxygen_in_sea_water'
+  var_attr_list.time_oxygen = {
+    'long_name'     'oxygen sensor epoch time'
+    'standard_name' 'time'
+    'units'         'seconds since 1970-01-01 00:00:00 +00:00'
+    'comment'       'oxygen sensor time stamp'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.temperature_oxygen = {
+    'long_name'     'oxygen sensor temperature'
+    'standard_name' ''
     'units'         'Celsius'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value };

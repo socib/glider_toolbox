@@ -2,30 +2,36 @@ function [temp_inside, cond_outside] = correctThermalLag(varargin)
 %CORRECTTHERMALLAG  Correct CTD conductivity and temperature sequence from thermal lag effects.
 %
 %  Syntax:
-%    [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIME, DEPTH, COND_INSIDE, TEMP_OUTSIDE, CONSTANTS)
-%    [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIME, DEPTH, PITCH, COND_INSIDE, TEMP_OUTSIDE, CONSTANTS)
+%    [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, COND_INSIDE, TEMP_OUTSIDE, CONSTANTS)
+%    [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, COND_INSIDE, TEMP_OUTSIDE, FLOW_SPEED, CONSTANTS)
 %
-%  [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIME, DEPTH, COND_INSIDE, TEMP_OUTSIDE, CONSTANTS)
-%  corrects thermal lag from a vertical CTD profile sequence given by vectors 
-%  TIME (timestamp), DEPTH (depth or pressure), COND_INSIDE (conductivity inside
-%  CTD cell) and TEMP_OUTSIDE (temperature outside CTD cell), returning vectors 
-%  COND_OUTSIDE (conductivity outside CTD cell) and TEMP_INSIDE (temperature 
-%  inside CTD cell). TIME, DEPTH, COND_INSIDE, TEMP_OUTSIDE, COND_OUTSIDE and 
-%  TEMP_OUTSIDE all have the same dimensions. The correction parameters are
-%  given in a four element vector CONSTANTS, with the offset and the slope of
-%  the error magnitude (alpha_o and alpha_s), and the offset and the slope of 
-%  the error time constant (tau_o and tau_s). A detailed description of these 
-%  parameters may be found in the references listed below.
+%  [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, COND_INSIDE, TEMP_OUTSIDE, CONSTANTS)
+%  corrects thermal lag in a CTD profile sequence with constant flow speed
+%  (pumped CTD) given by vectors TIMESTAMP (sampe timestamp), COND_INSIDE 
+%  (conductivity inside CTD cell) and TEMP_OUTSIDE (temperature outside CTD 
+%  cell), returning vectors COND_OUTSIDE (conductivity outside CTD cell) and 
+%  TEMP_INSIDE (temperature inside CTD cell). TIMESTAMP, COND_INSIDE, 
+%  TEMP_OUTSIDE, COND_OUTSIDE and TEMP_OUTSIDE all have the same dimensions. 
+%  The correction parameters are given in a two element vector CONSTANTS, 
+%  with the error magnitude (alpha), and the error time constant (tau). 
+%  A detailed description of these parameters may be found in the references 
+%  listed below (Lueck 1990).
 %
-%  [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIME, DEPTH, PITCH, COND_INSIDE, TEMP_OUTSIDE, CONSTANTS)
-%  performs the same correction but for a non vertical profile, with pitch angle
-%  given by PITCH in radians. PITCH may be either a vector with the same 
-%  dimensions as TIME, DEPTH, COND_INSIDE and TEMP_OUTSIDE, or a scalar taken to
-%  be the constant pitch across the whole profile.
+%  [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, DEPTH, PITCH, COND_INSIDE, TEMP_OUTSIDE, CONSTANTS)
+%  performs the same correction but for a CTD profile with variable flow speed
+%  (unpumped CTD), given by FLOW. FLOW should be a vector with the same
+%  dimensions as COND_INSIDE and TEMP_OUTSIDE, with the flow speed inside the 
+%  CTD cell in m/s. The correction parameters are given in a four 
+%  element vector CONSTANTS, with the offset and the slope of the error 
+%  magnitude (alpha_o and alpha_s), and the offset and the slope of the error 
+%  time constant (tau_o and tau_s). A detailed description of these parameters 
+%  may be found in the references listed below (Morison 1994).
 %
 %  Notes:
 %    This function is a recoding of the function by Tomeu Garau with the same 
-%    name. He is the true glider man.
+%    name. He is the true glider man. Main changes are:
+%      - Moved flow speed computation to a separate function COMPUTECTDFLOWSPEED.
+%      - Added support for pumped CTD profiles (constant flow speed).
 %
 %  References:
 %    Garau, B.; Ruiz, S.; G. Zhang, W.; Pascual, A.; Heslop, E.;
@@ -46,15 +52,17 @@ function [temp_inside, cond_outside] = correctThermalLag(varargin)
 %    Journal of Atmospheric and Oceanic Technology, vol. 7, pages 741–755.
 %
 %  Examples:
-%    % Vertical profile:
+%    % Constant flow speed (pumped CTD) profile:
 %    [temp_inside, cond_outside] = ...
-%      correctThermalLag(time, depth, cond_inside, temp_outside, constants)
-%    % Tilted profile:
-%    [temp_inside, cond_outside] = ...
-%      correctThermalLag(time, depth, pitch, cond_inside, temp_outside, constants)
+%      correctThermalLag(timestamp, cond_inside, temp_outside, constants)
+%    % Variable flow speed (unpumped CTD) profile:
+%    [temp_inside, cond_outside] = 
+%      correctThermalLag(timestamp, cond_inside, temp_outside, ...
+%                        flow_speed, constants)
 %
 %  See also:
 %    FINDTHERMALLAGPARAMS
+%    COMPUTECTDFLOWSPEED
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
@@ -75,93 +83,70 @@ function [temp_inside, cond_outside] = correctThermalLag(varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(5, 6, nargin, 'struct'));
+  error(nargchk(4, 5, nargin, 'struct'));
   
+  % Parse input arguments.
   switch(nargin)
+    case 4
+      % Constant flow speed (pumped CTD).
+      [timestamp, cond_inside, temp_outside, constants] = ...
+        varargin{1:4};
+      constant_flow = true;
     case 5
-      time = varargin{1};
-      depth = varargin{2};
-      cond_inside = varargin{3};
-      temp_outside = varargin{4};
-      constants = varargin{5};
-      pitch = pi/2; % vertical profile.
-    case 6
-      time = varargin{1};
-      depth = varargin{2};
-      pitch = varargin{3};
-      cond_inside = varargin{4};
-      temp_outside = varargin{5};
-      constants = varargin{6};
+      % Variable flow speed (unpumped CTD).
+      [timestamp, cond_inside, temp_outside, flow_speed, constants] = ...
+        varargin{1:5};
+      constant_flow = false;
   end
   
-  % Set constant pitch across the whole sequence, if needed.
-  if isscalar(pitch)
-    pitch = repmat(pitch, size(time));
+  if constant_flow
+    % Select full CTD rows
+    % The positive time test is needed to deal with odd data from initial
+    % lines in Slocum segment files.
+    valid = (timestamp(:) > 0) ...
+          & ~any(isnan([cond_inside(:) temp_outside(:)]), 2);
+    time_val = timestamp(valid);
+    temp_val = temp_outside(valid);
+    cond_val = cond_inside(valid);
+    % Extract parameter values:
+    alpha = constants(1);
+    tau = constants(2);
+  else
+    % Select full CTD rows
+    % The positive time test is needed to deal with odd data from initial
+    % lines in Slocum segment files.
+    valid = (timestamp(:) > 0) ...
+          & ~any(isnan([cond_inside(:) temp_outside(:) flow_speed(:)]), 2);
+    time_val = timestamp(valid);
+    temp_val = temp_outside(valid);
+    cond_val = cond_inside(valid);
+    flow_val = flow_speed(valid);
+    % Extract parameter values:
+    alpha_offset = constants(1);
+    alpha_slope = constants(2);
+    tau_offset = constants(3);
+    tau_slope = constants(4);
+    % Compute dynamic thermal error and error time parameters for variable flow
+    % speed. The formula is given in the references above (Morison 1994).
+    alpha = alpha_offset + alpha_slope ./ flow_val(1:end-1);
+    tau = tau_offset + tau_slope ./ sqrt(flow_val(1:end-1));
   end
-  
-  % Extract parameter values:
-  alpha_offset = constants(1);
-  alpha_slope = constants(2);
-  tau_offset = constants(3);
-  tau_slope = constants(4);
-  
-  % Select full CTD rows.
-  % The positive time test is needed to deal with odd data from initial
-  % lines in Slocum segment files.
-  valid = ...
-    ~any(isnan([time(:) depth(:) pitch(:) cond_inside(:) temp_outside(:)]), 2) ...
-    & (time > 0);
-  time_val = time(valid);
-  depth_val = depth(valid);
-  pitch_val = pitch(valid);
-  temp_val = temp_outside(valid);
-  cond_val = cond_inside(valid);
-  
-  % Compute glider surge speed from the vertical speed and the pitch.
-  % For Slocum data, pitch is positive when nose is up (so positive z is down).
-  % Reshape PITCH_VAL(1:end-1) to avoid dimension mismatch error when computing
-  % surge speed in empty or single row profiles.
-  ddepth = diff(depth_val);
-  dtime = diff(time_val);
-  vertical_velocity = ddepth ./ dtime;
-  sin_pitch = reshape(sin(pitch_val(1:end-1)), size(vertical_velocity));  
-  surge_speed = abs(vertical_velocity ./ sin_pitch);
-  % Deal whith numerical zero pitch values.
-  % small_pitch_sel = (abs(pitch_val) < small_pitch_threshold);
-  % surge_speed(small_pitch_sel) = 0;
-  
-  % Compute flow speed inside cell from surge speed.
-  % The original comment in Tomeu Garau's code was:
-  %   The relative coefficient between the flow speed inside and outside
-  %   of the conductivity cell. This is still uncertain (ask Gordon for origin).
-  %   Here are three choices for first three orders polynomial.
-  speed_factor_polynoms = [0.00, 0.00, 0.40;  % 0th order degree.
-                           0.00, 0.03, 0.45;  % 1st order degree.
-                           1.58, 1.15, 0.70]; % 2nd order degree.
-  % First order approximation, second row of the matrix.
-  speed_factor_degree_choice = 1; 
-  speed_factor = ...
-    polyval(speed_factor_polynoms(speed_factor_degree_choice+1,:), surge_speed);
-  flow_speed = speed_factor .* surge_speed;
-  
-  % Compute dynamic thermal error and error time parameters for variable flow
-  % speed. The formula is given in the references above.
-  alpha = alpha_offset + alpha_slope ./ flow_speed;
-  tau = tau_offset + tau_slope ./ sqrt(flow_speed);
 
-  % Compute the Nyquist frequency (half the sampling frequency). 
-  % This might be wrong in the original implementation by Tomeu Garau,
-  % where the sampling frequency was used.
-  sampling_freq = 1 ./ dtime;
-  nyquist_freq = 0.5 * sampling_freq;
   
   % Compute the coefficients of the correction formula.
-  % These are three equivalent forumulas for the first coefficient.
+  % Definitions in references use the Nyquist frequency (half the sampling 
+  % frequency). This might be wrong in the original implementation by Tomeu 
+  % Garau, where the sampling frequency was used.
+  % These are three equivalent formulas for coefficients.
+  dtime = diff(time_val);
+  % sampling_freq = 1 ./ dtime;
+  % nyquist_freq = 0.5 * sampling_freq;
+  % coefa = alpha .* (4 * nyquist_freq .* tau) ./ (1 + 4 * nyquist_freq .* tau);
+  % coefb = 1 - 2  * (4 * nyquist_freq .* tau) ./ (1 + 4 * nyquist_freq .* tau);
   % coefa = 2 * alpha ./ (2 + dtime .* beta); % from SBE Data Processing.
-  % coefa = 2 * alpha ./ (2 + dtime ./ tau);  % same using tau instead of beta.
-  coefa = 4 * nyquist_freq .* alpha .* tau ./ (1 + 4 * nyquist_freq .* tau);
-  coefb = 1 - 2 * (4 * nyquist_freq .* tau) ./ (1 + 4 * nyquist_freq .* tau);
-  % coefb = 1 - 2 .* coefa ./ alpha;
+  % coefb = 1 - 2 .* coefa ./ alpha;          
+  coefa = 2 * alpha ./ (2 + dtime ./ tau);  % same using tau instead of beta.
+  coefb = 1 - 4 ./ (2 + dtime ./ tau);
   
   
   % Compute the sensitivity of conductivity with respect to temperature.
@@ -188,8 +173,8 @@ function [temp_inside, cond_outside] = correctThermalLag(varargin)
 
   % Apply corrections to valid values in original sequences, 
   % preserving invalid values in the output.
-  temp_inside = nan(size(time));
-  cond_outside = nan(size(time));
+  temp_inside = nan(size(timestamp));
+  cond_outside = nan(size(timestamp));
   temp_inside(valid) = temp_val - temp_correction;
   cond_outside(valid) = cond_val + cond_correction;
 

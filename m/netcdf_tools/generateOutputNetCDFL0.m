@@ -1,6 +1,9 @@
 function ncl0 = generateOutputNetCDFL0(filename, data, meta, dims, atts, deployment)
 %GENERATEOUTPUTNETCDFL0  Generate NetCDF output for raw glider deployment data.
 %
+%  Syntax:
+%    NCL0 = GENERATEOUTPUTNETCDFL0(FILENAME, DATA, META, DIMS, ATTS, DEPLOYMENT)
+%
 %  NCL0 = GENERATEOUTPUTNETCDFL0(FILENAME, DATA, META, DIMS, ATTS, DEPLOYMENT)
 %  calls WRITENETCDFDATA to generate a NetCDF file named FILENAME from raw 
 %  deployment data in struct DATA, variable metadata in struct META, dimension

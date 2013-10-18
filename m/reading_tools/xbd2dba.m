@@ -1,6 +1,11 @@
 function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
 %XBD2DBA  Slocum xbd to ascii file conversion using external program provided by WRC.
 %
+%  Syntax:
+%    DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE)
+%    DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE, OPTIONS)
+%    DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE, OPT1, VAL1, ...)
+%
 %  DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE) converts the binary file(s) 
 %  named by string or string cell array DBD_FILES (xxx.[smdtne]bd files) to the 
 %  corresponding text representation in the ascii file named by string DBA_FILE,
@@ -11,17 +16,25 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
 %  directory through the function SYSTEM (this may be relevant for the cache 
 %  directory involved in the conversion).
 %
-%  DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE, OPT1, VAL1, ...) accepts the
-%  following set of options to modify the default behaviour:
-%    'program': string with the conversion program command name, including the
+%  DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE, OPTIONS) and
+%  DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE, OPT1, VAL1, ...) accept the
+%  following options given in key-value pairs OPT1, VAL1... or in struct OPTIONS
+%  with field names as option keys and field values as option values:
+%    CMDNAME: conversion program executable.
+%      String with the conversion program command name, including the
 %      path if needed. This is useful if the 'dbd2asc' program has been renamed
-%      or it is not in your system path. Default value is 'dbd2asc'.
-%    'cache': string with the cache directory to use. It will be passed as the -c
-%      option value in the conversion command call. By default the -c option
+%      or it is not in your system path.
+%      Default value: 'dbd2asc'.
+%    CMDOPTS:
+%      String with extra options to use in the program call. It will be placed 
+%      into the command line just before the input file names. This is useful 
+%      for passing options like '-k' or '-o'. 
+%      Default value: '' (no command options)
+%    CACHE: cache directory.
+%      String with the cache directory to use. It will be passed as the -c
+%      option value in the conversion command call. If empty the -c option
 %      will not be used.
-%    'options': string to with extra to the program call. It will be placed into 
-%      the command just before the input file names (useful for passing options
-%      like '-k' or '-o'). Default value is empty.
+%      Default value: '' (do not use -c command option)
 %
 %  Notes:
 %    This function is intended to allow Slocum binary file conversion from
@@ -31,7 +44,7 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
 %    so they may contain glob patterns to be expanded by the underlying shell.
 %
 %  Examples:
-%    % Convert a simple file.
+%    % Convert a single file.
 %    dbd_file = 'happyglider-1970-000-0-0.sbd'
 %    dba_file = 'happyglider-1970-000-0-0-sbd.dba'
 %    dba_file_full = xbd2dba(dbd_file, dba_file)
@@ -40,7 +53,7 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
 %    dbd_files = 'happyglider-1970-000-0-*.[smd]bd'
 %    dba_file = 'happyglider-1970-000-0-x-xbd.dba'
 %    dba_file_full = xbd2dba(dbd_file, dba_file, 'cache', pwd(), ...
-%                            'program', '~/bin/dbd2asc')
+%                            'cmdname', '~/bin/dbd2asc')
 %
 %  See also:
 %    DBACAT
@@ -65,29 +78,43 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(2, 6, nargin, 'struct'));
+  error(nargchk(2, 8, nargin, 'struct'));
   
-  %% Set option values.
-  program_dbd2asc = 'dbd2asc';
-  use_cache_dir = false;
-  extra_options = '';
-  for opt_idx = 1:2:numel(varargin)
-    opt = varargin{opt_idx};
-    val = varargin{opt_idx+1};
-    switch lower(opt)
-      case 'program'
-        program_dbd2asc = val;
-      case 'cache'
-        use_cache_dir = true;
-        cache_dir = val;
-      case 'options'
-        extra_options = val;
-      otherwise
-        error('glider_toolbox:xbd2dba:InvalidOption', ...
-              'Invalid option: %s.', opt);
+  
+  %% Set options and default values.
+  options.cmdname = 'dbd2asc';
+  options.cmdopts = '';
+  options.cache = [];
+  
+  
+  %% Parse optional arguments.
+  % Get option key-value pairs in any accepted call signature.
+  argopts = varargin;
+  if isscalar(argopts) && isstruct(argopts{1})
+    % Options passed as a single option struct argument:
+    % field names are option keys and field values are option values.
+    opt_key_list = fieldnames(argopts{1});
+    opt_val_list = struct2cell(argopts{1});
+  elseif mod(numel(argopts), 2) == 0
+    % Options passed as key-value argument pairs.
+    opt_key_list = argopts(1:2:end);
+    opt_val_list = argopts(2:2:end);
+  else
+    error('glider_toolbox:xbd2dba:InvalidOptions', ...
+          'Invalid optional arguments (neither key-value pairs nor struct).');
+  end
+  % Overwrite default options with values given in extra arguments.
+  for opt_idx = 1:numel(opt_key_list)
+    opt = lower(opt_key_list{opt_idx});
+    val = opt_val_list{opt_idx};
+    if isfield(options, opt)
+      options.(opt) = val;
+    else
+      error('glider_toolbox:xbd2dba:InvalidOption', ...
+            'Invalid option: %s.', opt);
     end
   end
-  
+
   
   %% Check for a single input file.
   if ischar(dbd_files)
@@ -104,19 +131,22 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
   % would produce an empty file that should be removed afterwards. To prevent
   % this, capture the output of the dbd2asc in a string and write it to a file
   % only when conversion succeeds.
-  if use_cache_dir
-    cmd_str = [program_dbd2asc ' -c ' cache_dir ' ' extra_options ' ' input_str];
+  cmd_name = options.cmdname;
+  cmd_opts = options.cmdopts;
+  cac_path = options.cache;
+  if isempty(cac_path)
+    cmd_str = [cmd_name ' ' cmd_opts ' ' input_str];
   else
-    cmd_str = [program_dbd2asc ' ' extra_options ' ' input_str];
+    cmd_str = [cmd_name ' -c ' cac_path ' ' cmd_opts ' ' input_str];
   end
-  [status, cmd_output] = system(cmd_str);
-  if status~=0
+  [status, cmd_out] = system(cmd_str);
+  if status ~= 0
     error('glider_toolbox:xbd2dba:SystemCallError', ...
-          'Error executing call: %s\n%s.', cmd_str, cmd_output);
+          'Error executing call: %s\n%s.', cmd_str, cmd_out);
   end
   
   
-  %% Create base directory of target file if needed.
+  %% Create directory of target file if needed.
   % This seems to be the better way to check if a relative path points to
   % an existing directory (EXIST checks for existance in the whole load path).
   [dba_dir, ~, ~] = fileparts(dba_file);
@@ -139,7 +169,7 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
     error('glider_toolbox:xbd2dba:WriteFileError', ...
           'Could not create file %s: %s.', dba_file, fid_msg);
   end
-  fprintf(fid, '%s', cmd_output);
+  fprintf(fid, '%s', cmd_out);
   fclose(fid);
   
    

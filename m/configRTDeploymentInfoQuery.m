@@ -1,6 +1,9 @@
 function [sql_query, deployment_fields] = configRTDeploymentInfoQuery()
 %CONFIGRTDEPLOYMENTINFOQUERY  Configure the query used to retrieve glider deployment information from the data base.
 %
+%  Syntax:
+%    [SQL_QUERY, DEPLOYMENT_FIELDS] = CONFIGRTDEPLOYMENTINFOQUERY()
+%
 %  [SQL_QUERY, DEPLOYMENT_FIELDS] = CONFIGRTDEPLOYMENTINFOQUERY() should return
 %  the SQL query to get information about glider deployments to be processed in
 %  real time. SQL_QUERY is the query to execute. When executed, the return 
@@ -49,8 +52,6 @@ function [sql_query, deployment_fields] = configRTDeploymentInfoQuery()
     'deployment_start'         'deployment_initial_date'
     'deployment_end'           'deployment_end_date'
     'glider_name'              'platform_name'
-    'glider_instrument_name'   'instrument_name'
-    'glider_deployment_code'   'deployment_code'
   };
 
   deployment_fields = fields_map(:,1)';

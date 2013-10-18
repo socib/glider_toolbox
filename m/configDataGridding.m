@@ -1,6 +1,9 @@
 function gridding_options = configDataGridding()
 %CONFIGDATAGRIDDING  Configure glider data gridding.
 %
+%  Syntax:
+%    GRIDDING_OPTIONS = CONFIGDATAGRIDDING()
+%
 %  GRIDDING_OPTIONS = CONFIGDATAGRIDDING() should return a struct setting the 
 %  options for glider data gridding as needed by the function GRIDGLIDERDATA.
 %

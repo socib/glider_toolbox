@@ -1,6 +1,10 @@
 function writeNetCDFData(var_data, var_meta, global_meta, filename)
 %WRITENETCDFDATA  Interface to low level functions to write data to a NetCDF file.
 %
+%  Syntax:
+%    WRITENETCDFDATA(VAR_DATA, VAR_META, GLOBAL_META)
+%    WRITENETCDFDATA(VAR_DATA, VAR_META, GLOBAL_META, FILENAME)
+%
 %  WRITENETCDFDATA(VAR_DATA, VAR_META, GLOBAL_META)  creates a NetCDF file 
 %  according to global properties given in struct GLOBAL_META with the variables 
 %  defined by the structs VAR_META and VAR_DATA.
@@ -15,8 +19,11 @@ function writeNetCDFData(var_data, var_meta, global_meta, filename)
 %  For every field in struct VAR_DATA a variable is created with the values in 
 %  the field value. VAR_META should have a field with the same name containing 
 %  the metadata for that variable in a struct with fields:
-%    DIMENSIONS: (mandatory) cell array with the name of the dimensions of the
-%      variable.
+%    DIMENSIONS: (mandatory) string cell array with the name of the dimensions 
+%      of the variable.
+%    DATATYPE: (optional) string with the NetCDF data type of the variable.
+%      It should be one of 'double', 'float', 'int', 'short', 'byte', or 'char'.
+%      If this field is missing the default data type 'double' is used.
 %    ATTRIBUTES: (optional) struct array with fields 'NAME' and 'VALUE' 
 %      specifying the attributes of the variable.
 %    NAME: (optional) string with the variable name as it should appear in the
@@ -46,19 +53,22 @@ function writeNetCDFData(var_data, var_meta, global_meta, filename)
 %      struct('name', {'dim1' 'dim2' 'dim3'}, 'length', {0 5 10})
 %    var_meta = struct()
 %    var_meta.rand_vec = struct('dimensions', {{'dim1'}});
-%    var_meta.rand_mat = struct('dimensions', {{'dim2' 'dim3'}});
+%    var_meta.rand_mat = struct('dimensions', {{'dim2' 'dim3'}}, ...
+%                               'datatype', {'int'});
 %    var_data = struct()
-%    var_data.rand_vec = rand(25, 1)
-%    var_data.rand_mat = rand(5, 10)
+%    var_data.rand_vec = randn(25, 1)
+%    var_data.rand_mat = randi(12, 5, 10)
+%    var_data.rand_mat(var_data.rand_mat == 1) = nan;
 %    writeNetCDFData(var_data, var_meta, global_meta)
 %    filename = 'random_with_atts.nc'
 %    var_meta.rand_vec.attributes = ...
-%      struct('name', {'comment'}, 'value', {'This is a random vector'})
+%      struct('name', {'comment', 'add_offset', 'scale_factor' }, ...
+%             'value', {'This is a random vector', 0, 0.01})
 %    var_meta.rand_mat.attributes = ...
 %      struct('name', {'comment', '_FillValue'}, ...
-%             'value', {'This is a random matrix', sqrt(realmax())})
+%             'value', {'This is a random matrix', intmax()})
 %    global_meta.attributes = ...
-%      struct('name', 'creation_date', 'value', datestr(now))
+%      struct('name', {'creation_date'}, 'value', {datestr(now)})
 %    writeNetCDFData(var_data, var_meta, global_meta, filename)
 %
 %  See also:
@@ -117,7 +127,11 @@ function writeNetCDFData(var_data, var_meta, global_meta, filename)
         else
           var_name = field_name;
         end
-        nc{var_name} = ncdouble(var_meta.(field_name).dimensions{:});
+        nc_var_func = @ncdouble;
+        if isfield(var_meta.(field_name), 'datatype')
+          nc_var_func = str2func(['nc' var_meta.(field_name).datatype]);
+        end
+        nc{var_name} = nc_var_func(var_meta.(field_name).dimensions{:});
         if isfield(var_meta.(var_name), 'attributes')
           for var_att = var_meta.(var_name).attributes(:)'
             nc{var_name}.(var_att.name) = var_att.value;
@@ -169,6 +183,9 @@ function writeNetCDFData(var_data, var_meta, global_meta, filename)
           nc_var.Attribute = ...
             struct('Name', {var_meta.(field_name).attributes.name}, ...
                    'Value', {var_meta.(field_name).attributes.value});
+        end
+        if isfield(var_meta.(field_name), 'datatype')
+          nc_var.Datatype = var_meta.(field_name).datatype;
         end
         nc_addvar(filename, nc_var);
         nc_varput(filename, var_name, var_data.(field_name))

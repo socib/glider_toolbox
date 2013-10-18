@@ -61,9 +61,9 @@ function [figures_proc, figures_grid] = configFigures()
   %% Set built-in default values for some figure and axes properties.
   % Figure properties.
   set(0,'DefaultFigurePaperUnits', 'inches');
-  set(0,'DefaultFigurePaperSize', [8.53 5.12]);
+  set(0,'DefaultFigurePaperSize', [6.40 3.84]);
+  set(0,'DefaultFigurePaperPosition', [0 0 6.40 3.84]);
   set(0,'DefaultFigurePaperPositionMode','manual');
-  set(0,'DefaultFigurePaperPosition', [0 0 8.53 5.12]);
   set(0,'DefaultFigureColor', 'white');
   set(0,'DefaultFigureColormap', colormap('jet'));
   set(0,'DefaultFigureInvertHardcopy','off');
@@ -77,11 +77,11 @@ function [figures_proc, figures_grid] = configFigures()
   set(0, 'DefaultAxesFontSize',  8);
   set(0, 'DefaultAxesLineWidth', 0.25);
   % Text properties.
-  set(0, 'DefaultTextFontSize',  10);
+  set(0, 'DefaultTextFontSize',  8);
   
   %% Set printing options.
   default_prntopts = struct();
-  default_prntopts.resolution = 150;
+  default_prntopts.resolution = 200;
   default_prntopts.format = 'png';
   default_prntopts.render = 'painters';
   
@@ -89,9 +89,9 @@ function [figures_proc, figures_grid] = configFigures()
   %% Set default figure and axes properties.
   default_figure = struct();
   default_figure.PaperUnits = 'inches';
-  default_figure.PaperSize = [8.53 5.12];
+  default_figure.PaperSize = [6.40 3.84];
+  default_figure.PaperPosition = [0 0 6.40 3.84];
   default_figure.PaperPositionMode = 'manual';
-  default_figure.PaperPosition = [0 0 8.53 5.12];
   default_figure.Color = 'white';
   default_figure.Colormap = colormap('jet');
   default_figure.InvertHardcopy = 'off';
@@ -223,7 +223,7 @@ function [figures_proc, figures_grid] = configFigures()
   figures_proc.chlorophyll.plotopts.logscale = true;
   figures_proc.chlorophyll.plotopts.xlabel = setfield(default_label, 'String', 'distance (km)');
   figures_proc.chlorophyll.plotopts.ylabel = setfield(default_label, 'String', 'depth (m)');
-  figures_proc.chlorophyll.plotopts.clabel = setfield(default_label, 'String', 'chlorophyll (\mug l-1)');
+  figures_proc.chlorophyll.plotopts.clabel = setfield(default_label, 'String', 'chlorophyll (ug l-1)');
   figures_proc.chlorophyll.plotopts.title = setfield(default_title, 'String', 'In situ chlorophyll');
   figures_proc.chlorophyll.plotopts.axsprops = setfield(default_axes, 'Ydir', 'reverse');
   figures_proc.chlorophyll.plotopts.figprops = default_figure;
@@ -259,7 +259,7 @@ function [figures_proc, figures_grid] = configFigures()
   figures_proc.oxygen_concentration.plotopts.logscale = false;
   figures_proc.oxygen_concentration.plotopts.xlabel = setfield(default_label, 'String', 'distance (km)');
   figures_proc.oxygen_concentration.plotopts.ylabel = setfield(default_label, 'String', 'depth (m)');
-  figures_proc.oxygen_concentration.plotopts.clabel = setfield(default_label, 'String', 'oxygen concentration (\mumol l-1)');
+  figures_proc.oxygen_concentration.plotopts.clabel = setfield(default_label, 'String', 'oxygen concentration (umol l-1)');
   figures_proc.oxygen_concentration.plotopts.title = setfield(default_title, 'String', 'In situ oxygen concentration');
   figures_proc.oxygen_concentration.plotopts.axsprops = setfield(default_axes, 'Ydir', 'reverse');
   figures_proc.oxygen_concentration.figprops = default_figure;
@@ -293,13 +293,13 @@ function [figures_proc, figures_grid] = configFigures()
   figures_proc.temperature_salinity.dataopts.tdata = 'temperature';
   figures_proc.temperature_salinity.plotopts.xlabel = setfield(default_label, 'String', 'salinity (PSU)');
   figures_proc.temperature_salinity.plotopts.ylabel = setfield(default_label, 'String', 'temperature (deg C)');
-  figures_proc.temperature_salinity.plotopts.title = setfield(default_title, 'String', 'Temperature-Salinity diagram on \sigma_t contours');
+  figures_proc.temperature_salinity.plotopts.title = setfield(default_title, 'String', {''; 'Temperature-Salinity diagram on sigma-t contours'});
   figures_proc.temperature_salinity.plotopts.axsprops = setfield(setfield(setfield(default_axes, ...
                                                           'PlotBoxAspectRatio', [1 1 1]), ...
                                                           'XGrid', 'off'), 'YGrid', 'off');
   figures_proc.temperature_salinity.plotopts.figprops = setfield(setfield(default_figure, ...
-                                                          'PaperSize', [6.40 5.12]), ...
-                                                          'PaperPosition', [0 0 6.40 5.12]);
+                                                          'PaperSize', [4.80 3.84]), ...
+                                                          'PaperPosition', [0 0 4.80 3.84]);
   figures_proc.temperature_salinity.prntopts = default_prntopts;
   figures_proc.temperature_salinity.prntopts.filename = 'temperature_salinity';
   figures_proc.temperature_salinity.prntopts.title = 'Temperature - Salinity diagram';
@@ -311,13 +311,13 @@ function [figures_proc, figures_grid] = configFigures()
   figures_proc.temperature_salinity_corrected_thermal.dataopts.tdata = 'temperature';
   figures_proc.temperature_salinity_corrected_thermal.plotopts.xlabel = setfield(default_label, 'String', 'salinity (PSU)');
   figures_proc.temperature_salinity_corrected_thermal.plotopts.ylabel = setfield(default_label, 'String', 'temperature (deg C)');
-  figures_proc.temperature_salinity_corrected_thermal.plotopts.title = setfield(default_title, 'String', 'Temperature-Salinity diagram on \sigma_t contours');
+  figures_proc.temperature_salinity_corrected_thermal.plotopts.title = setfield(default_title, 'String', {'Temperature-Salinity diagram on sigma-t contours'; '(corrected thermal lag)'});
   figures_proc.temperature_salinity_corrected_thermal.plotopts.axsprops = setfield(setfield(setfield(default_axes, ...
                                                                             'PlotBoxAspectRatio', [1 1 1]), ...
                                                                             'XGrid', 'off'), 'YGrid', 'off');
   figures_proc.temperature_salinity_corrected_thermal.plotopts.figprops = setfield(setfield(default_figure, ...
-                                                                            'PaperSize', [6.40 5.12]), ...
-                                                                            'PaperPosition', [0 0 6.40 5.12]);
+                                                                            'PaperSize', [4.80 3.84]), ...
+                                                                            'PaperPosition', [0 0 4.80 3.84]);
   figures_proc.temperature_salinity_corrected_thermal.prntopts = default_prntopts;
   figures_proc.temperature_salinity_corrected_thermal.prntopts.filename = 'temperature_salinity_corrected_thermal';
   figures_proc.temperature_salinity_corrected_thermal.prntopts.title = 'Temperature - Salinity diagram';
@@ -343,8 +343,8 @@ function [figures_proc, figures_grid] = configFigures()
   figures_proc.current_map.plotopts.title = setfield(default_title, 'String', 'Trajectory and column integrated water current estimates');
   figures_proc.current_map.plotopts.axsprops = setfield(setfield(default_axes, 'Layer', 'top'), 'GridLineStyle', ':');
   figures_proc.current_map.plotopts.figprops = setfield(setfield(default_figure, ...
-                                                                 'PaperSize', [6.40 5.12]), ...
-                                                                 'PaperPosition', [0 0 6.40 5.12]);
+                                                                 'PaperSize', [4.80 3.84]), ...
+                                                                 'PaperPosition', [0 0 4.80 3.84]);
   figures_proc.current_map.prntopts = default_prntopts;
   figures_proc.current_map.prntopts.filename = 'current_map';
   figures_proc.current_map.prntopts.title = 'Current map';
@@ -394,19 +394,19 @@ function [figures_proc, figures_grid] = configFigures()
   figures_grid.profiles_ctd_corrected_thermal.plotopts.title(2) = setfield(default_title, 'String', {'Salinity profiles'; '(corrected thermal lag)'});
   figures_grid.profiles_ctd_corrected_thermal.dataopts(3).mdata = 'density_corrected_thermal';
   figures_grid.profiles_ctd_corrected_thermal.dataopts(3).ydata = 'depth';
-  figures_grid.profiles_ctd_corrected_thermal.plotopts.xlabel(3) = setfield(default_label, 'String', 'Density (kg m-1)');
+  figures_grid.profiles_ctd_corrected_thermal.plotopts.xlabel(3) = setfield(default_label, 'String', 'density (kg m-1)');
   figures_grid.profiles_ctd_corrected_thermal.plotopts.ylabel(3) = setfield(default_label, 'String', 'depth (m)');
   figures_grid.profiles_ctd_corrected_thermal.plotopts.title(3) = setfield(default_title, 'String', {'Density profiles'; '(corrected thermal lag)'});
   figures_grid.profiles_ctd_corrected_thermal.plotopts.axsprops(1:3) = default_axes;
   figures_grid.profiles_ctd_corrected_thermal.prntopts = default_prntopts;
   figures_grid.profiles_ctd_corrected_thermal.prntopts.filename = 'ctd_profiles_corrected_thermal';
-  figures_grid.profiles_ctd_corrected_thermal.prntopts.title = 'CTD profiles with corrected thermal lag';
+  figures_grid.profiles_ctd_corrected_thermal.prntopts.title = 'CTD profiles';
   figures_grid.profiles_ctd_corrected_thermal.prntopts.comment = 'Profile statistics of temperature, salinity and density, derived from CTD measurements with thermal lag corrections.';
 
   figures_grid.profiles_flntu.plotfunc = @plotProfileStatistics;
   figures_grid.profiles_flntu.dataopts(1).mdata = 'chlorophyll';
   figures_grid.profiles_flntu.dataopts(1).ydata = 'depth';
-  figures_grid.profiles_flntu.plotopts.xlabel(1) = setfield(default_label, 'String', 'chlorophyll (\mumol l-1)');
+  figures_grid.profiles_flntu.plotopts.xlabel(1) = setfield(default_label, 'String', 'chlorophyll (ug l-1)');
   figures_grid.profiles_flntu.plotopts.ylabel(1) = setfield(default_label, 'String', 'depth (m)');
   figures_grid.profiles_flntu.plotopts.title(1) = setfield(default_title, 'String', 'Chlorophyll profiles');
   figures_grid.profiles_flntu.dataopts(2).mdata = 'turbidity';
@@ -423,7 +423,7 @@ function [figures_proc, figures_grid] = configFigures()
   figures_grid.profiles_oxygen.plotfunc = @plotProfileStatistics;
   figures_grid.profiles_oxygen.dataopts(1).mdata = 'oxygen_concentration';
   figures_grid.profiles_oxygen.dataopts(1).ydata = 'depth';
-  figures_grid.profiles_oxygen.plotopts.xlabel(1) = setfield(default_label, 'String', 'O2 concentration (\mumol l-1)');
+  figures_grid.profiles_oxygen.plotopts.xlabel(1) = setfield(default_label, 'String', 'O2 concentration (umol l-1)');
   figures_grid.profiles_oxygen.plotopts.ylabel(1) = setfield(default_label, 'String', 'depth (m)');
   figures_grid.profiles_oxygen.plotopts.title(1) = setfield(default_title, 'String', 'O2 concentration profiles');
   figures_grid.profiles_oxygen.dataopts(2).mdata = 'oxygen_saturation';

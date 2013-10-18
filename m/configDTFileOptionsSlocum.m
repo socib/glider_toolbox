@@ -1,6 +1,9 @@
 function slocum_options = configDTFileOptionsSlocum()
 %CONFIGDTFILEOPTIONSSLOCUM  Configure conversion and loading options for Slocum files in delayed time.
 %
+%  Syntax:
+%    SLOCUM_OPTIONS = CONFIGDTFILEOPTIONSSLOCUM()
+%
 %  SLOCUM_OPTIONS = CONFIGDTFILEOPTIONSSLOCUM() should return a struct with the
 %  parameters that control which are the deployment files, whether they need to
 %  be converted, and which files and data should be used in delayed time mode.
@@ -60,7 +63,7 @@ function slocum_options = configDTFileOptionsSlocum()
   
   % Enable binary file conversion to text format.
   % Disable it when reprocessing deployments with no new binary data.
-  slocum_options.format_conversion = false;
+  slocum_options.format_conversion = true;
   
   % All binary files, renamed or not:
   % slocum_options.bin_name_pattern = '^(.*)\.([smdtne]bd)$';
@@ -92,7 +95,9 @@ function slocum_options = configDTFileOptionsSlocum()
     'm_gps_status'
     'c_wpt_lat'
     'c_wpt_lon'
+    'm_roll'
     'm_pitch'
+    'm_heading'
     'm_depth'
     'm_final_water_vx'
     'm_final_water_vy'

@@ -1,6 +1,12 @@
 function [var_data, var_meta, global_meta] = readNetCDFData(url, var_names, field_names)
 %READNETCDFDATA  Interface to low level functions to read data from a NetCDF source.
 %
+%  Syntax:
+%    VAR_DATA = READNETCDFDATA(URL)
+%    VAR_DATA = READNETCDFDATA(URL, VAR_NAMES)
+%    VAR_DATA = READNETCDFDATA(URL, VAR_NAMES, FIELD_NAMES)
+%    [VAR_DATA, VAR_META, VAR_GLOBAL] = READNETCDFDATA(...)
+%
 %  VAR_DATA = READNETCDFDATA(URL) reads data from all variables in the NetCDF 
 %  source defined by string URL to struct VAR_DATA. For every variable there is 
 %  a field with the variable name as field name and the variable data as value.
@@ -19,6 +25,7 @@ function [var_data, var_meta, global_meta] = readNetCDFData(url, var_names, fiel
 %  VAR_META with the same name, containing the variable metadata in a struct
 %  with fields:
 %    NAME: string with the original variable name in the NetCDF source.
+%    DATATYPE: string with the original variable NetCDF data type.
 %    DIMENSIONS: cell array with the name of the dimensions of the variable.
 %    ATTRIBUTES: struct array with the attributes of the variable, with fields:
 %      NAME: string with the attribute name.
@@ -121,13 +128,16 @@ function [var_data, var_meta, global_meta] = readNetCDFData(url, var_names, fiel
         field_names = genvarname(var_names);
       end
       % Get available or selected variables, 
-      % variable dimensions and attributes if any, 
+      % variable data type, dimensions and attributes if any, 
       % and variable data.
       for var_idx = 1:numel(nc_var_list)
         % Go for variable metadata.
         var_meta.(field_names{var_idx}) = struct();
-        % Set variable original name.
+        % Get variable original name.
         var_meta.(field_names{var_idx}).name = ncname(nc_var_list{var_idx});
+        % Get variable original data type.
+        var_meta.(field_names{var_idx}).datatype = ...
+          ncdatatype(nc_var_list{var_idx});
         % Get variable dimensions.
         nc_var_dim_list = ncdim(nc_var_list{var_idx});
         var_meta.(field_names{var_idx}).dimensions = ...
@@ -209,13 +219,16 @@ function [var_data, var_meta, global_meta] = readNetCDFData(url, var_names, fiel
         field_names = genvarname(var_names);
       end
       % Get available or selected variables, 
-      % variable dimensions and attributes if any, 
+      % variable data type, dimensions and attributes if any, 
       % and variable data.
       for var_idx = 1:numel(nc_var_list)
         % Go for variable metadata.
         var_meta.(field_names{var_idx}) = struct();
-        % Set variable original name.
+        % Get variable original name.
         var_meta.(field_names{var_idx}).name = nc_var_list(var_idx).Name;
+        % Get variable original data type.
+        var_meta.(field_names{var_idx}).datatype = ...
+          nc_var_list(var_idx).Datatype;
         % Get variable dimensions.
         % Perform renaming to follow coding style guidelines, 
         % and handle empty case for coherence.

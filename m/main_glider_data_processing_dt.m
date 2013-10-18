@@ -111,7 +111,7 @@
 %    GENERATEOUTPUTNETCDFL2
 %    GENERATEFIGURES
 %    DIARY
-%    STRFGLIDER
+%    STRFSTRUCT
 %    XBD2DBA
 %    WRITEJSON
 %
@@ -197,15 +197,15 @@ for deployment_idx = 1:numel(deployment_list)
   deployment_start = deployment.deployment_start;
   deployment_end = deployment.deployment_end;
   glider_name = deployment.glider_name;
-  processing_log = strfglider(config.paths_local.processing_log, deployment);
-  binary_dir = strfglider(config.paths_local.binary_path, deployment);
-  cache_dir = strfglider(config.paths_local.cache_path, deployment);
-  log_dir = strfglider(config.paths_local.log_path, deployment);
-  ascii_dir = strfglider(config.paths_local.ascii_path, deployment);
-  figure_dir = strfglider(config.paths_local.figure_path, deployment);
-  netcdf_l0_file = strfglider(config.paths_local.netcdf_l0, deployment);
-  netcdf_l1_file = strfglider(config.paths_local.netcdf_l1, deployment);
-  netcdf_l2_file = strfglider(config.paths_local.netcdf_l2, deployment);
+  processing_log = strfstruct(config.paths_local.processing_log, deployment);
+  binary_dir = strfstruct(config.paths_local.binary_path, deployment);
+  cache_dir = strfstruct(config.paths_local.cache_path, deployment);
+  log_dir = strfstruct(config.paths_local.log_path, deployment);
+  ascii_dir = strfstruct(config.paths_local.ascii_path, deployment);
+  figure_dir = strfstruct(config.paths_local.figure_path, deployment);
+  netcdf_l0_file = strfstruct(config.paths_local.netcdf_l0, deployment);
+  netcdf_l1_file = strfstruct(config.paths_local.netcdf_l1, deployment);
+  netcdf_l2_file = strfstruct(config.paths_local.netcdf_l2, deployment);
   meta_raw = [];
   data_raw = [];
   data_preprocessed = [];
@@ -307,18 +307,17 @@ for deployment_idx = 1:numel(deployment_list)
   %% Load data from ascii deployment glider files.
   disp('Loading raw deployment data from text files...');
   try
-    load_start = deployment_start;
-    if isempty(deployment_end)
-      load_end = posixtime2utc(posixtime());
-    else
-      load_end = deployment_end;
+    load_start = utc2posixtime(deployment_start);
+    load_end = posixtime();
+    if ~isempty(deployment_end)
+      load_end = utc2posixtime(deployment_end);
     end
     [meta_raw, data_raw] = ...
       loadSlocumData(ascii_dir, ...
                      config.slocum_options.dba_name_pattern_nav, ...
                      config.slocum_options.dba_name_pattern_sci, ...
-                     'timestamp_nav', config.slocum_options.dba_time_sensor_nav, ...
-                     'timestamp_sci', config.slocum_options.dba_time_sensor_sci, ...
+                     'timenav', config.slocum_options.dba_time_sensor_nav, ...
+                     'timesci', config.slocum_options.dba_time_sensor_sci, ...
                      'sensors', config.slocum_options.dba_sensors, ...
                      'period', [load_start load_end], ...
                      'format', 'struct');
@@ -406,7 +405,6 @@ for deployment_idx = 1:numel(deployment_list)
   %% Generate processed data figures.
   if ~(isempty(figure_dir) || isempty(data_processed))
     disp('Generating figures from processed data...');
-    figures.figproc = struct();
     try
       figures.figproc = ...
         generateGliderFigures(data_processed, config.figures_proc, ...
@@ -453,7 +451,6 @@ for deployment_idx = 1:numel(deployment_list)
   %% Generate gridded data figures.
   if ~(isempty(figure_dir) || isempty(data_gridded))
     disp('Generating figures from gridded data...');
-    figures.figgrid = struct();
    try
       figures.figgrid = ...
         generateGliderFigures(data_gridded, config.figures_grid, ...
@@ -475,7 +472,7 @@ for deployment_idx = 1:numel(deployment_list)
            && ~isempty(config.paths_public.(output_name))
         output_local_file = outputs.(output_name);
         output_public_file = ...
-          strfglider(config.paths_public.(output_name), deployment);
+          strfstruct(config.paths_public.(output_name), deployment);
         output_public_dir = fileparts(output_public_file);
         [status, attrout] = fileattrib(output_public_dir);
         if ~status
@@ -512,27 +509,43 @@ for deployment_idx = 1:numel(deployment_list)
       && ~isempty(config.paths_public.figure_dir)
     disp('Copying public figures...');
     public_figure_baseurl = ...
-      strfglider(config.paths_public.figure_url, deployment);
+      strfstruct(config.paths_public.figure_url, deployment);
     public_figure_dir = ...
-      strfglider(config.paths_public.figure_dir, deployment);
-    public_figure_list = struct();
-    public_figure_name_list = {};
-    if isfield(figures, 'figproc')
-      public_figure_name_list = ...
-        union(public_figure_name_list, fieldnames(figures.figproc));
-    end
-    if isfield(figures, 'figgrid')
-      public_figure_name_list = ...
-        union(public_figure_name_list, fieldnames(figures.figgrid));
-    end
+      strfstruct(config.paths_public.figure_dir, deployment);
+    public_figure_include_all = true;
+    public_figure_exclude_none = true;
+    public_figure_include_list = [];
+    public_figure_exclude_list = [];
     if isfield(config.paths_public, 'figure_include')
-      public_figure_name_list = ...
-        intersect(public_figure_name_list, config.paths_public.figure_include);
+      public_figure_include_all = false;
+      public_figure_include_list = config.paths_public.figure_include;
     end
     if isfield(config.paths_public, 'figure_exclude')
-      public_figure_name_list = ...
-        setdiff(public_figure_name_list, config.paths_public.figure_exclude);
+      public_figure_exclude_none = false;
+      public_figure_exclude_list = config.paths_public.figure_exclude;
     end
+    public_figures = struct();
+    public_figures_local = struct();
+    figure_output_name_list = fieldnames(figures);
+    for figure_output_name_idx = 1:numel(figure_output_name_list)
+      figure_output_name = figure_output_name_list{figure_output_name_idx};
+      figure_output = figures.(figure_output_name);
+      figure_name_list = fieldnames(figure_output);
+      for figure_name_idx = 1:numel(figure_name_list)
+        figure_name = figure_name_list{figure_name_idx};
+        if (public_figure_include_all ...
+            || ismember(figure_name, public_figure_include_list)) ...
+            && (public_figure_exclude_none ...
+            || ~ismember(figure_name, public_figure_exclude_list))
+          if isfield(public_figures_local, figure_name)
+            disp(['Warning: figure ' figure_name ' appears to be duplicated.']);
+          else
+            public_figures_local.(figure_name) = figure_output.(figure_name);
+          end
+        end
+      end
+    end
+    public_figure_name_list = fieldnames(public_figures_local);
     if ~isempty(public_figure_name_list)
       [status, attrout] = fileattrib(public_figure_dir);
       if ~status
@@ -543,37 +556,25 @@ for deployment_idx = 1:numel(deployment_list)
       end
       if status
         for public_figure_name_idx = 1:numel(public_figure_name_list)
-          figure_name = public_figure_name_list{public_figure_name_idx};
-          figure_local = [];
-          figure_public = [];
-          if isfield(figures.figproc, figure_name) ...
-              && isfield(figures.figgrid, figure_name)
-            disp(['Warning: figure name '  figure_name ...
-                  ' appears to be duplicated.']);
-          elseif isfield(figures.figproc, figure_name)
-            figure_local = figures.figproc.(figure_name);
-          elseif isfield(figures.figgrid, figure_name)
-            figure_local = figures.figgrid.(figure_name);
-          end
-          if ~isempty(figure_local)
-            figure_public = figure_local;
-            figure_public.url = ...
-              [public_figure_baseurl '/' ...
-               figure_public.filename '.' figure_public.format];
-            figure_public.dirname = public_figure_dir;
-            figure_public.fullfile = ...
-              fullfile(figure_public.dirname, ...
-                       [figure_public.filename '.' figure_public.format]);
-            [success, message] = ...
-              copyfile(figure_local.fullfile, figure_public.fullfile);
-            if success
-              public_figure_list.(figure_name) = figure_public;
-              disp(['Public figure ' figure_name ' succesfully copied.']);
-            else
-              disp(['Error creating public copy of figure ' ...
-                    figure_name ': ' figure_public.fullfile '.']);
-              disp(message);
-            end
+          public_figure_name = public_figure_name_list{public_figure_name_idx};
+          figure_local = public_figures_local.(public_figure_name);
+          figure_public = figure_local;
+          figure_public.url = ...
+            [public_figure_baseurl '/' ...
+             figure_public.filename '.' figure_public.format];
+          figure_public.dirname = public_figure_dir;
+          figure_public.fullfile = ...
+            fullfile(figure_public.dirname, ...
+                     [figure_public.filename '.' figure_public.format]);
+          [success, message] = ...
+            copyfile(figure_local.fullfile, figure_public.fullfile);
+          if success
+            public_figures.(public_figure_name) = figure_public;
+            disp(['Public figure ' public_figure_name ' succesfully copied.']);
+          else
+            disp(['Error creating public copy of figure ' ...
+                  public_figure_name ': ' figure_public.fullfile '.']);
+            disp(message);
           end
         end
       else
@@ -586,9 +587,9 @@ for deployment_idx = 1:numel(deployment_list)
         && ~isempty(config.paths_public.figure_info)
       disp('Generating figure information service file...');
       public_figure_info_file = ...
-        strfglider(config.paths_public.figure_info, deployment);
+        strfstruct(config.paths_public.figure_info, deployment);
       try
-        writeJSON(public_figure_list, public_figure_info_file);
+        writeJSON(public_figures, public_figure_info_file);
         disp(['Figure information service file successfully generated: ' ...
               public_figure_info_file]);
       catch exception

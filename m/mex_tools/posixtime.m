@@ -1,6 +1,9 @@
 function t = posixtime()
 %POSIXTIME  Current POSIX time using low level utilities.
 %
+%  Syntax:
+%    T = POSIXTIME()
+%
 %  T = POSIXTIME() returns the current POSIX time: the number of seconds since
 %  1970-01-01 00:00:00 UTC, not counting the effects of leap seconds.
 %

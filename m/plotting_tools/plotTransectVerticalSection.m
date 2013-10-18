@@ -179,7 +179,7 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
   % statistical toolbox. See documentation there for algorithm details.
   % crange = quantile(options.cdata(:), crange_quantiles);
   crange_quantiles = [0.01 0.99];
-  cdata_sorted = sort(options.cdata(~isnan(options.cdata)));
+  cdata_sorted = sort(options.cdata(isfinite(options.cdata)));
   if isempty(cdata_sorted)
     crange = [0.5 1.5]; % some arbitrary value to let the rest of code work.
   else
@@ -192,10 +192,19 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
     set(hsct, ...
         'XData', options.xdata(:), 'YData', options.ydata(:), ...
         'CData', log10(options.cdata(:)), 'SizeData', options.sdata(:));
-    % Force range to prevent error due to wrong zero or negative values.
+    % Force range to prevent error due to wrong non positive values.
     % These values should not be there for logarithmic scale magnitudes
-    % (e.g. chlorophyll or oxygen concentration).
-    crange = log10(max(crange, [min(options.cdata(options.cdata>0)) -Inf])); 
+    % (e.g. chlorophyll concentration).
+    if crange(2) <= 0
+      crange = log10(realmin('double')*[1 10]);
+    elseif crange(1) <= 0 
+      crange = log10(sort([min(options.cdata(options.cdata(:)>0)) crange(2)]));
+    else
+      crange = log10(crange);
+    end
+    if diff(crange) == 0
+      crange = crange + 0.5 * [-1 1];
+    end
     ctick = bsxfun(@plus, log10(1:9)', floor(crange(1)) : floor(crange(2)));
     ctick = ctick(crange(1) <= ctick & ctick <= crange(2));
     ctick_label = cell(size(ctick));
@@ -212,6 +221,10 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
     set(haxs, 'CLim', crange);
     set(hcba, 'XTick', ctick, 'XTickLabel', ctick_label);
   else
+    % Prevent range error color range contains one single value.
+    if diff(crange) == 0
+      crange = crange + [-0.5 0.5];
+    end
     set(hsct, ...
         'XData', options.xdata(:), 'YData', options.ydata(:), ...
         'CData', options.cdata(:), 'SizeData', options.sdata(:));
@@ -219,7 +232,7 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
   end
   for a = 'xyz'
     if ismember(a, options.dateticks)
-      arange = range(get(haxs, [a 'lim']));
+      arange = diff(get(haxs, [a 'lim']));
       if arange > 365
         datetick_format = 'yyyy mmm';
       elseif arange > 2

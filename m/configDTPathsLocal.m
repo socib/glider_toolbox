@@ -1,6 +1,9 @@
 function local_paths = configDTPathsLocal()
 %CONFIGDTPATHSLOCAL  Config local paths for glider deployment delayed time data and figures.
 %
+%  Syntax:
+%    LOCAL_PATHS = CONFIGDTPATHSLOCAL()
+%
 %  LOCAL_PATHS = CONFIGDTPATHSLOCAL() should return a struct with the path 
 %  patterns for the deployment files generated during the glider processing
 %  chain in delayed time mode. It should have the following fields:
@@ -17,7 +20,7 @@ function local_paths = configDTPathsLocal()
 %      (already processed data interpolated on vertical instantaneous profiles).
 %    PROCESSING_LOG: path pattern of the processing log file.
 %  These path patterns are converted to true paths through the function
-%  STRFGLIDER.
+%  STRFSTRUCT.
 %
 %  Notes:
 %    Edit this file filling in the paths to reflect your desired file layout.
@@ -27,7 +30,7 @@ function local_paths = configDTPathsLocal()
 %
 %  See also:
 %    MAIN_GLIDER_DATA_PROCESSING_DT
-%    STRFGLIDER
+%    STRFSTRUCT
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
@@ -50,14 +53,14 @@ function local_paths = configDTPathsLocal()
 
   error(nargchk(0, 0, nargin, 'struct'));
 
-  local_paths.binary_path    = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START_DATE}/binary';
-  local_paths.cache_path     = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START_DATE}/binary';
-  local_paths.log_path       = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START_DATE}/log';
-  local_paths.ascii_path     = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START_DATE}/ascii';
-  local_paths.figure_path    = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START_DATE}/figures';
-  local_paths.netcdf_l0      = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START_DATE}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START_DATE}_l0.nc';
-  local_paths.netcdf_l1      = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START_DATE}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START_DATE}_l1.nc';
-  local_paths.netcdf_l2      = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START_DATE}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START_DATE}_l2.nc';
-  local_paths.processing_log = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START_DATE}/processing.log';
+  local_paths.binary_path    = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/binary';
+  local_paths.cache_path     = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/binary';
+  local_paths.log_path       = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/log';
+  local_paths.ascii_path     = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/ascii';
+  local_paths.figure_path    = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/figures';
+  local_paths.netcdf_l0      = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l0.nc';
+  local_paths.netcdf_l1      = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l1.nc';
+  local_paths.netcdf_l2      = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l2.nc';
+  local_paths.processing_log = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/processing.log';
 
 end

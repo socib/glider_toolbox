@@ -147,18 +147,17 @@ function [hfig, haxs, hcts, hlbs, hlns] = plotTSDiagram(varargin)
   
   
   %% Set properties of plot elements.
-  valid_data = ~(isnan(options.sdata) | isnan(options.tdata));
-  valid_data = ~(options.tdata < 10 | options.tdata > 40 | ...
-                 options.sdata <  2 | options.sdata > 40);
+  % valid_data = ~(isnan(options.sdata) | isnan(options.tdata));
+  % srange = quantile(options.sdata(valid_data), [0.0001 0.9999])
+  % trange = quantile(options.tdata(valid_data), [0.0001 0.9999])
+  valid_data = (10 < options.tdata) & (options.tdata < 40) ...
+             & ( 2 < options.sdata) & (options.sdata < 40);
   srange = [min(options.sdata(valid_data)) max(options.sdata(valid_data))];
   trange = [min(options.tdata(valid_data)) max(options.tdata(valid_data))];
-  % srange = quantile(options.sdata(:), [0.0001 0.9999])
-  % trange = quantile(options.tdata(:), [0.0001 0.9999])
   [salt_grid, temp_grid] = meshgrid(linspace(srange(1), srange(2), 30), ...
                                     linspace(trange(1), trange(2), 30));
   dns0_grid = sw_dens0(salt_grid, temp_grid) - 1000;
   set(hcts, 'XData', salt_grid, 'YData', temp_grid, 'ZData', dns0_grid);
-  hlbs = clabel(get(hcts, 'ContourMatrix'), hcts, 'Rotation', 0);
   set(haxs, 'XLim', srange, 'YLim', trange);
   set(haxs, 'NextPlot', haxs_next);
   set(haxs, options.axsprops);
@@ -166,12 +165,14 @@ function [hfig, haxs, hcts, hlbs, hlns] = plotTSDiagram(varargin)
   set(haxsxlb, options.xlabel);
   set(haxsylb, options.ylabel);
   set(hcts, 'LineColor', 0.125 * (get(haxs, 'XColor') + get(haxs, 'YColor')));
+  % Contour labels must be created here after setting axes properties.
+  hlbs = clabel(get(hcts, 'ContourMatrix'), hcts, 'Rotation', 0);
   set(hlbs, 'FontSize', get(haxs, 'FontSize'), 'FontWeight', 'bold');
   set(hlns, ...
       'XData', options.sdata, ...
       'YData', options.tdata, ...
       'LineStyle', 'none', 'LineWidth', 0.25 * get(hcts, 'LineWidth'), ...
-      'Marker', '.', 'MarkerSize', 4 * get(hcts, 'LineWidth'), ...
+      'Marker', 'o', 'MarkerSize', 4 * get(hcts, 'LineWidth'), ...
       'MarkerFaceColor', 0.375 * get(hcts, 'LineColor') + 0.625 * get(haxs, 'Color'), ...
       'MarkerEdgeColor', 0.625 * get(hcts, 'LineColor') + 0.375 * get(haxs, 'Color'), ...
       'Color', 0.625 * get(hcts, 'LineColor') + 0.375 * get(haxs, 'Color'));

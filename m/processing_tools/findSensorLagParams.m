@@ -48,7 +48,7 @@ function [constant, exitflag, residual] = findSensorLagParams(time1, depth1, dat
 %
 %  Notes:
 %    This function is an improved version of a previous function by Tomeu Garau,
-%    called ADJUSTIMECONSTANT. He is the true glider man.
+%    called ADJUSTTIMECONSTANT. He is the true glider man.
 %    Introduced changes are:
 %      - Different minimization function (FMINBND instead of FMINCON).
 %      - No initial guess (since FMINBND does not need it).
@@ -98,8 +98,8 @@ function [constant, exitflag, residual] = findSensorLagParams(time1, depth1, dat
   options.optimopts = optimset(optimset('fminbnd'), ...
                                'TolX', 1e-5, ...
                                'Display', 'off');
-
-                             
+  
+  
   %% Parse extra arguments.
   % Get option key-value pairs in any accepted call signature.
   if isscalar(varargin) && isstruct(varargin{1})
@@ -131,10 +131,13 @@ function [constant, exitflag, residual] = findSensorLagParams(time1, depth1, dat
   %% Enable graphical output, if needed.
   % The functions are defined below.
   if options.graphics
+    data_cor1 = correctSensorLag(time1, data1, options.guess);
+    data_cor2 = correctSensorLag(time2, data2, options.guess);
+    options.optimopts.OutputFcn = @optimoutUpdateCorrectedData;
     options.optimopts.PlotFcns = ...
-      {@optimplotx @optimplotfval @optimplotValueTime @optimplotDepthValue};
+      {@optimplotx @optimplotfval @optimplotDataTime @optimplotDepthData};
   end
-
+  
   
   %% Perform estimation through minimization.
   % Definition of minimization objective function.
@@ -167,46 +170,66 @@ function [constant, exitflag, residual] = findSensorLagParams(time1, depth1, dat
 
   
   %% Definition of auxiliar plotting functions.
-  % They should be nested to access sensor data.
-  
-  % Value sequence plot.
-  function stop = optimplotValueTime(x, ~, state)
-  %OPTIMPLOTVALUETIME  Value-Time diagram for pair of casts.
+  % They should be nested to access cast data.
+  function stop = optimoutUpdateCorrectedData(x, ~, state)
+  %OPTIMOUTUPDATEPLOTDATA  Update corrected data sequences.
     switch state
       case 'init'
       case 'iter'
-        hold off;
-        time_offset = min(min(time1), min(time2));
-        plot(time1 - time_offset, correctSensorLag(time1, data1, x), '-r');
-        hold on;
-        plot(time2 - time_offset, correctSensorLag(time2, data2, x), '-b');
-        plot(time1 - time_offset, data1, ':r');
-        plot(time2 - time_offset, data2, ':b');
-        title('Value-Time diagram');
-        xlabel('Time');
-        ylabel('Value');
+        data_cor1 = correctSensorLag(time1, data1, x);
+        data_cor2 = correctSensorLag(time2, data2, x);
       case 'interrupt'
       case 'done'
     end
     stop = false;
   end
   
-  % Depth-Value diagram.
-  function stop = optimplotDepthValue(x, ~, state)
-  %OPTIMPLOTDEPTHVALUE  Depth-Value diagram for pair of casts.
+  % Depth-Data diagram.
+  function stop = optimplotDepthData(~, ~, state)
+  %OPTIMPLOTDEPTHDATA  Depth-Data diagram for pair of casts.
     switch state
       case 'init'
       case 'iter'
+        valid_cor1 = ~(isnan(data_cor1) | isnan(depth1));
+        valid_cor2 = ~(isnan(data_cor2) | isnan(depth2));
+        valid1 = ~(isnan(data1) | isnan(depth1));
+        valid2 = ~(isnan(data2) | isnan(depth2));
         hold off;
-        plot(correctSensorLag(time1, data1, x), depth1, '-r');
+        plot(data_cor1(valid_cor1), depth1(valid_cor1), '-r');
         hold on;
-        plot(correctSensorLag(time2, data2, x), depth2, '-b');
-        plot(data1, depth1, ':r');
-        plot(data2, depth2, ':b');
-        title('Depth-Value diagram');
-        xlabel('Value');
+        plot(data_cor2(valid_cor2), depth2(valid_cor2), '-b');
+        plot(data1(valid1), depth1(valid1), ':r');
+        plot(data2(valid2), depth2(valid2), ':b');
+        title('Depth-Data diagram');
+        xlabel('Data');
         ylabel('Depth');
         set(gca, 'YDir', 'reverse')
+      case 'interrupt'
+      case 'done'
+    end
+    stop = false;
+  end
+  
+  % Data sequence plot.
+  function stop = optimplotDataTime(~, ~, state)
+  %OPTIMPLOTDATATIME  Data-Time diagram for pair of casts.
+    switch state
+      case 'init'
+      case 'iter'
+        valid_cor1 = (time1 > 0) & ~isnan(data_cor1);
+        valid_cor2 = (time2 > 0) & ~isnan(data_cor2);
+        valid1 = (time1 > 0) & ~isnan(data1);
+        valid2 = (time2 > 0) & ~isnan(data2);
+        hold off;
+        time_offset = min(min(time1(valid1)), min(time2(valid2)));
+        plot(time1(valid_cor1) - time_offset, data_cor1(valid_cor1), '-r');
+        hold on;
+        plot(time2(valid_cor2) - time_offset, data_cor2(valid_cor2), '-b');
+        plot(time1(valid1) - time_offset, data1(valid1), ':r');
+        plot(time2(valid2) - time_offset, data2(valid2), ':b');
+        title('Data-Time diagram');
+        xlabel('Time');
+        ylabel('Data');
       case 'interrupt'
       case 'done'
     end

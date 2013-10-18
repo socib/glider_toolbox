@@ -1,6 +1,9 @@
 function data = getDBDeploymentInfo(db_access, query, fields)
 %GETDBDEPLOYMENTINFO  Get deployment information from data base.
 %
+%  Syntax:
+%    DATA = GETDBDEPLOYMENTINFO(DB_ACCESS, QUERY, FIELDS)
+%
 %  DATA = GETDBDEPLOYMENTINFO(DB_ACCESS, QUERY, FIELDS) executes the given QUERY
 %  on the data base described in struct DB_ACCESS, and returns a struct DATA
 %  with fields given by string cell array FIELDS mapped to the corresponding 
@@ -22,8 +25,6 @@ function data = getDBDeploymentInfo(db_access, query, fields)
 %    DEPLOYMENT_START: deployment start date (see note on time format).
 %    DEPLOYMENT_END: deployment end date (see note on time format).
 %    GLIDER_NAME: glider platform name (as used in glider file names).
-%    GLIDER_INSTRUMENT_NAME: glider instrument name (e.g. internal unit name).
-%    GLIDER_DEPLOYMENT_NUMBER: number of deployment of this glider.
 %  The returned structure may include other fields, which are considered to be
 %  global deployment attributes by functions generating final products like
 %  GENERATEOUTPUTNETCDFL0, GENERATEOUTPUTNETCDFL1 and GENERATEOUTPUTNETCDFL2.

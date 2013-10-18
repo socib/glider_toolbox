@@ -1,5 +1,5 @@
 function setupMexPosixtime()
-%CONFIGMEXPOSIXTIME  Build mex file for getting current system POSIX time.
+%SETUPMEXPOSIXTIME  Build mex file for system POSIX time function POSIXTIME.
 %
 %  Syntax:
 %    SETUPMEXPOSIXTIME()

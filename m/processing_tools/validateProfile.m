@@ -1,17 +1,20 @@
-function [valid, full_rows] = validateProfile(depth, data, varargin)
+function [valid, full_rows] = validateProfile(depth, varargin)
 %VALIDATEPROFILE  Check if profile sequence is a proper profile and if it is well sampled.
 %
 %  Syntax:
-%    VALID = VALIDATEPROFILE(DEPTH, DATA)
-%    VALID = VALIDATEPROFILE(DEPTH, DATA, OPT1, VAL1, ...)
+%    VALID = VALIDATEPROFILE(DEPTH, DATA1, ... , DATAN)
+%    VALID = VALIDATEPROFILE(DEPTH, DATA1, ... , DATAN, OPTIONS)
+%    VALID = VALIDATEPROFILE(DEPTH, DATA1, ... , DATAN, OPT1, VAL1, ...)
 %    [VALID, FULL_ROWS]= VALIDATEPROFILE(...)
 %
-%  VALID = VALIDATEPROFILE(DEPTH, DATA, OPT1, VAL1, ...) checks if vector DEPTH
-%  is a proper profile depth sequence and if data in vector or array DATA is
-%  properly sampled over the profile range, according to criteria in option and 
-%  value pairs OPT1, VAL1... The profile is required to have a minimum depth 
-%  range and contain no significant gaps. Number of rows of DATA and number of 
-%  elements of DEPTH should be the same. Valid options are:
+%  VALID = VALIDATEPROFILE(DEPTH, DATA1, ... , DATAN, OPTIONS) and 
+%  VALID = VALIDATEPROFILE(DEPTH, DATA1, ... , DATAN, OPT1, VAL1, ...) check if 
+%  vector DEPTH is a proper profile depth sequence and if data in vectors or 
+%  column arrays DATA1, ... , DATAN is properly sampled over the profile range, 
+%  according to criteria in option struct OPTIONS or in option key-value pairs 
+%  OPT1, VAL1... The profile is required to have a minimum depth range and 
+%  contain no significant gaps. The number of rows of DEPTH, and DATA1, ... , 
+%  DATAN should be the same. Valid options are:
 %    RANGE: minimum depth range (in the same units as DEPTH).
 %      A profile is invalid if the difference between the maximum and minimum
 %      depth values is smaller than given threshold.
@@ -26,7 +29,8 @@ function [valid, full_rows] = validateProfile(depth, data, varargin)
 %
 %  [VALID, FULL_ROWS]= VALIDATEPROFILE(...) also returns a logical column vector
 %  FULL_ROWS with the same number of elements as DEPTH, showing whether
-%  respective entries in DEPTH or rows in DATA contain some invalid value.
+%  respective entries in DEPTH or rows in DATA1 , ... , DATAN contain some 
+%  invalid value.
 %
 %  Notes:
 %    This function is based on the previous work by Tomeu Garau, in functions
@@ -34,20 +38,20 @@ function [valid, full_rows] = validateProfile(depth, data, varargin)
 %    same name) and CLEANPROFILE. He is the true glider man.
 %
 %  Examples:
-%    depth = [1 2   3 nan  5 nan   7  nan   9  10]
-%    data1 = [0 0 nan nan  4 nan nan    7   8   9]
-%    data2 = [1 4 nan nan 25 nan  49   64 nan 100]
-%    data =  [data1(:) data2(:)]
+%    depth = [1 2   3 nan  5 nan   7  nan   9  10]'
+%    data1 = [0 0 nan nan  4 nan nan    7   8   9]'
+%    data2 = [1 4 nan nan 25 nan  49   64 nan 100]'
+%    data =  [data1 data2]
 %    % Default options: any profile is valid, usefull to retrieve valid rows.
 %    [valid, full_rows] = validateProfile(depth, data)
 %    depth(full_rows)
 %    data(full_rows, :)
 %    % Invalid profile: range too small.
-%    valid = validateProfile(depth, data, 'range', 15)
+%    valid = validateProfile(depth, data1, data2, 'range', 15)
 %    % Invalid profile: gap too large.
-%    valid = validateProfile(depth, data, 'gap', 0.25)
+%    valid = validateProfile(depth, data1, data2, 'gap', 0.25)
 %    % Valid profile: large enough range and small enough gap.
-%    valid = validateProfile(depth, data, 'range', 5, 'gap', 0.75)
+%    valid = validateProfile(depth, data1, data2, 'range', 5, 'gap', 0.75)
 %
 %  See also:
 %    ISNAN
@@ -71,47 +75,74 @@ function [valid, full_rows] = validateProfile(depth, data, varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(2, 6, nargin, 'struct'));
+  error(nargchk(1, Inf, nargin, 'struct'));
   
-  min_range = 0;
-  max_gap_ratio = 1;
-  for opt_idx = 1:2:numel(varargin)
-    opt = varargin{opt_idx};
-    val = varargin{opt_idx+1};
-    switch lower(opt)
-      case 'range'
-        min_range = val;
-      case 'gap'
-        max_gap_ratio = val;
-      otherwise
-        error('glider_toolbox:validateProfile:InvalidOption', ...
-              'Invalid option: %s.', opt);
+  
+  %% Parse basic input arguments.
+  % Get numeric (non option) arguments.
+  nargdata = find(~cellfun(@isnumeric, varargin), 1, 'first') - 1;
+  if isempty(nargdata)
+    nargdata = numel(varargin);
+  end
+  data = [varargin{1:nargdata}];
+
+  
+  %% Set options and default values.
+  options.range = 0;
+  options.gap = 1;
+  
+  
+  %% Parse optional arguments.
+  % Get numeric data arguments and option arguments.
+  % Get option key-value pairs in any accepted call signature.
+  argopts = varargin(nargdata+1:end);
+  if isscalar(argopts) && isstruct(argopts{1})
+    % Options passed as a single option struct argument:
+    % field names are option keys and field values are option values.
+    opt_key_list = fieldnames(argopts{1});
+    opt_val_list = struct2cell(argopts{1});
+  elseif mod(numel(argopts), 2) == 0
+    % Options passed as key-value argument pairs.
+    opt_key_list = argopts(1:2:end);
+    opt_val_list = argopts(2:2:end);
+  else
+    error('glider_toolbox:validateProfile:InvalidOptions', ...
+          'Invalid optional arguments (neither key-value pairs nor struct).');
+  end
+  % Overwrite default options with values given in extra arguments.
+  for opt_idx = 1:numel(opt_key_list)
+    opt = lower(opt_key_list{opt_idx});
+    val = opt_val_list{opt_idx};
+    if isfield(options, opt)
+      options.(opt) = val;
+    else
+      error('glider_toolbox:validateProfile:InvalidOption', ...
+            'Invalid option: %s.', opt);
     end
   end
   
+  
+  %% Validate the profile.
   % Initialize output.
   full_rows = ~any(isnan([depth(:) data]), 2);
   valid = false;
-  
   % Emptiness check.
   if ~any(full_rows)
     return
   end
-  
   % Range check.
-  depth_range = range(depth);
-  if depth_range < min_range 
-    return;
+  depth_range = max(depth(:)) - min(depth(:));
+  if depth_range < options.range 
+    return
   end
-  
   % Gap check.
   max_gap = max([min(depth(full_rows))-min(depth) ...
                  max(abs(diff(depth(full_rows)))) ...
                  max(depth) - max(depth(full_rows))]);
-  if max_gap > max_gap_ratio * depth_range
+  if max_gap > options.gap * depth_range
     return
   end
-  
+  % Checks passed, profile is valid.
   valid = true;
   
 end

@@ -1,6 +1,9 @@
 function processing_options = configDataProcessing()
 %CONFIGDATAPROCESSING  Configure glider data processing.
 %
+%  Syntax:
+%    PROCESSING_OPTIONS = CONFIGDATAPROCESSING()
+%
 %  PROCESSING_OPTIONS = CONFIGDATAPROCESSING() should return a struct setting 
 %  the options for glider data processing as needed by the function
 %  PROCESSGLIDERDATA.
@@ -38,13 +41,18 @@ function processing_options = configDataProcessing()
   
   processing_options.position_sensor_list(1).latitude  = 'm_gps_lat';
   processing_options.position_sensor_list(1).longitude = 'm_gps_lon';
+  processing_options.position_sensor_list(1).position_status = 'm_gps_status';
+  processing_options.position_sensor_list(1).position_status_good = 0;
   processing_options.position_sensor_list(2).latitude  = 'm_lat';
   processing_options.position_sensor_list(2).longitude = 'm_lon';
   
   processing_options.depth_sensor_list = {'m_depth'};
   
-  processing_options.pitch_sensor_list = {'m_pitch'};
+  processing_options.attitude_sensor_list(1).roll = 'm_roll';
+  processing_options.attitude_sensor_list(1).pitch = 'm_pitch';
   
+  processing_options.heading_sensor_list = 'm_heading';
+
   processing_options.waypoint_sensor_list(1).latitude = 'c_wpt_lat';
   processing_options.waypoint_sensor_list(1).longitude = 'c_wpt_lon';
   
@@ -61,17 +69,21 @@ function processing_options = configDataProcessing()
   processing_options.ctd_sensor_list(2).time         = [];
 
   processing_options.flntu_sensor_list(1).chlorophyll = 'sci_flntu_chlor_units';
-  processing_options.flntu_sensor_list(1).turbidity = 'sci_flntu_turb_units';
+  processing_options.flntu_sensor_list(1).turbidity   = 'sci_flntu_turb_units';
+  processing_options.flntu_sensor_list(1).time        = 'sci_flntu_timestamp';
   
   processing_options.oxygen_sensor_list(1).oxygen_concentration = 'sci_oxy3835_oxygen';
-  processing_options.oxygen_sensor_list(1).oxygen_saturation = 'sci_oxy3835_saturation';
+  processing_options.oxygen_sensor_list(1).oxygen_saturation    = 'sci_oxy3835_saturation';
+  processing_options.oxygen_sensor_list(1).temperature          = 'sci_oxy3835_temp';
+  processing_options.oxygen_sensor_list(1).time                 = 'sci_oxy3835_timestamp';
   
   processing_options.extra_sensor_list = struct();
   
   processing_options.time_filling = true;
   processing_options.position_filling = true;
   processing_options.depth_filling = true;
-  processing_options.pitch_filling = true;
+  processing_options.attitude_filling = true;
+  processing_options.heading_filling = true;
   processing_options.waypoint_filling = true;
   
   processing_options.pressure_conversion = true;
@@ -79,10 +91,23 @@ function processing_options = configDataProcessing()
   processing_options.pressure_filter_constant = 4; % Recommended setting from Seabird Data Processing Manual.
   processing_options.depth_ctd_derivation = true;
   
-  processing_options.profiling_sequence = {'depth_ctd' 'depth'};
+  processing_options.profiling_sequence_list = {'depth_ctd' 'depth'};
   processing_options.profiling_sequence_filling = true;
   processing_options.profile_min_range = 10;
   processing_options.profile_max_gap_ratio = 0.8;
+  
+  processing_options.flow_ctd_list(1).time  = 'time_ctd';
+  processing_options.flow_ctd_list(1).depth = 'depth_ctd';
+  processing_options.flow_ctd_list(1).pitch = 'pitch';
+  processing_options.flow_ctd_list(2).time  = 'time';
+  processing_options.flow_ctd_list(2).depth = 'depth_ctd';
+  processing_options.flow_ctd_list(2).pitch = 'pitch';
+  processing_options.flow_ctd_list(3).time  = 'time';
+  processing_options.flow_ctd_list(3).depth = 'depth';
+  processing_options.flow_ctd_list(3).pitch = 'pitch';
+  processing_options.flow_ctd_pitch_value = [];
+  processing_options.flow_ctd_min_pitch = deg2rad(11);
+  processing_options.flow_ctd_min_velocity = 0;
   
   processing_options.sensor_lag_list = ...
      struct('corrected', {}, 'original', {}, 'parameters', {});
@@ -92,6 +117,7 @@ function processing_options = configDataProcessing()
   processing_options.thermal_lag_list(1).conductivity_original  = 'conductivity';
   processing_options.thermal_lag_list(1).temperature_original   = 'temperature';
   processing_options.thermal_lag_list(1).pressure_original      = 'pressure';
+  processing_options.thermal_lag_list(1).constant_flow          = false;
   processing_options.thermal_lag_list(1).parameters             = 'auto';
 
   processing_options.salinity_list(1).salinity     = 'salinity';

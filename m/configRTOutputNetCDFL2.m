@@ -1,6 +1,9 @@
 function nc_l2_info = configRTOutputNetCDFL2()
 %CONFIGRTOUTPUTNETCDFL2  Configure NetCDF output for gridded glider deployment data in real time.
 %
+%  Syntax:
+%    NC_L2_INFO = CONFIGRTOUTPUTNETCDFL2()
+%
 %  NC_L2_INFO = CONFIGRTOUTPUTNETCDFL2() should return a struct describing the
 %  structure of the NetCDF file for gridded glider deployment data in real time
 %  (see the note about the file generation for more details).
@@ -103,6 +106,27 @@ function nc_l2_info = configRTOutputNetCDFL2()
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value };
 
+  var_attr_list.heading = {
+    'long_name'     'glider heading angle'
+    'standard_name' 'heading'
+    'units'         'rad'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.roll = {
+    'long_name'     'glider roll angle'
+    'standard_name' 'roll'
+    'units'         'rad'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.pitch = {
+    'long_name'     'glider pitch angle'
+    'standard_name' 'pitch'
+    'units'         'rad'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.profile_index = {
     'long_name'     'profile index'
     'standard_name' ''
@@ -122,13 +146,6 @@ function nc_l2_info = configRTOutputNetCDFL2()
     'standard_name' 'vertical_speed_direction'
     'units'         '1'
     'comment'       '-1 = ascending, 0 = inflecting, 1 = descending'
-    'coordinates'   'time depth latitude longitude'
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.pitch = {
-    'long_name'     'glider pitch angle'
-    'standard_name' 'pitch'
-    'units'         'rad'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value };
 

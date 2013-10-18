@@ -1,6 +1,9 @@
 function nc_l0_info = configRTOutputNetCDFL0()
 %CONFIGRTOUTPUTNETCDFL0  Configure NetCDF output for raw glider deployment data in real time.
 %
+%  Syntax:
+%    NC_L0_INFO = CONFIGRTOUTPUTNETCDFL0()
+%
 %  NC_L0_INFO = CONFIGRTOUTPUTNETCDFL0() should return a struct describing the
 %  structure of the NetCDF file for raw glider deployment data in real time 
 %  (see the note about the file generation for more details).
@@ -101,6 +104,13 @@ function nc_l0_info = configRTOutputNetCDFL0()
     'units'         'degree_east'  
     '_FillValue'    default_fill_value };
 
+  var_attr_list.m_gps_status = {
+    'long_name'     'GPS status'
+    'standard_name' 'gps_status'
+    'units'         '1'
+    'comments'      '0 = good fix, >0 = no fix'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.c_wpt_lat = {
     'long_name'     'next waypoint latitude'
     'standard_name' 'latitude'
@@ -113,16 +123,10 @@ function nc_l0_info = configRTOutputNetCDFL0()
     'units'         'degree_east'  
     '_FillValue'    default_fill_value };
 
-  var_attr_list.m_speed = {
-    'long_name'     'glider speed through water'
-    'standard_name' 'speed'
-    'units'         'm s-1'  
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.m_pitch = {
-    'long_name'     'glider pitch angle'
-    'standard_name' 'pitch'
-    'units'         'rad'  
+  var_attr_list.m_depth = {
+    'long_name'     'glider measured depth'
+    'standard_name' 'depth'
+    'units'         'm'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_roll = {
@@ -132,9 +136,9 @@ function nc_l0_info = configRTOutputNetCDFL0()
     'comments'      'greater than 0 is port wing up'  
     '_FillValue'    default_fill_value };
 
-  var_attr_list.m_fin = {
-    'long_name'     'glider rudder'
-    'standard_name' 'fin_position'
+  var_attr_list.m_pitch = {
+    'long_name'     'glider pitch angle'
+    'standard_name' 'pitch'
     'units'         'rad'  
     '_FillValue'    default_fill_value };
 
@@ -150,10 +154,16 @@ function nc_l0_info = configRTOutputNetCDFL0()
     'units'         'rad'  
     '_FillValue'    default_fill_value };
 
-  var_attr_list.m_depth = {
-    'long_name'     'glider measured depth'
-    'standard_name' 'depth'
-    'units'         'm'  
+  var_attr_list.m_speed = {
+    'long_name'     'glider speed through water'
+    'standard_name' 'speed'
+    'units'         'm s-1'  
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_fin = {
+    'long_name'     'glider rudder'
+    'standard_name' 'fin_position'
+    'units'         'rad'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.x_inflecting = {

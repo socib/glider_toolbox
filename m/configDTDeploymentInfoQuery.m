@@ -1,6 +1,9 @@
 function [sql_query, deployment_fields] = configDTDeploymentInfoQuery()
 %CONFIGDTDEPLOYMENTINFOQUERY  Configure the query used to retrieve glider deployment information from the data base for delayed time processing.
 %
+%  Syntax:
+%    [SQL_QUERY, DEPLOYMENT_FIELDS] = CONFIGDTDEPLOYMENTINFOQUERY()
+%
 %  [SQL_QUERY, DEPLOYMENT_FIELDS] = CONFIGDTDEPLOYMENTINFOQUERY() should return
 %  the SQL query to get information about glider deployments to be processed in
 %  delayed time. SQL_QUERY is the query to execute. When executed, the return 
@@ -52,8 +55,6 @@ function [sql_query, deployment_fields] = configDTDeploymentInfoQuery()
     'deployment_start'         'deployment_initial_date'
     'deployment_end'           'deployment_end_date'
     'glider_name'              'platform_name'
-    'glider_instrument_name'   'instrument_name'
-    'glider_deployment_code'   'deployment_code'
   };
 
   deployment_fields = fields_map(:,1)';
