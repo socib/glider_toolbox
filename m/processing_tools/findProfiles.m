@@ -1,23 +1,23 @@
-function [profile_direction, profile_index] = findProfiles(depth, varargin)
-%FINDPROFILES  Compute vertical direction and identify individual profiles from depth sequence.
+function [profile_index, profile_direction] = findProfiles(depth, varargin)
+%FINDPROFILES  Identify individual profiles and compute vertical direction from depth sequence.
 %
 %  Syntax:
-%    [PROFILE_DIRECTION, PROFILE_INDEX] = FINDPROFILES(DEPTH)
-%    [PROFILE_DIRECTION, PROFILE_INDEX] = FINDPROFILES(DEPTH, OPTIONS)
-%    [PROFILE_DIRECTION, PROFILE_INDEX] = FINDPROFILES(DEPTH, OPT1, VAL1)
+%    [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(DEPTH)
+%    [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(DEPTH, OPTIONS)
+%    [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(DEPTH, OPT1, VAL1)
 %
-%  [PROFILE_DIRECTION, PROFILE_INDEX] = FINDPROFILES(DEPTH) identifies upcast
+%  [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(DEPTH) identifies upcast
 %  and downcast profiles in depth (or pressure) vector DEPTH, and computes a 
-%  vector of vertical direction PROFILE_DIRECTION and a vector of profile
-%  indices PROFILE_INDEX. DEPTH, PROFILE_DIRECTION and PROFILE_INDEX have the
+%  vector of profile indices PROFILE_INDEX and a vector of vertical direction 
+%  PROFILE_DIRECTION. DEPTH, PROFILE_DIRECTION and PROFILE_INDEX have the
 %  same length. PROFILE_DIRECTION entries may be 1 (down), 0 (flat), -1 (up).
 %  PROFILE_INDEX entries associate each sample with the number of the profile it
 %  belongs to. Samples in the middle of a profile are flagged with a whole 
 %  number, starting from 1 and increased by 1 every time a new cast is 
 %  identified, while samples between profiles are flagged with an offset of 0.5.
 %
-%  [PROFILE_DIRECTION, PROFILE_INDEX] = FINDPROFILES(DEPTH, OPTIONS) and
-%  [PROFILE_DIRECTION, PROFILE_INDEX] = FINDPROFILES(DEPTH, OPT1, VAL1) accept
+%  [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(DEPTH, OPTIONS) and
+%  [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(DEPTH, OPT1, VAL1) accept
 %  the following options given in key-value pairs OPT1, VAL1... or in a struct 
 %  OPTIONS with field names as option keys and field values as option values:
 %    RANGE: minimum depth range (in the same units as DEPTH).
@@ -40,7 +40,7 @@ function [profile_direction, profile_index] = findProfiles(depth, varargin)
 %
 %  Examples:
 %    depth = [3 3 2 1 2 3 3 4 5 5 5 4 3 3 4 2 1 1 0 3 3]
-%    [profile_direction, profile_index] = findProfiles(depth)
+%    [profile_index, profile_direction] = findProfiles(depth)
 %    figure
 %    subplot(3, 1, 1)
 %    stairs(profile_direction, '-g')
@@ -105,8 +105,8 @@ function [profile_direction, profile_index] = findProfiles(depth, varargin)
 
   
   %% Identify the profiles.
-  profile_direction = nan(size(depth));
   profile_index = nan(size(depth));
+  profile_direction = nan(size(depth));
   depth_valid_ind = find(~isnan(depth));
   depth_valid = depth(depth_valid_ind);
   if numel(depth_valid) >= 2

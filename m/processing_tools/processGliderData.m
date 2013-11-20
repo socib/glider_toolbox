@@ -996,7 +996,7 @@ function data_proc = processGliderData(data_pre, varargin)
         fillInvalidValues(data_proc.time, profile_stamp, 'linear');
     end
     % Find profile directions and indices.
-    [data_proc.profile_direction, data_proc.profile_index] = ...
+    [data_proc.profile_index, data_proc.profile_direction] = ...
       findProfiles(profile_stamp, 'range', options.profile_min_range);
   end
   
