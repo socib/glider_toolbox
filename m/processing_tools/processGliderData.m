@@ -973,10 +973,10 @@ function data_proc = processGliderData(data_pre, varargin)
   %% Identify start and end of profiles.
   % Find preferred profiling sequence (e.g. navigation depth, CTD derived depth,
   % pressure ...) present in the already processed data.
+  profiling_sequence_list = cellstr(options.profiling_sequence_list);
   profiling_sequence_avail = false;
-  for profiling_sequence_idx = 1:numel(options.profiling_sequence_list)
-    profiling_sequence = ...
-      options.profiling_sequence_list{profiling_sequence_idx};
+  for profiling_sequence_idx = 1:numel(profiling_sequence_list)
+    profiling_sequence = profiling_sequence_list{profiling_sequence_idx};
     if isfield(data_proc, profiling_sequence) ...
         && ~all(isnan(data_proc.(profiling_sequence)))
       profile_stamp = data_proc.(profiling_sequence);
@@ -1271,7 +1271,7 @@ function data_proc = processGliderData(data_pre, varargin)
     end
     if isfield(thermal_lag_option, 'flow') ...
         && ~isempty(thermal_lag_option.flow)
-      thermal_lag_flow_list = cellstr(thermal_lag_flow_list);
+      thermal_lag_flow_list = cellstr(thermal_lag_option.flow);
     end
     if isfield(thermal_lag_option, 'time') ...
         && ~isempty(thermal_lag_option.time)
