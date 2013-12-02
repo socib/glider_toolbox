@@ -58,11 +58,11 @@ void poly2tri_gpc(double** xout, double** yout, size_t* nout,
   /* Fill in the gpc contour. */
   p.num_contours = 1;
   p.hole = (int*) malloc(1 * sizeof(int));
-  p.contour = (gpc_vertex_list*) malloc(1 * sizeof(gpc_vertex_list));
   p.hole[0] = 0;
+  p.contour = (gpc_vertex_list*) malloc(1 * sizeof(gpc_vertex_list));
   p.contour[0].num_vertices = nin;
   p.contour[0].vertex = (gpc_vertex*) malloc(nin * sizeof(gpc_vertex));
-  for (i = 0; i < p.contour[0].num_vertices; i++)
+  for (i = 0; i < nin; i++)
   {
     p.contour[0].vertex[i].x = xin[i];
     p.contour[0].vertex[i].y = yin[i];
@@ -90,13 +90,10 @@ void poly2tri_gpc(double** xout, double** yout, size_t* nout,
       (*yout)[k++] = t.strip[i].vertex[j].y;
     }
 
-  /* Free the gpc triangle strip allocated by gpc itself. */
-  gpc_free_tristrip(&t);
 
-  /* Free the gpc polygon allocated by us. */
-  free(p.contour[0].vertex);
-  free(p.contour);
-  free(p.hole);
+  /* Free the gpc polygon and triangle strip. */
+  gpc_free_tristrip(&t);
+  gpc_free_polygon(&p);
 }
 
 
