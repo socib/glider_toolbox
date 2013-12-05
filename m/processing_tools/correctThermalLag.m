@@ -2,27 +2,27 @@ function [temp_inside, cond_outside] = correctThermalLag(varargin)
 %CORRECTTHERMALLAG  Correct CTD conductivity and temperature sequence from thermal lag effects.
 %
 %  Syntax:
-%    [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, COND_INSIDE, TEMP_OUTSIDE, CONSTANTS)
-%    [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, COND_INSIDE, TEMP_OUTSIDE, FLOW_SPEED, CONSTANTS)
+%    [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, COND_INSIDE, TEMP_OUTSIDE, PARAMS)
+%    [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, COND_INSIDE, TEMP_OUTSIDE, FLOW_SPEED, PARAMS)
 %
-%  [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, COND_INSIDE, TEMP_OUTSIDE, CONSTANTS)
+%  [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, COND_INSIDE, TEMP_OUTSIDE, PARAMS)
 %  corrects thermal lag in a CTD profile sequence with constant flow speed
 %  (pumped CTD) given by vectors TIMESTAMP (sampe timestamp), COND_INSIDE 
 %  (conductivity inside CTD cell) and TEMP_OUTSIDE (temperature outside CTD 
 %  cell), returning vectors COND_OUTSIDE (conductivity outside CTD cell) and 
 %  TEMP_INSIDE (temperature inside CTD cell). TIMESTAMP, COND_INSIDE, 
 %  TEMP_OUTSIDE, COND_OUTSIDE and TEMP_OUTSIDE all have the same dimensions. 
-%  The correction parameters are given in a two element vector CONSTANTS, 
+%  The correction parameters are given in a two element vector PARAMS, 
 %  with the error magnitude (alpha), and the error time constant (tau). 
 %  A detailed description of these parameters may be found in the references 
 %  listed below (Lueck 1990).
 %
-%  [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, DEPTH, PITCH, COND_INSIDE, TEMP_OUTSIDE, CONSTANTS)
+%  [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, DEPTH, PITCH, COND_INSIDE, TEMP_OUTSIDE, PARAMS)
 %  performs the same correction but for a CTD profile with variable flow speed
 %  (unpumped CTD), given by FLOW. FLOW should be a vector with the same
 %  dimensions as COND_INSIDE and TEMP_OUTSIDE, with the flow speed inside the 
 %  CTD cell in m/s. The correction parameters are given in a four 
-%  element vector CONSTANTS, with the offset and the slope of the error 
+%  element vector PARAMS, with the offset and the slope of the error 
 %  magnitude (alpha_o and alpha_s), and the offset and the slope of the error 
 %  time constant (tau_o and tau_s). A detailed description of these parameters 
 %  may be found in the references listed below (Morison 1994).
@@ -54,11 +54,11 @@ function [temp_inside, cond_outside] = correctThermalLag(varargin)
 %  Examples:
 %    % Constant flow speed (pumped CTD) profile:
 %    [temp_inside, cond_outside] = ...
-%      correctThermalLag(timestamp, cond_inside, temp_outside, constants)
+%      correctThermalLag(timestamp, cond_inside, temp_outside, params)
 %    % Variable flow speed (unpumped CTD) profile:
 %    [temp_inside, cond_outside] = 
 %      correctThermalLag(timestamp, cond_inside, temp_outside, ...
-%                        flow_speed, constants)
+%                        flow_speed, params)
 %
 %  See also:
 %    FINDTHERMALLAGPARAMS
@@ -89,12 +89,12 @@ function [temp_inside, cond_outside] = correctThermalLag(varargin)
   switch(nargin)
     case 4
       % Constant flow speed (pumped CTD).
-      [timestamp, cond_inside, temp_outside, constants] = ...
+      [timestamp, cond_inside, temp_outside, params] = ...
         varargin{1:4};
       constant_flow = true;
     case 5
       % Variable flow speed (unpumped CTD).
-      [timestamp, cond_inside, temp_outside, flow_speed, constants] = ...
+      [timestamp, cond_inside, temp_outside, flow_speed, params] = ...
         varargin{1:5};
       constant_flow = false;
   end
@@ -109,8 +109,8 @@ function [temp_inside, cond_outside] = correctThermalLag(varargin)
     temp_val = temp_outside(valid);
     cond_val = cond_inside(valid);
     % Extract parameter values:
-    alpha = constants(1);
-    tau = constants(2);
+    alpha = params(1);
+    tau = params(2);
   else
     % Select full CTD rows
     % The positive time test is needed to deal with odd data from initial
@@ -122,10 +122,10 @@ function [temp_inside, cond_outside] = correctThermalLag(varargin)
     cond_val = cond_inside(valid);
     flow_val = flow_speed(valid);
     % Extract parameter values:
-    alpha_offset = constants(1);
-    alpha_slope = constants(2);
-    tau_offset = constants(3);
-    tau_slope = constants(4);
+    alpha_offset = params(1);
+    alpha_slope = params(2);
+    tau_offset = params(3);
+    tau_slope = params(4);
     % Compute dynamic thermal error and error time parameters for variable flow
     % speed. The formula is given in the references above (Morison 1994).
     alpha = alpha_offset + alpha_slope ./ flow_val(1:end-1);

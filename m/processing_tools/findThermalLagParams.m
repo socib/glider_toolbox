@@ -1,22 +1,20 @@
-function [constants, exitflag, residual] = findThermalLagParams(varargin)
+function [params, exitflag, residual] = findThermalLagParams(varargin)
 %FINDTHERMALLAGPARAMS  Thermal lag parameter estimation for a single pair of casts.
 %
 %  Syntax:
-%    CONSTANTS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, TIME2, COND2, TEMP2, PRES2)
-%    CONSTANTS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, TIME2, COND2, TEMP2, PRES2, OPTIONS)
-%    CONSTANTS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, TIME2, COND2, TEMP2, PRES2, OPT1, VAL1, ...)
-%    CONSTANTS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, FLOW1, TIME2, COND2, TEMP2, PRES2, FLOW2)
-%    CONSTANTS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, FLOW1, TIME2, COND2, TEMP2, PRES2, FLOW2, OPTIONS)
-%    CONSTANTS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, FLOW1, TIME2, COND2, TEMP2, PRES2, FLOW2, OPT1, VAL1, ...)
-%    [CONSTANTS, EXITFLAG, RESIDUAL] = FINDTHERMALLAGPARAMS(...)
+%    PARAMS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, TIME2, COND2, TEMP2, PRES2)
+%    PARAMS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, FLOW1, TIME2, COND2, TEMP2, PRES2, FLOW2)
+%    PARAMS = FINDTHERMALLAGPARAMS(..., OPTIONS)
+%    PARAMS = FINDTHERMALLAGPARAMS(..., OPT1, VAL1, ...)
+%    [PARAMS, EXITFLAG, RESIDUAL] = FINDTHERMALLAGPARAMS(...)
 %
-%  CONSTANTS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, TIME2, COND2, TEMP2, PRES2)
+%  PARAMS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, TIME2, COND2, TEMP2, PRES2)
 %  finds the thermal lag parameters from two CTD profiles with constant flow
 %  speed (pumped CTD) given by sequences of time (s), conductivity (S/m), 
 %  temperature (ºC) and pressure (dbar) in respective vectors TIME1, COND1, 
 %  TEMP1 and PRES1, and TIME2, COND2, TEMP2 and PRES2. The profiles are supposed
 %  to measure the same column of water in opposite directions. The computed 
-%  parameters are returned in a two element vector CONSTANTS, with the error 
+%  parameters are returned in a two element vector PARAMS, with the error 
 %  magnitude (alpha), and the error time constant (tau). A detailed description 
 %  of these parameters may be found in the references listed below (Lueck 1990).
 %
@@ -28,12 +26,16 @@ function [constants, exitflag, residual] = findThermalLagParams(varargin)
 %  FMINCON, using default values for the initial guess and the parameter bounds.
 %  See OPTIONS description below.
 %
-%  CONSTANTS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, FLOW1, TIME2, DEPTH2, TEMP2, PRES2, FLOW2, ...)
+%  PARAMS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, FLOW1, TIME2, DEPTH2, TEMP2, PRES2, FLOW2, ...)
 %  performs the same estimation but for a pair of CTD profiles with variable 
-%  flow speed (unpumped CTD), given by respective vectors FLOW1 and FLOW2. 
+%  flow speed (unpumped CTD), given by respective vectors FLOW1 and FLOW2.
+%  The estimated parameters are returned in a four element vector PARAMS, with 
+%  the offset and the slope of the error magnitude (alpha_o and alpha_s) and the
+%  offset and the slope of the error time (tau_o and tau_s). Details on these
+%  parameters may be found in references below (Morison 1994).
 %
-%  CONSTANTS = FINDTHERMALLAGPARAMS(..., OPTIONS) and 
-%  CONSTANTS = FINDTHERMALLAGPARAMS(..., OPT1, VAL1, ...) allow passing extra 
+%  PARAMS = FINDTHERMALLAGPARAMS(..., OPTIONS) and 
+%  PARAMS = FINDTHERMALLAGPARAMS(..., OPT1, VAL1, ...) allow passing extra 
 %  options given in key-value pairs OPT1, VAL1... or in a struct OPTIONS with 
 %  field names as option keys and field values as option values.
 %  Recognized options are:
@@ -45,28 +47,29 @@ function [constants, exitflag, residual] = findThermalLagParams(varargin)
 %    GUESS: initial guess for minimization function FMINCON.
 %      A two or four element vector with the initial guess for each parameter.
 %      Default value:
-%        For variable flow speed: [0.0135 0.0264 7.1499 2.7858] (Morison 1994).
-%        For constant flow speed: [0.0677 11.1431] (see note below).
+%        For constant flow speed: [0.0677 11.1431] (see note below)
+%        For variable flow speed: [0.0135 0.0264 7.1499 2.7858] (Morison 1994)
 %    LOWER: lower bounds of parameters for minimization function FMINCON.
 %      A four element vector with the lower bound for each parameter.
 %      Default value:
-%        For variable flow speed: [0 0 0 0] (no correction).
-%        For constant flow speed: [0 0] (no correction).
+%        For constant flow speed: [0 0] (no correction)
+%        For variable flow speed: [0 0 0 0] (no correction)
 %    UPPER: upper bounds of parameters for minimization function FMINCON.
 %      A four element vector with the upper bound for each parameter.
 %      Default value:
-%        For variable flow speed: [2 1 RANGE(TIME1) RANGE(TIME1)/2].
-%        For constant flow speed: [4 2.5*RANGE(TIME1)].
+%        For constant flow speed: [4 2.5*RANGE(TIME1)]
+%        For variable flow speed: [2 1 RANGE(TIME1) RANGE(TIME1)/2]
 %    OPTIMOPTS: extra options for the minimization function FMINCON.
 %      A option struct as needed by the function FMINCON.
 %      Default value: default options for FMINCON, except for:
-%       'Algorithm': 'interior-point'
-%       'TolFun': 1e-4
-%       'TolCon': 1e-5
-%       'TolX': 1e-5
-%       'Display': 'off'
+%        'Algorithm': 'interior-point'
+%        'FinDiffType': 'central'
+%        'TolFun': 1e-4
+%        'TolCon': 1e-5
+%        'TolX': 1e-5
+%        'Display': 'off'
 %
-%  [CONSTANTS, EXITFLAG, RESIDUAL] = FINDTHERMALLAGPARAMS(...) also returns the 
+%  [PARAMS, EXITFLAG, RESIDUAL] = FINDTHERMALLAGPARAMS(...) also returns the 
 %  exit code of the minimization function FMINCON in EXITFLAG, and the resulting
 %  residual area in RESIDUAL. EXITFLAG is positive when minimization succeeds.
 %
@@ -74,12 +77,12 @@ function [constants, exitflag, residual] = findThermalLagParams(varargin)
 %    This function is an improved version of a previous function by Tomeu Garau,
 %    called ADJUSTTHERMALLAGPARAMS. He is the true glider man.
 %    Introduced changes are:
+%      - Support for CTD profiles with constant flow speed (pumped CTD).
 %      - Different minimization algorithm (interior-point instead of active-set).
 %      - Support for custom minimization options.
 %      - Optional predefined graphical output.
-%      - Support for CTD profiles with constant flow speed (pumped CTD).
 %
-%    It remains to be assessed that the constants found minimize the area 
+%    It remains to be assessed that the parameters found minimize the area 
 %    between the corrected profiles globally, because the solver might look for
 %    local minimizers only.
 %
@@ -91,11 +94,11 @@ function [constants, exitflag, residual] = findThermalLagParams(varargin)
 %        tau = 7.1499 + 2.7858 / sqrt(11.1431) = 11.1431 
 %    The flow speed value is estimated from reported Seabird Glider Payload CTD 
 %    (GPCTD) specifications as:
-%      v = 0.010 / 0.003 * 0.146 = 0.4867 m/s
+%      V = Q / U * L = 0.010 / 0.003 * 0.146 = 0.4867 m/s
 %    where:
-%      Q = 0.010 L/s is the flow rate.
+%      Q = 0.010 l/s is the flow rate.
+%      U = 0.003 l   is the cell volume.
 %      L = 0.146 m   is the cell length.
-%      V = 0.003 L   is the cell volume.
 %
 %  References:
 %    Garau, B.; Ruiz, S.; G. Zhang, W.; Pascual, A.; Heslop, E.;
@@ -117,25 +120,54 @@ function [constants, exitflag, residual] = findThermalLagParams(varargin)
 %
 %  Examples:
 %    % Constant flow speed profiles (pumped CTD):
-%    constants = ...
-%      findThermalLagParams(time1, cond1, temp1, pres1, 
-%                           time2, cond2, temp2, pres2);
+%    data = load('private/test/ctd_pumped.dat');
+%    profile = data(:, 10);
+%    time1 = data(profile==1, 1);
+%    cond1 = data(profile==1, 2);
+%    temp1 = data(profile==1, 3);
+%    pres1 = data(profile==1, 4);
+%    time2 = data(profile==2, 1);
+%    cond2 = data(profile==2, 2);
+%    temp2 = data(profile==2, 3);
+%    pres2 = data(profile==2, 4);
+%    params = findThermalLagParams(time1, cond1, temp1, pres1, ...
+%                                  time2, cond2, temp2, pres2)
+%
 %    % Variable flow speed profiles (unpumped CTD):
-%    constants = ...
-%      findThermalLagParams(time1, cond1, temp1, pres1, flow1, ...
-%                           time2, cond2, temp2, pres2, flow2);
+%    data = load('private/test/ctd_unpumped.dat');
+%    profile = data(:, 10);
+%    time1 = data(profile==1, 1);
+%    cond1 = data(profile==1, 2);
+%    temp1 = data(profile==1, 3);
+%    pres1 = data(profile==1, 4);
+%    ptch1 = data(profile==1, 5);
+%    lati1 = data(profile==1, 8);
+%    dpth1 = sw_dpth(pres1, lati1);
+%    flow1 = computeCTDFlowSpeed(time1, dpth1, ptch1, 'minpitch', deg2rad(11));
+%    time2 = data(profile==2, 1);
+%    cond2 = data(profile==2, 2);
+%    temp2 = data(profile==2, 3);
+%    pres2 = data(profile==2, 4);
+%    ptch2 = data(profile==2, 5);
+%    lati2 = data(profile==2, 8);
+%    dpth2 = sw_dpth(pres2, lati2);
+%    flow2 = computeCTDFlowSpeed(time2, dpth2, ptch2, 'minpitch', deg2rad(11));
+%    params = findThermalLagParams(time1, cond1, temp1, pres1, flow1, ...
+%                                  time2, cond2, temp2, pres2, flow2)
+%
 %    % Variable flow speed profiles with exit code, residual and extra options.
-%    [constants, exitflag, residual] = ...
+%    [params, exitflag, residual] = ...
 %      findThermalLagParams(time1, cond1, temp1, pres1, flow1, ...
 %                           time2, cond2, temp2, pres2, flow2, ...
-%                           options);
+%                           'graphics', 'true')
 %
 %  See also:
-%    COMPUTECTDFLOWSPEED
+%    FMINCON
+%    OPTIMSET
 %    CORRECTTHERMALLAG
 %    SW_SALT
-%    OPTIMSET
-%    FMINCON
+%    SW_DENS
+%    COMPUTECTDFLOWSPEED
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
@@ -197,6 +229,7 @@ function [constants, exitflag, residual] = findThermalLagParams(varargin)
   options.optimopts = optimset(optimset('fmincon'), ...
                                'Algorithm', 'interior-point', ...
                                'TolFun', 1e-4, 'TolCon', 1e-5, 'TolX', 1e-5, ...
+                               'FinDiffType', 'central', ...
                                'Display', 'off');
   
   
@@ -257,40 +290,58 @@ function [constants, exitflag, residual] = findThermalLagParams(varargin)
   
   %% Perform estimation through minimization.
   % Definition of minimization objective function.
-  if constant_flow
-    objective_function = @(constants) profileArea(...
-      sw_salt(cond1 * (10 / sw_c3515()), correctThermalLag(time1, cond1, temp1, constants), pres1), ...
-      temp1, ...
-      sw_salt(cond2 * (10 / sw_c3515()), correctThermalLag(time2, cond2, temp2, constants), pres2), ...
-      temp2);
-  else
-    objective_function = @(constants) profileArea(...
-      sw_salt(cond1 * (10 / sw_c3515()), correctThermalLag(time1, cond1, temp1, flow1, constants), pres1), ...
-      temp1, ...
-      sw_salt(cond2 * (10 / sw_c3515()), correctThermalLag(time2, cond2, temp2, flow2, constants), pres2), ...
-      temp2);
-  end
+  objective_function = @optimobjTSArea;
 
   % Run minimization procedure.
-  [constants, residual, exitflag] = ...
+  [params, residual, exitflag] = ...
     fmincon(objective_function, options.guess, ...
             [], [], [], [], options.lower, options.upper, [], ...
             options.optimopts);
   
   
-  %% Definition of auxiliar plotting functions.
+  %% Definition of auxiliary objective and plotting functions.  
   % They should be nested to access cast data.
-  function stop = optimoutUpdateCorrectedData(x, ~, state)
+  function area = optimobjTSArea(params)
+  %OPTIMOBJTSAREA Compute area enclosed by profiles in TS diagram.
+    if constant_flow
+      temp_cor1 = correctThermalLag(time1, cond1, temp1, params);
+      temp_cor2 = correctThermalLag(time2, cond2, temp2, params);
+    else
+      temp_cor1 = correctThermalLag(time1, cond1, temp1, flow1, params);
+      temp_cor2 = correctThermalLag(time2, cond2, temp2, flow2, params);
+    end
+    salt_cor1 = sw_salt(cond1 * (10 / sw_c3515()), temp_cor1, pres1);
+    salt_cor2 = sw_salt(cond2 * (10 / sw_c3515()), temp_cor2, pres2);
+    dens_cor1 = sw_dens(salt_cor1, temp1, pres1);
+    dens_cor2 = sw_dens(salt_cor2, temp2, pres2);
+    dens_min = max(min(dens_cor1), min(dens_cor2));
+    dens_max = min(max(dens_cor1), max(dens_cor2));
+    dens_mask1 = (dens_min <= dens_cor1) & (dens_cor1 <= dens_max);
+    dens_mask2 = (dens_min <= dens_cor2) & (dens_cor2 <= dens_max);
+    min_idx1 = find(dens_mask1, 1, 'first');
+    min_idx2 = find(dens_mask2, 1, 'first');
+    max_idx1 = find(dens_mask1, 1, 'last');
+    max_idx2 = find(dens_mask2, 1, 'last');
+    area = ...
+      profileArea(salt_cor1(min_idx1:max_idx1), temp1(min_idx1:max_idx1), ...
+                  salt_cor2(min_idx2:max_idx2), temp2(min_idx2:max_idx2));
+  end
+  
+  function stop = optimoutUpdateCorrectedData(params, ~, state)
   %OPTIMOUTUPDATEPLOTDATA  Update corrected temperature, conductivity an salinity sequences.
     switch state
       case 'init'
       case 'iter'
         if constant_flow
-          [temp_cor1, cond_cor1] = correctThermalLag(time1, cond1, temp1, x);
-          [temp_cor2, cond_cor2] = correctThermalLag(time2, cond2, temp2, x);
+          [temp_cor1, cond_cor1] = ...
+            correctThermalLag(time1, cond1, temp1, params);
+          [temp_cor2, cond_cor2] = ...
+            correctThermalLag(time2, cond2, temp2, params);
         else
-          [temp_cor1, cond_cor1] = correctThermalLag(time1, cond1, temp1, flow1, x);
-          [temp_cor2, cond_cor2] = correctThermalLag(time2, cond2, temp2, flow2, x);
+          [temp_cor1, cond_cor1] = ...
+            correctThermalLag(time1, cond1, temp1, flow1, params);
+          [temp_cor2, cond_cor2] = ...
+            correctThermalLag(time2, cond2, temp2, flow2, params);
         end
         salt_cor1 = sw_salt(cond1 * (10 / sw_c3515()), temp_cor1, pres1);
         salt_cor2 = sw_salt(cond2 * (10 / sw_c3515()), temp_cor2, pres2);
@@ -299,7 +350,7 @@ function [constants, exitflag, residual] = findThermalLagParams(varargin)
     end
     stop = false;
   end
-
+  
   % Temperature-salinity diagram.
   function stop = optimplotTempSalt(~, ~, state)
   %OPTIMPLOTTEMPSALT  Temperature-salinity diagram for pair of casts.
@@ -310,12 +361,10 @@ function [constants, exitflag, residual] = findThermalLagParams(varargin)
         valid_cor2 = ~(isnan(salt_cor2) | isnan(temp2));
         valid1 = ~(isnan(salt1) | isnan(temp1));
         valid2 = ~(isnan(salt2) | isnan(temp2));
-        hold off;
-        plot(salt_cor1(valid_cor1), temp1(valid_cor1), '-r');
-        hold on;
-        plot(salt_cor2(valid_cor2), temp2(valid_cor2), '-b');
-        plot(salt1(valid1), temp1(valid1), ':r');
-        plot(salt2(valid2), temp2(valid2), ':b');
+        plot(salt1(valid1), temp1(valid1), ':r', ...
+             salt2(valid2), temp2(valid2), ':b', ...
+             salt_cor1(valid_cor1), temp1(valid_cor1), '-r', ...
+             salt_cor2(valid_cor2), temp2(valid_cor2), '-b');
         title('Temperature-Salinity diagram');
         xlabel('Salinity');
         ylabel('Temperature');
@@ -335,12 +384,10 @@ function [constants, exitflag, residual] = findThermalLagParams(varargin)
         valid_cor2 = ~(isnan(salt_cor2) | isnan(pres2));
         valid1 = ~(isnan(salt1) | isnan(pres1));
         valid2 = ~(isnan(salt2) | isnan(pres2));
-        hold off;
-        plot(salt_cor1(valid_cor1), pres1(valid_cor1), '-r');
-        hold on;
-        plot(salt_cor2(valid_cor2), pres2(valid_cor2), '-b');
-        plot(salt1(valid1), pres1(valid1), ':r');
-        plot(salt2(valid2), pres2(valid2), ':b');
+        plot(salt1(valid1), pres1(valid1), ':r', ...
+             salt2(valid2), pres2(valid2), ':b', ...
+             salt_cor1(valid_cor1), pres1(valid_cor1), '-r', ...
+             salt_cor2(valid_cor2), pres2(valid_cor2), '-b');
         title('Pressure-Salinity diagram');
         xlabel('Salinity');
         ylabel('Pressure');
@@ -361,13 +408,11 @@ function [constants, exitflag, residual] = findThermalLagParams(varargin)
         valid_cor2 = (time2 > 0) & ~isnan(temp_cor2);
         valid1 = (time1 > 0) & ~isnan(temp1);
         valid2 = (time2 > 0) & ~isnan(temp2);
-        hold off;
         time_offset = min(min(time1(valid1)), min(time2(valid2)));
-        plot(time1(valid_cor1) - time_offset, temp_cor1(valid_cor1), '-r');
-        hold on;
-        plot(time2(valid_cor2) - time_offset, temp_cor2(valid_cor2), '-b');
-        plot(time1(valid1) - time_offset, temp1(valid1), ':r');
-        plot(time2(valid2) - time_offset, temp2(valid2), ':b');
+        plot(time1(valid1) - time_offset, temp1(valid1), ':r', ...
+             time2(valid2) - time_offset, temp2(valid2), ':b', ...
+             time1(valid_cor1) - time_offset, temp_cor1(valid_cor1), '-r', ...
+             time2(valid_cor2) - time_offset, temp_cor2(valid_cor2), '-b');
         title('Temperature-Time diagram');
         xlabel('Time');
         ylabel('Temperature');
@@ -387,13 +432,11 @@ function [constants, exitflag, residual] = findThermalLagParams(varargin)
         valid_cor2 = (time2 > 0) & ~isnan(cond_cor2);
         valid1 = (time1 > 0) & ~isnan(cond1);
         valid2 = (time2 > 0) & ~isnan(cond2);
-        hold off;
         time_offset = min(min(time1(valid1)), min(time2(valid2)));
-        plot(time1(valid_cor1) - time_offset, cond_cor1(valid_cor1), '-r');
-        hold on;
-        plot(time2(valid_cor2) - time_offset, cond_cor2(valid_cor2), '-b');
-        plot(time1(valid1) - time_offset, cond1(valid1), ':r');
-        plot(time2(valid2) - time_offset, cond2(valid2), ':b');        
+        plot(time1(valid1) - time_offset, cond1(valid1), ':r', ...
+             time2(valid2) - time_offset, cond2(valid2), ':b', ...
+             time1(valid_cor1) - time_offset, cond_cor1(valid_cor1), '-r', ...
+             time2(valid_cor2) - time_offset, cond_cor2(valid_cor2), '-b');     
         title('Conductivity-Time diagram');
         xlabel('Time');
         ylabel('Conductivity');
