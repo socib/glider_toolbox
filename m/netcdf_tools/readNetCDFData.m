@@ -5,7 +5,7 @@ function [var_data, var_meta, global_meta] = readNetCDFData(url, var_names, fiel
 %    VAR_DATA = READNETCDFDATA(URL)
 %    VAR_DATA = READNETCDFDATA(URL, VAR_NAMES)
 %    VAR_DATA = READNETCDFDATA(URL, VAR_NAMES, FIELD_NAMES)
-%    [VAR_DATA, VAR_META, VAR_GLOBAL] = READNETCDFDATA(...)
+%    [VAR_DATA, VAR_META, GLOBAL_META] = READNETCDFDATA(...)
 %
 %  VAR_DATA = READNETCDFDATA(URL) reads data from all variables in the NetCDF 
 %  source defined by string URL to struct VAR_DATA. For every variable there is 
