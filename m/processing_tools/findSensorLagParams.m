@@ -1,16 +1,17 @@
-function [constant, exitflag, residual] = findSensorLagParams(time1, depth1, data1, time2, depth2, data2, varargin)
+function [params, exitflag, residual] = findSensorLagParams(varargin)
 %FINDSENSORLAGPARAMS  Sensor lag time constant adjustment for profiles.
 %
 %  Syntax:
-%    CONSTANT = FINDSENSORLAGPARAMS(TIME1, DEPTH1, DATA1, TIME2, DEPTH2, DATA2)
-%    CONSTANT = FINDSENSORLAGPARAMS(TIME1, DEPTH1, DATA1, TIME2, DEPTH2, DATA2, OPTIONS)
-%    CONSTANT = FINDSENSORLAGPARAMS(TIME1, DEPTH1, DATA1, TIME2, DEPTH2, DATA2, OPT1, VAL1, ...)
-%    [CONSTANT, EXITFLAG, RESIDUAL] = FINDSENSORLAGPARAMS(...)
+%    PARAMS = FINDSENSORLAGPARAMS(TIME1, DEPTH1, DATA1, TIME2, DEPTH2, DATA2)
+%    PARAMS = FINDSENSORLAGPARAMS(TIME1, DEPTH1, DATA1, FLOW1, TIME2, DEPTH2, DATA2, FLOW2)
+%    PARAMS = FINDSENSORLAGPARAMS(..., OPTIONS)
+%    PARAMS = FINDSENSORLAGPARAMS(..., OPT1, VAL1, ...)
+%    [PARAMS, EXITFLAG, RESIDUAL] = FINDSENSORLAGPARAMS(...)
 %
-%  CONSTANT = FINDSENSORLAGPARAMS(TIME1, DEPTH1, DATA1, TIME2, DEPTH2, DATA2)
-%  finds the sensor lag time constant from the two profile sequences given by 
-%  vectors TIME1, DEPTH1 and DATA1, and TIME2, DEPTH2 and DATA2. The profiles
-%  are supposed to measure the same to measure the same column of water in 
+%  PARAMS = FINDSENSORLAGPARAMS(TIME1, DEPTH1, DATA1, TIME2, DEPTH2, DATA2)
+%  finds the sensor lag time constant from two profile sequences with constant
+%  flow speed given by vectors TIME1, DEPTH1 and DATA1, and TIME2, DEPTH2 and 
+%  DATA2. The profiles are supposed to measure the same column of water in 
 %  opposite directions. Based on the assumption that both profiles should be as 
 %  similar as possible, it finds the sensor time lag parameter, such that the 
 %  area in a value-depth diagram between the corrected profiles is minimum.
@@ -20,38 +21,57 @@ function [constant, exitflag, residual] = findSensorLagParams(time1, depth1, dat
 %  is minimal. This problem is solved with the function FMINBND using default 
 %  values for the parameter bounds. See OPTIONS description below.
 %
-%  CONSTANT = FINDSENSORLAGPARAMS(..., OPTIONS) and 
-%  CONSTANT = FINDSENSORLAGPARAMS(..., OPT1, VAL1, ...) allow passing extra 
+%  PARAMS = FINDSENSORLAGPARAMS(TIME1, DEPTH1, DATA1, FLOW1, TIME2, DEPTH2, DATA2, FLOW2)
+%  performs the same estimation but for a pair profiles with variable flow speed
+%  given by respective vectors FLOW1 and FLOW2. The estimated parameters are 
+%  returned in a two element vector PARAMS with the offset and the slope of the 
+%  time lag parameter with respect to the inverse flow speed.
+%
+%  PARAMS = FINDSENSORLAGPARAMS(..., OPTIONS) and 
+%  PARAMS = FINDSENSORLAGPARAMS(..., OPT1, VAL1, ...) allow passing extra 
 %  options given either as key-value pairs OPT1, VAL1... or in a struct
 %  OPTIONS with field names as option keys and field values as option values.
 %  Recognized options are:
 %    GRAPHICS: whether graphic output should be produced.
 %      A boolean. If true a nice figure showing the minimization process will be
 %      displayed. It includes the parameter value, the objective function value,
-%      the time serie of the data and the depth-data diagram.
+%      a value-time diagram both sequences, and a depth-value diagram.
 %      Default value: false.
-%    LOWER: lower bound of parameter for minimization function FMINBND.
+%    GUESS: initial guess for minimization function FMINCON.
+%      A one or two element vector with the initial guess for each parameter.
+%      Default value:
+%        For constant flow speed: 0.5 (see note below)
+%        For variable flow speed: [0.3568 0.07]
+%    LOWER: lower bound of parameter for minimization function FMINCON.
 %      A number with the lower bound for the sensor lag parameter.
-%      Default value: 0 (no correction).
-%    UPPER: upper bound of parameter for minimization function FMINBND.
+%      Default value: 
+%        For constant flow speed: 0 (no correction)
+%        For variable flow speed: [0 0] (no correction)
+%    UPPER: upper bound of parameter for minimization function FMINCON.
 %      A four element vector with the upper bound for each parameter.
 %      Default value: 16.
-%    OPTIMOPTS: extra options for the minimization function FMINBND.
-%      A option struct as needed by the function FMINBND.
-%      Default value: default options for FMINBND, except for:
-%       'TolX': 1e-5
-%       'Display': 'off'
+%        For constant flow speed: 16
+%        For variable flow speed: [16 7.5]
+%    OPTIMOPTS: extra options for the minimization function FMINCON.
+%      A option struct as needed by the function FMINCON.
+%      Default value: default options for FMINCON, except for:
+%        'Algorithm'  : 'interior-point'
+%        'FinDiffType': 'central'
+%        'TolFun'     : 1e-4
+%        'TolCon'     : 1e-5
+%        'TolX'       : 1e-5
+%        'Display'    : 'off'
 %
-%  [CONSTANT, EXITFLAG, RESIDUAL] = FINDSENSORLAGPARAMS(...) also returns the 
-%  exit code of the minimization function FMINBND in EXITFLAG, and the resulting
+%  [PARAMS, EXITFLAG, RESIDUAL] = FINDSENSORLAGPARAMS(...) also returns the 
+%  exit code of the minimization function FMINCON in EXITFLAG, and the resulting
 %  residual area in RESIDUAL. EXITFLAG is positive when minimization succeeds.
 %
 %  Notes:
 %    This function is an improved version of a previous function by Tomeu Garau,
-%    called ADJUSTTIMECONSTANT. He is the true glider man.
-%    Introduced changes are:
-%      - Different minimization function (FMINBND instead of FMINCON).
-%      - No initial guess (since FMINBND does not need it).
+%    called ADJUSTTIMECONSTANT. He is the true glider man. Introduced changes are:
+%      - Support for dynamic time lag parameters for sequences with variable 
+%        flow speed.
+%      - Different minimization algorithm (interior-point instead of active-set).
 %      - Support for custom minimization options.
 %      - Optional predefined graphical output.
 %
@@ -60,13 +80,48 @@ function [constant, exitflag, residual] = findSensorLagParams(time1, depth1, dat
 %    minimizers only.
 %
 %  Examples:
-%    constant = findSensorLagParams(time1, depth1, data1, time2, depth2, data2)
-%    [constant, exitflag, residual] = ...
-%      findSensorLagParams(time1, depth1, data1, time2, depth2, data2, options)
+%    % Constant flow speed profiles (pumped CTD):
+%    data = load('private/test/ctd_sharp_pumped.dat');
+%    profile = data(:, 10);
+%    time1 = data(profile==3, 1);
+%    temp1 = data(profile==3, 3);
+%    pres1 = data(profile==3, 4);
+%    time2 = data(profile==4, 1);
+%    temp2 = data(profile==4, 3);
+%    pres2 = data(profile==4, 4);
+%    params = findSensorLagParams(time1, pres1, temp1, time2, pres2, temp2)
+%
+%    % Variable flow speed profiles (unpumped CTD):
+%    data = load('private/test/ctd_sharp_unpumped.dat');
+%    profile = data(:, 10);
+%    time1 = data(profile==17, 1);
+%    temp1 = data(profile==17, 3);
+%    pres1 = data(profile==17, 4);
+%    ptch1 = data(profile==17, 5);
+%    lati1 = data(profile==17, 8);
+%    dpth1 = sw_dpth(pres1, lati1);
+%    flow1 = computeCTDFlowSpeed(time1, dpth1, ptch1, 'minpitch', deg2rad(11));
+%    time2 = data(profile==18, 1);
+%    temp2 = data(profile==18, 3);
+%    pres2 = data(profile==18, 4);
+%    ptch2 = data(profile==18, 5);
+%    lati2 = data(profile==18, 8);
+%    dpth2 = sw_dpth(pres2, lati2);
+%    flow2 = computeCTDFlowSpeed(time2, dpth2, ptch2, 'minpitch', deg2rad(11));
+%    params = findSensorLagParams(time1, pres1, temp1, flow1, ...
+%                                 time2, pres2, temp2, flow2)
+%
+%    % Variable flow speed profiles with exit code, residual and extra options.
+%    [params, exitflag, residual] = ...
+%      findSensorLagParams(time1, pres1, temp1, flow1, ...
+%                          time2, pres2, temp2, flow2, ...
+%                          'graphics', 'true')
 %
 %  See also:
-%    CORRECTSENSORLAG
 %    FMINCON
+%    OPTIMSET
+%    CORRECTSENSORLAG
+%    COMPUTECTDFLOWSPEED
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
@@ -87,30 +142,59 @@ function [constant, exitflag, residual] = findSensorLagParams(time1, depth1, dat
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(6, 16, nargin, 'struct'));
+  error(nargchk(6, 18, nargin, 'struct'));
+  
+  
+  %% Parse basic input arguments.
+  % Get numeric (non option) arguments.
+  nargnum = find(~cellfun(@isnumeric, varargin), 1, 'first') - 1;
+  if isempty(nargnum)
+    nargnum = nargin;
+  end
+  switch(nargnum)
+    case 6
+      % Constant flow speed (pumped CTD).
+      [time1, depth1, data1] = varargin{1:3};
+      [time2, depth2, data2] = varargin{4:6};
+      constant_flow = true;
+    case 8
+      % Variable flow speed (unpumped CTD).
+      [time1, depth1, data1, flow1] = varargin{1:4};
+      [time2, depth2, data2, flow2] = varargin{5:8};
+      constant_flow = false;
+  end
   
   
   %% Configure default options.
   options.graphics = false;
-  options.guess = 0.5;
-  options.lower = 0;
-  options.upper = 16;
-  options.optimopts = optimset(optimset('fminbnd'), ...
-                               'TolX', 1e-5, ...
+  if constant_flow
+    options.guess = 0.5; % from original implementation.
+    options.lower = 0; % no correction.
+    options.upper = 16;  % from original implementation.
+  else
+    options.guess = [0.3568 0.07];
+    options.lower = [0 0];
+    options.upper = [16 7.5];
+  end
+  options.optimopts = optimset(optimset('fmincon'), ...
+                               'Algorithm', 'interior-point', ...
+                               'TolFun', 1e-4, 'TolCon', 1e-5, 'TolX', 1e-5, ...
+                               'FinDiffType', 'central', ...
                                'Display', 'off');
   
   
   %% Parse extra arguments.
   % Get option key-value pairs in any accepted call signature.
-  if isscalar(varargin) && isstruct(varargin{1})
+  argopt = varargin(nargnum+1:end);
+  if isscalar(argopt) && isstruct(argopt{1})
     % Options passed as a single option struct argument:
     % field names are option keys and field values are option values.
-    opt_key_list = fieldnames(varargin{1});
-    opt_val_list = struct2cell(varargin{1});
-  elseif mod(numel(varargin), 2) == 0
+    opt_key_list = fieldnames(argopt{1});
+    opt_val_list = struct2cell(argopt{1});
+  elseif mod(numel(argopt), 2) == 0
     % Options passed as key-value argument pairs.
-    opt_key_list = varargin(1:2:end);
-    opt_val_list = varargin(2:2:end);
+    opt_key_list = argopt(1:2:end);
+    opt_val_list = argopt(2:2:end);
   else
     error('glider_toolbox:findSensorLagParams:InvalidOptions', ...
           'Invalid optional arguments (neither key-value pairs nor struct).');
@@ -131,8 +215,13 @@ function [constant, exitflag, residual] = findSensorLagParams(time1, depth1, dat
   %% Enable graphical output, if needed.
   % The functions are defined below.
   if options.graphics
-    data_cor1 = correctSensorLag(time1, data1, options.guess);
-    data_cor2 = correctSensorLag(time2, data2, options.guess);
+    if constant_flow
+      data_cor1 = correctSensorLag(time1, data1, options.guess);
+      data_cor2 = correctSensorLag(time2, data2, options.guess);
+    else
+      data_cor1 = correctSensorLag(time1, data1, flow1, options.guess);
+      data_cor2 = correctSensorLag(time2, data2, flow2, options.guess);
+    end
     options.optimopts.OutputFcn = @optimoutUpdateCorrectedData;
     options.optimopts.PlotFcns = ...
       {@optimplotx @optimplotfval @optimplotDataTime @optimplotDepthData};
@@ -141,13 +230,12 @@ function [constant, exitflag, residual] = findSensorLagParams(time1, depth1, dat
   
   %% Perform estimation through minimization.
   % Definition of minimization objective function.
-  objective_function = ...
-    @(constant) profileArea(depth1, correctSensorLag(time1, data1, constant), ...
-                            depth2, correctSensorLag(time2, data2, constant));
+  objective_function = @optimobjDepthValueArea;
 
   % Run minimization procedure.
-  [constant, residual, exitflag] = ...
-    fminbnd(objective_function, options.lower, options.upper, ...
+  [params, residual, exitflag] = ...
+    fmincon(objective_function, options.guess, ...
+            [], [], [], [], options.lower, options.upper, [], ...
             options.optimopts);
   
   % This is the equivalent version of the original code by Tomeu Garau,
@@ -169,24 +257,53 @@ function [constant, exitflag, residual] = findSensorLagParams(time1, depth1, dat
   %}
 
   
-  %% Definition of auxiliar plotting functions.
+  %% Definition of auxiliary objective and plotting functions.  
   % They should be nested to access cast data.
-  function stop = optimoutUpdateCorrectedData(x, ~, state)
+
+  function area = optimobjDepthValueArea(params)
+  %OPTIMOBJDEPTHVALUEAREA Compute area enclosed by profiles in depth-value diagram.
+    if constant_flow
+      data_cor1 = correctSensorLag(time1, data1, params);
+      data_cor2 = correctSensorLag(time2, data2, params);
+    else
+      data_cor1 = correctSensorLag(time1, data1, flow1, params);
+      data_cor2 = correctSensorLag(time2, data2, flow2, params);
+    end
+    depth_min = max(min(depth1), min(depth2));
+    depth_max = min(max(depth1), max(depth2));
+    depth_mask1 = (depth_min <= depth1) & (depth1 <= depth_max);
+    depth_mask2 = (depth_min <= depth2) & (depth2 <= depth_max);
+    min_idx1 = find(depth_mask1, 1, 'first');
+    min_idx2 = find(depth_mask2, 1, 'first');
+    max_idx1 = find(depth_mask1, 1, 'last');
+    max_idx2 = find(depth_mask2, 1, 'last');
+    area = ...
+      profileArea(data_cor1(min_idx1:max_idx1), depth1(min_idx1:max_idx1), ...
+                  data_cor2(min_idx2:max_idx2), depth2(min_idx2:max_idx2));
+  end
+  
+  
+  function stop = optimoutUpdateCorrectedData(params, ~, state)
   %OPTIMOUTUPDATEPLOTDATA  Update corrected data sequences.
     switch state
       case 'init'
       case 'iter'
-        data_cor1 = correctSensorLag(time1, data1, x);
-        data_cor2 = correctSensorLag(time2, data2, x);
+        if constant_flow
+          data_cor1 = correctSensorLag(time1, data1, params);
+          data_cor2 = correctSensorLag(time2, data2, params);
+        else
+          data_cor1 = correctSensorLag(time1, data1, flow1, params);
+          data_cor2 = correctSensorLag(time2, data2, flow2, params);
+        end
       case 'interrupt'
       case 'done'
     end
     stop = false;
   end
   
-  % Depth-Data diagram.
+  % Depth-value diagram.
   function stop = optimplotDepthData(~, ~, state)
-  %OPTIMPLOTDEPTHDATA  Depth-Data diagram for pair of casts.
+  %OPTIMPLOTDEPTHDATA  Depth-value diagram for a pair of casts.
     switch state
       case 'init'
       case 'iter'
@@ -194,12 +311,10 @@ function [constant, exitflag, residual] = findSensorLagParams(time1, depth1, dat
         valid_cor2 = ~(isnan(data_cor2) | isnan(depth2));
         valid1 = ~(isnan(data1) | isnan(depth1));
         valid2 = ~(isnan(data2) | isnan(depth2));
-        hold off;
-        plot(data_cor1(valid_cor1), depth1(valid_cor1), '-r');
-        hold on;
-        plot(data_cor2(valid_cor2), depth2(valid_cor2), '-b');
-        plot(data1(valid1), depth1(valid1), ':r');
-        plot(data2(valid2), depth2(valid2), ':b');
+        plot(data_cor1(valid_cor1), depth1(valid_cor1), '-r', ...
+             data_cor2(valid_cor2), depth2(valid_cor2), '-b', ...
+             data1(valid1), depth1(valid1), ':r', ...
+             data2(valid2), depth2(valid2), ':b');
         title('Depth-Data diagram');
         xlabel('Data');
         ylabel('Depth');
@@ -210,9 +325,9 @@ function [constant, exitflag, residual] = findSensorLagParams(time1, depth1, dat
     stop = false;
   end
   
-  % Data sequence plot.
+  % Value-time diagram.
   function stop = optimplotDataTime(~, ~, state)
-  %OPTIMPLOTDATATIME  Data-Time diagram for pair of casts.
+  %OPTIMPLOTDATATIME  Value-time diagram for a pair of casts.
     switch state
       case 'init'
       case 'iter'
@@ -220,13 +335,11 @@ function [constant, exitflag, residual] = findSensorLagParams(time1, depth1, dat
         valid_cor2 = (time2 > 0) & ~isnan(data_cor2);
         valid1 = (time1 > 0) & ~isnan(data1);
         valid2 = (time2 > 0) & ~isnan(data2);
-        hold off;
         time_offset = min(min(time1(valid1)), min(time2(valid2)));
-        plot(time1(valid_cor1) - time_offset, data_cor1(valid_cor1), '-r');
-        hold on;
-        plot(time2(valid_cor2) - time_offset, data_cor2(valid_cor2), '-b');
-        plot(time1(valid1) - time_offset, data1(valid1), ':r');
-        plot(time2(valid2) - time_offset, data2(valid2), ':b');
+        plot(time1(valid_cor1) - time_offset, data_cor1(valid_cor1), '-r', ...
+             time2(valid_cor2) - time_offset, data_cor2(valid_cor2), '-b', ...
+             time1(valid1) - time_offset, data1(valid1), ':r', ...
+             time2(valid2) - time_offset, data2(valid2), ':b');
         title('Data-Time diagram');
         xlabel('Time');
         ylabel('Data');
