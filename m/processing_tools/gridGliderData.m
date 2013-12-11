@@ -62,8 +62,7 @@ function data_grid = gridGliderData(data_proc, varargin)
 %
 %  Notes:
 %    This function is an improved version of a previous function by Tomeu Garau
-%    with the same name. He is the true glider man.
-%    Introduced changes are:
+%    with the same name. He is the true glider man. Main changes are:
 %      - Support for reference coordinate sequence selection, variables to
 %        interpolate, gridding options.
 %      - Use the mean value of readings lying in the depth interval centered at

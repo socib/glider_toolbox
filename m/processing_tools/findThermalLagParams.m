@@ -75,8 +75,7 @@ function [params, exitflag, residual] = findThermalLagParams(varargin)
 %
 %  Notes:
 %    This function is an improved version of a previous function by Tomeu Garau,
-%    called ADJUSTTHERMALLAGPARAMS. He is the true glider man.
-%    Introduced changes are:
+%    called ADJUSTTHERMALLAGPARAMS. He is the true glider man. Main changes are:
 %      - Support for CTD profiles with constant flow speed (pumped CTD).
 %      - Different minimization algorithm (interior-point instead of active-set).
 %      - Support for custom minimization options.

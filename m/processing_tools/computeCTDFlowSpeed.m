@@ -45,7 +45,7 @@ function flow = computeCTDFlowSpeed(varargin)
 %
 %  Notes:
 %    This function is based on the flow speed computation code by Tomeu Garau in
-%    function CORRECTTHERMALLAG. Introduced changes are:
+%    function CORRECTTHERMALLAG. Main changes are:
 %      - Changed vertical velocity approximation method (central instead of 
 %        forward differences).
 %      - Added support for discarding regions with low velocity or low pitch.

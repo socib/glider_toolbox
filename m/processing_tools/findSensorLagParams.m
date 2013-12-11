@@ -68,7 +68,7 @@ function [params, exitflag, residual] = findSensorLagParams(varargin)
 %
 %  Notes:
 %    This function is an improved version of a previous function by Tomeu Garau,
-%    called ADJUSTTIMECONSTANT. He is the true glider man. Introduced changes are:
+%    called ADJUSTTIMECONSTANT. He is the true glider man. Main changes are:
 %      - Support for dynamic time lag parameters for sequences with variable 
 %        flow speed.
 %      - Different minimization algorithm (interior-point instead of active-set).
