@@ -25,7 +25,7 @@ function new_pressure = applySeabirdPressureFilter(time, old_pressure, time_cons
 % 
 %  Notes:
 %    This function is a version of the function APPLYPRESSUREFILTER created by
-%    Tomeu Garau. He is the true glider man. Introduced changes are:
+%    Tomeu Garau. He is the true glider man. Main changes are:
 %      - Time constant argument.
 %      - Duplicate record handling removal.
 %      - Coding style adaptions.

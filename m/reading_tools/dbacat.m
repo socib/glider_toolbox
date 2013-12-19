@@ -33,7 +33,7 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 %
 %  [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP, OPTIONS) and 
 %  [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP, OPT1, VAL1, ...) 
-%  accept the following options given in key-value pairs OPT1, VAL1... or in 
+%  accept the following options given in key-value pairs OPT1, VAL1... or in a
 %  struct OPTIONS with field names as option keys and field values as option 
 %  values:
 %    FORMAT: data output format.

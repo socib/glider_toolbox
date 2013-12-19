@@ -16,7 +16,7 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
 %
 %  [META, DATA] = DBAMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI, OPTIONS) and
 %  [META, DATA] = DBAMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI, OPT1, VAL1, ...) 
-%  accept the following options given in key-value pairs OPT1, VAL1... or in 
+%  accept the following options given in key-value pairs OPT1, VAL1... or in a
 %  struct OPTIONS with field names as option keys and field values as option 
 %  values:
 %    FORMAT: data output format.

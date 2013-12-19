@@ -11,12 +11,12 @@ function [hfig, haxs, hlgn, hcba, htrj, hwpt, hcur] = plotTransectCurrentMap(var
 %  PLOTTRANSECTCURRENTMAP(OPTIONS) and 
 %  PLOTTRANSECTCURRENTMAP(OPT1, VAL1, ...) generate a new figure with a line
 %  plot of the trajectory described in glider data over a map, with an optional 
-%  line plot of the waypoint path and an optional vector plot of the estimated 
-%  average currents according to options in string key-value pairs OPT1, VAL1...
-%  or in option struct OPTIONS. The map is generated with M_PROJ, M_PATCH and
-%  M_GSHHS_H or M_USERCOAST, the line plots are generated with M_PLOT, 
-%  and the vector plot with M_VEC.
-%  Allowed options are:
+%  line plot of the waypoint path and a vector plot of the estimated average 
+%  currents, according to options in key-value pairs OPT1, VAL1... or in struct
+%  OPTIONS with field names as option keys and field values as option values.
+%  The map is generated with M_PROJ, M_PATCH and M_GSHHS_H or M_USERCOAST.
+%  The line plots are generated with M_PLOT, and the vector plot with M_VEC.
+%  Recognized options are:
 %    LATDATA: trajectory latitude coordinate data.
 %      Vector of data to use as latitude coordinate of the glider trajectory.
 %      Default value: []

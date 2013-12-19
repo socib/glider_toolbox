@@ -11,13 +11,14 @@ function [hfig, haxs, hlgs, hlns] = plotProfileStatistics(varargin)
 %  PLOTPROFILESTATISTICS(OPTIONS) and 
 %  PLOTPROFILESTATISTICS(OPT1, VAL1, ...) generate a new figure with line plots
 %  of statistical profiles of gridded glider data according to options in 
-%  key-value pairs OPT1, VAL1... or in option struct OPTIONS. A profile 
-%  statistic subplot is produced for each given variable, showing the mean value
-%  and the standard deviation of each given measured variable along the 
-%  horizontal dimension over the given vertical coordinate for that subplot.
+%  key-value pairs OPT1, VAL1... or in struct OPTIONS with field names as option
+%  keys and field values as option values. A profile statistic subplot is 
+%  produced for each given variable, showing the mean value and the standard 
+%  deviation of each given measured variable along the horizontal dimension 
+%  over the given vertical coordinate for that subplot.
 %  The statistics are computed with the functions MEAN and STD.
 %  The line plots are generated with the function PLOT.
-%  Allowed options are:
+%  Recognized options are:
 %    MDATA: measurement data.
 %      Cell array of matrices with variable data from which the profile
 %      statistics will be computed. One subplot will be produced for each

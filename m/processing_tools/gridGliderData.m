@@ -2,29 +2,30 @@ function data_grid = gridGliderData(data_proc, varargin)
 %GRIDGLIDERDATA  Grid glider trajectory data over instantaneous homogeneous regular profiles.
 %
 %  Syntax:
+%    DATA_GRID = GRIDGLIDERDATA(DATA_PROC)
 %    DATA_GRID = GRIDGLIDERDATA(DATA_PROC, OPTIONS)
 %    DATA_GRID = GRIDGLIDERDATA(DATA_PROC, OPT1, VAL1, ...)
 %
-%  DATA_GRID = GRIDGLIDERDATA(DATA_PROC, ...) converts glider trajectory data in
+%  DATA_GRID = GRIDGLIDERDATA(DATA_PROC) converts glider trajectory data in
 %  struct DATA_PROC to vertical instantaneous profiles defined at regular depth
-%  intervals in DATA_GRID.
+%  intervals in DATA_GRID using default option values (see below).
 %  
 %  Each cast identified in DATA_PROC is converted to an instantaneous vertical 
 %  profile. The position and time coordinates of the new profile are the mean 
 %  values of the respective coordinates in the cast. All profiles are defined at
 %  the same depth coordinates, computed as the depth range of the whole 
-%  trajectory divided in regular intervals of given resolution. Data in the cast
-%  is interpolated over the new depth grid binning the readings lying in the 
+%  trajectory divided into regular intervals of given resolution. The cast data
+%  is interpolated over the new depth grid binning the readings that lay in the 
 %  corresponding depth intervals.
 %
 %  DATA_PROC should be a struct in the format returned by PROCESSGLIDERDATA,
 %  where each field is a time sequence of readings of the variable with the same
-%  name. At least, it should have a sequence for reference coordinates time,
+%  name. At least it should have a sequence for each reference coordinate: time,
 %  latitude and longitude, and depth. It also should have a sequence of profile
 %  indices that flags each reading with the number of the cast it belongs to.
 %
-%  Options may be given either as key-value pairs OPT1, VAL1 ... or in a struct
-%  OPTIONS with field names as option keys and field values as option values.
+%  Options may be given in key-value pairs OPT1, VAL1... or in a struct OPTIONS 
+%  with field names as option keys and field values as option values.
 %  Recognized options are:
 %    PROFILE: profile index sequence choices.
 %      String cell array with the names of the sequence to be used as profile 
@@ -62,8 +63,7 @@ function data_grid = gridGliderData(data_proc, varargin)
 %
 %  Notes:
 %    This function is an improved version of a previous function by Tomeu Garau
-%    with the same name. He is the true glider man.
-%    Introduced changes are:
+%    with the same name. He is the true glider man. Main changes are:
 %      - Support for reference coordinate sequence selection, variables to
 %        interpolate, gridding options.
 %      - Use the mean value of readings lying in the depth interval centered at

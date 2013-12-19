@@ -15,7 +15,7 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
 %
 %  [META, DATA] = LOADSLOCUMDATA(ASCII_DIR, NAME_PATTERN_NAV, NAME_PATTERN_SCI, OPTIONS) and
 %  [META, DATA] = LOADSLOCUMDATA(ASCII_DIR, NAME_PATTERN_NAV, NAME_PATTERN_SCI, OPT1, VAL1, ...) 
-%  accept the following options, given in key-value pairs OPT1, VAL1... or in 
+%  accept the following options, given in key-value pairs OPT1, VAL1... or in a
 %  struct OPTIONS with field names as option keys and field values as option 
 %  values, allowing to restrict the time range or the sensor set of the data to
 %  load, or to specify the output format:

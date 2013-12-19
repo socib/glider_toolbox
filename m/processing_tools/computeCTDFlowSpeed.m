@@ -21,15 +21,15 @@ function flow = computeCTDFlowSpeed(varargin)
 %  whole profile sequence.
 %
 %  FLOW = COMPUTECTDFLOWSPEED(..., OPTIONS) and 
-%  FLOW = COMPUTECTDFLOWSPEED(..., OPT1, VAL1, ...) allow passing extra 
-%  options given either as key-value pairs OPT1, VAL1... or in a struct
-%  OPTIONS with field names as option keys and field values as option values.
+%  FLOW = COMPUTECTDFLOWSPEED(..., OPT1, VAL1, ...) allow passing extra options
+%  given in key-value pairs OPT1, VAL1... or in a struct OPTIONS with field 
+%  names as option keys and field values as option values.
 %  Recognized options are:
 %    FACTORPOLY: flow speed factor polynomial.
 %      Vector with the coefficients of the polynomial that returns the flow
 %      speed factor whem evaluated by POLYVAL at each surge speed value.
 %      See note on flow speed computation below.
-%      Default value:  0.00, 0.03, 0.45 (from original code by T. Garau).
+%      Default value:  [0.00 0.03 1.15] (see note below).
 %    MINVEL: minimum vertical velocity threshold.
 %      Scalar with the minimum vertical velocity threshold below which the 
 %      aproximated surge speed value is supposed to be unreliable. On samples 
@@ -42,10 +42,10 @@ function flow = computeCTDFlowSpeed(varargin)
 %      with an absolute pitch value lesser than given threshold flow speed is 
 %      invalid (NaN).
 %      Default value: 0 (all samples are valid)
-
+%
 %  Notes:
 %    This function is based on the flow speed computation code by Tomeu Garau in
-%    function CORRECTTHERMALLAG. Introduced changes are:
+%    function CORRECTTHERMALLAG. Main changes are:
 %      - Changed vertical velocity approximation method (central instead of 
 %        forward differences).
 %      - Added support for discarding regions with low velocity or low pitch.
@@ -68,7 +68,13 @@ function flow = computeCTDFlowSpeed(varargin)
 %                               1.58, 1.15, 0.70]; % 2nd order degree.
 %      % First order approximation, second row of the matrix.
 %    Surge speed is supposed to be unreliable when the vertical velocity or the
-%    pitch is too low, so the flow speed is left undefined.
+%    pitch is too low, so the flow speed is left undefined. In October 2013
+%    Gerd Krahmann noted that there might be a bug in the original 
+%    implementation, and the matrix of polynomial coefficients (above) should be
+%    transposed:
+%      speed_factor_polynoms = [0.00, 0.00, 1.58;  % 0th order degree.
+%                               0.00, 0.03, 1.15;  % 1st order degree.
+%                               0.40, 0.45, 0.70]; % 2nd order degree.
 %
 %  Examples:
 %    % Vertical profile:
@@ -123,11 +129,12 @@ function flow = computeCTDFlowSpeed(varargin)
   
   
   %% Configure default options.
-  % This is equivalent to the original version by Tomeu Garau.
-  options.factorpoly = [0.00, 0.03, 0.45];
+  % This is NOT equivalent to the original version by Tomeu Garau.
+  % The 1st degree flow speed factor polynomial is chosen, but using the proper
+  % coefficients as noted by Gerd Krahmann.
+  options.factorpoly = [0.00, 0.03, 1.15];
   options.minvel = 0.0;
   options.minpitch = 0.0;
-  
   
   
   %% Parse option arguments.
