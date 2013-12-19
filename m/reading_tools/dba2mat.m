@@ -11,7 +11,7 @@ function [meta, data] = dba2mat(filename, varargin)
 %
 %  [META, DATA] = DBA2MAT(FILENAME, OPTIONS) and 
 %  [META, DATA] = DBA2MAT(FILENAME, OPT1, VAL1, ...) accept the following 
-%  options given in key-value pairs OPT1, VAL1... or in struct OPTIONS with 
+%  options given in key-value pairs OPT1, VAL1... or in a struct OPTIONS with 
 %  field names as option keys and field values as option values:
 %    FORMAT: data output format.
 %      String setting the format of the output DATA. Valid values are:

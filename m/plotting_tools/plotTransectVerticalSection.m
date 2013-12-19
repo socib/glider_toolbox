@@ -11,9 +11,10 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
 %  PLOTTRANSECTVERTICALSECTION(OPTIONS) and 
 %  PLOTTRANSECTVERTICALSECTION(OPT1, VAL1, ...) generate a new figure with a
 %  scatter plot of scalar data collected during a glider transect according to
-%  options in string key-value pairs OPT1, VAL1... or in option struct OPTIONS.
+%  options in string key-value pairs OPT1, VAL1... or in struct OPTIONS with
+%  field names as option keys and field values as option values.
 %  The scatter plot is generated with the function SCATTER.
-%  Allowed options are:
+%  Recognized options are:
 %    XDATA: horizontal coordinate data.
 %      Vector of data to be passed as x coordindate to function SCATTER, 
 %      usually distance or time.

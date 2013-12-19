@@ -14,8 +14,8 @@ function data_pre = preprocessGliderData(data_raw, varargin)
 %  DATA_RAW should be a struct in the format returned by DBACAT or DBAMERGE,
 %  where each field is a time sequence from the sensor with the same name.
 %
-%  Options may be given either as key-value pairs OPT1, VAL1 ... or in a struct
-%  OPTIONS with field names as option keys and field values as option values.
+%  Options may be given in key-value pairs OPT1, VAL1... or in a struct OPTIONS 
+%  with field names as option keys and field values as option values.
 %  Recognized options are:
 %    NMEA_CONVERSION_SENSOR_LIST: string cell array with the latitude or 
 %      longitude sensor sequences to be converted from NMEA to decimal degrees.

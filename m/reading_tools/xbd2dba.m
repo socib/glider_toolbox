@@ -18,8 +18,8 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
 %
 %  DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE, OPTIONS) and
 %  DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE, OPT1, VAL1, ...) accept the
-%  following options given in key-value pairs OPT1, VAL1... or in struct OPTIONS
-%  with field names as option keys and field values as option values:
+%  following options given in key-value pairs OPT1, VAL1... or in a struct 
+%  OPTIONS with field names as option keys and field values as option values:
 %    CMDNAME: conversion program executable.
 %      String with the conversion program command name, including the
 %      path if needed. This is useful if the 'dbd2asc' program has been renamed

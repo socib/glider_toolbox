@@ -10,8 +10,8 @@ function imginfo = printFigure(varargin)
 %  IMGINFO = PRINTFIGURE(OPTIONS) and IMGINFO = PRINTFIGURE(OPT1, VAL1, ...)
 %  print current figure to image file according to given options and return a
 %  struct IMGINFO with information about the generated image file.
-%  Options may be given either as key-value pairs OPT1, VAL1 ... or in a struct
-%  OPTIONS with field names as option keys and field values as option values.
+%  Options may be given in key-value pairs OPT1, VAL1... or in a struct OPTIONS 
+%  with field names as option keys and field values as option values.
 %  Recognized options are:
 %    DIRNAME: image file directory.
 %      String with the path of the directory of the resulting image file.

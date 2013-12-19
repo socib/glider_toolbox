@@ -28,8 +28,8 @@ function [params, exitflag, residual] = findSensorLagParams(varargin)
 %
 %  PARAMS = FINDSENSORLAGPARAMS(..., OPTIONS) and 
 %  PARAMS = FINDSENSORLAGPARAMS(..., OPT1, VAL1, ...) allow passing extra 
-%  options given either as key-value pairs OPT1, VAL1... or in a struct
-%  OPTIONS with field names as option keys and field values as option values.
+%  options given in key-value pairs OPT1, VAL1... or in a struct OPTIONS with 
+%  field names as option keys and field values as option values.
 %  Recognized options are:
 %    GRAPHICS: whether graphic output should be produced.
 %      A boolean. If true a nice figure showing the minimization process will be

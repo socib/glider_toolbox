@@ -26,8 +26,7 @@ function a = profileArea(x1, y1, x2, y2)
 %    y2 = [-2 -1  1  2]
 %    figure
 %    hold on
-%    plot(x1, y1, 'b')
-%    plot(x2, y2, 'r')
+%    plot(x1, y1, 'b', x2, y2, 'r')
 %    a = profileArea(x1, y1, x2, y2)
 %    % POLYAREA would fail because of complex polygon:
 %    a = polyarea([x1(:); x2(:)], [y1(:); y2(:)])

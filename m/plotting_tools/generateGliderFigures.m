@@ -36,8 +36,9 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
 %
 %  FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST, OPT1, VAL1, ...) and
 %  FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST, OPTIONS) allows
-%  passing default values for the following options of PRINTFIGURE, in either
-%  option key - value pairs or in scalar option struct OPTIONS:
+%  passing the following options of PRINTFIGURE in key-value pairs OPT1, VAL1...
+%  or in a struct OPTIONS with field names as option names and field values as 
+%  option values:
 %    DIRNAME: image file directory.
 %      Default value: '' (empty, use current directory)
 %    FORMAT: image file format (extension)

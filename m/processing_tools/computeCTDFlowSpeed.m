@@ -21,9 +21,9 @@ function flow = computeCTDFlowSpeed(varargin)
 %  whole profile sequence.
 %
 %  FLOW = COMPUTECTDFLOWSPEED(..., OPTIONS) and 
-%  FLOW = COMPUTECTDFLOWSPEED(..., OPT1, VAL1, ...) allow passing extra 
-%  options given either as key-value pairs OPT1, VAL1... or in a struct
-%  OPTIONS with field names as option keys and field values as option values.
+%  FLOW = COMPUTECTDFLOWSPEED(..., OPT1, VAL1, ...) allow passing extra options
+%  given in key-value pairs OPT1, VAL1... or in a struct OPTIONS with field 
+%  names as option keys and field values as option values.
 %  Recognized options are:
 %    FACTORPOLY: flow speed factor polynomial.
 %      Vector with the coefficients of the polynomial that returns the flow

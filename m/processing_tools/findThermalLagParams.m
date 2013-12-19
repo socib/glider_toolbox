@@ -37,7 +37,7 @@ function [params, exitflag, residual] = findThermalLagParams(varargin)
 %
 %  PARAMS = FINDTHERMALLAGPARAMS(..., OPTIONS) and 
 %  PARAMS = FINDTHERMALLAGPARAMS(..., OPT1, VAL1, ...) allow passing extra 
-%  options given in key-value pairs OPT1, VAL1... or in struct OPTIONS with 
+%  options given in key-value pairs OPT1, VAL1... or in a struct OPTIONS with 
 %  field names as option keys and field values as option values.
 %  Recognized options are:
 %    GRAPHICS: whether graphic output should be produced.
