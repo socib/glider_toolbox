@@ -1,5 +1,5 @@
 function [params, exitflag, residual] = findThermalLagParams(varargin)
-%FINDTHERMALLAGPARAMS  Thermal lag parameter estimation for a single pair of casts.
+%FINDTHERMALLAGPARAMS  Thermal lag parameter estimation for profiles.
 %
 %  Syntax:
 %    PARAMS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, TIME2, COND2, TEMP2, PRES2)
@@ -9,16 +9,17 @@ function [params, exitflag, residual] = findThermalLagParams(varargin)
 %    [PARAMS, EXITFLAG, RESIDUAL] = FINDTHERMALLAGPARAMS(...)
 %
 %  PARAMS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, TIME2, COND2, TEMP2, PRES2)
-%  finds the thermal lag parameters from two CTD profiles with constant flow
+%  finds the thermal lag parameters for two CTD profiles with constant flow
 %  speed (pumped CTD) given by sequences of time (s), conductivity (S/m), 
-%  temperature (ºC) and pressure (dbar) in respective vectors TIME1, COND1, 
+%  temperature (deg C) and pressure (dbar) in respective vectors TIME1, COND1, 
 %  TEMP1 and PRES1, and TIME2, COND2, TEMP2 and PRES2. The profiles are supposed
 %  to measure the same column of water in opposite directions. The computed 
 %  parameters are returned in a two element vector PARAMS, with the error 
 %  magnitude (alpha), and the error time constant (tau). A detailed description 
 %  of these parameters may be found in the references listed below (Lueck 1990).
 %
-%  The function solves the minimization problem of finding the thermal lag 
+%  Based on the assumption that both profiles should be as similar as possible,
+%  the function solves the minimization problem of finding the thermal lag 
 %  parameters such that the area between profiles of temperature and salinity 
 %  is minimal; where salinity is derived from temperature, conductivity and 
 %  pressure sequences using SW_SALT with the corrected temperature sequence
@@ -36,13 +37,14 @@ function [params, exitflag, residual] = findThermalLagParams(varargin)
 %
 %  PARAMS = FINDTHERMALLAGPARAMS(..., OPTIONS) and 
 %  PARAMS = FINDTHERMALLAGPARAMS(..., OPT1, VAL1, ...) allow passing extra 
-%  options given in key-value pairs OPT1, VAL1... or in a struct OPTIONS with 
+%  options given in key-value pairs OPT1, VAL1... or in struct OPTIONS with 
 %  field names as option keys and field values as option values.
 %  Recognized options are:
 %    GRAPHICS: whether graphic output should be produced.
 %      A boolean. If true a nice figure showing the minimization process will be
 %      displayed. It includes the parameter values, the objective function 
-%      value, a temperature-salinity diagram and a pressure-salinity diagram.
+%      value, a temperature-salinity diagram, a pressure-salinity diagram, 
+%      a temperature-time plot, and a conductivity-time plot.
 %      Default value: false.
 %    GUESS: initial guess for minimization function FMINCON.
 %      A two or four element vector with the initial guess for each parameter.
@@ -50,17 +52,17 @@ function [params, exitflag, residual] = findThermalLagParams(varargin)
 %        For constant flow speed: [0.0677 11.1431] (see note below)
 %        For variable flow speed: [0.0135 0.0264 7.1499 2.7858] (Morison 1994)
 %    LOWER: lower bounds of parameters for minimization function FMINCON.
-%      A four element vector with the lower bound for each parameter.
+%      A two or four element vector with the lower bound for each parameter.
 %      Default value:
 %        For constant flow speed: [0 0] (no correction)
 %        For variable flow speed: [0 0 0 0] (no correction)
 %    UPPER: upper bounds of parameters for minimization function FMINCON.
-%      A four element vector with the upper bound for each parameter.
+%      A two or four element vector with the upper bound for each parameter.
 %      Default value:
 %        For constant flow speed: [4 2.5*RANGE(TIME1)]
 %        For variable flow speed: [2 1 RANGE(TIME1) RANGE(TIME1)/2]
 %    OPTIMOPTS: extra options for the minimization function FMINCON.
-%      A option struct as needed by the function FMINCON.
+%      An option struct as needed by the function FMINCON.
 %      Default value: default options for FMINCON, except for:
 %        'Algorithm': 'interior-point'
 %        'FinDiffType': 'central'
@@ -327,7 +329,7 @@ function [params, exitflag, residual] = findThermalLagParams(varargin)
   end
   
   function stop = optimoutUpdateCorrectedData(params, ~, state)
-  %OPTIMOUTUPDATEPLOTDATA  Update corrected temperature, conductivity an salinity sequences.
+  %OPTIMOUTUPDATEPLOTDATA  Update corrected data sequences.
     switch state
       case 'init'
       case 'iter'
@@ -444,5 +446,5 @@ function [params, exitflag, residual] = findThermalLagParams(varargin)
     end
     stop = false;
   end
-
+  
 end

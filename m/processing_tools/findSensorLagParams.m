@@ -1,5 +1,5 @@
 function [params, exitflag, residual] = findSensorLagParams(varargin)
-%FINDSENSORLAGPARAMS  Sensor lag time constant adjustment for profiles.
+%FINDSENSORLAGPARAMS  Sensor lag parameter estimation for profiles.
 %
 %  Syntax:
 %    PARAMS = FINDSENSORLAGPARAMS(TIME1, DEPTH1, DATA1, TIME2, DEPTH2, DATA2)
@@ -9,23 +9,22 @@ function [params, exitflag, residual] = findSensorLagParams(varargin)
 %    [PARAMS, EXITFLAG, RESIDUAL] = FINDSENSORLAGPARAMS(...)
 %
 %  PARAMS = FINDSENSORLAGPARAMS(TIME1, DEPTH1, DATA1, TIME2, DEPTH2, DATA2)
-%  finds the sensor lag time constant from two profile sequences with constant
-%  flow speed given by vectors TIME1, DEPTH1 and DATA1, and TIME2, DEPTH2 and 
-%  DATA2. The profiles are supposed to measure the same column of water in 
-%  opposite directions. Based on the assumption that both profiles should be as 
-%  similar as possible, it finds the sensor time lag parameter, such that the 
-%  area in a value-depth diagram between the corrected profiles is minimum.
+%  finds the sensor lag parameter for two profiles with constant flow speed
+%  given by vectors TIME1, DEPTH1 and DATA1, and TIME2, DEPTH2 and DATA2.
+%  The profiles are supposed to measure the same column of water in opposite
+%  directions. 
 %
-%  The function solves the minimization problem of finding the time constant
+%  Based on the assumption that both profiles should be as similar as possible,
+%  the function solves the minimization problem of finding the time constant
 %  such that the area between corrected profiles returned by CORRECTSENSORLAG
-%  is minimal. This problem is solved with the function FMINBND using default 
+%  is minimal. This problem is solved with the function FMINCON using default 
 %  values for the parameter bounds. See OPTIONS description below.
 %
 %  PARAMS = FINDSENSORLAGPARAMS(TIME1, DEPTH1, DATA1, FLOW1, TIME2, DEPTH2, DATA2, FLOW2)
 %  performs the same estimation but for a pair profiles with variable flow speed
 %  given by respective vectors FLOW1 and FLOW2. The estimated parameters are 
 %  returned in a two element vector PARAMS with the offset and the slope of the 
-%  time lag parameter with respect to the inverse flow speed.
+%  sensor lag parameter with respect to the inverse flow speed.
 %
 %  PARAMS = FINDSENSORLAGPARAMS(..., OPTIONS) and 
 %  PARAMS = FINDSENSORLAGPARAMS(..., OPT1, VAL1, ...) allow passing extra 
@@ -35,25 +34,25 @@ function [params, exitflag, residual] = findSensorLagParams(varargin)
 %    GRAPHICS: whether graphic output should be produced.
 %      A boolean. If true a nice figure showing the minimization process will be
 %      displayed. It includes the parameter value, the objective function value,
-%      a value-time diagram both sequences, and a depth-value diagram.
+%      a value-time diagram of both sequences, and a depth-value diagram.
 %      Default value: false.
 %    GUESS: initial guess for minimization function FMINCON.
 %      A one or two element vector with the initial guess for each parameter.
 %      Default value:
-%        For constant flow speed: 0.5 (see note below)
+%        For constant flow speed: 0.5
 %        For variable flow speed: [0.3568 0.07]
-%    LOWER: lower bound of parameter for minimization function FMINCON.
-%      A number with the lower bound for the sensor lag parameter.
-%      Default value: 
+%    LOWER: lower bounds of parameters for minimization function FMINCON.
+%      A one or two element vector with the lower bound for each parameter.
+%      Default value:
 %        For constant flow speed: 0 (no correction)
 %        For variable flow speed: [0 0] (no correction)
-%    UPPER: upper bound of parameter for minimization function FMINCON.
-%      A four element vector with the upper bound for each parameter.
-%      Default value: 16.
+%    UPPER: upper bounds of parameters for minimization function FMINCON.
+%      A one or two element vector with the upper bound for each parameter.
+%      Default value:
 %        For constant flow speed: 16
 %        For variable flow speed: [16 7.5]
 %    OPTIMOPTS: extra options for the minimization function FMINCON.
-%      A option struct as needed by the function FMINCON.
+%      An option struct as needed by the function FMINCON.
 %      Default value: default options for FMINCON, except for:
 %        'Algorithm'  : 'interior-point'
 %        'FinDiffType': 'central'
@@ -69,7 +68,7 @@ function [params, exitflag, residual] = findSensorLagParams(varargin)
 %  Notes:
 %    This function is an improved version of a previous function by Tomeu Garau,
 %    called ADJUSTTIMECONSTANT. He is the true glider man. Main changes are:
-%      - Support for dynamic time lag parameters for sequences with variable 
+%      - Support for dynamic senosr lag parameter for sequences with variable 
 %        flow speed.
 %      - Different minimization algorithm (interior-point instead of active-set).
 %      - Support for custom minimization options.
@@ -259,7 +258,6 @@ function [params, exitflag, residual] = findSensorLagParams(varargin)
   
   %% Definition of auxiliary objective and plotting functions.  
   % They should be nested to access cast data.
-
   function area = optimobjDepthValueArea(params)
   %OPTIMOBJDEPTHVALUEAREA Compute area enclosed by profiles in depth-value diagram.
     if constant_flow
@@ -281,7 +279,6 @@ function [params, exitflag, residual] = findSensorLagParams(varargin)
       profileArea(data_cor1(min_idx1:max_idx1), depth1(min_idx1:max_idx1), ...
                   data_cor2(min_idx2:max_idx2), depth2(min_idx2:max_idx2));
   end
-  
   
   function stop = optimoutUpdateCorrectedData(params, ~, state)
   %OPTIMOUTUPDATEPLOTDATA  Update corrected data sequences.
