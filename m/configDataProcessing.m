@@ -9,10 +9,10 @@ function processing_options = configDataProcessing()
 %  PROCESSGLIDERDATA.
 %
 %  Examples:
-%    preprocessing_options = configDataProcessing()
+%    processing_options = configDataProcessing()
 %
 %  See also:
-%    PREPROCESSGLIDERDATA
+%    PROCESSGLIDERDATA
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
