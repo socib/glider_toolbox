@@ -94,7 +94,7 @@ function processing_options = configDataProcessing()
   processing_options.profiling_sequence_list = {'depth_ctd' 'depth'};
   processing_options.profiling_sequence_filling = true;
   processing_options.profile_min_range = 10;
-  processing_options.profile_max_gap_ratio = 0.8;
+  processing_options.profile_max_gap_ratio = 0.6;
   
   processing_options.flow_ctd_list(1).time  = 'time_ctd';
   processing_options.flow_ctd_list(1).depth = 'depth_ctd';
