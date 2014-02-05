@@ -1258,10 +1258,10 @@ function data_proc = processGliderData(data_pre, varargin)
         sensor_lag_constants = sensor_lag_estimator(sensor_lag_estimates);
       end
       % Correct sensor lag, if possible.
-      if isnan(sensor_lag_constants)
+      if any(isnan(sensor_lag_constants))
         fprintf('Omiting sensor lag correction %d (%s): %s.\n', ...
                 sensor_lag_option_idx, sensor_lag_cor, ...
-                'no valid parameter available');
+                'no valid parameters available');
       else
         fprintf('Performing sensor lag correction %d with settings:\n', sensor_lag_option_idx);
         fprintf('  output sensor sequence: %s\n', sensor_lag_cor);
