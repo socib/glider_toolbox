@@ -36,7 +36,7 @@ function data_grid = gridGliderData(data_proc, varargin)
 %      coordinates, in order of preference.
 %      Default value: {'time'}
 %    POSITION: latitude and longitude sequence choices.
-%      Struct array whith the names of the sequence the to be used as 
+%      Struct array with the names of the sequence the to be used as 
 %      latitude and longitude coordinates, in order of preference.
 %      It should have the following fields:
 %        LATITUDE: latitude sequence name.

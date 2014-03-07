@@ -21,7 +21,7 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
 %  load, or to specify the output format:
 %    FORMAT: data output format.
 %      String setting the format of the output DATA. Valid values are:
-%        'array': DATA is a matrix whith sensor readings as columns 
+%        'array': DATA is a matrix with sensor readings as columns 
 %           ordered as in the 'sensors' metadata field.
 %        'struct': DATA is a struct with sensor names as field names and column 
 %           vectors of sensor readings as field values.
