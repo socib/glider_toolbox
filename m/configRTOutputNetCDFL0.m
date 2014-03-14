@@ -347,7 +347,7 @@ function nc_l0_info = configRTOutputNetCDFL0()
   var_attr_list.m_water_pressure = {
     'long_name'     'water pressure'
     'standard_name' 'pressure'
-    'units'         'decibar'  
+    'units'         'bar'  
     '_FillValue'    default_fill_value };
 
   % Navigation FLNTU.
@@ -398,7 +398,7 @@ function nc_l0_info = configRTOutputNetCDFL0()
   var_attr_list.sci_water_pressure = {
     'long_name'     'water pressure'
     'standard_name' 'pressure'
-    'units'         'decibar'  
+    'units'         'bar'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_ctd41cp_timestamp = {
