@@ -9,26 +9,28 @@ function writeNetCDFData(var_data, var_meta, global_meta, filename)
 %  according to global properties given in struct GLOBAL_META with the variables 
 %  defined by the structs VAR_META and VAR_DATA.
 %  GLOBAL_META is struct with the following fields:
-%    NAME: string with the name of the NetCDF file to be written.
 %    DIMENSIONS: struct array describing the dimensions, with fields:
 %      NAME: string with the name of the dimension.
 %      LENGTH: number with the length of the dimension (0 for record dimension).
 %    ATTRIBUTES: struct array with global attributes with fields:
 %      NAME: string with the name of the attribute.
 %      VALUE: arbitrary typed value with the value of the attribute.
+%    NAME: string with the name of the NetCDF file to be written.
 %  For every field in struct VAR_DATA a variable is created with the values in 
 %  the field value. VAR_META should have a field with the same name containing 
 %  the metadata for that variable in a struct with fields:
 %    DIMENSIONS: (mandatory) string cell array with the name of the dimensions 
 %      of the variable.
-%    DATATYPE: (optional) string with the NetCDF data type of the variable.
-%      It should be one of 'double', 'float', 'int', 'short', 'byte', or 'char'.
-%      If this field is missing the default data type 'double' is used.
 %    ATTRIBUTES: (optional) struct array with fields 'NAME' and 'VALUE' 
 %      specifying the attributes of the variable.
 %    NAME: (optional) string with the variable name as it should appear in the
 %      NetCDF file. If this field is missing the variable is named after the
-%      field name.
+%      field name. This is useful when the desired variable name can not be used
+%      as field name.
+%    DATATYPE: (optional) string with the NetCDF data type of the variable.
+%      It should be one of 'double', 'float', 'int', 'short', 'byte', or 'char'.
+%      If this field is missing, the type is derived from the class of the data,
+%      and if it is not valid the default data type 'double' is used.
 %
 %  WRITENETCDFDATA(VAR_DATA, VAR_META, GLOBAL_META, FILENAME) will create a 
 %  NetCDF file named FILENAME, overriding the 'NAME' field in GLOBAL_META.
@@ -52,18 +54,23 @@ function writeNetCDFData(var_data, var_meta, global_meta, filename)
 %    global_meta.dimensions = ...
 %      struct('name', {'dim1' 'dim2' 'dim3'}, 'length', {0 5 10})
 %    var_meta = struct()
-%    var_meta.rand_vec = struct('dimensions', {{'dim1'}});
+%    var_meta.rand_num = struct('dimensions', {{}})
+%    var_meta.rand_vec = struct('dimensions', {{'dim1'}})
 %    var_meta.rand_mat = struct('dimensions', {{'dim2' 'dim3'}}, ...
-%                               'datatype', {'int'});
+%                               'datatype', {'int'})
 %    var_data = struct()
-%    var_data.rand_vec = randn(25, 1)
-%    var_data.rand_mat = randi(12, 5, 10)
-%    var_data.rand_mat(var_data.rand_mat == 1) = nan;
+%    var_data.rand_num = int8(round(12 * rand([1 1])))
+%    var_data.rand_vec = randn([25 1])
+%    var_data.rand_mat = round(12 * rand([5 10]))
+%    var_data.rand_mat(var_data.rand_mat == 1) = nan
 %    writeNetCDFData(var_data, var_meta, global_meta)
 %    filename = 'random_with_atts.nc'
+%    var_meta.rand_num.attributes = ...
+%      struct('name', {'comment'}, ...
+%             'value', {'This is a random signed 8 bit integer'})
 %    var_meta.rand_vec.attributes = ...
-%      struct('name', {'comment', 'add_offset', 'scale_factor' }, ...
-%             'value', {'This is a random vector', 0, 0.01})
+%      struct('name', {'comment', 'add_offset', 'scale_factor'}, ...
+%             'value', {'This is a random vector', 10, 2.5})
 %    var_meta.rand_mat.attributes = ...
 %      struct('name', {'comment', '_FillValue'}, ...
 %             'value', {'This is a random matrix', intmax()})
@@ -95,6 +102,8 @@ function writeNetCDFData(var_data, var_meta, global_meta, filename)
 
   % Consider make this variable persistent.
   ISOCTAVE = exist('OCTAVE_VERSION','builtin');
+  NETCDF_TYPES = {'double' 'float'  'int'   'short' 'byte' 'char'};
+  NATIVE_TYPES = {'double' 'single' 'int32' 'int16' 'int8' 'char'};
 
   error(nargchk(3, 4, nargin, 'struct'));
 
@@ -127,11 +136,19 @@ function writeNetCDFData(var_data, var_meta, global_meta, filename)
         else
           var_name = field_name;
         end
-        nc_var_func = @ncdouble;
         if isfield(var_meta.(field_name), 'datatype')
-          nc_var_func = str2func(['nc' var_meta.(field_name).datatype]);
+          var_type = var_meta.(field_name).datatype;
+        else
+          data_type = class(var_data.(field_name));
+          data_type_select = strcmp(data_type, NATIVE_TYPES);
+          if any(data_type_select)
+            var_type = NETCDF_TYPES{data_type_select};
+          else
+            var_type = 'double';
+          end
         end
-        nc{var_name} = nc_var_func(var_meta.(field_name).dimensions{:});
+        nc_var_type_func = str2func(['nc' var_type]);
+        nc{var_name} = nc_var_type_func(var_meta.(field_name).dimensions{:});
         if isfield(var_meta.(var_name), 'attributes')
           for var_att = var_meta.(var_name).attributes(:)'
             nc{var_name}.(var_att.name) = var_att.value;
@@ -176,16 +193,25 @@ function writeNetCDFData(var_data, var_meta, global_meta, filename)
         else
           var_name = field_name;
         end
+        if isfield(var_meta.(field_name), 'datatype')
+          var_type = var_meta.(field_name).datatype;
+        else
+          data_type = class(var_data.(field_name));
+          data_type_select = strcmp(data_type, NATIVE_TYPES);
+          if any(data_type_select)
+            var_type = NETCDF_TYPES{data_type_select};
+          else
+            var_type = 'double';
+          end
+        end
         nc_var = struct('Name', {var_name}, ...
-                        'Dimension', {var_meta.(field_name).dimensions});
+                        'Dimension', {var_meta.(field_name).dimensions}, ...
+                        'Datatype', var_type);
         if isfield(var_meta.(field_name), 'attributes')
           % Rename fields as required by low level library.
           nc_var.Attribute = ...
             struct('Name', {var_meta.(field_name).attributes.name}, ...
                    'Value', {var_meta.(field_name).attributes.value});
-        end
-        if isfield(var_meta.(field_name), 'datatype')
-          nc_var.Datatype = var_meta.(field_name).datatype;
         end
         nc_addvar(filename, nc_var);
         nc_varput(filename, var_name, var_data.(field_name))

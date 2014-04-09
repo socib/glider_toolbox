@@ -210,9 +210,9 @@ function [var_data, var_meta, global_meta] = readNetCDFData(url, var_names, fiel
         nc_var_list = nc_full_info.Dataset;
         var_names = {nc_var_list.Name};
       else
-        [nc_var_present, nc_var_sel] = ...
+        [nc_var_present, nc_var_select] = ...
           ismember(var_names, {nc_full_info.Dataset.Name});
-        nc_var_list = nc_full_info.Dataset(nc_var_sel);
+        nc_var_list = nc_full_info.Dataset(nc_var_select);
       end
       % If no variable renaming is specified preserve names as much as possible.
       if nargin < 3
