@@ -1,24 +1,26 @@
-function nc_l2_info = configRTOutputNetCDFL2()
+function ncl2_info = configRTOutputNetCDFL2()
 %CONFIGRTOUTPUTNETCDFL2  Configure NetCDF output for gridded glider deployment data in real time.
 %
 %  Syntax:
-%    NC_L2_INFO = CONFIGRTOUTPUTNETCDFL2()
+%    NCL2_INFO = CONFIGRTOUTPUTNETCDFL2()
 %
-%  NC_L2_INFO = CONFIGRTOUTPUTNETCDFL2() should return a struct describing the
-%  structure of the NetCDF file for gridded glider deployment data in real time
-%  (see the note about the file generation for more details).
+%  NCL2_INFO = CONFIGRTOUTPUTNETCDFL2() should return a struct describing the
+%  structure of the NetCDF file for gridded glider deployment data in real
+%  time (see the note about the file generation for more details).
 %  The returned struct should have the following fields:
-%    DIM_NAMES: struct with string fields defining the dimension names.
-%      The size of the dimensions are inferred from the data during the
-%      processing, so only dimension names need to be provided. It should have
-%      the following fields:
-%        TIME: time dimension name.
-%        DEPTH: regular depth index name.
-%    GLOBAL_ATTS: A struct array with fields 'NAME' and 'VALUE' defining global
+%    DIMENSIONS: struct array with fields 'NAME' and 'LENGTH' defining the 
+%      dimensions for variables in the file.
+%      A variable may have dimensions not listed here or with their length left
+%      undefined (empty field value), and they are inferred from the data during
+%      the generation of the file. However, it is useful to preset the length of
+%      a dimension for record or string size dimensions.
+%    ATTRIBUTES: A struct array with fields 'NAME' and 'VALUE' defining global
 %      attributes of the file.
-%    VAR_META: A struct defining variable metadata. Field names are variable
-%      names and field values are structs as needed by function WRITENETCDFDATA.
-%      They should have the following fields:
+%      Global attributes might be overwritten by deployment fields with the same
+%      name.
+%    VARIABLES: A struct defining variable metadata. Field names are variable
+%      names and field values are structs as needed by function SAVENC.
+%      It should have the following fields:
 %        DIMENSIONS: string cell array with the name of the dimensions of the
 %          variable.
 %        ATTRIBUTES: struct array with fields 'NAME' and 'VALUE' defining the
@@ -28,7 +30,7 @@ function nc_l2_info = configRTOutputNetCDFL2()
 %      data will be used.
 %
 %  Notes:
-%    The NetCDF file will be created by the function GENERATEOUTPUTNETCDFL2 with
+%    The NetCDF file will be created by the function GENERATEOUTPUTNETCDF with
 %    the metadata provided here and the data returned by GRIDGLIDERDATA.
 %
 %    Please note that global attributes described here may be overwritten by
@@ -36,11 +38,11 @@ function nc_l2_info = configRTOutputNetCDFL2()
 %    attributes whose values are known only at runtime.
 %
 %  Examples:
-%    nc_l2_info = configRTOutputNetCDFL2()
+%    ncl2_info = configRTOutputNetCDFL2()
 %
 %  See also:
-%    GENERATEOUTPUTNETCDFL2
-%    WRITENETCDFDATA
+%    GENERATEOUTPUTNETCDF
+%    SAVENC
 %    GRIDGLIDERDATA
 %
 %  Author: Joan Pau Beltran
@@ -69,7 +71,7 @@ function nc_l2_info = configRTOutputNetCDFL2()
   % variable field to the struct defined below, with its attributes defined in 
   % a cell array (attribute name in first column and attribute value in second).
   % This cell array will be converted at the end of the function to the proper
-  % representation needed by WRITENETCDFDATA.
+  % representation needed by SAVENC.
 
   default_fill_value = realmax('double');
 
@@ -371,7 +373,7 @@ function nc_l2_info = configRTOutputNetCDFL2()
   % To define the global attributes easily and readably, add them to this
   % cell array (attribute name in first column and attribute value in second).
   % This cell array will be converted at the end of the function to the proper
-  % representation needed by WRITENETCDFDATA.
+  % representation needed by SAVENC.
   global_atts = ...
   {
     'abstract'                     '' % deployment_description
@@ -422,36 +424,34 @@ function nc_l2_info = configRTOutputNetCDFL2()
   };
 
 
-  %% Define dimension names.
-  time_dim_name = 'time';
-  depth_dim_name = 'depth';
+  %% Define preset dimensions.
+  time_dimension = struct('name', {'time'}, 'length', {0});
+  dpth_dimension = struct('name', {'depth'}, 'length', {[]});
 
 
   %% Return variable metadata in the correct format.
-  nc_l2_info = struct();
+  ncl2_info = struct();
   % Set the dimension names.
-  nc_l2_info.dim_names.time = time_dim_name;
-  nc_l2_info.dim_names.depth = depth_dim_name;
+  ncl2_info.dimensions = [time_dimension dpth_dimension];
   % Set the global attributes.
-  nc_l2_info.global_atts = struct('name', global_atts(:,1), ...
-                                  'value', global_atts(:,2));
+  ncl2_info.attributes = cell2struct(global_atts, {'name' 'value'}, 2);
   % Set the variable metadata.
-  nc_l2_info.var_meta = struct();
+  ncl2_info.variables = struct();
   var_name_list = fieldnames(var_attr_list);
   for var_name_idx = 1:numel(var_name_list)
     var_name = var_name_list{var_name_idx};
     var_atts = var_attr_list.(var_name);
     switch var_name
       case {'time' 'profile_index' 'longitude' 'latitude' 'distance'}
-        var_dims = {time_dim_name};
+        var_dims = {time_dimension.name};
       case {'depth'}
-        var_dims = {depth_dim_name};
+        var_dims = {dpth_dimension.name};
       otherwise
-        var_dims = {time_dim_name depth_dim_name};
+        var_dims = {time_dimension.name dpth_dimension.name};
     end
-    nc_l2_info.var_meta.(var_name).dimensions = var_dims;
-    nc_l2_info.var_meta.(var_name).attributes = ...
-      struct('name',  var_atts(:,1), 'value', var_atts(:,2));
+    ncl2_info.variables.(var_name).dimensions = var_dims;
+    ncl2_info.variables.(var_name).attributes = ...
+      cell2struct(var_atts, {'name' 'value'}, 2);
   end
 
 end
