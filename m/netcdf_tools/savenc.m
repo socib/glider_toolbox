@@ -1,13 +1,13 @@
-function writeNetCDFData(var_data, var_meta, global_meta, filename)
-%WRITENETCDFDATA  Interface to low level functions to write data to a NetCDF file.
+function savenc(var_data, var_meta, global_meta, filename)
+%SAVENC  Interface to low level functions to write data to a NetCDF file.
 %
 %  Syntax:
-%    WRITENETCDFDATA(VAR_DATA, VAR_META, GLOBAL_META)
-%    WRITENETCDFDATA(VAR_DATA, VAR_META, GLOBAL_META, FILENAME)
+%    SAVENC(VAR_DATA, VAR_META, GLOBAL_META)
+%    SAVENC(VAR_DATA, VAR_META, GLOBAL_META, FILENAME)
 %
-%  WRITENETCDFDATA(VAR_DATA, VAR_META, GLOBAL_META)  creates a NetCDF file 
-%  according to global properties given in struct GLOBAL_META with the variables 
-%  defined by the structs VAR_META and VAR_DATA.
+%  SAVENC(VAR_DATA, VAR_META, GLOBAL_META) creates a NetCDF file according to 
+%  global properties given in struct GLOBAL_META with the variables defined by 
+%  the structs VAR_META and VAR_DATA.
 %  GLOBAL_META is struct with the following fields:
 %    DIMENSIONS: struct array describing the dimensions, with fields:
 %      NAME: string with the name of the dimension.
@@ -23,17 +23,17 @@ function writeNetCDFData(var_data, var_meta, global_meta, filename)
 %      of the variable.
 %    ATTRIBUTES: (optional) struct array with fields 'NAME' and 'VALUE' 
 %      specifying the attributes of the variable.
-%    NAME: (optional) string with the variable name as it should appear in the
-%      NetCDF file. If this field is missing the variable is named after the
-%      field name. This is useful when the desired variable name can not be used
-%      as field name.
 %    DATATYPE: (optional) string with the NetCDF data type of the variable.
 %      It should be one of 'double', 'float', 'int', 'short', 'byte', or 'char'.
 %      If this field is missing, the type is derived from the class of the data,
 %      and if it is not valid the default data type 'double' is used.
+%    NAME: (optional) string with the variable name as it should appear in the
+%      NetCDF file. If this field is missing the variable is named after the
+%      field name. This is useful when the desired variable name can not be used
+%      as field name.
 %
-%  WRITENETCDFDATA(VAR_DATA, VAR_META, GLOBAL_META, FILENAME) will create a 
-%  NetCDF file named FILENAME, overriding the 'NAME' field in GLOBAL_META.
+%  SAVENC(VAR_DATA, VAR_META, GLOBAL_META, FILENAME) will create a NetCDF file 
+%  named FILENAME, overriding the 'NAME' field in GLOBAL_META.
 %
 %  Notes:
 %    Fill value and scale conversions are always performed.
@@ -63,7 +63,7 @@ function writeNetCDFData(var_data, var_meta, global_meta, filename)
 %    var_data.rand_vec = randn([25 1])
 %    var_data.rand_mat = round(12 * rand([5 10]))
 %    var_data.rand_mat(var_data.rand_mat == 1) = nan
-%    writeNetCDFData(var_data, var_meta, global_meta)
+%    savenc(var_data, var_meta, global_meta)
 %    filename = 'random_with_atts.nc'
 %    var_meta.rand_num.attributes = ...
 %      struct('name', {'comment'}, ...
@@ -76,10 +76,10 @@ function writeNetCDFData(var_data, var_meta, global_meta, filename)
 %             'value', {'This is a random matrix', intmax()})
 %    global_meta.attributes = ...
 %      struct('name', {'creation_date'}, 'value', {datestr(now)})
-%    writeNetCDFData(var_data, var_meta, global_meta, filename)
+%    savenc(var_data, var_meta, global_meta, filename)
 %
 %  See also:
-%    READNETCDFDATA
+%    LOADNC
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
