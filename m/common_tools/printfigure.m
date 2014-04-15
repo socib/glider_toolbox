@@ -1,4 +1,4 @@
-function imginfo = printFigure(varargin)
+function imginfo = printfigure(varargin)
 %PRINTFIGURE  Print figure to image file with metadata.
 %
 %  Syntax:
@@ -33,7 +33,7 @@ function imginfo = printFigure(varargin)
 %    DATE: image time stamp.
 %      String with the value of the 'date' property of the resulting image file.
 %      Some image formats might not support it. Usually it is the creation date.
-%      Default value: datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00:00')
+%      Default value: datestr(now(), 31)
 %    TITLE: image title label.
 %      String with the value of the 'title' property of the resulting image
 %      file. Some image formats might not support it.
@@ -112,14 +112,15 @@ function imginfo = printFigure(varargin)
 %    options.date = datestr(now(), 31)
 %    options.title = 'Example plot'
 %    options.comment = 'Example 6.83x5.12 inch figure printed to png at 150 dpi (approx. 1024x768 pixels)'
-%    imginfo = printFigure(hfig, options)
+%    imginfo = printfigure(hfig, options)
 %
 %  See also:
 %    SYSTEM
 %    PRINT
 %    GCF
 %    FULLFILE
-%    POSIXTIME
+%    DATESTR
+%    NOW
 %    
 %
 %  Author: Joan Pau Beltran
@@ -159,7 +160,7 @@ function imginfo = printFigure(varargin)
   options.filename = sprintf('figure%03d', hfig);
   options.format = 'eps';
   options.resolution = 72;
-  options.date = datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00:00');
+  options.date = datestr(now(), 31);
   options.title = '';
   options.comment = '';
   options.driver = 'epsc2';
@@ -178,7 +179,7 @@ function imginfo = printFigure(varargin)
     option_key_list = args(1:2:end);
     option_val_list = args(2:2:end);
   else
-    error('glider_toolbox:printFigure:InvalidOptions', ...
+    error('glider_toolbox:printfigure:InvalidOptions', ...
           'Invalid optional arguments (neither key-value pairs nor struct).');
   end
   % Overwrite default options with values given in extra arguments.
@@ -188,7 +189,7 @@ function imginfo = printFigure(varargin)
     if isfield(options, opt)
       options.(opt) = val;
     else
-      error('glider_toolbox:printFigure:InvalidOption', ...
+      error('glider_toolbox:printfigure:InvalidOption', ...
             'Invalid option: %s.', opt);
     end
   end
@@ -201,11 +202,11 @@ function imginfo = printFigure(varargin)
   if ~status
     [success, message] = mkdir(options.dirname);
     if ~success
-      error('glider_toolbox:printFigure:ImageDirectoryError', ...
+      error('glider_toolbox:printfigure:ImageDirectoryError', ...
             'Could not create directory %s: %s.', options.dirname, message);
     end
   elseif ~attrout.directory
-    error('glider_toolbox:printFigure:ImageDirectoryError', ...
+    error('glider_toolbox:printfigure:ImageDirectoryError', ...
           'Not a directory: %s.', options.dirname);
   end
   
@@ -233,7 +234,7 @@ function imginfo = printFigure(varargin)
          ' -set comment ''' options.comment ''''  ...
          ' ' fullfile_ext ';'] );
      if failure
-       error('glider_toolbox:printFigure:ConvertError', ...
+       error('glider_toolbox:printfigure:ConvertError', ...
              'Command convert failed (eps file preserved): %s.', output);
      else
        delete(fullfile_eps);
@@ -245,7 +246,7 @@ function imginfo = printFigure(varargin)
   [status, attrout] = fileattrib(fullfile_ext);
   if status == 0
     % We should never get here (if image creation succeed, file must exist).
-    error('glider_toolbox:printFigure:ImageFileError', ...
+    error('glider_toolbox:printfigure:ImageFileError', ...
           'Image generation succeed but problems with image file %s: %s.', ...
           fullfile_ext, attrout);
   end
