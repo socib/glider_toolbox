@@ -49,6 +49,8 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
 %      Default value: 'epsc2'
 %    RENDER: renderer to use when printing intermediate vector file.
 %      Default value: [] (renderer automatically selected)
+%    DATE: image generation timestamp.
+%      Default value: datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00:00')
 %
 %  Examples:
 %    % Assuming data is a processed glider data structure, 
@@ -115,6 +117,8 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
 %    PLOTTSDIAGRAM
 %    PLOTPROFILESTATISTICS
 %    CONFIGFIGURES
+%    POSIXTIME2UTC
+%    POSIXTIME
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
@@ -144,6 +148,8 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
   options.resolution = 72;
   options.driver = 'epsc2';
   options.render = [];
+  options.date = ...
+    datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00:00');
   
   
   %% Get options from extra arguments.
@@ -286,7 +292,7 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
       figure_handle = figure();
       try
         plot_function(figure_handle, plot_options);
-        figure_info.(figure_key) = printFigure(figure_handle, print_options);
+        figure_info.(figure_key) = printfigure(figure_handle, print_options);
       catch exception
         fprintf('Figure generation failed:\n');
         disp(getReport(exception, 'extended'));
