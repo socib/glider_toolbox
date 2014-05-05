@@ -42,7 +42,7 @@ function [meta, data] = loadSeagliderData(sgdir, logregexp, engregexp, varargin)
 %      list will be present in output. For non scalar parameters, the name of
 %      the identifier as it appears in the log line specifies including all of
 %      its fields. Individual parameter fields are selected with the identifier
-%      and the name of the field separed by underscore (e.g. 'FINISH_dens').
+%      and the name of the field separated by underscore (e.g. 'FINISH_dens').
 %      The string 'all' may also be given, in which case parameter filtering is
 %      not performed and all parameters in input list will be present in output.
 %      Default value: 'all' (do not perform log parameter filtering).

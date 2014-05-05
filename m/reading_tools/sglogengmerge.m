@@ -67,7 +67,7 @@ function [meta, data] = sglogengmerge(meta_log, data_log, meta_eng, data_eng, va
 %      list will be present in output. For non scalar parameters, the name of
 %      the identifier as it appears in the log line specifies including all of
 %      its fields. Individual parameter fields are selected with the identifier
-%      and the name of the field separed by underscore (e.g. 'FINISH_dens').
+%      and the name of the field separated by underscore (e.g. 'FINISH_dens').
 %      The string 'all' may also be given, in which case parameter filtering is
 %      not performed and all parameters in input list will be present in output.
 %      Default value: 'all' (do not perform log parameter filtering).
@@ -85,11 +85,17 @@ function [meta, data] = sglogengmerge(meta_log, data_log, meta_eng, data_eng, va
 %
 %    The log parameters GC, STATE and SM_CCo contain values produced during the
 %    dive and timestamped according to the start of it. Hence, they are merged 
-%    with the data collected in the eng files. STATE lines ususally do not have
-%    a unique timestamp (the timestamp of consecutive end-begin lines is the 
-%    same) and in that case only the last line appears in the output. For
-%    columns with different names in end and log data, the eng name is used in
-%    output. 
+%    with the data collected in the eng files. To avoid name clashes and
+%    duplications, the following fields of the log parameters are renamed:
+%      - 'st_secs' field of 'GC'/'STATE'/'SM_CCo' parameter maps to 'elaps_t'
+%      - 'depth'   field of 'GC' parameter maps to 'GC_depth'
+%      - 'gcphase' field of 'GC' parameter maps to 'GC_phase'
+%    STATE lines ususally do not have a unique timestamp (the timestamp of 
+%    consecutive end-begin lines is the same) and in that case only the last 
+%    line appears in the output.ç
+%
+%    Depth in 'GC' log lines and in eng columns is not merged because they come
+%    in different units (m and cm). Also, there seems to be some time mismatch.
 %
 %    Output in 'array' format when there are both textual and numeric columns is
 %    might require a large amount of memory because of the storage in a cell
@@ -190,7 +196,8 @@ function [meta, data] = sglogengmerge(meta_log, data_log, meta_eng, data_eng, va
   eng_column_list = meta_eng.columns;
   eng_secs_offset = meta_eng.start_secs - min_start_secs;
   eng_secs_select = strcmp('elaps_t', eng_column_list);
-  eng_secs = eng(:, eng_secs_select) + eng_secs_offset;
+  eng(:, eng_secs_select) = eng(:, eng_secs_select) + eng_secs_offset;
+  eng_secs = eng(:, eng_secs_select);
   if column_filter
     eng_column_filtering = ismember(eng_column_list, column_filter_list);
     eng_column_list = eng_column_list(eng_column_filtering);
@@ -202,11 +209,11 @@ function [meta, data] = sglogengmerge(meta_log, data_log, meta_eng, data_eng, va
   end
   % Log data to be merged with eng data:
   logeng_param_list = {'GC' 'SM_CCo' 'STATE'}';
-  logeng_param_numeric_list = {true true false}';
+  logeng_param_numeric_list = [true true false]';
   logeng_member_map = {
     'st_secs' 'elaps_t'
     'gcphase' 'GC_phase'
-    'depth'   'depth'
+    'depth'   'GC_depth'
   };
   logeng_param_list = ...
     intersect(fieldnames(meta_log.params), logeng_param_list);
@@ -216,7 +223,7 @@ function [meta, data] = sglogengmerge(meta_log, data_log, meta_eng, data_eng, va
   logeng_values_list = cell(size(logeng_param_list));
   for logeng_param_idx = 1:numel(logeng_param_list)
     logeng_param = logeng_param_list{logeng_param_idx};
-    logeng_param_numeric = logeng_param_numeric_list{logeng_param_idx};
+    logeng_param_numeric = logeng_param_numeric_list(logeng_param_idx);
     logeng_members = meta_log.params.(logeng_param);
     logeng_columns = strcat(logeng_param, '_', logeng_members);
     if ~isfield(data_log, logeng_param)

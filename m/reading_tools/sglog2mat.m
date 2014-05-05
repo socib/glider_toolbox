@@ -36,9 +36,9 @@ function [meta, data] = sglog2mat(filename, varargin)
 %      present in output. For non scalar parameters, the name of the identifier
 %      as it appears in the log line specifies including all of its fields.
 %      Individual parameter fields are selected with the identifier and the name
-%      of the field separed by underscore (e.g. 'GC_st_secs'). The string 'all'
-%      may also be given, in which case parameter filtering is not performed 
-%      and all parameters in input list will be present in output.
+%      of the field separated by underscore (e.g. 'GC_st_secs'). The string 
+%      'all' may also be given, in which case parameter filtering is not 
+%      performed and all parameters in input list will be present in output.
 %      Default value: 'all' (do not perform parameter filtering).
 %
 %  META has the following fields based on the tags of the header and the content
