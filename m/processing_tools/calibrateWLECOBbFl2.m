@@ -18,14 +18,14 @@ function [chlr, cdom, scat] = calibrateWLECOBbFl2(chlr_cnts, cdom_cnts, scat_cnt
 %    SCAT = SCAT_SF*(SCAT_CNTS - SCAT_DC)
 %  where
 %    CHLR_SF and CHLR_DC: chlorophyll scale factor and dark counts.
-%      These should be fields of struct CHLR_COEFS or its elements if it is an
-%      array (in that order).
+%      These should be fields of struct CHLR_COEFS, shortened to SF and DC,
+%      or its elements if it is an array (in that order).
 %    CDOM_SF and CDOM_DC: CDOM scale factor and dark counts.
-%      These should be fields of struct CDOM_COEFS or its elements if it is an
-%      array (in that order).
+%      These should be fields of struct CDOM_COEF, shortened to SF and DC,
+%      or its elements if it is an array (in that order).
 %    SCAT_SF and SCAT_DC: scattering scale factor and dark counts.
-%      These should be fields of struct SCAT_COEFS or its elements if it is an
-%      array (in that order).
+%      These should be fields of struct SCAT_COEFS, shortened to SF and DC,
+%      or its elements if it is an array (in that order).
 %
 %  Notes:
 %    The equations and coefficients are provided in the calibration sheets of
@@ -67,17 +67,17 @@ function [chlr, cdom, scat] = calibrateWLECOBbFl2(chlr_cnts, cdom_cnts, scat_cnt
   error(nargchk(nargin, 6, 6, 'struct'));
   
   if isstruct(chlr_coefs)
-    sd_chlr = [chlr_coefs.chlr_sf chlr_coefs.chlr_dc];
+    sd_chlr = [chlr_coefs.sf chlr_coefs.dc];
   else
     sd_chlr = chlr_coefs([1 2]);
   end
   if isstruct(cdom_coefs)
-    sd_cdom = [cdom_coefs.cdom_sf cdom_coefs.cdom_dc];
+    sd_cdom = [cdom_coefs.sf cdom_coefs.dc];
   else
     sd_cdom = cdom_coefs([1 2]);
   end
   if isstruct(scat_coefs)
-    sd_scat = [scat_coefs.scat_sf scat_coefs.scat_dc];
+    sd_scat = [scat_coefs.sf scat_coefs.dc];
   else
     sd_scat = scat_coefs([1 2]);
   end
