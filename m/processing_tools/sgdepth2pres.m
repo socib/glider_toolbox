@@ -1,4 +1,4 @@
-function pres = sgdepth2pres(depth, psig2m)
+function pres = sgdepth2pres(depth)
 %SGDEPTH2PRES  Reverse Seaglider pressure to depth conversion.
 %
 %  Syntax:
