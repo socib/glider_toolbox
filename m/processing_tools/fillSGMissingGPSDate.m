@@ -1,17 +1,17 @@
-function [stampnum, ddmmyy, hhmmss] = fillSGMissingGPSDate(ddmmyy, hhmmss)
+function [stampnum, hhmmss, ddmmyy] = fillSGMissingGPSDate(hhmmss, ddmmyy)
 %FILLSGMISSINGGPSDATE  Fill missing date component of Seaglider GPS timestamps.
 %
 %  Syntax:
 %    STAMPNUM = FILLSGMISSINGGPSDATE(DDMMYY, HHMMSS)
-%    [STAMPNUM, DDMMYY, HHMMSS] = FILLSGMISSINGGPSDATE(DDMMYY, HHMMSS)
+%    [STAMPNUM, HHMMSS, DDMMYY] = FILLSGMISSINGGPSDATE(HHMMSS, DDMMYY)
 %
 %  STAMPNUM = FILLSGMISSINGGPSDATE(DDMMYY, HHMMSS) fills the date component
-%  of GPS timestamps given by character arrays or string cell arrays DDMMYY
-%  and HHMMSS and returns them as serial date numbers in array STARTNUM. See
+%  of GPS timestamps given by character arrays or string cell arrays HHMMSS
+%  and DDMMYY and returns them as serial date numbers in array STARTNUM. See
 %  note below.
 %
-%  [STAMPNUM, DDMMYY, HHMMSS] = FILLSGMISSINGGPSDATE(DDMMYY, HHMMSS)
-%  also returns the same input arrays DDMMYY and HHMMSS but with the empty
+%  [STAMPNUM, HHMMSS, DDMMYY] = FILLSGMISSINGGPSDATE(HHMMSS, DDMMYY)
+%  also returns the same input arrays HHMMSS and DDMMYY but with the empty
 %  entries in DDMMYY filled with the corresponding date component value.
 %
 %  Notes:
@@ -21,7 +21,7 @@ function [stampnum, ddmmyy, hhmmss] = fillSGMissingGPSDate(ddmmyy, hhmmss)
 %    taking into account day roll backs inferred from the time components.
 %
 %  Examples:
-%    stampvec = fillSGMissingGPSTimestamp(ddmmyy, hhmmss)
+%    stampvec = fillSGMissingGPSTimestamp(hhmmss, ddmmyy)
 %
 %  See also:
 %
@@ -65,9 +65,9 @@ function [stampnum, ddmmyy, hhmmss] = fillSGMissingGPSDate(ddmmyy, hhmmss)
   stampnum = datenum(stampvec);
   if nargout > 1
     if ischar(ddmmyy)
-      ddmmyy(nodate, 1:6) = datestr(stampnum(nodate), 'ddmmyy', 1900);
+      ddmmyy(nodate, 1:6) = datestr(stampnum(nodate), 'ddmmyy');
     else
-      ddmmyy(nodate) = cellstr(datestr(stampnum(nodate), 'ddmmyy', 1900));
+      ddmmyy(nodate) = cellstr(datestr(stampnum(nodate), 'ddmmyy'));
     end
   end
   
