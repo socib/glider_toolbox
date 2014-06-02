@@ -13,7 +13,7 @@ function [temp, cond] = calibrateSBECT(temp_freq, cond_freq, pres, temp_coefs, c
 %
 %  The calibration equations are:
 %    TEMP = 1/(T_G + T_H*ln(1/F_T) + T_I*ln(1/F_T)^2 + T_J*ln(1/F_T)^3) - 273.15
-%    COND = (C_G + C_H*F_C^2 + C_I*F_C^3 + C_J*F_C^4)/(10*(1 + CTCOR*TEMP + CPCOR*PRES)
+%    COND = 0.1*(C_G + C_H*F_C^2 + C_I*F_C^3 + C_J*F_C^4)/(1 + CTCOR*TEMP + CPCOR*PRES)
 %  where
 %    F_T: temperature signal frequency in kHz (TEMP_FREQ * 1e-3).
 %    F_C: conductivity signal frequency in kHz (COND_FREQ * 1e-3).
@@ -77,7 +77,7 @@ function [temp, cond] = calibrateSBECT(temp_freq, cond_freq, pres, temp_coefs, c
   end
   
   temp = 1 ./ polyval(jihg_temp, log(1000 ./ temp_freq)) - 273.15;
-  cond = polyval(jih0g_cond, cond_freq ./ 1000) ...
-       ./ (10  * (1 + ctcor * temp + cpcor * pres));
+  cond = 0.1 * ...
+    polyval(jih0g_cond, cond_freq ./ 1000) ./ (1 + ctcor * temp + cpcor * pres);
 
 end
