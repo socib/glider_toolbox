@@ -24,6 +24,12 @@ function [profile_index, profile_direction] = findProfiles(depth, varargin)
 %      Only monotonic intervals of depth spanning a range greater or equal than
 %      the given value are considered valid profiles.
 %      Default value: 0 (all profiles are valid).
+%    JOIN: join consecutive valid profiles with the same direction into one.
+%      When set, valid profiles separated by a sequence of invalid profiles 
+%      are joined together if they have the same direction. This allows for non 
+%      monotonic profiles, that is, profiles with depth inversions smaller than
+%      than RANGE.
+%      Default value: false (split sequence in monotonic profiles).
 %
 %  Notes:
 %    Direction is inferred from the sign of forward differences of vector DEPTH.
@@ -48,6 +54,12 @@ function [profile_index, profile_direction] = findProfiles(depth, varargin)
 %    plot(depth, '-db')
 %    subplot(3, 1, 3)
 %    stairs(profile_index, '-r')
+%    hold on
+%    [profile_index, profile_direction] = findProfiles(depth, 'range', 2)
+%    stairs(profile_index, '-c')
+%    [profile_index, profile_direction] = ...
+%       findProfiles(depth, 'range', 2, 'join', true)
+%    stairs(profile_index, '-m')
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
@@ -68,11 +80,12 @@ function [profile_index, profile_direction] = findProfiles(depth, varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(1, 3, nargin, 'struct'));
+  error(nargchk(1, 5, nargin, 'struct'));
 
   
   %% Set options and default values.
   options.range = 0;
+  options.join = false;
 
   
   %% Parse optional arguments.
@@ -114,13 +127,22 @@ function [profile_index, profile_direction] = findProfiles(depth, varargin)
     sdy_flat = sign(dy(:));
     sdy_ind = find(sdy_flat ~= 0);
     sdy = sdy_flat(sdy_ind);
-    sdy_peak = [false; (sdy(1:(end-1)).*sdy(2:end) < 0)];
+    sdy_peak = [false; (sdy(1:end-1).*sdy(2:end) < 0)];
     depth_peak_ind = depth_valid_ind([1; sdy_ind(sdy_peak); end]);
-    cast_found = (abs(diff(depth(depth_peak_ind))) >= options.range);
+    cast_vinc = diff(depth(depth_peak_ind));
+    cast_vdir = sign(cast_vinc);
+    cast_good = (abs(cast_vinc) >= options.range);
+    cast_head_peak_ind = find(cast_good);
+    cast_tail_peak_ind = cast_head_peak_ind + 1;
+    if options.join
+      cast_good_opposite = (diff(cast_vdir(cast_good)) ~= 0);
+      cast_head_peak_ind = cast_head_peak_ind([true; cast_good_opposite(:)]);
+      cast_tail_peak_ind = cast_tail_peak_ind([cast_good_opposite(:); true]);
+    end
     cast_head = zeros(size(depth));
     cast_tail = zeros(size(depth));
-    cast_head(depth_peak_ind([cast_found(:); false])+1) = 0.5;
-    cast_tail(depth_peak_ind([false; cast_found(:)])) = 0.5;
+    cast_head(depth_peak_ind(cast_head_peak_ind) + 1) = 0.5;
+    cast_tail(depth_peak_ind(cast_tail_peak_ind)) = 0.5;
     profile_index = 0.5 + cumsum(cast_head + cast_tail);
     for i = 1:numel(depth_valid_ind)-1
       profile_direction(depth_valid_ind(i):depth_valid_ind(i+1)-1) = sdy_flat(i);
