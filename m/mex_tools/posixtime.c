@@ -46,7 +46,6 @@ void mexFunction( int nlhs, mxArray *plhs[],
   time(&t);
 
   /* Assign pointers to corresponding outputs. */
-  if (nlhs > 0)
-    plhs[0] = mxCreateDoubleScalar((double) t);
+  plhs[0] = mxCreateDoubleScalar((double) t);
 }
 
