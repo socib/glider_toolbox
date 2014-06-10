@@ -207,8 +207,14 @@ function [var_data, var_meta, global_meta] = loadnc(url, var_names, field_names)
       nc_full_info = nc_info(url);
       % If no selected variables are specified, retrieve all variables.
       if nargin < 2
+        % Dataset has no fields when there are no variables
+        % (instead of being an empty struct but with the proper fields).
         nc_var_list = nc_full_info.Dataset;
-        var_names = {nc_var_list.Name};
+        if isempty(nc_var_list) 
+          var_names = {};
+        else
+          var_names = {nc_var_list.Name};
+        end
       else
         [nc_var_present, nc_var_select] = ...
           ismember(var_names, {nc_full_info.Dataset.Name});
@@ -255,6 +261,8 @@ function [var_data, var_meta, global_meta] = loadnc(url, var_names, field_names)
         var_data.(field_names{var_idx}) = nc_varget(url, var_names{var_idx});
       end
       % Get global metadata: list of dimensions with its length and attributes.
+      % Set global name (the url).
+      global_meta.name = url;
       % Get global list of dimensions if any.
       % Perform renaming to follow coding style guidelines, 
       % and handle empty case for coherence.
