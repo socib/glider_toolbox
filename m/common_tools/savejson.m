@@ -26,9 +26,9 @@ function json = savejson(object, varargin)
 %      - Numeric scalars map to corresponding numeric literals, except from NaN 
 %        which maps to null (because it is not a valid JSON value).
 %      - Structs map to objects with field names as keys and field values as
-%        values mapped according to these same set of rules.
+%        values mapped according to this same set of rules.
 %      - Strings (character row vectors) are converted to string literals
-%        (escaping characters according to section 2.5 of RFC in references).
+%        escaping characters according to section 2.5 of RFC in references.
 %      - Other arrays (either character arrays, numeric arrays, struct arrays 
 %        or cell arrays) map to flat arrays in column major order. 
 %        Dimensionality and shape information is lost.
@@ -48,12 +48,11 @@ function json = savejson(object, varargin)
 %    json = savejson(true)
 %    json = savejson(false)
 %    json = savejson(rand(1,10))
-%    json = savejson({sprintf('escape this:\b\f\n\t\r\x001A"\\')})
 %    json = savejson(...
 %      {sprintf(['escape this:' ...
 %                ' \b (backspace) \f (form feed) \n (line feed) \t (tab)' ...
 %                ' \r (carriage return) \x001A (escaped unicode character)' ...
-%                ' " (quotation mark) \\ (back slash)'])})
+%                ' " (quotation mark) \\ (backslash)'])})
 %    json = savejson(struct('field1', {'a', 'b', 'c'}, ...
 %                            'field2', {[1 2], [3 5], [4 pi]}))
 %    % Encode to file:

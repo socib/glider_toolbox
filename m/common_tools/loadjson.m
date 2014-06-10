@@ -1,5 +1,5 @@
 function object = loadjson(json, varargin)
-%LOADJSON  JSON encoder and emitter.
+%LOADJSON  JSON decoder and parser.
 %
 %  Syntax:
 %    OBJECT = LOADJSON(JSON)
@@ -21,16 +21,16 @@ function object = loadjson(json, varargin)
 %
 %    There is no one-to-one map between MATLAB/Octave values and JSON values.
 %    The conversion is done according to this rules:
-%      - Boolean scalars map to corresponding boolean literals (true or false).
-%      - Numeric scalars map to corresponding numeric literals, except from NaN 
-%        which maps to null (because it is not a valid JSON value).
-%      - Structs map to objects with field names as keys and field values as
-%        values mapped according to these same set of rules.
-%      - Strings (character row vectors) are converted to string literals
-%        (escaping characters according to section 2.5 of RFC in references).
-%      - Other arrays (either character arrays, numeric arrays, struct arrays 
-%        or cell arrays) map to flat arrays in column major order. 
-%        Dimensionality and shape information is lost.
+%      - Boolean literals (true or false) map to corresponding boolean scalars.
+%      - Numeric literals map to double scalars.
+%      - Null literal (null) maps to double scalar NaN.
+%      - String literals are converted to strings (character row vectors) 
+%        unescaping character sequences according to section 2.5 of RFC in 
+%        references.
+%      - Objects map to scalar structs with keys as field names and values as 
+%        field values mapped according to this same set of rules.
+%      - Arrays map to column vector cell arrays with elements mapped according
+%        to this same set of rules.
 %
 %  References:
 %    Crockford, D.; 2006:
@@ -46,7 +46,7 @@ function object = loadjson(json, varargin)
 %    object = loadjson(['["unescape this:' ...
 %      ' \b (backspace) \f (form feed) \n (line feed) \t (tab)' ...
 %      ' \r (carriage return) \u001a (escaped unicode character)' ...
-%      ' \" (quotation mark) \\ (back slash)"]'])
+%      ' \" (quotation mark) \\ (backslash)"]'])
 %    object = loadjson(['[{ "field1": "a" ,"field2" : [1, 2]},' ...
 %                       ' {"field1" : "b", "field2" :[3, 5] },' ...
 %                       ' {"field1":"c" , "field2":[4, 3.14]}]']);
@@ -87,7 +87,7 @@ function object = loadjson(json, varargin)
       error('glider_toolbox:loadjson:FileError', ...
             'Could not open file for reading %s: %s.', filename, message);
     end
-    json = fread(fid, '*char');
+    json = fread(fid, '*char')';
     status = fclose(fid);
     if status < 0
       error('glider_toolbox:loadjson:FileError', ...
@@ -96,43 +96,45 @@ function object = loadjson(json, varargin)
   end
   
   nspc = ~isspace(json);
-  curs = find(nspc, 1);
+  step([true nspc]) = diff([0 find(nspc) length(nspc)+1]);
+  next = cumsum(step);
+  curs = next(1);
   tokn = json(curs);
   if tokn == '['
-    object = loadjsonArray(json, curs, nspc);
+    object = loadjsonArray(json, curs, next);
   else
-    object = loadjsonObject(json, curs, nspc);
+    object = loadjsonObject(json, curs, next);
   end
   
 end
 
-function [object, curs] = loadjsonObject(json, curs, nspc)
+function [object, curs] = loadjsonObject(json, curs, next)
 %LOADJSONOBJECT  Decode a scalar struct from a JSON object.
   % Initialize empty object:
   object = struct();
   % Assert begin-object found, read members if any:
   not_bad_object = (json(curs) == '{');
-  curs = curs + find(nspc(curs + 1 : end), 1);
+  curs = next(curs + 1);
   not_end_object = (json(curs) ~= '}');
   while not_bad_object && not_end_object
     % Read key:
     [key, curs] = loadjsonString(json, curs);
     % Read key-value separator:
-    curs = curs + find(nspc(curs : end), 1) - 1;
+    curs = next(curs);
     if json(curs) ~= ':'
       not_bad_object = false;
       break
     end
-    curs = curs + find(nspc(curs + 1 : end), 1);
+    curs = next(curs + 1);
     % Read value:
-    [val, curs] = loadjsonValue(json, curs, nspc);
+    [val, curs] = loadjsonValue(json, curs, next);
     % Set key-value in object:
     object.(key) = val;
     % Read member (pair) separator or end-object:
-    curs = curs + find(nspc(curs : end), 1) - 1;
+    curs = next(curs);
     switch json(curs);
       case ','
-        curs = curs + find(nspc(curs + 1 : end), 1);
+        curs = next(curs + 1);
       case '}'
         not_end_object = false;
       otherwise
@@ -141,7 +143,7 @@ function [object, curs] = loadjsonObject(json, curs, nspc)
   end
   % Assert no errors and end-object found.
   if not_bad_object
-    curs = curs + find(nspc(curs + 1 : end), 1);
+    curs = next(curs + 1);
   else
     error('glider_toolbox:loadjson:InvalidObject', ...
           'Invalid object at position %d: %s.', ...
@@ -149,24 +151,24 @@ function [object, curs] = loadjsonObject(json, curs, nspc)
   end
 end
 
-function [object, curs] = loadjsonArray(json, curs, nspc)
+function [object, curs] = loadjsonArray(json, curs, next)
 %LOADJSONARRAY  Decode a cell array from a JSON array.
   % Initialize empty cell array:
   object = {};
   % Assert begin-array found, read elements if any:
   not_bad_array = (json(curs) == '[');
-  curs = curs + find(nspc(curs + 1 : end), 1);
+  curs = next(curs + 1);
   not_end_array = (json(curs) ~= ']');
   while not_bad_array && not_end_array
     % Read value:
-    [val, curs] = loadjsonValue(json, curs, nspc);
+    [val, curs] = loadjsonValue(json, curs, next);
     % Set value in object:
     object{end+1} = val;
     % Read element separator or end-array:
-    curs = curs + find(nspc(curs : end), 1) - 1;
+    curs = next(curs);
     switch json(curs);
       case ','
-        curs = curs + find(nspc(curs + 1 : end), 1);
+        curs = next(curs + 1);
       case ']'
         not_end_array = false;
       otherwise
@@ -175,21 +177,21 @@ function [object, curs] = loadjsonArray(json, curs, nspc)
   end
   % Assert no errors and end-array found.
   if not_bad_array
-    curs = curs + find(nspc(curs + 1 : end), 1);
+    curs = next(curs + 1);
   else
     error('glider_toolbox:loadjson:InvalidArray', ...
-    'Invalid array at position %d: %s.', ...
-    curs, json(max(curs-16, 1):curs));
+          'Invalid array at position %d: %s.', ...
+          curs, json(max(curs-16, 1):curs));
   end
 end
 
-function [object, curs] = loadjsonValue(json, curs, nspc)
+function [object, curs] = loadjsonValue(json, curs, next)
 %LOADJSONVALUE  Decode arbitrary value from a JSON value.
   tokn = json(curs);
   if tokn == '{'
-    [object, curs] = loadjsonObject(json, curs, nspc);
+    [object, curs] = loadjsonObject(json, curs, next);
   elseif tokn == '['
-    [object, curs] = loadjsonArray(json, curs, nspc);
+    [object, curs] = loadjsonArray(json, curs, next);
   elseif tokn == '"'
     [object, curs] = loadjsonString(json, curs);
   elseif tokn == 't' || tokn == 'f'
@@ -220,8 +222,8 @@ function [object, curs] = loadjsonNumber(json, curs)
     object = nan;
     curs = curs + 4;
   else
-    [object, count, emsg, next] = sscanf(json(curs:end), '%f', 1);
-    curs = curs + next - 1;
+    [object, count, emsg, nextidx] = sscanf(json(curs:end), '%f', 1);
+    curs = curs + nextidx - 1;
     if count ~= 1
       error('glider_toolbox:loadjson:InvalidNumber', ...
             'Invalid number at position %d: %s (%s).', ...
