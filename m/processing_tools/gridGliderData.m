@@ -1,15 +1,32 @@
-function data_grid = gridGliderData(data_proc, varargin)
+function [data_grid, meta_grid] = gridGliderData(data_proc, meta_proc, varargin)
 %GRIDGLIDERDATA  Grid glider trajectory data over instantaneous homogeneous regular profiles.
 %
 %  Syntax:
-%    DATA_GRID = GRIDGLIDERDATA(DATA_PROC)
-%    DATA_GRID = GRIDGLIDERDATA(DATA_PROC, OPTIONS)
-%    DATA_GRID = GRIDGLIDERDATA(DATA_PROC, OPT1, VAL1, ...)
+%    [DATA_GRID, META_GRID] = GRIDGLIDERDATA(DATA_PROC, META_PROC)
+%    [DATA_GRID, META_GRID] = GRIDGLIDERDATA(DATA_PROC, META_PROC, OPTIONS)
+%    [DATA_GRID, META_GRID] = GRIDGLIDERDATA(DATA_PROC, META_PROC, OPT1, VAL1, ...)
 %
-%  DATA_GRID = GRIDGLIDERDATA(DATA_PROC) converts glider trajectory data in
-%  struct DATA_PROC to vertical instantaneous profiles defined at regular depth
-%  intervals in DATA_GRID using default option values (see below).
-%  
+%  DATA_GRID = GRIDGLIDERDATA(DATA_PROC, META_PROC) converts glider trajectory 
+%  data in struct DATA_PROC to vertical instantaneous profiles defined at 
+%  regular depth intervals in DATA_GRID using default option values (see below).
+%
+%  DATA_PROC should be a struct in the format returned by PROCESSGLIDERDATA,
+%  where each field is a time sequence of readings of the variable with the same
+%  name. At least it should have a sequence for each reference coordinate: time,
+%  latitude and longitude, and depth. It also should have a sequence of profile
+%  indices that flags each reading with the number of the cast it belongs to.
+%
+%  META_PROC is also a struct as returned by PROCESSGLIDERDATA, and gridding
+%  information is added to any existing metadata of each reference coordinate
+%  variable or data variable in returned struct META_GRID.
+%
+%  DATA_GRID is a struct with two kind of fields: bidimensional arrays with 
+%  profiles of gridded variables as rows, and one dimensional reference 
+%  coordinate sequences: LATITUDE, LONTGITUDE, DEPTH, TIME and PROFILE_INDEX.
+%  Coordinate sequences are selected according to preferred choices in options.
+%  Only variables selected in options and also present in DATA_PROC are gridded.
+%  Selected variables not present in DATA_PROC are silently omited.
+%
 %  Each cast identified in DATA_PROC is converted to an instantaneous vertical 
 %  profile. The position and time coordinates of the new profile are the mean 
 %  values of the respective coordinates in the cast. All profiles are defined at
@@ -18,48 +35,35 @@ function data_grid = gridGliderData(data_proc, varargin)
 %  is interpolated over the new depth grid binning the readings that lay in the 
 %  corresponding depth intervals.
 %
-%  DATA_PROC should be a struct in the format returned by PROCESSGLIDERDATA,
-%  where each field is a time sequence of readings of the variable with the same
-%  name. At least it should have a sequence for each reference coordinate: time,
-%  latitude and longitude, and depth. It also should have a sequence of profile
-%  indices that flags each reading with the number of the cast it belongs to.
-%
 %  Options may be given in key-value pairs OPT1, VAL1... or in a struct OPTIONS 
 %  with field names as option keys and field values as option values.
 %  Recognized options are:
-%    PROFILE: profile index sequence choices.
+%    PROFILE_LIST: profile index sequence choices.
 %      String cell array with the names of the sequence to be used as profile 
 %      index, in order of preference.
 %      Default value: {'profile_index'}
-%    TIME: timestamp sequence choices.
+%    TIME_LIST: timestamp sequence choices.
 %      String cell array with the names of the sequence to be used as time 
 %      coordinates, in order of preference.
 %      Default value: {'time'}
-%    POSITION: latitude and longitude sequence choices.
+%    POSITION_LIST: latitude and longitude sequence choices.
 %      Struct array with the names of the sequence the to be used as 
 %      latitude and longitude coordinates, in order of preference.
 %      It should have the following fields:
 %        LATITUDE: latitude sequence name.
 %        LONGITUDE: longitude sequence name.
 %      Default value: struct('latitude',  {latitude}, 'longitude', {'longitude'})
-%    DEPTH: depth sequence choices.
+%    DEPTH_LIST: depth sequence choices.
 %      String cell array with the names of the sequence to be use as depth
 %      coordinate, in order of preference.
 %      Default value: {'depth'}
 %    DEPTH_STEP: depth resolution.
 %      Positive number setting the depth resolution for output profiles.
 %      Default value: 1
-%    VARIABLES: list of variables to be included in output profiles.
+%    VARIABLE_LIST: list of variables to be included in output profiles.
 %      String cell array with the names of the variables to be interpolated over
 %      the output profiles.
 %      Default value: {} (do nothing except compute profile coordinates)
-%
-%  DATA_GRID is a struct with two kind of fields: bidimensional arrays with 
-%  profiles of gridded variables as rows, and one dimensional reference 
-%  coordinate sequences: LATITUDE, LONTGITUDE, DEPTH, TIME and PROFILE_INDEX.
-%  Coordinate sequences are selected according to preferred choices in options.
-%  Only variables selected in options and also present in DATA_PROC are gridded.
-%  Selected variables not present in DATA_PROC are silently omited
 %
 %  Notes:
 %    This function is an improved version of a previous function by Tomeu Garau
@@ -71,7 +75,7 @@ function data_grid = gridGliderData(data_proc, varargin)
 %        of interpolation).
 %
 %  Examples:
-%    data_grid = gridGliderData(data_proc, options)
+%    [data_grid, meta_grid] = gridGliderData(data_proc, meta_proc, options)
 %
 %  See also:
 %    PROCESSGLIDERDATA
@@ -95,19 +99,19 @@ function data_grid = gridGliderData(data_proc, varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(1, 15, nargin, 'struct'));  
+  error(nargchk(2, 16, nargin, 'struct'));  
   
   
   %% Set gridding options from default values and extra arguments.
   % Set default option values.
   options = struct();
-  options.profile = {'profile_index'};
-  options.time = {'time'};
-  options.position.latitude = 'latitude';
-  options.position.longitude = 'longitude';
-  options.depth = {'depth'};
+  options.profile_list = {'profile_index'};
+  options.time_list = {'time'};
+  options.position_list.latitude = 'latitude';
+  options.position_list.longitude = 'longitude';
+  options.depth_list = {'depth'};
   options.depth_step = 1;
-  options.variables = {};
+  options.variable_list = {};
   % Parse option key-value pairs in any accepted call signature.
   if isscalar(varargin) && isstruct(varargin{1})
     % Options passed as a single option struct argument:
@@ -147,11 +151,11 @@ function data_grid = gridGliderData(data_proc, varargin)
   position_available = false;
   depth_available = false;
   % Select profile index sequence.
-  for profile_sequence_idx = 1:numel(options.profile)
-    profile_sequence = options.profile{profile_sequence_idx};
+  profile_choice_list = cellstr(options.profile_list);
+  for profile_choice_idx = 1:numel(profile_choice_list)
+    profile_sequence = profile_choice_list{profile_choice_idx};
     if ismember(profile_sequence, sequence_list) ...
         && ~all(isnan(data_proc.(profile_sequence)))
-      profile = data_proc.(profile_sequence);
       fprintf('Selected profile index coordinate sequence:\n');
       fprintf('  profile: %s\n', profile_sequence);
       profile_available = true;
@@ -159,11 +163,11 @@ function data_grid = gridGliderData(data_proc, varargin)
     end
   end
   % Select time coordinate sequence.
-  for time_sequence_idx = 1:numel(options.time)
-    time_sequence = options.time{time_sequence_idx};
+  time_choice_list = cellstr(options.time_list);
+  for time_choice_idx = 1:numel(time_choice_list)
+    time_sequence = time_choice_list{time_choice_idx};
     if ismember(time_sequence, sequence_list) ...
         && any(data_proc.(time_sequence) > 0)
-      time = data_proc.(time_sequence);
       fprintf('Selected time coordinate sequence:\n');
       fprintf('  time: %s\n', time_sequence);
       time_available = true;
@@ -171,27 +175,26 @@ function data_grid = gridGliderData(data_proc, varargin)
     end
   end
   % Select position coordinate sequences.
-  for position_sequence_idx = 1:numel(options.position)
-    lat_sequence = options.position(position_sequence_idx).latitude;
-    lon_sequence = options.position(position_sequence_idx).longitude;
-    if all(ismember({lat_sequence lon_sequence}, sequence_list)) ...
-        && ~all(isnan(data_proc.(lat_sequence))) ...
-        && ~all(isnan(data_proc.(lon_sequence))) 
-      latitude = data_proc.(lat_sequence);
-      longitude = data_proc.(lon_sequence);
+  position_choice_list = options.position_list;
+  for position_choice_idx = 1:numel(position_choice_list)
+    latitude_sequence = position_choice_list(position_choice_idx).latitude;
+    longitude_sequence = position_choice_list(position_choice_idx).longitude;
+    if all(ismember({latitude_sequence longitude_sequence}, sequence_list)) ...
+        && ~all(isnan(data_proc.(latitude_sequence))) ...
+        && ~all(isnan(data_proc.(longitude_sequence))) 
       fprintf('Selected position coordinate sequences:\n');
-      fprintf('  latitude : %s\n', lat_sequence);
-      fprintf('  longitude: %s\n', lon_sequence);
+      fprintf('  longitude: %s\n', latitude_sequence);
+      fprintf('  latitude : %s\n', longitude_sequence);
       position_available = true;
       break;
     end
   end
   % Select depth sequence.
-  for depth_sequence_idx = 1:numel(options.depth)
-    depth_sequence = options.depth{depth_sequence_idx};
+  depth_choice_list = cellstr(options.depth_list);
+  for depth_choice_idx = 1:numel(depth_choice_list)
+    depth_sequence = depth_choice_list{depth_choice_idx};
     if ismember(depth_sequence, sequence_list) ...
         && ~all(isnan(data_proc.(depth_sequence)))
-      depth = data_proc.(depth_sequence);
       fprintf('Selected depth coordinate sequence:\n');
       fprintf('  depth: %s\n', depth_sequence);
       depth_available = true;
@@ -211,21 +214,25 @@ function data_grid = gridGliderData(data_proc, varargin)
 
 
   %% Select variables to grid.
-  variable_name_list = intersect(sequence_list, options.variables);
+  variable_list_choice = cellstr(options.variable_list);
+  variable_name_list = intersect(sequence_list, variable_list_choice);
   fprintf('Selected variables to interpolate:\n');
-  %%{
-  % Store variable as columns in a single array to accelerate binning below.
+  fprintf('  %s\n', variable_name_list{:});
+
+  
+  %% Store variables as columns in a single array to accelerate binning below.
+  profile = data_proc.(profile_sequence);
+  time = data_proc.(time_sequence);
+  latitude = data_proc.(latitude_sequence);
+  longitude = data_proc.(longitude_sequence);
+  depth = data_proc.(depth_sequence);
   num_variables = numel(variable_name_list);
   num_instants = numel(time);
   variables = nan(num_instants, num_variables);
   for variable_name_idx = 1:num_variables
     variable_name = variable_name_list{variable_name_idx};
     variables(:, variable_name_idx) = data_proc.(variable_name)(:);
-    fprintf('  %s\n', variable_name);
   end
-  %%}
-  % fprintf('  %s\n', variable_name_list{:});
-  
 
   
   %% Compute number of casts.
@@ -235,8 +242,8 @@ function data_grid = gridGliderData(data_proc, varargin)
 
   %% Compute depth intervals.
   depth_resolution = options.depth_step;
-  depth_min = floor(min(depth) / depth_resolution) * depth_resolution;
-  depth_max = ceil(max(depth) / depth_resolution) * depth_resolution;
+  depth_min = round(min(depth) / depth_resolution) * depth_resolution;
+  depth_max = round(max(depth) / depth_resolution) * depth_resolution;
   depth_range = depth_min : depth_resolution : depth_max;
   num_levels = numel(depth_range);
   
@@ -251,9 +258,8 @@ function data_grid = gridGliderData(data_proc, varargin)
     variable_name = variable_name_list{variable_name_idx};
     data_grid.(variable_name) = nan(num_casts, num_levels);
   end
-  data_grid_variables = nan(num_casts, num_levels, num_variables);
-
   
+
   %% Compute profile coordinates and profile data.
   % Spatial and temporal coordinates are the mean values among cast readings.
   % Selected variable data is interpolated at selected depth levels.
@@ -285,6 +291,14 @@ function data_grid = gridGliderData(data_proc, varargin)
   % intervals centered at selected depth levels.
   % For better performance, compute variable data in single array and move it to
   % output struct at the end.
+  fprintf('Gridding variables with settings:\n');
+  fprintf('  depth level min : %d\n', depth_min);
+  fprintf('  depth level max : %d\n', depth_max);
+  fprintf('  depth level step: %d\n', depth_resolution);
+  fprintf('  number of depth levels: %d\n', num_levels);
+  fprintf('  number of profiles    : %d\n', num_casts);
+  fprintf('  number of variables   : %d\n', num_variables);
+  data_grid_variables = nan(num_casts, num_levels, num_variables);
   for cast_idx = 1:num_casts
     cast_select = (profile == cast_idx);
     cast_lat = latitude(cast_select);
@@ -308,4 +322,36 @@ function data_grid = gridGliderData(data_proc, varargin)
   end
   %%}
 
+  
+  %% Add gridding metadata:
+  meta_grid.profile_index = meta_proc.(profile_sequence);
+  meta_grid.profile_index.grid_sources = profile_sequence;
+  meta_grid.profile_index.grid_resolution = 1;
+  meta_grid.profile_index.grid_min = min(profile_range);
+  meta_grid.profile_index.grid_max = max(profile_range);
+  meta_grid.depth = meta_proc.(depth_sequence);
+  meta_grid.depth.grid_sources = depth_sequence;
+  meta_grid.depth.grid_resolution = depth_resolution;
+  meta_grid.depth.grid_min = depth_min;
+  meta_grid.depth.grid_max = depth_max;
+  meta_grid.time = meta_proc.(time_sequence);
+  meta_grid.time.grid_sources = time_sequence;
+  meta_grid.time.grid_coordinates = {'profile_index'};
+  meta_grid.time.grid_method = {'mean'};
+  meta_grid.longitude = meta_proc.(longitude_sequence);
+  meta_grid.longitude.grid_sources = longitude_sequence;
+  meta_grid.longitude.grid_coordinates = {'profile_index'};
+  meta_grid.longitude.grid_method = {'mean'};
+  meta_grid.latitude = meta_proc.(latitude_sequence);
+  meta_grid.latitude.grid_sources = latitude_sequence;
+  meta_grid.latitude.grid_coordinates = {'profile_index'};
+  meta_grid.latitude.grid_method = {'mean'};
+  for variable_name_idx = 1:numel(variable_name_list)
+    variable_name = variable_name_list{variable_name_idx};
+    meta_grid.(variable_name) = meta_proc.(variable_name);
+    meta_grid.(variable_name).grid_sources = variable_name;
+    meta_grid.(variable_name).grid_coordinates = {'profile_index' 'depth'};
+    meta_grid.(variable_name).grid_method = {'index' 'mean'};
+  end
+  
 end

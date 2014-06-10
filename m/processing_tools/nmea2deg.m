@@ -1,20 +1,27 @@
-function deg = nmea2deg(nmea)
-%NMEA2DEG  Convert NMEA latitude/longitude degrees to decimal degrees.
+function varargout = nmea2deg(varargin)
+%NMEA2DEG  Convert NMEA latitude and/or longitude degrees to decimal degrees.
 %
 %  Syntax:
 %    DEG = NMEA2DEG(NMEA)
+%    [DEGLAT, DEGLON] = NMEA2DEG(NMEALAT, NMEALON)
 %
-%  DEG = NMEA2DEG(NMEA) Converts the scalar or array NMEA from NMEA
-%  latitude/longitude degrees to decimal degrees applying the transformation:
+%  DEG = NMEA2DEG(NMEA) converts the scalar or array NMEA from NMEA latitude or
+%  longitude degrees to decimal degrees applying the transformation:
 %     DEG = FIX(NMEA/100) + REM(NMEA,100)/60;
+%
+%  [DEGLAT, DEGLON] = NMEA2DEG(NMEALAT, NMEALON) performs the same conversion
+%  to each of its input arguments separately.
 %    
 %  Examples:
 %    nmea2deg(3330.00)
 %    nmea = [36015.00 -445.25]
 %    deg = nmea2deg(nmea)
+%    nmealat = 3900.61662
+%    nmealon = 257.99996
+%    [deglat, deglon] = nmea2deg(nmealat, nmealon)
 %
 %  Notes:
-%    The input number is not checked to be a valid NMEA coordinate value.
+%    The input values are not checked to be valid NMEA coordinate values.
 %    So no warning is produced if the degree digits are out of [0,180] or
 %    the integral part of de minute digits are out of [00,59].
 %  
@@ -41,8 +48,12 @@ function deg = nmea2deg(nmea)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(1, 1, nargin, 'struct'));
+  error(nargchk(1, 2, nargin, 'struct'));
   
-  deg = fix(nmea/100) + rem(nmea,100)/60;
+  for varargidx = 1:numel(varargin)
+    nmea = varargin{varargidx};
+    deg = fix(nmea/100) + rem(nmea,100)/60;
+    varargout{varargidx} = deg;
+  end
 
 end

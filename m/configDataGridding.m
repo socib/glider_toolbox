@@ -36,18 +36,18 @@ function gridding_options = configDataGridding()
 
   gridding_options = struct();
 
-  gridding_options.profile = {'profile_index'};
+  gridding_options.profile_list = {'profile_index'};
   
-  gridding_options.time = {'time'};
+  gridding_options.time_list = {'time'};
 
-  gridding_options.position(1).latitude = 'latitude';
-  gridding_options.position(1).longitude = 'longitude';
+  gridding_options.position_list(1).latitude = 'latitude';
+  gridding_options.position_list(1).longitude = 'longitude';
 
-  gridding_options.depth = {'depth'};
+  gridding_options.depth_list = {'depth_ctd' 'depth'};
 
   gridding_options.depth_step = 1;
 
-  gridding_options.variables = { 
+  gridding_options.variable_list = { 
     'conductivity'
     'temperature'
     'pressure'

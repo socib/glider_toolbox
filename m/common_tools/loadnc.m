@@ -1,29 +1,29 @@
-function [var_data, var_meta, global_meta] = readNetCDFData(url, var_names, field_names)
-%READNETCDFDATA  Interface to low level functions to read data from a NetCDF source.
+function [var_data, var_meta, global_meta] = loadnc(url, var_names, field_names)
+%LOADNC  Interface to low level functions to read data from a NetCDF source.
 %
 %  Syntax:
-%    VAR_DATA = READNETCDFDATA(URL)
-%    VAR_DATA = READNETCDFDATA(URL, VAR_NAMES)
-%    VAR_DATA = READNETCDFDATA(URL, VAR_NAMES, FIELD_NAMES)
-%    [VAR_DATA, VAR_META, GLOBAL_META] = READNETCDFDATA(...)
+%    VAR_DATA = LOADNC(URL)
+%    VAR_DATA = LOADNC(URL, VAR_NAMES)
+%    VAR_DATA = LOADNC(URL, VAR_NAMES, FIELD_NAMES)
+%    [VAR_DATA, VAR_META, GLOBAL_META] = LOADNC(...)
 %
-%  VAR_DATA = READNETCDFDATA(URL) reads data from all variables in the NetCDF 
-%  source defined by string URL to struct VAR_DATA. For every variable there is 
-%  a field with the variable name as field name and the variable data as value.
-%  See note on variable renaming.
+%  VAR_DATA = LOADNC(URL) reads data from all variables in the NetCDF source 
+%  defined by string URL to struct VAR_DATA. For every variable there is a field
+%  with the variable name as field name and the variable data as value (see note
+%  on variable renaming. The URL might be the name of a local file or an 
+%  OPeNDAP url.
 %
-%  VAR_DATA = READNETCDFDATA(URL, VAR_NAMES) retrieves only variables named in 
-%  string cell array VAR_NAMES. See note on variable renaming.
+%  VAR_DATA = LOADNC(URL, VAR_NAMES) retrieves only variables named in string 
+%  cell array VAR_NAMES.
 %
-%  VAR_DATA = READNETCDFDATA(URL, VAR_NAMES, FIELD_NAMES) also retrieves 
-%  variables named in string cell array VAR_NAMES but performs a renaming,
-%  storing them in fields named by string cell array FIELD_NAMES, which must
-%  have the size of VAR_NAMES.
+%  VAR_DATA = LOADNC(URL, VAR_NAMES, FIELD_NAMES) also retrieves variables named
+%  in string cell array VAR_NAMES but performs a renaming, storing them in 
+%  fields named by string cell array FIELD_NAMES, which must have the size of 
+%  VAR_NAMES.
 %
-%  [VAR_DATA, VAR_META] = READNETCDFDATA(...) reads also variable metadata to 
-%  struct VAR_META. For every variable field in VAR_DATA there is a field in 
-%  VAR_META with the same name, containing the variable metadata in a struct
-%  with fields:
+%  [VAR_DATA, VAR_META] = LOADNC(...) reads also variable metadata to struct 
+%  VAR_META. For every variable field in VAR_DATA there is a field in VAR_META 
+%  with the same name, containing the variable metadata in a struct with fields:
 %    NAME: string with the original variable name in the NetCDF source.
 %    DATATYPE: string with the original variable NetCDF data type.
 %    DIMENSIONS: cell array with the name of the dimensions of the variable.
@@ -31,9 +31,9 @@ function [var_data, var_meta, global_meta] = readNetCDFData(url, var_names, fiel
 %      NAME: string with the attribute name.
 %      VALUE: arbitrary typed value with the value of the attribute.
 %
-%  [VAR_DATA, VAR_META, GLOBAL_META] = READNETCDFDATA(...) reads also global 
-%  attributes and dimensions present in the NetCDF source to struct GLOBAL_META,
-%  which has the following fields:
+%  [VAR_DATA, VAR_META, GLOBAL_META] = LOADNC(...) reads also global attributes 
+%  and dimensions present in the NetCDF source to struct GLOBAL_META, which has 
+%  the following fields:
 %    NAME: string with the url of the NetCDF resource (same as URL).
 %    DIMENSIONS: struct array describing the dimensions with fields:
 %      NAME: string with the dimension name.
@@ -58,19 +58,19 @@ function [var_data, var_meta, global_meta] = readNetCDFData(url, var_names, fiel
 %  Examples:
 %    url = 'http://test.opendap.org:80/opendap/netcdf/examples/tos_O1_2001-2002.nc'
 %    % Read all information at once.
-%    [var_data, var_meta, global_meta] = readNetCDFData(url)
+%    [var_data, var_meta, global_meta] = loadnc(url)
 %    % Retrieve data of interest without metadata.
-%    var_data = readNetCDFData(url, {'time', 'lon', 'lat', 'tos'})
+%    var_data = loadnc(url, {'time', 'lon', 'lat', 'tos'})
 %    % Retrieve data of interest with metadata.
-%    [var_data, var_meta] = readNetCDFData(url, {'time', 'lon', 'lat', 'tos'})
+%    [var_data, var_meta] = loadnc(url, {'time', 'lon', 'lat', 'tos'})
 %    % Retrieve data renaming variables.
 %    var_names = {'time', 'lon', 'lat', 'tos'}
 %    new_names = {'time', 'longitude', 'latitude', 'temperature'}
-%    var_data = readNetCDFData(url, var_names, new_names)
-%    [var_data, var_meta] = readNetCDFData(url, var_names, new_names)
+%    var_data = loadnc(url, var_names, new_names)
+%    [var_data, var_meta] = loadnc(url, var_names, new_names)
 %
 %  See also:
-%    WRITENETCDFDATA
+%    SAVENC
 %    GENVARNAME
 %
 %  Author: Joan Pau Beltran
@@ -210,9 +210,9 @@ function [var_data, var_meta, global_meta] = readNetCDFData(url, var_names, fiel
         nc_var_list = nc_full_info.Dataset;
         var_names = {nc_var_list.Name};
       else
-        [nc_var_present, nc_var_sel] = ...
+        [nc_var_present, nc_var_select] = ...
           ismember(var_names, {nc_full_info.Dataset.Name});
-        nc_var_list = nc_full_info.Dataset(nc_var_sel);
+        nc_var_list = nc_full_info.Dataset(nc_var_select);
       end
       % If no variable renaming is specified preserve names as much as possible.
       if nargin < 3

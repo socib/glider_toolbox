@@ -1,23 +1,25 @@
-function preprocessing_options = configDataPreprocessing()
-%CONFIGDATAPREPROCESSING  Configure glider data preprocessing.
+function dbar = bar2dbar(bar)
+%BAR2DBAR  Convert pressure from bars to dbars.
 %
 %  Syntax:
-%    PREPROCESSING_OPTIONS = CONFIGDATAPREPROCESSING()
+%    DBAR = BAR2DBAR(BAR)
 %
-%  PREPROCESSING_OPTIONS = CONFIGDATAPREPROCESSING() should return a struct
-%  setting the options for glider data preprocessing as needed by the function
-%  PREPROCESSGLIDERDATA.
+%  DBAR = BAR2DBAR(BAR) converts pressure readings in array BAR from bars to
+%  decibars by multiplying by 10.
+%
+%  Notes:
+%    This is simply a convenience function to call the conversion with an
+%    explicit name.
 %
 %  Examples:
-%    preprocessing_options = configDataPreprocessing()
+%    dbar = bar2dbar(bar)
 %
 %  See also:
-%    PREPROCESSGLIDERDATA
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify
@@ -33,16 +35,8 @@ function preprocessing_options = configDataPreprocessing()
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(0, 0, nargin, 'struct'));
+  error(nargchk(nargin, 1, 1, 'struct'));
   
-  preprocessing_options.nmea_conversion_sensor_list = {
-    'm_gps_lat'
-    'm_gps_lon'
-    'm_lat'
-    'm_lon'
-    'c_wpt_lat'
-    'c_wpt_lon'
-  };
+  dbar = bar * 10;
 
 end
-
