@@ -59,6 +59,23 @@ function imginfo = printfigure(varargin)
 %      the renderer is automatically selected either from figure properties or
 %      depending on figure contents.
 %      Default value: '' (renderer automatically selected)
+%    LOOSE: uncrop image when printing intermediate vector file.
+%      String setting the value of the loose option (MATLAB only) to produce
+%      an uncropped image when printing to the intermediate vector file.
+%      The only recognized value is 'loose', which prevents the figure being
+%      cropped. If empty, no option is set when calling PRINT.
+%      Default value: 'loose' (produce uncropped images).
+%    CONVERT: program to convert intermediate vector file to final format.
+%      String setting which program should be called to convert the intermediate
+%      vector image file to the final format using SYSTEM (see note on format
+%      conversion below). If empty, the conversion is omitted and the image file
+%      in the final format is produced by the built-in driver in option DRIVER.
+%      Default value: 'convert'
+%    KEEPEPS: preserve intermediate vector file after conversion.
+%      Boolean setting whether the intermediate vector file should be preserved
+%      after the conversion to the final format. If false, the intermediate file
+%      is deleted after a successful conversion.
+%      Default value: false
 %  Returned struct IMGINFO contains information about the figure and the 
 %  generated image. It has the following fields:
 %    TITLE: string with the image label (taken from options).
@@ -87,10 +104,14 @@ function imginfo = printfigure(varargin)
 %    Due to quality limitations when printing to some output formats in MATLAB
 %    (like png), the image file is generated first printing the corresponding 
 %    figure to eps format with PRINT, and then calling the program 'convert' 
-%    from ImageMagick suite through SYSTEM to convert it to the final format 
-%    and add metadata tags. If the final format is eps, no conversion is
-%    performed. Since eps does not seem to support metadata tags, the program is
-%    not invoked at all.
+%    from ImageMagick/GraphicsMagick suite through SYSTEM to convert it to the
+%    final format and add metadata tags. If the final format is eps, no 
+%    conversion is performed. Since eps does not seem to support metadata tags,
+%    the program is not invoked at all.
+%
+%    The 'convert' program is part of the GraphicsMagick and ImageMagick suites:
+%      http://www.imagemagick.org/script/convert.php
+%      http://www.graphicsmagick.org/convert.html
 %
 %    The resulting image size, either in pixel or metric units, is governed by 
 %    the resolution option and the figure position properties 'PaperPosition'
@@ -121,7 +142,6 @@ function imginfo = printfigure(varargin)
 %    FULLFILE
 %    DATESTR
 %    NOW
-%    
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
@@ -165,6 +185,9 @@ function imginfo = printfigure(varargin)
   options.comment = '';
   options.driver = 'epsc2';
   options.render = []; 
+  options.loose = 'loose';
+  options.convert = 'convert';
+  options.keepeps = false;
   
   
   %% Get options from extra arguments.
@@ -220,11 +243,16 @@ function imginfo = printfigure(varargin)
   if ~isempty(options.render)
     renderopt = ['-' options.render];
   end
-  looseopt = '-loose'; % needed to create an uncropped image (eps bounding box better matches figure position)
-  print(hfig, resdpiopt, renderopt, driveropt, looseopt, fullfile_eps);
-  if ~strcmpi(options.format, 'eps')
+  looseopt = '';
+  if ~isempty(options.loose) % needed to create an uncropped image (eps bounding box better matches figure position)
+    looseopt = ['-' options.loose];
+  end
+  if isempty(options.convert) || strcmpi(options.format, 'eps')
+    print(hfig, resdpiopt, renderopt, driveropt, looseopt, fullfile_ext);
+  else
+    print(hfig, resdpiopt, renderopt, driveropt, looseopt, fullfile_eps);
     [failure, output] = system( ...
-        ['convert' ...
+        [options.convert ...
          ' -depth 8' ...        % needed because ImageMagick identifies the eps as 16 bit color depth.
          ' -colorspace RGB' ... % needed because ImageMagick identifies the eps as CMYK due to the %%DocumentProcessColor comment.
          ' -density ' num2str(options.resolution) ... 
@@ -236,7 +264,7 @@ function imginfo = printfigure(varargin)
      if failure
        error('glider_toolbox:printfigure:ConvertError', ...
              'Command convert failed (eps file preserved): %s.', output);
-     else
+     elseif ~options.keepeps
        delete(fullfile_eps);
      end
   end
