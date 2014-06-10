@@ -42,7 +42,7 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
 %    ncl0_info = configDTOutputNetCDFL0Slocum()
 %
 %  See also:
-%    GENERATENETCDF
+%    GENERATEOUTPUTNETCDF
 %    SAVENC
 %    LOADSLOCUMDATA
 %
@@ -533,8 +533,8 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
     'citation'                     '' % deployment_citation
     'comment'                      'Data provided as it comes from the glider.'
     'Conventions'                  'CF-1.6'
+    'creator'                      '' % deployment_author
     'creator_email'                '' % deployment_author_email
-    'creator_name'                 '' % deployment_author
     'creator_url'                  '' % deployment_author_url
     'data_center'                  '' % deployment_data_center
     'data_center_email'            '' % deployment_data_center_email
@@ -550,6 +550,7 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
     'history'                      ''
     'institution'                  '' % institution_name
     'institution_references'       '' % institution_references
+    'instrument'                   '' % instrument_name
     'instrument_model'             '' % instrument_model
     'instrument_manufacturer'      '' % instrument_manufacturer
     'license'                      'Approved for public release. Distribution Unlimited.' % deployment_distribution_statement
@@ -559,8 +560,8 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
     'principal_investigator_email' '' % deployment_principal_investigator_email
     'processing_level'             'L0 raw data not calibrated'
     'project'                      '' % deployment_project
+    'publisher'                    '' % deployment_publisher_name
     'publisher_email'              '' % deployment_publisher_email
-    'publisher_name'               '' % deployment_publisher_name
     'publisher_url'                '' % deployment_publisher_url
     'source'                       'glider'
     'source_files'                 'undefined' % source_files field set by processing script after loading data.

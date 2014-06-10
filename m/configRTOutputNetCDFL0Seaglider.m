@@ -2507,8 +2507,8 @@ function ncl0_info = configRTOutputNetCDFL0Seaglider()
     'citation'                     '' % deployment_citation
     'comment'                      'Data provided as it comes from the glider.'
     'Conventions'                  'CF-1.6'
+    'creator'                      '' % deployment_author
     'creator_email'                '' % deployment_author_email
-    'creator_name'                 '' % deployment_author
     'creator_url'                  '' % deployment_author_url
     'data_center'                  '' % deployment_data_center
     'data_center_email'            '' % deployment_data_center_email
@@ -2533,8 +2533,8 @@ function ncl0_info = configRTOutputNetCDFL0Seaglider()
     'principal_investigator_email' '' % deployment_principal_investigator_email
     'processing_level'             'L0 raw data not calibrated'
     'project'                      '' % deployment_project
+    'publisher'                    '' % deployment_publisher_name
     'publisher_email'              '' % deployment_publisher_email
-    'publisher_name'               '' % deployment_publisher_name
     'publisher_url'                '' % deployment_publisher_url
     'source'                       'glider'
     'source_files'                 'undefined' % source_files field set by processing script after loading data.

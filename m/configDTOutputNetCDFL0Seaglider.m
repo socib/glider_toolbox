@@ -42,7 +42,7 @@ function ncl0_info = configDTOutputNetCDFL0Seaglider()
 %    ncl0_info = configDTOutputNetCDFL0Seaglider()
 %
 %  See also:
-%    GENERATENETCDF
+%    GENERATEOUTPUTNETCDF
 %    SAVENC
 %    LOADSEAGLIDERDATA
 %
@@ -2507,8 +2507,8 @@ function ncl0_info = configDTOutputNetCDFL0Seaglider()
     'citation'                     '' % deployment_citation
     'comment'                      'Data provided as it comes from the glider.'
     'Conventions'                  'CF-1.6'
+    'creator'                      '' % deployment_author
     'creator_email'                '' % deployment_author_email
-    'creator_name'                 '' % deployment_author
     'creator_url'                  '' % deployment_author_url
     'data_center'                  '' % deployment_data_center
     'data_center_email'            '' % deployment_data_center_email
@@ -2524,8 +2524,9 @@ function ncl0_info = configDTOutputNetCDFL0Seaglider()
     'history'                      ''
     'institution'                  '' % institution_name
     'institution_references'       '' % institution_references
-    'instrument_model'             '' % instrument_model
+    'instrument'                   '' % instrument_name
     'instrument_manufacturer'      '' % instrument_manufacturer
+    'instrument_model'             '' % instrument_model
     'license'                      'Approved for public release. Distribution Unlimited.' % deployment_distribution_statement
     'netcdf_version'               '4.0.1'
     'positioning_system'           'GPS and dead reckoning'
@@ -2533,8 +2534,8 @@ function ncl0_info = configDTOutputNetCDFL0Seaglider()
     'principal_investigator_email' '' % deployment_principal_investigator_email
     'processing_level'             'L0 raw data not calibrated'
     'project'                      '' % deployment_project
+    'publisher'                    '' % deployment_publisher_name
     'publisher_email'              '' % deployment_publisher_email
-    'publisher_name'               '' % deployment_publisher_name
     'publisher_url'                '' % deployment_publisher_url
     'source'                       'glider'
     'source_files'                 'undefined' % source_files field set by processing script after loading data.

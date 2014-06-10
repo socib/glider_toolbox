@@ -1,31 +1,37 @@
-function nc = generateOutputNetCDF(filename, data, deployment, vars, dims, atts, varargin)
+function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims, atts, varargin)
 %GENERATEOUTPUTNETCDF  Generate NetCDF output for glider deployment data.
 %
 %  Syntax:
-%    NC = GENERATEOUTPUTNETCDF(FILENAME, DATA, DEPLOYMENT, VARS, DIMS, ATTS)
-%    NC = GENERATEOUTPUTNETCDF(FILENAME, DATA, DEPLOYMENT, VARS, DIMS, ATTS, OPTIONS)
-%    NC = GENERATEOUTPUTNETCDF(FILENAME, DATA, DEPLOYMENT, VARS, DIMS, ATTS, OPT1, VAL1, ...)
+%    NC = GENERATEOUTPUTNETCDF(FILENAME, DATA, META, DEPLOYMENT, VARS, DIMS, ATTS)
+%    NC = GENERATEOUTPUTNETCDF(FILENAME, DATA, META, DEPLOYMENT, VARS, DIMS, ATTS, OPTIONS)
+%    NC = GENERATEOUTPUTNETCDF(FILENAME, DATA, META, DEPLOYMENT, VARS, DIMS, ATTS, OPT1, VAL1, ...)
 %
-%  NC = GENERATEOUTPUTNETCDF(FILENAME, DATA, DEPLOYMENT, VARS, DIMS, ATTS) calls
-%  SAVENC to generate a NetCDF file named FILENAME from deployment data in 
+%  NC = GENERATEOUTPUTNETCDF(FILENAME, DATA, META, DEPLOYMENT, VARS, DIMS, ATTS)
+%  calls SAVENC to generate a NetCDF file named FILENAME from deployment data in 
 %  struct DATA, according to the template defined by variable metadata in VARS,
 %  dimension definitions in struct DIMS and global attributes in struct array 
 %  ATTS, and returns the absolute name of the generated file in string NC.
 %
 %  DATA and VARS should be structs with one field per variable with the variable
-%  data and the variable metadata respectively, as needed by SAVENC.
+%  data and the variable metadata respectively, as needed by SAVENC. To allow
+%  runtime defined variable metadata, META might be a struct with variable names 
+%  as field names and runtime defined variable attributes as values. Each field
+%  should be a struct with the vattribute names as field names and the attribute
+%  values as field values. If the value of a variable attribute in a field of 
+%  VARS is left undefined (empty) and its name matches a field name of the 
+%  corresponding variable field in META, the value is overwritten.
 %
 %  DIMS should be a struct as needed by SAVENC. To allow runtime defined 
 %  dimensions and predefined dimensions (useful for the case of string
-%  variables), variables may have dimensions not defined in DIMS or with 
-%  undefined length (empty LENGTH field value), and they are inferred from the
-%  data values.
+%  variables), variables may specifye dimensions in VARS which are not defined 
+%  in DIMS or with undefined length (empty LENGTH field value), and they are 
+%  inferred from the size of the data values.
 %
 %  ATTS should be a struct array as needed by SAVENC, too. To allow runtime 
-%  defined attributes, attributes in ATTS whose name match a field name in 
-%  struct DEPLOYMENT are overwritten with the field value. In addition, if the
-%  following global attributes are present in struct ATTS, they are updated with
-%  values computed from data (see options below):
+%  defined global attributes, attributes in ATTS whose name matches a field name
+%  in struct DEPLOYMENT are overwritten with the field value.
+%  In addition, if the following global attributes are present in struct ATTS, 
+%  they are updated with values computed from data (see options below):
 %    DATE_MODIFIED: modification time given by POSIXTIME ('yyyy-mm-ddTHH:MM:SS+00:00').
 %    GEOSPATIAL_LAT_MAX: maximum latitude value inferred from data.
 %    GEOSPATIAL_LAT_MIN: minimum latitude value inferred from data.
@@ -204,7 +210,7 @@ function nc = generateOutputNetCDF(filename, data, deployment, vars, dims, atts,
     time_field_index = find(time_field_present, 1);
     time_field = time_field_list{time_field_index};
     time_units = [];
-    if numel(options.time_conversion) > 1
+    if iscell(options.time_conversion)
       time_func = options.time_conversion{time_field_index};
     else
       time_func = options.time_conversion;
@@ -248,7 +254,7 @@ function nc = generateOutputNetCDF(filename, data, deployment, vars, dims, atts,
     position_field_index = find(position_field_present, 1);
     [position_x_field, position_y_field] = ...
       position_field_list{position_field_index, :};
-    if numel(options.position_conversion) > 1
+    if iscell(options.position_conversion)
       position_func = options.position_conversion{position_field_index};
     else
       position_func = options.position_conversion;
@@ -299,7 +305,7 @@ function nc = generateOutputNetCDF(filename, data, deployment, vars, dims, atts,
   if any(vertical_field_present)
     vertical_field_index = find(vertical_field_present, 1);
     vertical_field = vertical_field_list{vertical_field_index};
-    if numel(options.vertical_conversion) > 1
+    if iscell(options.vertical_conversion)
       vertical_func = options.vertical_conversion{position_field_index};
     else
       vertical_func = options.vertical_conversion;
@@ -345,26 +351,6 @@ function nc = generateOutputNetCDF(filename, data, deployment, vars, dims, atts,
 
   %% Aggregate global metadata (global attributes and dimension definitions).
   global_meta = struct();
-  % Set dimension lengths.
-  global_meta.dimensions = dims;
-  var_name_list = intersect(fieldnames(data), fieldnames(vars));
-  % Set lengths of dimensions not defined by input arguments.
-  for var_idx = 1:numel(var_name_list);
-    var_name = var_name_list{var_idx};
-    dim_name_list = vars.(var_name).dimensions;
-    dim_size_list = size(data.(var_name));
-    for dim_idx = 1:numel(dim_name_list)
-      dim_name = dim_name_list{dim_idx};
-      dim_size = dim_size_list(dim_idx);
-      dim_comp = strcmp(dim_name, {global_meta.dimensions.name});
-      if ~any(dim_comp)
-        global_meta.dimensions(end+1) = ...
-          struct('name', {dim_name}, 'length', {dim_size});
-      elseif isempty(global_meta.dimensions(dim_comp).length)
-        global_meta.dimensions(dim_comp).length = dim_size;
-      end
-    end
-  end
   % Set global attributes.
   global_meta.attributes = atts;
   % Overwrite default attributes with deployment fields or dynamic values.
@@ -377,14 +363,74 @@ function nc = generateOutputNetCDF(filename, data, deployment, vars, dims, atts,
         dyn_atts.(global_meta.attributes(att_idx).name);
     end
   end
+  % Set dimension lengths.
+  global_meta.dimensions = dims;
+  % Overwrite lengths of dimensions not defined by input arguments.
+  var_name_list = fieldnames(vars);
+  for var_idx = 1:numel(var_name_list);
+    var_name = var_name_list{var_idx};
+    if isfield(data, var_name)
+      dim_name_list = vars.(var_name).dimensions;
+      dim_size_list = size(data.(var_name));
+      for dim_idx = 1:numel(dim_name_list)
+        dim_name = dim_name_list{dim_idx};
+        dim_size = dim_size_list(dim_idx);
+        dim_comp = strcmp(dim_name, {global_meta.dimensions.name});
+        if ~any(dim_comp)
+          global_meta.dimensions(end+1) = ...
+            struct('name', {dim_name}, 'length', {dim_size});
+        elseif isempty(global_meta.dimensions(dim_comp).length)
+          global_meta.dimensions(dim_comp).length = dim_size;
+        end
+      end
+    end
+  end
   
   
-  %% Convert text data from string cell array C style strings.
+  %% Aggregate variable metadata and overwrite runtime defined metadata.
+  variable_meta = struct();
+  var_name_list = fieldnames(vars);
+  for var_name_idx = 1:numel(var_name_list)
+    var_name = var_name_list{var_name_idx};
+    if isfield(data, var_name)
+      variable_meta.(var_name) = vars.(var_name);
+      % Loop in reverse order to allow for deletion of indexed attributes.
+      for att_idx = numel(variable_meta.(var_name).attributes):-1:1
+        att_name = variable_meta.(var_name).attributes(att_idx).name;
+        att_value = variable_meta.(var_name).attributes(att_idx).value;
+        if isempty(att_value)
+          if isfield(meta, var_name) && isfield(meta.(var_name), att_name)
+            if iscellstr(meta.(var_name).(att_name))
+              variable_meta.(var_name).attributes(att_idx).value = ...
+                strtrim(sprintf('%s ', meta.(var_name).(att_name){:}));
+            elseif islogical(meta.(var_name).(att_name))
+              variable_meta.(var_name).attributes(att_idx).value = ...
+                uint8(meta.(var_name).(att_name));
+            else
+              variable_meta.(var_name).attributes(att_idx).value = ...
+                meta.(var_name).(att_name);
+            end
+          else
+            variable_meta.(var_name).attributes(att_idx) = [];
+          end
+        end
+      end
+    end
+  end
+  
+  
+  %% Aggregate required variable data and apply required conversions.
+  variable_data = struct();
   data_field_list = fieldnames(data);
   for data_field_idx = 1:numel(data_field_list)
     data_field = data_field_list{data_field_idx};
-    if iscellstr(data.(data_field))
-      data.(data_field) = strc(data.(data_field));
+    if isfield(vars, data_field)
+      % Convert text data from string cell array to C style strings.
+      if iscellstr(data.(data_field))
+        variable_data.(data_field) = strc(data.(data_field));
+      else
+        variable_data.(data_field) = data.(data_field);
+      end
     end
   end
   
@@ -407,7 +453,7 @@ function nc = generateOutputNetCDF(filename, data, deployment, vars, dims, atts,
   
   
   %% Generate the file.
-  savenc(data, vars, global_meta, filename);
+  savenc(variable_data, variable_meta, global_meta, filename);
   
   
   %% Return the absolute name of the generated file.
