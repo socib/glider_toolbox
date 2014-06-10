@@ -321,7 +321,7 @@ for deployment_idx = 1:numel(deployment_list)
         disp('Converting binary data files to ascii format...');
         bin_dir_contents = dir(binary_dir);
         xbd_select = ~[bin_dir_contents.isdir] ...
-          & ~cellfun(@isempty, regexp({bin_dir_contents.name}, file_options.bin_name_pattern));
+          & ~cellfun(@isempty, regexp({bin_dir_contents.name}, file_options.xbd_name_pattern));
         xbd_names = {bin_dir_contents(xbd_select).name};
         xbd_sizes = [bin_dir_contents(xbd_select).bytes];
         disp(['Binary files found: ' num2str(numel(xbd_names)) ...
@@ -332,8 +332,8 @@ for deployment_idx = 1:numel(deployment_list)
             if isempty(new_files{xbd_idx})
               xbd_name_ext = xbd_names{xbd_idx};
               dba_name_ext = regexprep(xbd_name_ext, ...
-                                       file_options.bin_name_pattern, ...
-                                       file_options.dba_name_replacement);
+                                       file_options.xbd_name_pattern, ...
+                                       file_options.dba_name_replace);
               xbd_fullfile = fullfile(binary_dir, xbd_name_ext);
               dba_fullfile = fullfile(ascii_dir, dba_name_ext);
               try

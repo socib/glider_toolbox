@@ -42,12 +42,12 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
 %      present in output.
 %      Default value: 'all' (do not perform sensor filtering).
 %    PERIOD: time filtering boundaries.
-%      Two element numeric array with the start and end of the time interval of 
-%      interest (seconds since 1970-01-01 00:0:00.00 UTC). If given, only sensor
-%      cycles with timestamps within this period will be present in output.
-%      The string 'all' may also be given, in which case time filtering is not
-%      performed and all sensors cycles in input data sets will be present in 
-%      output.
+%      Two element numeric array with the start and the end of the time interval 
+%      of interest (seconds since 1970-01-01 00:00:00.00 UTC). If given, only 
+%      sensor cycles with timestamps within this period will be present in
+%      output. The string 'all' may also be given, in which case time filtering 
+%      is not performed and all sensors cycles in input data sets will be 
+%      present in output.
 %      Default value: 'all' (do not perform time filtering).
 %
 %  Notes:

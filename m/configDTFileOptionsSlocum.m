@@ -10,7 +10,7 @@ function slocum_options = configDTFileOptionsSlocum()
 %  The returned struct should have the following fields:
 %    FORMAT_CONVERSION: boolean specifying whether data is in binary files that
 %      should be converted to human readable format.
-%    BIN_NAME_PATTERN: string with the name pattern of binary data files as
+%    XBD_NAME_PATTERN: string with the name pattern of binary data files as
 %      needed by script MAIN_GLIDER_DATA_PROCESSING_DT. A binary file should 
 %      match this pattern to be converted, and the conversion to ascii format 
 %      renames it according to this pattern and the replacement string in next 
@@ -61,31 +61,33 @@ function slocum_options = configDTFileOptionsSlocum()
 
   error(nargchk(0, 0, nargin, 'struct'));
   
-  % Enable binary file conversion to text format.
-  % Disable it when reprocessing deployments with no new binary data.
+  % Binary file conversion to text format
+  % (disable it when reprocessing deployments with no new binary data):
   slocum_options.format_conversion = true;
   
   % All binary files, renamed or not:
-  % slocum_options.bin_name_pattern = '^(.*)\.([smdtne]bd)$';
-  % Already renamed binary files of all sizes.
-  slocum_options.bin_name_pattern = '^(\w+-\d{4}-\d+-\d+-\d+)\.([smdtne]bd)$';
+  % slocum_options.xbd_name_pattern = '^(.*)\.([smdtne]bd)$';
+  % Already renamed binary files of all sizes:
+  slocum_options.xbd_name_pattern = '^(\w+-\d{4}-\d+-\d+-\d+)\.([smdtne]bd)$';
   
-  % xbd to dba name replacement.
-  slocum_options.dba_name_replacement = '$1-$2.dba';
+  % xbd to dba name replacement:
+  slocum_options.dba_name_replace = '$1-$2.dba';
   
-  % Select navigation files to use. Restrict the character set if needed.
-  slocum_options.dba_name_pattern_nav = '^.*-[d]bd.dba$';
+  % Navigation files to use (restrict the character set if needed):
+  % slocum_options.dba_name_pattern_nav = '^.*-[smd]bd\.dba$';
+  slocum_options.dba_name_pattern_nav = '^.*-dbd\.dba$';
   
-  % Select science files to use. Restrict the character set if needed.
-  slocum_options.dba_name_pattern_sci = '^.*-[e]bd.dba$';
+  % Science files to use: (restrict the character set if needed):
+  % slocum_options.dba_name_pattern_sci = '^.*-[tne]bd\.dba$';
+  slocum_options.dba_name_pattern_sci = '^.*-ebd\.dba$';
   
-  % Select time sensor column in navigation files.
+  % Time sensor column in navigation files:
   slocum_options.dba_time_sensor_nav = 'm_present_time';
   
-  % Select time sensor column in science files.
+  % Time sensor column in science files:
   slocum_options.dba_time_sensor_sci = 'sci_m_present_time';
   
-  % Sensors to load.
+  % Sensors to load:
   slocum_options.dba_sensors = {
     'm_present_time'
     'm_lat'
@@ -95,10 +97,12 @@ function slocum_options = configDTFileOptionsSlocum()
     'm_gps_status'
     'c_wpt_lat'
     'c_wpt_lon'
+    'c_heading'
     'm_roll'
     'm_pitch'
     'm_heading'
     'm_depth'
+    'm_speed'
     'm_final_water_vx'
     'm_final_water_vy'
     'x_dr_state'

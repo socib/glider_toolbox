@@ -11,7 +11,7 @@ function slocum_options = configRTFileOptionsSlocum()
 %    LOG_NAME_PATTERN: string with the name pattern of surface log files as
 %      needed by function GETDOCKSERVERFILES. A remote log file should match 
 %      this should match to be downloaded.
-%    BIN_NAME_PATTERN: string with the name pattern of binary data files as
+%    XBD_NAME_PATTERN: string with the name pattern of binary data files as
 %      needed by function GETDOCKSERVERFILES and LOADSLOCUMDATA. A remote 
 %      binary file should match this pattern to be downloaded, and the 
 %      conversion to ascii format renames it according to this pattern and the 
@@ -62,30 +62,30 @@ function slocum_options = configRTFileOptionsSlocum()
 
   error(nargchk(0, 0, nargin, 'struct'));
   
-  % Surface log files of any kind.
+  % Surface log files of any kind:
   slocum_options.log_name_pattern = '^\w+_(modem|network|freewave)_\d{8}T\d{6}\.log$';
 
   % All binary files, renamed or not:
-  % slocum_options.bin_name_pattern = '^(.*)\.([smdtne]bd)$';
-  % Already renamed binary files of all sizes.
-  slocum_options.bin_name_pattern = '^(\w+-\d{4}-\d+-\d+-\d+)\.([smdtne]bd)$';
+  % slocum_options.xbd_name_pattern = '^(.*)\.([smdtne]bd)$';
+  % Already renamed binary files of all sizes:
+  slocum_options.xbd_name_pattern = '^(\w+-\d{4}-\d+-\d+-\d+)\.([smdtne]bd)$';
   
-  % xbd to dba name replacement.
-  slocum_options.dba_name_replacement = '$1-$2.dba';
+  % xbd to dba name replacement:
+  slocum_options.dba_name_replace = '$1-$2.dba';
   
-  % Select navigation files to use. Restrict the character set if needed.
-  slocum_options.dba_name_pattern_nav = '^.*-[smd]bd.dba$';
+  % Navigation files to use (restrict the character set if needed):
+  slocum_options.dba_name_pattern_nav = '^.*-[smd]bd\.dba$';
   
-  % Select science files to use. Restrict the character set if needed.
-  slocum_options.dba_name_pattern_sci = '^.*-[tne]bd.dba$';
+  % Science files to use: (restrict the character set if needed):
+  slocum_options.dba_name_pattern_sci = '^.*-[tne]bd\.dba$';
   
-  % Select time sensor column in navigation files.
+  % Time sensor column in navigation files:
   slocum_options.dba_time_sensor_nav = 'm_present_time';
   
-  % Select time sensor column in science files.
+  % Time sensor column in science files:
   slocum_options.dba_time_sensor_sci = 'sci_m_present_time';
   
-  % Sensors to load.
+  % Sensors to load:
   slocum_options.dba_sensors = {
     'm_present_time'
     'm_lat'
@@ -95,10 +95,12 @@ function slocum_options = configRTFileOptionsSlocum()
     'm_gps_status'
     'c_wpt_lat'
     'c_wpt_lon'
+    'c_heading'
     'm_roll'
     'm_pitch'
     'm_heading'
     'm_depth'
+    'm_speed'
     'm_final_water_vx'
     'm_final_water_vy'
     'x_dr_state'
