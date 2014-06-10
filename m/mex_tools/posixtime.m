@@ -18,7 +18,6 @@ function t = posixtime()
 %    datestr(posixtime2utc(t))
 %    datestr(now())
 %    
-%
 %  See also:
 %    POSIXTIME2UTC
 %    UTC2POSIXTIME

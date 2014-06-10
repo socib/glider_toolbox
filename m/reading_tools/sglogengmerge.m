@@ -22,7 +22,7 @@ function [meta, data] = sglogengmerge(meta_log, data_log, meta_eng, data_eng, va
 %      unmatched eng headers have all fields empty.
 %    ENGHEADERS: struct array of eng headers.
 %      These are the eng data headers from META_ENG. Entries corresponding to
-%      unmathed log headers have all fields empty.
+%      unmatched log headers have all fields empty.
 %    START_SECS: number with the reference time for timestamped data lines. 
 %      This is the minimum of the START_SECS field in META_LOGG and META_ENG
 %      (start time of first dive as seconds since 1970 Janyuay 01 00:00:00 UTC).
@@ -183,6 +183,7 @@ function [meta, data] = sglogengmerge(meta_log, data_log, meta_eng, data_eng, va
   
   %% GPS data goes on its own.
   % However, it is described in the PARAMS metadata field.
+  
   
   %% Eng data merged with numeric timestamped log data.
   % Precompute timestamp column and column names,

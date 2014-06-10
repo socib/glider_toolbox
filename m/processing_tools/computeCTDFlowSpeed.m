@@ -33,7 +33,7 @@ function flow = computeCTDFlowSpeed(varargin)
 %    MINVEL: minimum vertical velocity threshold.
 %      Scalar with the minimum vertical velocity threshold below which the 
 %      aproximated surge speed value is supposed to be unreliable. On samples 
-%      with an absolute vertical velocity value lesser than given threshold 
+%      with an absolute vertical velocity value less than given threshold 
 %      flow speed is invalid (NaN).
 %      Default value: 0 (all samples are valid)
 %    MINPITCH: minimum pitch threshold.
