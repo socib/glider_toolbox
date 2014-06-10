@@ -5,14 +5,16 @@
 %    - Convert deployment binary files to human readable format, if needed.
 %    - Load data from all files in a single and consistent structure.
 %    - Generate standarized product version of raw data (NetCDF level 0).
-%    - Preprocess raw data applying simple unit conversions data without 
-%      modifying it:
-%        -- NMEA latitude and longitude to decimal degrees.
-%    - Process raw data to obtain well referenced trajectory data with new 
-%      derived measurements and corrections. The following steps are applied:
+%    - Preprocess raw data applying simple unit conversions and factory
+%      calibrations without modifying their nominal value:
 %        -- Select reference sensors for time and space coordinates.
+%           Perform unit conversions if necessary.
 %        -- Select extra navigation sensors: waypoints, pitch, depth...
+%           Perform unit conversions if necessary.
 %        -- Select sensors of interest: CTD, oxygen, ocean color...
+%           Perform unit conversions and factory calibrations if necessary.
+%    - Process preprocessed data to obtain well referenced trajectory data with
+%      new derived measurements and corrections:
 %        -- Identify transect boundaries at waypoint changes.
 %        -- Identify cast boundaries from vertical direction changes.
 %        -- General sensor processings: sensor lag correction, interpolation...
@@ -28,10 +30,10 @@
 %    - Copy generated figures to its public location and generate figure
 %      information service file, if needed.
 %
-%  Deployment information is queried from a data base with GETDBDEPLOYMENTINFO.
+%  Deployment information is queried from a data base with GETDEPLOYMENTINFODB.
 %  Data base access parameters may be configured in CONFIGDBACCESS.
 %  Selected deployments and their metadata fields may be configured in 
-%  CONFIGDTDEPLOYMENTINFOQUERY.
+%  CONFIGDTDEPLOYMENTINFOQUERYDB.
 %
 %  For each deployment, the messages produced during each processing step are
 %  recorded to a log file. This recording is enabled just before the processing
@@ -93,7 +95,7 @@
 %
 %  See also:
 %    CONFIGDBACCESS
-%    CONFIGDTDEPLOYMENTINFOQUERY
+%    CONFIGDTDEPLOYMENTINFOQUERYDB
 %    CONFIGDTPATHSLOCAL
 %    CONFIGDTFILEOPTIONSSLOCUM
 %    CONFIGDTFILEOPTIONSEAGLIDER
@@ -105,7 +107,7 @@
 %    CONFIGDTOUTPUTNETCDFL1
 %    CONFIGDTOUTPUTNETCDFL2
 %    CONFIGFIGURES
-%    GETDBDEPLOYMENTINFO
+%    GETDEPLOYMENTINFODB
 %    LOADSLOCUMDATA
 %    PREPROCESSGLIDERDATA
 %    PROCESSGLIDERDATA
@@ -151,7 +153,7 @@ config.paths_local = configDTPathsLocal();
 
 
 %% Configure figure outputs.
-[config.figures_proc, config.figures_grid] = configFigures();
+[config.figures_processed, config.figures_gridded] = configFigures();
 
 
 %% Configure NetCDF outputs.
@@ -162,25 +164,31 @@ config.output_netcdf_l2 = configDTOutputNetCDFL2();
 
 
 %% Configure processing options.
-config.preprocessing_options = configDataPreprocessing();
-config.processing_options = configDataProcessing();
+config.preprocessing_options_slocum = configDataPreprocessingSlocum();
+config.preprocessing_options_seaglider = configDataPreprocessingSeaglider();
+config.processing_options_slocum_g1 = configDataProcessingSlocumG1();
+config.processing_options_slocum_g2 = configDataProcessingSlocumG2();
+config.processing_options_seaglider = configDataProcessingSeaglider();
 config.gridding_options = configDataGridding();
 
 
 %% Configure file download and conversion and data loading.
-config.slocum_options = configDTFileOptionsSlocum();
-config.seaglider_options = configDTFileOptionsSeaglider();
+config.file_options_slocum = configDTFileOptionsSlocum();
+config.file_options_seaglider = configDTFileOptionsSeaglider();
 
 
 %% Configure data base deployment information source.
 config.db_access = configDBAccess();
-[config.db_query, config.db_fields] = configDTDeploymentInfoQuery();
+[config.db_query, config.db_fields] = configDTDeploymentInfoQueryDB();
 
 
 %% Get list of deployments to process from database.
 disp('Querying information of glider deployments...');
-deployment_list = ...
-  getDBDeploymentInfo(config.db_access, config.db_query, config.db_fields);
+deployment_list = getDeploymentInfoDB( ...
+  config.db_query, config.db_access.name, ...
+  'user', config.db_access.user, 'pass', config.db_access.pass, ...
+  'server', config.db_access.server, 'driver', config.db_access.driver, ...
+  'fields', config.db_fields);
 if isempty(deployment_list)
   disp('Selected glider deployments are not available.');
   return
@@ -218,17 +226,41 @@ for deployment_idx = 1:numel(deployment_list)
   deployment_start = deployment.deployment_start;
   deployment_end = deployment.deployment_end;
   glider_name = deployment.glider_name;
-  glider_type = lower(...
-    regexpi(deployment.instrument_model, 'slocum|seaglider', 'match', 'once'));
+  glider_model = deployment.glider_model;
+  glider_type = '';
+  if ~isempty(regexpi(glider_model, '.*slocum.*g1.*', 'match', 'once'))
+    glider_type = 'slocum_g1';
+  elseif ~isempty(regexpi(glider_model, '.*slocum.*g2.*', 'match', 'once'))
+    glider_type = 'slocum_g2';
+  elseif ~isempty(regexpi(glider_model, '.*seaglider.*', 'match', 'once'))
+    glider_type = 'seaglider';
+  end
   % Options depending on the type of glider:
   switch glider_type
-    case 'slocum'
-      % config.preprocessing_options = config.preprocessing_options_slocum;
-      config.output_netcdf_l0 = config.output_netcdf_l0_slocum;
+    case 'slocum_g1'
+      file_options = config.file_options_slocum;
+      preprocessing_options = config.preprocessing_options_slocum;
+      processing_options = config.processing_options_slocum_g1;
+      netcdf_l0_options = config.output_netcdf_l0_slocum;
+    case 'slocum_g2'
+      file_options = config.file_options_slocum;
+      preprocessing_options = config.preprocessing_options_slocum;
+      processing_options = config.processing_options_slocum_g2;
+      netcdf_l0_options = config.output_netcdf_l0_slocum;
     case 'seaglider'
-      % config.preprocessing_options = config.preprocessing_options_seaglider;
-      config.output_netcdf_l0 = config.output_netcdf_l0_seaglider;
+      file_options = config.file_options_seaglider;
+      preprocessing_options = config.preprocessing_options_seaglider;
+      processing_options = config.processing_options_seaglider;
+      netcdf_l0_options = config.output_netcdf_l0_seaglider;
   end
+  if isfield(deployment, 'calibrations')
+    preprocessing_options.calibration_parameter_list = deployment.calibrations;
+  end
+  gridding_options = config.gridding_options;
+  netcdf_l1_options = config.output_netcdf_l1;
+  netcdf_l2_options = config.output_netcdf_l2;
+  figproc_options = config.figures_processed;
+  figgrid_options = config.figures_gridded;
 
 
   %% Start deployment processing logging.
@@ -263,11 +295,11 @@ for deployment_idx = 1:numel(deployment_list)
   %% Report deployment information.
   disp('Deployment information:')
   disp(['  Glider name          : ' glider_name]);
-  disp(['  Glider type          : ' glider_type]);
+  disp(['  Glider model         : ' glider_model]);
   disp(['  Deployment identifier: ' num2str(deployment_id)]);
   disp(['  Deployment name      : ' deployment_name]);
   disp(['  Deployment start     : ' datestr(deployment_start)]);
-  if isempty(deployment_end)
+  if isnan(deployment_end)
     disp(['  Deployment end       : ' 'undefined']);
   else
     disp(['  Deployment end       : ' datestr(deployment_end)]);
@@ -283,32 +315,32 @@ for deployment_idx = 1:numel(deployment_list)
   % Give a second try to failing files, because they might have failed due to 
   % a missing cache file generated later.
   switch glider_type
-    case 'slocum'
+    case {'slocum_g1' 'slocum_g2'}
       if file_options.format_conversion
         % Look for xbds in binary directory.
-        disp('Converting new deployment binary files...');
+        disp('Converting binary data files to ascii format...');
         bin_dir_contents = dir(binary_dir);
-        xbd_sel = ~[bin_dir_contents.isdir] ...
-          & ~cellfun(@isempty, regexp({bin_dir_contents.name}, config.slocum_options.bin_name_pattern));
-        xbd_names = {bin_dir_contents(xbd_sel).name};
-        xbd_sizes = [bin_dir_contents(xbd_sel).bytes];
+        xbd_select = ~[bin_dir_contents.isdir] ...
+          & ~cellfun(@isempty, regexp({bin_dir_contents.name}, file_options.bin_name_pattern));
+        xbd_names = {bin_dir_contents(xbd_select).name};
+        xbd_sizes = [bin_dir_contents(xbd_select).bytes];
         disp(['Binary files found: ' num2str(numel(xbd_names)) ...
              ' (' num2str(sum(xbd_sizes)*2^-10) ' kB).']);
-        new_dbas = cell(size(xbd_names));
+        new_files = cell(size(xbd_names));
         for conversion_retry = 1:2
           for xbd_idx = 1:numel(xbd_names)
-            if isempty(new_dbas{xbd_idx})
+            if isempty(new_files{xbd_idx})
               xbd_name_ext = xbd_names{xbd_idx};
               dba_name_ext = regexprep(xbd_name_ext, ...
-                                       config.slocum_options.bin_name_pattern, ...
-                                       config.slocum_options.dba_name_replacement);
+                                       file_options.bin_name_pattern, ...
+                                       file_options.dba_name_replacement);
               xbd_fullfile = fullfile(binary_dir, xbd_name_ext);
               dba_fullfile = fullfile(ascii_dir, dba_name_ext);
               try
-                new_dbas{xbd_idx} = ...
+                new_files{xbd_idx} = ...
                   {xbd2dba(xbd_fullfile, dba_fullfile, 'cache', cache_dir)};
               catch exception
-                new_dbas{xbd_idx} = {};
+                new_files{xbd_idx} = {};
                 if conversion_retry == 2
                   disp(['Error converting binary file ' xbd_name_ext ':']);
                   disp(getReport(exception, 'extended'));
@@ -317,46 +349,47 @@ for deployment_idx = 1:numel(deployment_list)
             end
           end
         end
-        new_dbas = [new_dbas{:}];
+        new_files = [new_files{:}];
         disp(['Binary files converted: ' ...
-              num2str(numel(new_dbas)) ' of ' num2str(numel(xbd_names)) '.']);
+              num2str(numel(new_files)) ' of ' num2str(numel(xbd_names)) '.']);
       end
+    otherwise
   end
 
 
   %% Load data from ascii deployment glider files.
   disp('Loading raw deployment data from text files...');
   load_start = utc2posixtime(deployment_start);
-  load_end = posixtime();
-  if ~isempty(deployment_end)
-    load_end = utc2posixtime(deployment_end);
+  load_final = posixtime();
+  if ~isnan(deployment_end)
+    load_final = utc2posixtime(deployment_end);
   end
   try
     switch glider_type
-      case 'slocum'
+      case {'slocum_g1' 'slocum_g2'}
         [meta_raw, data_raw] = ...
           loadSlocumData(ascii_dir, ...
-                         config.slocum_options.dba_name_pattern_nav, ...
-                         config.slocum_options.dba_name_pattern_sci, ...
-                         'timenav', config.slocum_options.dba_time_sensor_nav, ...
-                         'timesci', config.slocum_options.dba_time_sensor_sci, ...
-                         'sensors', config.slocum_options.dba_sensors, ...
-                         'period', [load_start load_end], ...
+                         file_options.dba_name_pattern_nav, ...
+                         file_options.dba_name_pattern_sci, ...
+                         'timenav', file_options.dba_time_sensor_nav, ...
+                         'timesci', file_options.dba_time_sensor_sci, ...
+                         'sensors', file_options.dba_sensors, ...
+                         'period', [load_start load_final], ...
                          'format', 'struct');
         source_files = {meta_raw.headers.filename_label};
       case 'seaglider'
         [meta_raw, data_raw] = ...
           loadSeagliderData(ascii_dir, ...
-                            config.seaglider_options.log_name_pattern, ...
-                            config.seaglider_options.eng_name_pattern, ...
-                            'columns', config.seaglider_options.log_params, ...
-                            'params' , config.seaglider_options.eng_columns, ...
-                            'period', [load_start load_end], ...
+                            file_options.log_name_pattern, ...
+                            file_options.eng_name_pattern, ...
+                            'columns', file_options.eng_columns, ...
+                            'params' , file_options.log_params, ...
+                            'period', [load_start load_final], ...
                             'format', 'merged');
         source_files = meta_raw.sources;
       otherwise
         warning('glider_toolbox:main_glider_data_processing_dt:InvalidGliderType', ...
-                'Unknown glider type: %s.', glider_type);
+                'Unknown glider model: %s.', glider_model);
     end
   catch exception
     disp('Error loading raw data:');
@@ -378,33 +411,31 @@ for deployment_idx = 1:numel(deployment_list)
     disp('Generating NetCDF L0 output...');
     try
       switch glider_type
-        case 'slocum'
+        case {'slocum_g1' 'slocum_g2'}
           outputs.netcdf_l0 = generateOutputNetCDF( ...
             netcdf_l0_file, data_raw, deployment, ...
-            config.output_netcdf_l0.variables, ...
-            config.output_netcdf_l0.dimensions, ...
-            config.output_netcdf_l0.attributes, ...
-            'time', {'m_present_time sci_m_present_time'}, ...
+            netcdf_l0_options.variables, ...
+            netcdf_l0_options.dimensions, ...
+            netcdf_l0_options.attributes, ...
+            'time', {'m_present_time' 'sci_m_present_time'}, ...
             'position', {'m_gps_lon' 'm_gps_lat'; 'm_lon' 'm_lat'}, ...
-            'position_conversion', ...
-               @(x,y)(subsref({nmea2deg(x) nmea2deg(y)}, substruct('{}', {':'}))), ...
+            'position_conversion', @nmea2deg, ...
             'vertical',            {'m_depth' 'sci_water_pressure'}, ...
             'vertical_conversion', {[]        @(z)(z * 10)}, ...
             'vertical_positive',   {'down'} );
         case 'seaglider'
           outputs.netcdf_l0 = generateOutputNetCDF( ...
             netcdf_l0_file, data_raw, deployment, ...
-            config.output_netcdf_l0.variables, ...
-            config.output_netcdf_l0.dimensions, ...
-            config.output_netcdf_l0.attributes, ...
+            netcdf_l0_options.variables, ...
+            netcdf_l0_options.dimensions, ...
+            netcdf_l0_options.attributes, ...
             'time', {'elaps_t'}, ...
             'time_conversion', @(t)(t + meta_raw.start_secs), ... 
             'position', {'GPSFIX_fixlon' 'GPSFIX_fixlat'}, ...
-            'position_conversion', ...
-               @(x,y)(subsref({nmea2deg(x) nmea2deg(y)}, substruct('{}', {':'}))), ...
-            'vertical', {'depth'}, ...
-            'vertical_conversion', @(z)(z * 10), ... 
-            'vertical_positive', {'down'} );
+            'position_conversion', @nmea2deg, ...
+            'vertical',            {'depth'}, ...
+            'vertical_conversion', {@(z)(z * 10)}, ... 
+            'vertical_positive',   {'down'} );
       end
       disp(['Output NetCDF L0 (raw data) generated: ' outputs.netcdf_l0 '.']);
     catch exception
@@ -418,8 +449,15 @@ for deployment_idx = 1:numel(deployment_list)
   if ~isempty(data_raw)
     disp('Preprocessing raw data...');
     try
-      data_preprocessed = ...
-        preprocessGliderData(data_raw, config.preprocessing_options);
+      switch glider_type 
+        case 'seaglider'
+          seaglider_time_sensor_select = ...
+            strcmp('elaps_t', {preprocessing_options.time_list.time});
+          preprocessing_options.time_list(seaglider_time_sensor_select).conversion = ...
+            @(t)(t +  meta_raw.start_secs);
+      end
+      [data_preprocessed, meta_preprocessed] = ...
+        preprocessGliderData(data_raw, meta_raw, preprocessing_options);
     catch exception
       disp('Error preprocessing glider deployment data:');
       disp(getReport(exception, 'extended'));
@@ -431,8 +469,8 @@ for deployment_idx = 1:numel(deployment_list)
   if ~isempty(data_preprocessed)
     disp('Processing glider data...');
     try
-      data_processed = ...
-        processGliderData(data_preprocessed, config.processing_options);
+      [data_processed, meta_processed] = ...
+        processGliderData(data_preprocessed, meta_preprocessed, processing_options);
     catch exception
       disp('Error processing glider deployment data:');
       disp(getReport(exception, 'extended'));
@@ -444,11 +482,11 @@ for deployment_idx = 1:numel(deployment_list)
   if ~isempty(data_processed) && ~isempty(netcdf_l1_file)
     disp('Generating NetCDF L1 output...');
     try
-      outputs.netcdf_l1 = ...
-        generateOutputNetCDF(netcdf_l1_file, data_processed, deployment, ...
-                             config.output_netcdf_l1.variables, ...
-                             config.output_netcdf_l1.dimensions, ...
-                             config.output_netcdf_l1.attributes);
+      outputs.netcdf_l1 = generateOutputNetCDF( ...
+        netcdf_l1_file, data_processed, deployment, ...
+        netcdf_l1_options.variables, ...
+        netcdf_l1_options.dimensions, ...
+        netcdf_l1_options.attributes);
       disp(['Output NetCDF L1 (processed data) generated: ' ...
             outputs.netcdf_l1 '.']);
     catch exception
@@ -464,7 +502,7 @@ for deployment_idx = 1:numel(deployment_list)
     disp('Generating figures from processed data...');
     try
       figures.figproc = ...
-        generateGliderFigures(data_processed, config.figures_proc, ...
+        generateGliderFigures(data_processed, figproc_options, ...
                               'dirname', figure_dir);
     catch exception
       disp('Error generating processed data figures:');
@@ -477,7 +515,8 @@ for deployment_idx = 1:numel(deployment_list)
   if ~isempty(data_processed)
     disp('Gridding glider data...');
     try
-      data_gridded = gridGliderData(data_processed, config.gridding_options);
+      [data_gridded, meta_gridded] = ...
+        gridGliderData(data_processed, meta_processed, gridding_options);
     catch exception
       disp('Error gridding glider deployment data:');
       disp(getReport(exception, 'extended'));
@@ -489,11 +528,11 @@ for deployment_idx = 1:numel(deployment_list)
   if ~isempty(data_gridded) && ~isempty(netcdf_l2_file)
     disp('Generating NetCDF L2 output...');
     try
-      outputs.netcdf_l2 = ...
-        generateOutputNetCDF(netcdf_l2_file, data_gridded, deployment, ...
-                             config.output_netcdf_l2.variables, ...
-                             config.output_netcdf_l2.dimensions, ...
-                             config.output_netcdf_l2.attributes);
+      outputs.netcdf_l2 = generateOutputNetCDF( ...
+        netcdf_l2_file, data_gridded, deployment, ...
+        netcdf_l2_options.variables, ...
+        netcdf_l2_options.dimensions, ...
+        netcdf_l2_options.attributes);
       disp(['Output NetCDF L2 (gridded data) generated: ' ...
             outputs.netcdf_l2 '.']);
     catch exception
@@ -507,9 +546,9 @@ for deployment_idx = 1:numel(deployment_list)
   %% Generate gridded data figures.
   if ~(isempty(figure_dir) || isempty(data_gridded))
     disp('Generating figures from gridded data...');
-   try
+    try
       figures.figgrid = ...
-        generateGliderFigures(data_gridded, config.figures_grid, ...
+        generateGliderFigures(data_gridded, figgrid_options, ...
                               'dirname', figure_dir);
     catch exception
       disp('Error generating gridded data figures:');
