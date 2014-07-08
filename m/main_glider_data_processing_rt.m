@@ -166,6 +166,7 @@
 
 %% Configure toolbox and configuration file path.
 glider_toolbox_dir = configGliderToolboxPath();
+glider_toolbox_ver = configGliderToolboxVersion();
 
 
 %% Configure deployment data paths.
@@ -316,6 +317,10 @@ for deployment_idx = 1:numel(deployment_list)
   end
   disp(['Deployment processing start time: ' ...
         datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00:00')]);
+
+
+  %% Report toolbox version:    
+  disp(['Toolbox version: ' glider_toolbox_ver]);
 
 
   %% Report deployment information.
