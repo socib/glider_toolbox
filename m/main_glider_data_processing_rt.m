@@ -147,7 +147,7 @@
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2013-2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify

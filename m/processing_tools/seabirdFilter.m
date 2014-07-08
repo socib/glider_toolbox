@@ -48,7 +48,7 @@ function outputSignal = seabirdFilter(inputSignal, timeConstant, samplingPeriod)
 % email: tomeu.garau@socib.es
 % Website: http://www.socib.es
 % Dec 2010; Last revision: 23-Dec-2010
-% Copyright (C) 2013
+% Copyright (C) 2013-2014
 % ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 % 
 %  This program is free software: you can redistribute it and/or modify
