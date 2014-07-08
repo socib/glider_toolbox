@@ -46,6 +46,7 @@ function data = getDeploymentInfoDB(query, dbname, varargin)
 %    DEPLOYMENT_START: deployment start date (see note on time format).
 %    DEPLOYMENT_END: deployment end date (see note on time format).
 %    GLIDER_NAME: glider platform name (used by Slocum gliders in file names).
+%    GLIDER_SERIAL: glider serial code (used by Seaglider gliders in file names).
 %    GLIDER_MODEL: glider model name (like Slocum G1, Slocum G2, Seaglider).
 %  The returned structure may include other fields, which are considered to be
 %  global deployment attributes by functions generating final products like

@@ -1,28 +1,28 @@
-function dockservers = configDockservers()
-%CONFIGDOCKSERVERS  Configure dockserver parameters for glider data processing.
+function basestations = configBasestations()
+%CONFIGBASESTATIONS  Configure basestation parameters for glider data processing.
 %
 %  Syntax:
-%    DOCKSERVERS = CONFIGDOCKSERVERS()
+%    BASESTATIONS = CONFIGBASESTATIONS()
 %
-%  DOCKSERVERS = CONFIGDOCKSERVERS() should return a struct array with the
-%  access parameters for the dockservers containing Slocum glider data, as
-%  needed by the function GETDOCKSERVERFILES.
+%  BASESTATIONS = CONFIGBASESTATIONS() should return a struct array with the
+%  access parameters for the basestations containing Seaglider glider data, as
+%  needed by the function GETBASESTATIONFILES.
 %
 %  Notes:
-%    Edit this file filling in the parameters of your dockservers.
+%    Edit this file filling in the parameters of your basestations.
 %    Once configured, this file will contain private data, so you should not
 %    make it public.
 %
 %  Examples:
-%    dockservers = configDockservers()
+%    basestations = configBasestations()
 %
 %  See also:
-%    GETDOCKSERVERFILES
+%    GETBASESTATIONFILES
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify
@@ -40,12 +40,12 @@ function dockservers = configDockservers()
 
   error(nargchk(0, 0, nargin, 'struct'));
 
-  dockservers(1).url  = 'http://mydockserver01.myportal.mydomain';
-  dockservers(1).user = 'myself';
-  dockservers(1).pass = 'top_secret';
+  basestations(1).url  = 'http://mybasestation01.myportal.mydomain';
+  basestations(1).user = 'myself';
+  basestations(1).pass = 'top_secret';
 
-  dockservers(2).url  = 'http://mydockserver02.myportal.mydomain';
-  dockservers(2).user = 'myself';
-  dockservers(2).conn = @sftp;
+  basestations(2).url  = 'http://mybasestation02.myportal.mydomain';
+  basestations(2).user = 'myself';
+  basestations(2).conn = @sftp;
 
 end

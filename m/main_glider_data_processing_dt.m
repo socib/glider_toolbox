@@ -55,12 +55,14 @@
 %
 %  Raw data is preprocessed to apply some simple unit conversions with the
 %  function PREPROCESSGLIDERDATA. The preprocessing options and its parameters 
-%  may be configured in CONFIGDATAPREPROCESSING.
+%  may be configured in CONFIGDATAPREPROCESSINGSLOCUM and 
+%  CONFIGDATAPREPROCESSINGSEAGLIDER.
 %
 %  Preprocessed data is processed with PROCESSGLIDERDATA to obtain properly 
 %  referenced data with in a trajectory data set structure. The desired 
 %  processing actions (interpolations, filterings, corrections and derivations) 
-%  and its parameters may be configured in CONFIGDATAPROCESSING.
+%  and its parameters may be configured in CONFIGDATAPROCESSINGSLOCUMG1, 
+%  CONFIGDATAPROCESSINGSLOCUMG2 and CONFIGDATAPROCESSINGSEAGLIDER.
 %
 %  Processed data is interpolated/binned with GRIDGLIDERDATA to obtain a data 
 %  set with the structure of a trajectory of instantaneous vertical profiles 
@@ -98,9 +100,12 @@
 %    CONFIGDTDEPLOYMENTINFOQUERYDB
 %    CONFIGDTPATHSLOCAL
 %    CONFIGDTFILEOPTIONSSLOCUM
-%    CONFIGDTFILEOPTIONSEAGLIDER
-%    CONFIGDATAPREPROCESSING
-%    CONFIGDATAPROCESSING
+%    CONFIGDTFILEOPTIONSSEAGLIDER
+%    CONFIGDATAPREPROCESSINGSLOCUM
+%    CONFIGDATAPREPROCESSINGSEAGLIDER
+%    CONFIGDATAPROCESSINGSLOCUMG1
+%    CONFIGDATAPROCESSINGSLOCUMG2
+%    CONFIGDATAPROCESSINGSEAGLIDER
 %    CONFIGDATAGRIDDING
 %    CONFIGDTOUTPUTNETCDFL0SLOCUM
 %    CONFIGDTOUTPUTNETCDFL0SEAGLIDER
@@ -227,6 +232,7 @@ for deployment_idx = 1:numel(deployment_list)
   deployment_end = deployment.deployment_end;
   glider_name = deployment.glider_name;
   glider_model = deployment.glider_model;
+  glider_serial = deployment.glider_serial;
   glider_type = '';
   if ~isempty(regexpi(glider_model, '.*slocum.*g1.*', 'match', 'once'))
     glider_type = 'slocum_g1';
@@ -296,6 +302,7 @@ for deployment_idx = 1:numel(deployment_list)
   disp('Deployment information:')
   disp(['  Glider name          : ' glider_name]);
   disp(['  Glider model         : ' glider_model]);
+  disp(['  Glider serial        : ' glider_serial]);
   disp(['  Deployment identifier: ' num2str(deployment_id)]);
   disp(['  Deployment name      : ' deployment_name]);
   disp(['  Deployment start     : ' datestr(deployment_start)]);

@@ -41,14 +41,26 @@
 %  of the deployment starts, and it is turned off when the processing finishes,
 %  with the function DIARY.
 %
-%  Input deployment raw data is loaded from a directory of raw text files with 
-%  LOADSLOCUMDATA or LOADSEAGLIDERDATA. For Slocum gliders a directory of raw 
-%  binary files may also be specified, and automatic conversion to text file 
-%  format may be enabled. The conversion is performed by function XBD2DBA, 
-%  which is called with each binary file in the specified binary directory, 
-%  and with a renaming pattern to specify the name of the resulting text file.
-%  Input file conversion and data loading options may be configured in 
+%  New raw data files of the deployment are fetched from remote servers.
+%  For Slocum gliders, binary and log files are retrieved by GETDOCKSERVERFILES
+%  from each dockserver specified in CONFIGDOCKSERVERS, and stored in the 
+%  binary and log directories configured in CONFIGRTPATHSLOCAL.
+%  For Seaglider gliders, engineering data files and log data files are
+%  retrieved by GETBASESTATIONFILES from each basestation specified in
+%  CONFIGBASESTATIONS, and stored in the ascii folder specified in 
+%  CONFIGRTPATHSLOCAL. The names of the files to download may be restricted in
 %  CONFIGRTFILEOPTIONSSLOCUM and CONFIGRTFILEOPTIONSSEAGLIDER.
+%
+%  For Slocum gliders fetched binary files are converted to text file format.
+%  The conversion is performed by function XBD2DBA, which is called with each
+%  binary file fetched, and with a renaming pattern to specify the name of the 
+%  resulting text file. The directory for converted text files is configured
+%  in CONFIGRTPATHSLOCAL. File conversion options may be configured in
+%  CONFIGRTFILEOPTIONSSLOCUM.
+%
+%  Input deployment raw data is loaded from the directory of raw text files with 
+%  LOADSLOCUMDATA or LOADSEAGLIDERDATA. Data loading options may be configured
+%  in CONFIGRTFILEOPTIONSSLOCUM and CONFIGRTFILEOPTIONSSEAGLIDER.
 %
 %  Output products, figures and processing logs are generated to local paths.
 %  Input and output paths may be configured using expressions built upon
@@ -56,12 +68,14 @@
 %
 %  Raw data is preprocessed to apply some simple unit conversions with the
 %  function PREPROCESSGLIDERDATA. The preprocessing options and its parameters 
-%  may be configured in CONFIGDATAPREPROCESSING.
+%  may be configured in CONFIGDATAPREPROCESSINGSLOCUM and 
+%  CONFIGDATAPREPROCESSINGSEAGLIDER.
 %
 %  Preprocessed data is processed with PROCESSGLIDERDATA to obtain properly 
 %  referenced data with in a trajectory data set structure. The desired 
 %  processing actions (interpolations, filterings, corrections and derivations) 
-%  and its parameters may be configured in CONFIGDATAPROCESSING.
+%  and its parameters may be configured in CONFIGDATAPROCESSINGSLOCUMG1, 
+%  CONFIGDATAPROCESSINGSLOCUMG2 and CONFIGDATAPROCESSINGSEAGLIDER.
 %
 %  Processed data is interpolated/binned with GRIDGLIDERDATA to obtain a data 
 %  set with the structure of a trajectory of instantaneous vertical profiles 
@@ -95,20 +109,26 @@
 %  CONFIGRTPATHSPUBLIC.
 %
 %  See also:
+%    CONFIGDOCKSERVERS
+%    CONFIGBASESTATIONS
 %    CONFIGDBACCESS
 %    CONFIGRTDEPLOYMENTINFOQUERYDB
 %    CONFIGRTPATHSLOCAL
 %    CONFIGRTFILEOPTIONSSLOCUM
-%    CONFIGRTFILEOPTIONSEAGLIDER
-%    CONFIGDATAPREPROCESSING
-%    CONFIGDATAPROCESSING
-%    CONFIGDATAGRIDDING
+%    CONFIGRTFILEOPTIONSSEAGLIDER
+%    CONFIGDATAPREPROCESSINGSLOCUM
+%    CONFIGDATAPREPROCESSINGSEAGLIDER
+%    CONFIGDATAPROCESSINGSLOCUMG1
+%    CONFIGDATAPROCESSINGSLOCUMG2
+%    CONFIGDATAPROCESSINGSEAGLIDER
 %    CONFIGRTOUTPUTNETCDFL0SLOCUM
 %    CONFIGRTOUTPUTNETCDFL0SEAGLIDER
 %    CONFIGRTOUTPUTNETCDFL1
 %    CONFIGRTOUTPUTNETCDFL2
 %    CONFIGFIGURES
 %    GETDEPLOYMENTINFODB
+%    GETDOCKSERVERFILES
+%    GETBASESTATIONFILES
 %    LOADSLOCUMDATA
 %    PREPROCESSGLIDERDATA
 %    PROCESSGLIDERDATA
@@ -232,6 +252,7 @@ for deployment_idx = 1:numel(deployment_list)
   deployment_end = deployment.deployment_end;
   glider_name = deployment.glider_name;
   glider_model = deployment.glider_model;
+  glider_serial = deployment.glider_serial;
   glider_type = '';
   if ~isempty(regexpi(glider_model, '.*slocum.*g1.*', 'match', 'once'))
     glider_type = 'slocum_g1';
@@ -301,6 +322,7 @@ for deployment_idx = 1:numel(deployment_list)
   disp('Deployment information:')
   disp(['  Glider name          : ' glider_name]);
   disp(['  Glider model         : ' glider_model]);
+  disp(['  Glider serial        : ' glider_serial]);
   disp(['  Deployment identifier: ' num2str(deployment_id)]);
   disp(['  Deployment name      : ' deployment_name]);
   disp(['  Deployment start     : ' datestr(deployment_start)]);
@@ -345,13 +367,35 @@ for deployment_idx = 1:numel(deployment_list)
       new_logs = [new_logs{:}];
       disp(['Binary data files downloaded: '  num2str(numel(new_xbds)) '.']);
       disp(['Surface log files downloaded: '  num2str(numel(new_logs)) '.']);
+    case {'seaglider'}
+      new_engs = cell(size(config.basestations));
+      new_logs = cell(size(config.basestations));
+      for basestation_idx = 1:numel(config.basestations)
+        basestation = config.dockservers(basestation_idx);
+        try
+          [new_engs{basestation_idx}, new_logs{basestation_idx}] = ...
+            getDockserverFiles(basestation, glider_serial, ascii_dir, ascii_dir, ...
+                               'eng', file_options.eng_name_pattern, ...                     
+                               'log', file_options.log_name_pattern, ...
+                               'start', download_start, ...
+                               'final', download_final);
+        catch exception
+          disp(['Error getting basestation files from ' basestation.host ':']);
+          disp(getReport(exception, 'extended'));
+        end
+      end  
+      new_engs = [new_engs{:}];
+      new_logs = [new_logs{:}];
+      disp(['Engineering data files downloaded: '  num2str(numel(new_engs)) '.']);
+      disp(['Dive log data files downloaded: '  num2str(numel(new_logs)) '.']);
     otherwise
   end
 
 
   %% Convert binary glider files to ascii human readable format.
-  % For each downloaded binary file, convert it to ascii format in the ascii
-  % directory and store the returned absolute path for later use.
+  % For Seaglider, do nothing but join the lists of new eng and log files.
+  % For Slocum, convert each downloaded binary file to ascii format in the
+  % ascii directory and store the returned absolute path for later use.
   % Since some conversion may fail use a cell array of string cell arrays and
   % flatten it when finished, leaving only the succesfully created dbas.
   % Give a second try to failing files, because they might have failed due to 
@@ -386,6 +430,8 @@ for deployment_idx = 1:numel(deployment_list)
       new_files = [new_files{:}];
       disp(['Binary files converted: ' ...
            num2str(numel(new_files)) ' of ' num2str(numel(new_xbds)) '.']);
+    case {'seaglider'}
+      new_files = [new_engs{:} new_logs{:}];
     otherwise
   end
 
