@@ -4,13 +4,14 @@ function local_paths = configRTPathsLocal()
 %  Syntax:
 %    LOCAL_PATHS = CONFIGRTPATHSLOCAL()
 %
-%  LOCAL_PATHS = CONFIGRTPATHSLOCAL() should return a struct with the path 
-%  patterns for the deployment files generated during the glider processing
-%  chain in real time mode. It should have the following fields:
-%    BINARY_PATH: path pattern of the directory for downloaded .xbd.
-%    CACHE_PATH: path pattern of the directory for .cac files.
-%    LOG_PATH: path pattern of the directory for downloaded surface log files.
-%    ASCII_PATH: path pattern of the directory for converted .dba files.
+%  LOCAL_PATHS = CONFIGDTPATHSLOCAL() should return a struct with the path 
+%  patterns for the deployment files involved in the glider processing chain
+%  in real time mode. It should have the following fields:
+%    BINARY_PATH: path pattern of the directory of Slocum binary files (.Xbd).
+%    CACHE_PATH: path pattern of the directory of Slocum cache files (.cac).
+%    LOG_PATH: path pattern of the directory of Slocum surface log files (.log).
+%    ASCII_PATH: path pattern of the directory of converted Slocum text files
+%      (.dba) or Seglider text files (.log and .eng).
 %    FIGURE_PATH: path pattern of the directory for deployment figures.
 %    NETCDF_L0: path pattern of the NetCDF file for raw data
 %      (data provided by the glider without any meaningful modification).

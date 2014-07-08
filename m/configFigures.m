@@ -79,6 +79,7 @@ function [figures_proc, figures_grid] = configFigures()
   % Text properties.
   set(0, 'DefaultTextFontSize',  8);
   
+  
   %% Set printing options.
   default_prntopts = struct();
   default_prntopts.resolution = 200;
