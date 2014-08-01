@@ -306,7 +306,7 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
     vertical_field_index = find(vertical_field_present, 1);
     vertical_field = vertical_field_list{vertical_field_index};
     if iscell(options.vertical_conversion)
-      vertical_func = options.vertical_conversion{position_field_index};
+      vertical_func = options.vertical_conversion{vertical_field_index};
     else
       vertical_func = options.vertical_conversion;
     end
