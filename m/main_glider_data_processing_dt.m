@@ -44,8 +44,10 @@
 %  LOADSLOCUMDATA or LOADSEAGLIDERDATA. For Slocum gliders a directory of raw 
 %  binary files may also be specified, and automatic conversion to text file 
 %  format may be enabled. The conversion is performed by function XBD2DBA, 
-%  which is called with each binary file in the specified binary directory, 
-%  and with a renaming pattern to specify the name of the resulting text file.
+%  which is called with each binary file in the specified binary directory
+%  and with a renaming pattern to specify the name of the resulting text file,
+%  and performs a system call to the 'dbd2asc' program by WRC.
+%  The path to the 'dbd2asc' program may be configured in CONFIGWRCPROGRAMS.
 %  Input file conversion and data loading options may be configured in 
 %  CONFIGDTFILEOPTIONSSLOCUM and CONFIGDTFILEOPTIONSSEAGLIDER.
 %
@@ -96,6 +98,7 @@
 %  CONFIGDTPATHSPUBLIC.
 %
 %  See also:
+%    CONFIGWRCPROGRAMS
 %    CONFIGDBACCESS
 %    CONFIGDTDEPLOYMENTINFOQUERYDB
 %    CONFIGDTPATHSLOCAL
@@ -151,6 +154,10 @@
 %% Configure toolbox and configuration file path.
 glider_toolbox_dir = configGliderToolboxPath();
 glider_toolbox_ver = configGliderToolboxVersion();
+
+
+%% Configure external programs paths.
+config.wrcprogs = configWRCPrograms();
 
 
 %% Configure deployment data paths.
@@ -350,7 +357,8 @@ for deployment_idx = 1:numel(deployment_list)
               dba_fullfile = fullfile(ascii_dir, dba_name_ext);
               try
                 new_files{xbd_idx} = ...
-                  {xbd2dba(xbd_fullfile, dba_fullfile, 'cache', cache_dir)};
+                  {xbd2dba(xbd_fullfile, dba_fullfile, 'cache', cache_dir, ...
+                           'cmdname', config.wrcprogs.dbd2asc)};
               catch exception
                 new_files{xbd_idx} = {};
                 if conversion_retry == 2

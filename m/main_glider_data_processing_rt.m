@@ -53,10 +53,11 @@
 %
 %  For Slocum gliders fetched binary files are converted to text file format.
 %  The conversion is performed by function XBD2DBA, which is called with each
-%  binary file fetched, and with a renaming pattern to specify the name of the 
-%  resulting text file. The directory for converted text files is configured
-%  in CONFIGRTPATHSLOCAL. File conversion options may be configured in
-%  CONFIGRTFILEOPTIONSSLOCUM.
+%  binary file and with a renaming pattern to specify the name of the resulting
+%  text file, and performs a system call to the 'dbd2asc' program by WRC.
+%  The path to the 'dbd2asc' program may be configured in CONFIGWRCPROGRAMS.
+%  The directory for converted text files is configured in CONFIGRTPATHSLOCAL.
+%  File conversion options may be configured in CONFIGRTFILEOPTIONSSLOCUM.
 %
 %  Input deployment raw data is loaded from the directory of raw text files with 
 %  LOADSLOCUMDATA or LOADSEAGLIDERDATA. Data loading options may be configured
@@ -109,6 +110,7 @@
 %  CONFIGRTPATHSPUBLIC.
 %
 %  See also:
+%    CONFIGWRCPROGRAMS
 %    CONFIGDOCKSERVERS
 %    CONFIGBASESTATIONS
 %    CONFIGDBACCESS
@@ -121,6 +123,7 @@
 %    CONFIGDATAPROCESSINGSLOCUMG1
 %    CONFIGDATAPROCESSINGSLOCUMG2
 %    CONFIGDATAPROCESSINGSEAGLIDER
+%    CONFIGDATAGRIDDING
 %    CONFIGRTOUTPUTNETCDFL0SLOCUM
 %    CONFIGRTOUTPUTNETCDFL0SEAGLIDER
 %    CONFIGRTOUTPUTNETCDFL1
@@ -167,6 +170,10 @@
 %% Configure toolbox and configuration file path.
 glider_toolbox_dir = configGliderToolboxPath();
 glider_toolbox_ver = configGliderToolboxVersion();
+
+
+%% Configure external programs paths.
+config.wrcprogs = configWRCPrograms();
 
 
 %% Configure deployment data paths.
@@ -421,7 +428,8 @@ for deployment_idx = 1:numel(deployment_list)
             dba_fullfile = fullfile(ascii_dir, dba_name_ext);
             try
               new_files{xbd_idx} = ...
-                {xbd2dba(xbd_fullfile, dba_fullfile, 'cache', cache_dir)};
+                {xbd2dba(xbd_fullfile, dba_fullfile, 'cache', cache_dir, ...
+                         'cmdname', config.wrcprogs.dbd2asc)};
             catch exception
               new_files{xbd_idx} = {};
               if conversion_retry == 2
