@@ -1,12 +1,12 @@
-function [hfig, haxs, hlgn, hcba, htrj, hwpt, hcur] = plotTransectCurrentMap(varargin)
-%PLOTTRANSECTCURRENTMAP  Plot vertical section of scatter data from a glider transect.
+function [hfig, haxs, hlgn, hcba, htrj, hbeg, hend, hwpt, hcur] = plotTransectCurrentMap(varargin)
+%PLOTTRANSECTCURRENTMAP  Plot map of glider trajectory with waypoints and current estimates.
 %
 %  Syntax:
 %    PLOTTRANSECTCURRENTMAP(OPTIONS)
 %    PLOTTRANSECTCURRENTMAP(OPT1, VAL1, ...)
 %    PLOTTRANSECTCURRENTMAP(H, OPTIONS)
 %    PLOTTRANSECTCURRENTMAP(H, OPT1, VAL1, ...)
-%    [HFIG, HAXS, HLGN, HCBA, HTRJ, HWPT, HCUR] = PLOTTRANSECTCURRENTMAP(...)
+%    [HFIG, HAXS, HLGN, HCBA, HTRJ, HBEG, HEND, HWPT, HCUR] = PLOTTRANSECTCURRENTMAP(...)
 %
 %  PLOTTRANSECTCURRENTMAP(OPTIONS) and 
 %  PLOTTRANSECTCURRENTMAP(OPT1, VAL1, ...) generate a new figure with a line
@@ -67,9 +67,10 @@ function [hfig, haxs, hlgn, hcba, htrj, hwpt, hcur] = plotTransectCurrentMap(var
 %  PLOTTRANSECTCURRENTMAP(H, ...) does not create a new figure, but plots 
 %  to figure given by figure handle H.
 %  
-%  [HFIG, HAXS, HLGN, HCBA, HTRJ, HWPT, HCUR] = PLOTTRANSECTCURRENTMAP(...) 
-%  returns handles for the figure, axes, legend, color bar, and scatter group 
-%  in HFIG, HAXS, HLGN, HCBA, HTRJ, HWPT, and HCUR respectively.
+%  [HFIG, HAXS, HLGN, HCBA, HTRJ, HBEG, HEND, HWPT, HCUR] = PLOTTRANSECTCURRENTMAP(...) 
+%  returns handles for the figure, axes, legend, color bar, lines and patch 
+%  objects in HFIG, HAXS, HLGN, HCBA, HTRJ, HBEG, HEND, HWPT, and HCUR 
+%  respectively.
 %
 %  Notes:
 %    This function requires the files from the Global Self-consistant 
@@ -296,27 +297,38 @@ function [hfig, haxs, hlgn, hcba, htrj, hwpt, hcur] = plotTransectCurrentMap(var
                  'headlength', 0.25 * get(haxs, 'FontSize'), ...
                  'clip', 'on');
   end
-  % Plot glider trajectory.
-  htrj = m_plot(options.londata, options.latdata, ...
-                'LineStyle', '-', 'LineWidth', 1.5 * get(haxs, 'LineWidth'), ...
-                'Marker', 'none', ...
-                'Color', 'black');
   % Plot planned waypoint path.
   hwpt = m_plot(options.wptlondata, options.wptlatdata, ...
                 'LineStyle', ':', 'LineWidth', 1.5 * get(haxs, 'LineWidth'), ...
                 'Marker', 'x', 'MarkerSize', 0.5 * get(haxs, 'FontSize'), ...
                 'Color', 'black');
+  % Plot glider trajectory.
+  htrj = m_plot(options.londata, options.latdata, ...
+                'LineStyle', '-', 'LineWidth', 1.5 * get(haxs, 'LineWidth'), ...
+                'Marker', 'none', ...
+                'Color', 'black');
+  % Plot initial and final trajectory points.
+  trj_frst = ...
+    find(~(isnan(options.londata(:)) | isnan(options.latdata(:))), 1, 'first');
+  trj_last = ...
+    find(~(isnan(options.londata(:)) | isnan(options.latdata(:))), 1, 'last');
+  hbeg = m_plot(options.londata(trj_frst), options.latdata(trj_frst), ...
+                'LineStyle', 'none', ...
+                'Marker', 'o', 'MarkerSize', 1/3 * get(haxs, 'FontSize'), ...
+                'MarkerEdgeColor', 'black', 'MarkerFaceColor', 'black');
+  hend = m_plot(options.londata(trj_last), options.latdata(trj_last), ...
+                'LineStyle', 'none', ...
+                'Marker', 'o', 'MarkerSize', 1/3 * get(haxs, 'FontSize'), ...
+                'MarkerEdgeColor', 'black', 'MarkerFaceColor', 'white');
   
   
   %% Add legends for glider trajectory and planned waypoint path.
-  if any(ishghandle([htrj hwpt]))
-    if ishghandle(htrj)
-      set(htrj, 'DisplayName', 'glider trajectory');
-    end
-    if ishghandle(hwpt)
-      set(hwpt, 'DisplayName', 'planned waypoint path');
-    end
-    hlgn = legend([htrj hwpt]);
+  set(htrj, 'DisplayName', 'glider trajectory');
+  set(hbeg, 'DisplayName', 'first position');
+  set(hend, 'DisplayName', 'last position');
+  set(hwpt, 'DisplayName', 'planned waypoint path');
+  if any(ishghandle([htrj hbeg hend hwpt]))
+    hlgn = legend([htrj hbeg hend hwpt]);
   end
   
   
