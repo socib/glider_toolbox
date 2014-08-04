@@ -427,7 +427,7 @@ for deployment_idx = 1:numel(deployment_list)
 
 
   %% Generate L0 NetCDF file (raw/preprocessed data), if needed and possible.
-  if ~isempty(data_raw) && ~isempty(netcdf_l0_file)
+  if ~isempty(fieldnames(data_raw)) && ~isempty(netcdf_l0_file)
     disp('Generating NetCDF L0 output...');
     try
       switch glider_type
@@ -466,7 +466,7 @@ for deployment_idx = 1:numel(deployment_list)
   
   
   %% Preprocess raw glider data.
-  if ~isempty(data_raw)
+  if ~isempty(fieldnames(data_raw))
     disp('Preprocessing raw data...');
     try
       switch glider_type 
