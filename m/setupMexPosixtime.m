@@ -7,9 +7,9 @@ function setupMexPosixtime()
 %  SETUPMEXPOSIXTIME() builds a mex file implementing the function POSIXTIME,
 %  that gets the system current POSIX time from the standard C library.
 %    TARGET:
-%      mex_tools/posixtime.mex(a64)
+%      /path/to/posixtime.mex(a64)
 %    SOURCES:
-%      mex_tools/posixtime.c
+%      /path/to/posixtime.c
 %    INCLUDES:
 %      none
 %    LIBRARIES:
@@ -47,7 +47,7 @@ function setupMexPosixtime()
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2013-2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify
@@ -64,7 +64,19 @@ function setupMexPosixtime()
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   error(nargchk(0, 0, nargin, 'struct'));
-
-  mex -outdir mex_tools mex_tools/posixtime.c
+  
+  funcname = 'posixtime';
+  funcpath = which(funcname);
+  
+  if isempty(funcpath)
+    error('glider_toolbox:setup:NotFound', ...
+          'Could not find location of %s.', funcname);
+  end
+  
+  prefix = fileparts(funcpath);
+  target = fullfile(prefix, [funcname '.' mexext()]);
+  sources = fullfile(prefix, [funcname '.c']);
+  
+  mex('-output', target, sources);
 
 end

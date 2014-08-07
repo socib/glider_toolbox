@@ -49,6 +49,8 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
 %      Default value: 'epsc2'
 %    RENDER: renderer to use when printing intermediate vector file.
 %      Default value: [] (renderer automatically selected)
+%    DATE: image generation timestamp.
+%      Default value: datestr(now(), 31)
 %
 %  Examples:
 %    % Assuming data is a processed glider data structure, 
@@ -115,11 +117,13 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
 %    PLOTTSDIAGRAM
 %    PLOTPROFILESTATISTICS
 %    CONFIGFIGURES
+%    DATESTR
+%    NOW
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2013-2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify
@@ -144,6 +148,7 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
   options.resolution = 72;
   options.driver = 'epsc2';
   options.render = [];
+  options.date = datestr(now(), 31);
   
   
   %% Get options from extra arguments.
@@ -204,6 +209,9 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
     end
     if ~isfield(print_options, 'render')
       print_options.render = options.render;
+    end
+    if ~isfield(print_options, 'date')
+      print_options.date = options.date;
     end
     % Get plot function as function handle.
     plot_function = figure_plot.plotfunc;
@@ -286,7 +294,7 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
       figure_handle = figure();
       try
         plot_function(figure_handle, plot_options);
-        figure_info.(figure_key) = printFigure(figure_handle, print_options);
+        figure_info.(figure_key) = printfigure(figure_handle, print_options);
       catch exception
         fprintf('Figure generation failed:\n');
         disp(getReport(exception, 'extended'));

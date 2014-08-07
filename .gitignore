@@ -1,3 +1,5 @@
 m/private/
 m/mex_tools/*.mex*
+m/common_tools/@sftp/private/*.mex*
+m/common_tools/@sftp/private/libssh
 doc/

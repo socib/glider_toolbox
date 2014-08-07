@@ -43,7 +43,7 @@ function new_pressure = applySeabirdPressureFilter(time, old_pressure, time_cons
 %  Author: Bartolome Garau
 %  Email: tgarau@socib.es
 
-%  Copyright (C) 2013
+%  Copyright (C) 2013-2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify

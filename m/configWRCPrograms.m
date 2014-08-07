@@ -39,7 +39,7 @@ function wrc_progs = configWRCPrograms()
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2013-2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify
@@ -60,7 +60,7 @@ function wrc_progs = configWRCPrograms()
   % This program is needed.
   wrc_progs.dbd2asc           = '/path/to/dbd2asc';
   % These programs are optional.
-  wrc_progs.dba_merge         = '/path/to/dba_emrge';
+  wrc_progs.dba_merge         = '/path/to/dba_merge';
   wrc_progs.dba_sensor_filter = '/path/to/dba_sensor_filter';
   wrc_progs.dba_time_filter   = '/path/to/dba_time_filter';
   wrc_progs.dba2_orig_matlab  = '/path/to/dba2_orig_matlab';

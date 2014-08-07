@@ -12,7 +12,7 @@ else
 $(error unknown interpreter '$(M)' (should be 'matlab' or 'octave'))
 endif
 
-all:
+all: doc
 
 doc:
 	-mkdir -p doc

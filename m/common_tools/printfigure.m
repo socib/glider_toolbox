@@ -1,4 +1,4 @@
-function imginfo = printFigure(varargin)
+function imginfo = printfigure(varargin)
 %PRINTFIGURE  Print figure to image file with metadata.
 %
 %  Syntax:
@@ -33,7 +33,7 @@ function imginfo = printFigure(varargin)
 %    DATE: image time stamp.
 %      String with the value of the 'date' property of the resulting image file.
 %      Some image formats might not support it. Usually it is the creation date.
-%      Default value: datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00:00')
+%      Default value: datestr(now(), 31)
 %    TITLE: image title label.
 %      String with the value of the 'title' property of the resulting image
 %      file. Some image formats might not support it.
@@ -59,6 +59,23 @@ function imginfo = printFigure(varargin)
 %      the renderer is automatically selected either from figure properties or
 %      depending on figure contents.
 %      Default value: '' (renderer automatically selected)
+%    LOOSE: uncrop image when printing intermediate vector file.
+%      String setting the value of the loose option (MATLAB only) to produce
+%      an uncropped image when printing to the intermediate vector file.
+%      The only recognized value is 'loose', which prevents the figure being
+%      cropped. If empty, no option is set when calling PRINT.
+%      Default value: 'loose' (produce uncropped images).
+%    CONVERT: program to convert intermediate vector file to final format.
+%      String setting which program should be called to convert the intermediate
+%      vector image file to the final format using SYSTEM (see note on format
+%      conversion below). If empty, the conversion is omitted and the image file
+%      in the final format is produced by the built-in driver in option DRIVER.
+%      Default value: 'convert'
+%    KEEPEPS: preserve intermediate vector file after conversion.
+%      Boolean setting whether the intermediate vector file should be preserved
+%      after the conversion to the final format. If false, the intermediate file
+%      is deleted after a successful conversion.
+%      Default value: false
 %  Returned struct IMGINFO contains information about the figure and the 
 %  generated image. It has the following fields:
 %    TITLE: string with the image label (taken from options).
@@ -87,10 +104,14 @@ function imginfo = printFigure(varargin)
 %    Due to quality limitations when printing to some output formats in MATLAB
 %    (like png), the image file is generated first printing the corresponding 
 %    figure to eps format with PRINT, and then calling the program 'convert' 
-%    from ImageMagick suite through SYSTEM to convert it to the final format 
-%    and add metadata tags. If the final format is eps, no conversion is
-%    performed. Since eps does not seem to support metadata tags, the program is
-%    not invoked at all.
+%    from ImageMagick/GraphicsMagick suite through SYSTEM to convert it to the
+%    final format and add metadata tags. If the final format is eps, no 
+%    conversion is performed. Since eps does not seem to support metadata tags,
+%    the program is not invoked at all.
+%
+%    The 'convert' program is part of the GraphicsMagick and ImageMagick suites:
+%      http://www.imagemagick.org/script/convert.php
+%      http://www.graphicsmagick.org/convert.html
 %
 %    The resulting image size, either in pixel or metric units, is governed by 
 %    the resolution option and the figure position properties 'PaperPosition'
@@ -112,20 +133,20 @@ function imginfo = printFigure(varargin)
 %    options.date = datestr(now(), 31)
 %    options.title = 'Example plot'
 %    options.comment = 'Example 6.83x5.12 inch figure printed to png at 150 dpi (approx. 1024x768 pixels)'
-%    imginfo = printFigure(hfig, options)
+%    imginfo = printfigure(hfig, options)
 %
 %  See also:
 %    SYSTEM
 %    PRINT
 %    GCF
 %    FULLFILE
-%    POSIXTIME
-%    
+%    DATESTR
+%    NOW
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2013-2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify
@@ -159,11 +180,14 @@ function imginfo = printFigure(varargin)
   options.filename = sprintf('figure%03d', hfig);
   options.format = 'eps';
   options.resolution = 72;
-  options.date = datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00:00');
+  options.date = datestr(now(), 31);
   options.title = '';
   options.comment = '';
   options.driver = 'epsc2';
   options.render = []; 
+  options.loose = 'loose';
+  options.convert = 'convert';
+  options.keepeps = false;
   
   
   %% Get options from extra arguments.
@@ -178,7 +202,7 @@ function imginfo = printFigure(varargin)
     option_key_list = args(1:2:end);
     option_val_list = args(2:2:end);
   else
-    error('glider_toolbox:printFigure:InvalidOptions', ...
+    error('glider_toolbox:printfigure:InvalidOptions', ...
           'Invalid optional arguments (neither key-value pairs nor struct).');
   end
   % Overwrite default options with values given in extra arguments.
@@ -188,7 +212,7 @@ function imginfo = printFigure(varargin)
     if isfield(options, opt)
       options.(opt) = val;
     else
-      error('glider_toolbox:printFigure:InvalidOption', ...
+      error('glider_toolbox:printfigure:InvalidOption', ...
             'Invalid option: %s.', opt);
     end
   end
@@ -201,11 +225,11 @@ function imginfo = printFigure(varargin)
   if ~status
     [success, message] = mkdir(options.dirname);
     if ~success
-      error('glider_toolbox:printFigure:ImageDirectoryError', ...
+      error('glider_toolbox:printfigure:ImageDirectoryError', ...
             'Could not create directory %s: %s.', options.dirname, message);
     end
   elseif ~attrout.directory
-    error('glider_toolbox:printFigure:ImageDirectoryError', ...
+    error('glider_toolbox:printfigure:ImageDirectoryError', ...
           'Not a directory: %s.', options.dirname);
   end
   
@@ -219,11 +243,16 @@ function imginfo = printFigure(varargin)
   if ~isempty(options.render)
     renderopt = ['-' options.render];
   end
-  looseopt = '-loose'; % needed to create an uncropped image (eps bounding box better matches figure position)
-  print(hfig, resdpiopt, renderopt, driveropt, looseopt, fullfile_eps);
-  if ~strcmpi(options.format, 'eps')
+  looseopt = '';
+  if ~isempty(options.loose) % needed to create an uncropped image (eps bounding box better matches figure position)
+    looseopt = ['-' options.loose];
+  end
+  if isempty(options.convert) || strcmpi(options.format, 'eps')
+    print(hfig, resdpiopt, renderopt, driveropt, looseopt, fullfile_ext);
+  else
+    print(hfig, resdpiopt, renderopt, driveropt, looseopt, fullfile_eps);
     [failure, output] = system( ...
-        ['convert' ...
+        [options.convert ...
          ' -depth 8' ...        % needed because ImageMagick identifies the eps as 16 bit color depth.
          ' -colorspace RGB' ... % needed because ImageMagick identifies the eps as CMYK due to the %%DocumentProcessColor comment.
          ' -density ' num2str(options.resolution) ... 
@@ -233,9 +262,9 @@ function imginfo = printFigure(varargin)
          ' -set comment ''' options.comment ''''  ...
          ' ' fullfile_ext ';'] );
      if failure
-       error('glider_toolbox:printFigure:ConvertError', ...
+       error('glider_toolbox:printfigure:ConvertError', ...
              'Command convert failed (eps file preserved): %s.', output);
-     else
+     elseif ~options.keepeps
        delete(fullfile_eps);
      end
   end
@@ -245,7 +274,7 @@ function imginfo = printFigure(varargin)
   [status, attrout] = fileattrib(fullfile_ext);
   if status == 0
     % We should never get here (if image creation succeed, file must exist).
-    error('glider_toolbox:printFigure:ImageFileError', ...
+    error('glider_toolbox:printfigure:ImageFileError', ...
           'Image generation succeed but problems with image file %s: %s.', ...
           fullfile_ext, attrout);
   end

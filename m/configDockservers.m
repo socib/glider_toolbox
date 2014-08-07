@@ -22,7 +22,7 @@ function dockservers = configDockservers()
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2013-2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify
@@ -46,6 +46,6 @@ function dockservers = configDockservers()
 
   dockservers(2).url  = 'http://mydockserver02.myportal.mydomain';
   dockservers(2).user = 'myself';
-  dockservers(2).pass = 'top_secret';
+  dockservers(2).conn = @sftp;
 
 end

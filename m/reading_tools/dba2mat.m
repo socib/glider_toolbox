@@ -15,10 +15,10 @@ function [meta, data] = dba2mat(filename, varargin)
 %  field names as option keys and field values as option values:
 %    FORMAT: data output format.
 %      String setting the format of the output DATA. Valid values are:
-%        'array': DATA is a matrix whith sensor readings as columns 
-%           ordered as in the 'sensors' metadata field.
-%        'struct': DATA is a struct with sensor names as field names and column 
-%           vectors of sensor readings as field values.
+%        'array': DATA is a matrix with sensor readings as columns ordered
+%          as in the 'sensors' metadata field.
+%        'struct': DATA is a struct with sensor names as field names and
+%          column vectors of sensor readings as field values.
 %      Default value: 'array'
 %    SENSORS: sensor filtering list.
 %      String cell array with the names of the sensors of interest. If given,
@@ -74,7 +74,7 @@ function [meta, data] = dba2mat(filename, varargin)
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2013-2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify
@@ -98,7 +98,7 @@ function [meta, data] = dba2mat(filename, varargin)
   options.sensors = 'all';
   
   
-    %% Parse optional arguments.
+  %% Parse optional arguments.
   % Get option key-value pairs in any accepted call signature.
   argopts = varargin;
   if isscalar(argopts) && isstruct(argopts{1})
@@ -128,18 +128,18 @@ function [meta, data] = dba2mat(filename, varargin)
 
   
   %% Set option flags and values.
-  output_format = options.format;
+  output_format = lower(options.format);
   sensor_filtering = true;
-  sensor_list = options.sensors;
   if ischar(options.sensors) && strcmp(options.sensors, 'all')
     sensor_filtering = false;
   end
+  sensor_list = cellstr(options.sensors);
   
   
   %% Open the file.
   [fid, fid_msg] = fopen(filename, 'r');
   if fid < 0
-    error('glider_toolbox:dba2mat:FileError', fid_msg)
+    error('glider_toolbox:dba2mat:FileError', fid_msg);
   end
   
   
@@ -147,7 +147,7 @@ function [meta, data] = dba2mat(filename, varargin)
   try
     % Read mandatory header tags.
     num_mandatory_ascii_tags = 12;
-    field_header_line_map = { ...
+    header_map = { ...
       'dbd_label'          'dbd_label: %s\n'
       'encoding_ver'       'encoding_ver: %s\n'
       'num_ascii_tags'     'num_ascii_tags: %d\n'
@@ -160,11 +160,12 @@ function [meta, data] = dba2mat(filename, varargin)
       'fileopen_time'      'fileopen_time: %s\n'
       'sensors_per_cycle'  'sensors_per_cycle: %d\n'
       'num_label_lines'    'num_label_lines: %d\n' };
-    header_fields = field_header_line_map(:,1);
-    header_format_str = [field_header_line_map{:,2}];
-    header_values = textscan(fid, header_format_str, 1, 'ReturnOnError', false);
-    header_field_value_map = {header_fields{:}; header_values{:}};
-    header_struct = struct(header_field_value_map{:});
+    header_fields = header_map(:,1);
+    header_fmtstr = [header_map{:,2}];
+    header_values = textscan(fid, header_fmtstr, 1, 'ReturnOnError', false);
+    header_struct = {header_fields{:}; header_values{:}};
+    header_struct = struct(header_struct{:});
+
     % Read optional tags (number of segment files and segment file names).
     num_ascii_tags = header_values{3};
     if num_ascii_tags == num_mandatory_ascii_tags
@@ -203,7 +204,7 @@ function [meta, data] = dba2mat(filename, varargin)
     end
     fmt_str = [sprintf('%s ', sensor_format{1:end-1}) sensor_format{end} '\n'];
     data_values = textscan(fid, fmt_str, 'ReturnOnError', false);
-    switch lower(output_format)
+    switch output_format
       case 'array'
         data = [data_values{:}];
       case 'struct'

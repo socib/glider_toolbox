@@ -1,41 +1,23 @@
-function data_proc = processGliderData(data_pre, varargin)
+function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin)
 %PROCESSGLIDERDATA  Glider data processing applying conversions and derivations.
 %
 %  Syntax:
-%    DATA_PROC = PROCESSGLIDERDATA(DATA_PRE)
-%    DATA_PROC = PROCESSGLIDERDATA(DATA_PRE, OPTIONS)
-%    DATA_PROC = PROCESSGLIDERDATA(DATA_PRE, OPT1, VAL1, ...)
+%    [DATA_PROC, META_PROC] = PROCESSGLIDERDATA(DATA_PRE, META_PRE)
+%    [DATA_PROC, META_PROC] = PROCESSGLIDERDATA(DATA_PRE, META_PRE, OPTIONS)
+%    [DATA_PROC, META_PROC] = PROCESSGLIDERDATA(DATA_PRE, META_PRE, OPT1, VAL1, ...)
 %
-%  DATA_PROC = PROCESSGLIDERDATA(DATA_PRE, ...) processes glider preprocessed 
-%  deployment data according to given options, performing the following actions:
-%    - Selection of reference sensors: 
-%      Time, latitude and longitude sequences are selected.
-%      Optionally, bad position values are masked as missing,
-%      and missing values are filled by interpolation.
-%      These sequences are mandatory, processing aborts if missing.
-%    - Selection of optional reference sensors:
-%      Navigation depth, pitch, roll and heading sequences are selected, if any.
-%      Optionally, missing values are filled by interpolation.
-%    - Selection of water velocity sensors.
-%      Mean segment water eastward and northward velocity sequences are 
-%      selected, if any.
-%    - Selection of commanded trajectory sensors:
-%      Commanded waypoint latitude and longitude sequences are selected, if any.
-%    - Selection of CTD sensor:
-%      Conductivity, temperature and pressure sequences are selected, if any.
-%      Optionally the CTD timestamp sequence is selected, too.
-%    - Selection of chlorophyl sensor:
-%      Fluorescense and turbidity sequences are selected, if any.
-%      Optionally the FLNTU timestamp sequence is selected, too.
-%    - Selection of oxygen sensors:
-%      Oxygen concentration and saturation sequences are selected, if any.
-%      Optionally the oxygen sensor timestamp and temperature sequences are 
-%      selected, too.
-%    - Selection of other sensors of interest:
-%      Sequences from extra sensors configured in options are selected.
+%  DATA_PROC = PROCESSGLIDERDATA(DATA_PRE, META_PRE, ...) processes preprocessed
+%  data from a glider deploymnet according to given options, performing the 
+%  following actions:
+%    - Interpolation of reference sensors: 
+%      Missing values of time, latitude and longitude sequences are filled 
+%      by interpolation if required.
+%    - Interpolation of optional reference sensors:
+%      Missing values of navigation depth, pitch, roll and heading sequences, 
+%      if present, are filled by interpolation if required.
 %    - Identification of transects:
 %      Transects are identified finding their boundaries at changes of waypoint
-%      coordinates.
+%      coordinates, if they are available.
 %    - Computation of distance over ground:
 %      The planar distance covered along the trajectory is computed cumulating
 %      the distance between consecutive points with valid position coordinates.
@@ -65,104 +47,19 @@ function data_proc = processGliderData(data_pre, varargin)
 %      and pressure sequences already selected or produced.
 %
 %  DATA_PRE should be a struct in the format returned by PREPROCESSGLIDERDATA,
-%  where each field is a time sequence from the sensor with the same name.
+%  where each field is a sequence of measurements of the variable with the same
+%  name.
 %
 %  DATA_PROC is a struct in the same format as DATA_PRE, with time sequences 
 %  resulting from the processing actions described above, performed according
 %  to the options described below.
 %
+%  META_PROC is also a struct with one field per variable, adding processing 
+%  metadata to any existing metadata in META_PRE.
+%
 %  Options may be given in key-value pairs OPT1, VAL1... or in a struct OPTIONS
 %  with field names as option keys and field values as option values.
 %  Recognized options are:
-%    TIME_SENSOR_LIST: time sensor choices.
-%      String cell array with the name of time sensors, in order of preference.
-%      Default value: {'m_present_time' 'sci_m_present_time'}
-%    POSITION_SENSOR_LIST: latitude and longitude sensor choices.
-%      Struct array selecting latitude and longitude sensor sets in order
-%      of preference, with optional mask of valid position readings.
-%      It should have the following fields:
-%        LATITUDE: latitude sensor name.
-%        LONGITUDE: longitude sensor name.
-%      It may have the following optional fields (empty or missing):
-%        POSITION_STATUS: position status sensor name.
-%        POSITION_STATUS_GOOD: position status good values.
-%        POSITION_STATUS_BAD:  position status bad values.
-%      Default value: struct('latitude',  {'m_gps_lat' 'm_lat'}, ...
-%                            'longitude', {'m_gps_lon' 'm_lon'}, ...
-%                            'position_status',      {'m_gps_status' []}, ...
-%                            'position_status_good', { 0 []}, ...
-%                            'position_status_bad',  {[] []})
-%    DEPTH_SENSOR_LIST: depth sensor choices.
-%      String cell array with the name of depth sensors, in order of preference.
-%      Default value: {'m_depth'}
-%    ATTITUDE_SENSOR_LIST: roll and pitch sensor choices.
-%      Struct array selecting roll and pitch sensor sets, in order of 
-%      preference. It should have the following fields:
-%        ROLL: roll sensor name.
-%        PITCH: pitch sensor name.
-%      Default value: struct('roll', {'m_roll'}, 'pitch', {'m_pitch'})
-%    HEADING_SENSOR_LIST: heading sensor choices.
-%      String cell array with the name of heading sensors, in order of 
-%      preference.
-%      Default value: {'m_heading'}
-%    WAYPOINT_SENSOR_LIST: waypoint latitude and longitude sensor choices.
-%      Struct array selecting waypoint latitude and longitude sensor sets in
-%      order of preference. It should have the following fields:
-%        LATITUDE: waypoint latitude sensor name.
-%        LONGITUDE: waypoint longitude sensor name.
-%      Default value: struct('latitude',  {'c_wpt_lat'}, ...
-%                            'longitude', {'c_wpt_lon'})
-%    WATER_VELOCITY_SENSOR_LIST: water velocity sensor choices.
-%      Struct array selecting water velocity coordinate sensor sets in order of
-%      preference. It should have the following fields:
-%        VELOCITY_EASTWARD: water velocity eastward component sensor name.
-%        VELOCITY_NORTHWARD: water velocity northward component sensor name.
-%      Default value: struct('velocity_eastward', {'m_final_water_vx'}, ...
-%                            'velocity_northward', {'m_final_water_vy'})
-%    CTD_SENSOR_LIST: CTD sensor set choices.
-%      Struct array selecting the CTD sensor sets, in order of preference.
-%      It should have the following fields:
-%        CONDUCTIVITY: conductivity sensor name.
-%        TEMPERATURE: temperature sensor name.
-%        PRESSURE: pressure sensor name.
-%      It may have the following optional fields (empty or missing):
-%        TIME: CTD time sensor name.
-%      Default value: struct('conductivity', {'sci_water_cond'        'm_water_cond'}, ...
-%                            'temperature',  {'sci_water_temp'        'm_water_temp'}, ...
-%                            'pressure',     {'sci_water_pressure'    'm_water_pressure'}, ...
-%                            'time',         {'sci_ctd41cp_timestamp' []})
-%    FLNTU_SENSOR_LIST: fluorescence and turbidity sensor set choices.
-%      Struct array selecting the fluorescence and turbidity sensor sets in 
-%      order of preference. It should have the following fields:
-%        CHLOROPHYLL: chlorophyl sensor name.
-%        TURBIDITY: turbidity sensor name.
-%      It may have the following optional fields (empty or missing):
-%        TIME:  FLNTU timestamp sensor name.
-%      Default value: struct('chlorophyll', {'sci_flntu_chlor_units'}, ...
-%                            'turbidity',   {'sci_flntu_turb_units'}, ...
-%                            'time',        {'sci_flntu_timestamp'})
-%    OXYGEN_SENSOR_LIST: oxygen sensor set choices.
-%      Struct array selecting the oxygen sensor sets, in order of preference.
-%      It should have the following fields:
-%        OXYGEN_CONCENTRATION: concentration of oxygen sensor name.
-%        OXYGEN_SATURATION: saturation of oxygen sensor name.
-%      It may have the following optional fields (empty or missing):
-%        TEMPERATURE: oxygen temperature sensor name.
-%        TIME: oxygen timestamp sensor name.
-%      Default value: struct('oxygen_concentration', {'sci_oxy3835_oxygen'}, ...
-%                            'oxygen_saturation',    {'sci_oxy3835_saturation'}, ...
-%                            'temperature',          {'sci_oxy3835_temp'}, ...
-%                            'time',                 {'sci_oxy3835_timestamp'})
-%    EXTRA_SENSOR_LIST: other sensor set choices.
-%      Struct selecting other sensor sets of interest. Each field in the struct
-%      represents a sensor set of interest. The field name is the sensor set 
-%      name (e.g. battery_info) and the field value should be a struct array 
-%      with the sensor set choices in order of preference, where field names are
-%      the final sensor names (fields in struct DATA_PROC, e.g. 
-%      battery_nominal_capacity and battery_total_consumption) and field values 
-%      are the original sensor name choices (fields in struct DATA_PRE, e.g. 
-%      f_coulomb_battery_capacity m_coulomb_amphr_total).
-%      Default value: {}
 %    TIME_FILLING: time interpolation switch.
 %      Boolean setting whether time missing values should be filled by 
 %      interpolation.
@@ -186,10 +83,6 @@ function data_proc = processGliderData(data_pre, varargin)
 %    WAYPOINT_FILLING: waypoint interpolation switch.
 %      Boolean setting whether waypoint latitude and longitude missing values 
 %      should be filled with the previous valid value.
-%      Default value: true
-%    PRESSURE_CONVERSION: pressure unit conversion switch.
-%      Boolean setting whether pressure should be converted from bars to
-%      decibars.
 %      Default value: true
 %    PRESSURE_FILTERING: Seabird pressure filtering switch.
 %      Boolean setting whether pressure should be filtered with low pass filter 
@@ -216,6 +109,10 @@ function data_proc = processGliderData(data_pre, varargin)
 %      depth reached in a cast is less than the given threshold, the cast will
 %      be invalid. Set it to zero to prevent discarting any cast.
 %      Default value: 10
+%    PROFILE_JOIN_SAME_DIR: whether join consecutive profiles with the same direction.
+%      Boolean setting whether consecutive valid profiles with the same vertical
+%      direction should be joined into one.
+%      Default value: false
 %    PROFILE_MAX_GAP_RATIO: maximum gap depth ratio allowed for a valid profile.
 %      Real number (in [0..1]) setting the maximum gap ratio threshold for cast
 %      cast validation. A gap is a sequence of consecutive readings in which the
@@ -380,6 +277,9 @@ function data_proc = processGliderData(data_pre, varargin)
 %    This function is based on the previous work by Tomeu Garau. He is the true
 %    glider man.
 %
+%  Examples:
+%    [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, options)
+%
 %  See also:
 %    PREPROCESSGLIDERDATA
 %    FILLINVALIDVALUES
@@ -399,7 +299,7 @@ function data_proc = processGliderData(data_pre, varargin)
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2013-2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify
@@ -415,7 +315,7 @@ function data_proc = processGliderData(data_pre, varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
   
-  error(nargchk(1, 55, nargin, 'struct'));
+  error(nargchk(2, 56, nargin, 'struct'));
   
   
   %% Configure default values for optional sensor lag settings. 
@@ -438,46 +338,13 @@ function data_proc = processGliderData(data_pre, varargin)
   
   %% Set processing options and default values.
   options = struct();
-  options.time_sensor_list = {'m_present_time' 'sci_m_present_time'};
-  options.position_sensor_list = ...
-    struct('latitude',        {'m_gps_lat'    'm_lat'}, ...
-           'longitude',       {'m_gps_lon'    'm_lon'}, ...
-           'position_status',      {'m_gps_status' []}, ...
-           'position_status_good', {0              []}, ...
-           'position_status_bad',  {[]             []});
-  options.depth_sensor_list = {'m_depth'};
-  options.attitude_sensor_list = struct('roll',  {'m_roll'}, ...
-                                        'pitch', {'m_pitch'});
-  options.heading_sensor_list = {'m_heading'};
-  options.waypoint_sensor_list = struct('latitude',  {'c_wpt_lat'}, ...
-                                        'longitude', {'c_wpt_lon'});
-  options.water_velocity_sensor_list = ...
-    struct('velocity_eastward', {'m_final_water_vx'}, ...
-           'velocity_northward', {'m_final_water_vy'});
-  options.ctd_sensor_list = ...
-    struct('conductivity', {'sci_water_cond'        'm_water_cond'}, ...
-           'temperature',  {'sci_water_temp'        'm_water_temp'}, ...
-           'pressure',     {'sci_water_pressure'    'm_water_pressure'}, ...
-           'time',         {'sci_ctd41cp_timestamp' []});
-  options.flntu_sensor_list = ...
-    struct('chlorophyll', {'sci_flntu_chlor_units'}, ...
-           'turbidity',   {'sci_flntu_turb_units'}, ...
-           'time',        {'sci_flntu_timestamp'});
-  options.oxygen_sensor_list = ...
-    struct('oxygen_concentration', {'sci_oxy3835_oxygen'}, ...
-           'oxygen_saturation',    {'sci_oxy3835_saturation'}, ...
-           'temperature',          {'sci_oxy3835_temp'}, ...
-           'time',                 {'sci_oxy3835_timestamp'});
-  options.extra_sensor_list = struct();
-  
   options.time_filling = false;
   options.position_filling = false;
   options.depth_filling = false;
   options.attitude_filling = false;
   options.heading_filling = false;
   options.waypoint_filling = false;
-  
-  options.pressure_conversion = true;
+
   options.pressure_filtering = true;
   options.pressure_filter_constant = 4; % Recommended setting from Seabird Data Processing Manual.
   options.depth_ctd_derivation = true;
@@ -485,6 +352,7 @@ function data_proc = processGliderData(data_pre, varargin)
   options.profiling_sequence_list = {'depth_ctd' 'depth'};
   options.profiling_sequence_filling = true;
   options.profile_min_range = 10;
+  options.profile_join_same_dir = false;
   options.profile_max_gap_ratio = 0.8;
   
   options.flow_ctd_list = struct('time', {}, 'depth', {}, 'pitch', {});
@@ -496,16 +364,12 @@ function data_proc = processGliderData(data_pre, varargin)
     struct('corrected', {}, 'original', {}, 'parameters', {});
   
   options.thermal_lag_list = ...
-    struct('conductivity_corrected', {}, 'temperature_corrected',  {}, ...         
-           'conductivity_original',  {}, 'temperature_original', {}, ...
-           'pressure_original', {}, 'parameters',  {} );
-%   options.thermal_lag_list = ...
-%     struct('conductivity_corrected', {'conductivity_corrected_thermal'}, ...
-%            'temperature_corrected',  {'temperature_corrected_thermal'}, ...         
-%            'conductivity_original',  {'conductivity'}, ...
-%            'temperature_original',   {'temperature'}, ...
-%            'pressure_original',      {'pressure'}, ...
-%            'parameters',             {'auto'} );
+    struct('conductivity_corrected', {'conductivity_corrected_thermal'}, ...
+           'temperature_corrected',  {'temperature_corrected_thermal'}, ...         
+           'conductivity_original',  {'conductivity'}, ...
+           'temperature_original',   {'temperature'}, ...
+           'pressure_original',      {'pressure'}, ...
+           'parameters',             {'auto'} );
   
   options.salinity_list = ...
     struct('salinity',     {'salinity'     'salinity_corrected_thermal'}, ...
@@ -548,327 +412,10 @@ function data_proc = processGliderData(data_pre, varargin)
   end
   
   
-  %% Initialize output variable.
-  data_proc = struct();
+  %% Initialize output variables.
+  data_proc = data_pre;
+  meta_proc = meta_pre;
   
-  
-  %% Get list of available sensors.
-  sensor_list = fieldnames(data_pre);
-  
-  
-  %% Select time coordinate sensor.
-  % Find preferred valid time sensor in list of available sensors.
-  % For Slocum data please be aware of the efects of program dba_merge,
-  % namely the copy of the sci_m_present_time value to the m_present_time for
-  % sensor cycles coming from the science board.
-  % Convert char array to string cell array if needed (safe if cell array).
-  time_sensor_list = cellstr(options.time_sensor_list);
-  for time_sensor_idx = 1:numel(time_sensor_list)
-    time_sensor = time_sensor_list{time_sensor_idx};
-    if ismember(time_sensor, sensor_list) && any(data_pre.(time_sensor) > 0)
-      data_proc.time = data_pre.(time_sensor);
-      fprintf('Selected time sensor:\n'); ...
-      fprintf('  time: %s\n', time_sensor);
-      break;
-    end
-  end
-  if ~isfield(data_proc, 'time')
-    error('glider_toolbox:processGliderData:MissingSensorTime', ...
-          'No time sensor present in data set.');
-  end
-  
-  
-  %% Select position coordinate sensors.
-  % Find preferred set of valid latitude and longitude sensors in list of 
-  % available sensors. Optionally set flagged readings as invalid (NaN),
-  % if position status sensor, and good or bad values are available.
-  position_sensor_list = options.position_sensor_list;
-  for position_sensor_idx = 1:numel(position_sensor_list)
-    lat_sensor = position_sensor_list(position_sensor_idx).latitude;
-    lon_sensor = position_sensor_list(position_sensor_idx).longitude;
-    position_status_sensor = [];
-    position_status_good = [];
-    position_status_bad = [];
-    if isfield(position_sensor_list, 'position_status')
-      position_status_sensor = ...
-        position_sensor_list(position_sensor_idx).position_status;
-    end
-    if isfield(position_sensor_list, 'position_status_good')
-      position_status_good = ...
-        position_sensor_list(position_sensor_idx).position_status_good;
-    end
-    if isfield(position_sensor_list, 'position_status_bad')
-      position_status_bad = ...
-        position_sensor_list(position_sensor_idx).position_status_bad;
-    end
-    if all(ismember({lat_sensor lon_sensor}, sensor_list)) ...
-        && ~all(isnan(data_pre.(lat_sensor))) ...
-        && ~all(isnan(data_pre.(lon_sensor))) 
-      data_proc.latitude = data_pre.(lat_sensor);
-      data_proc.longitude = data_pre.(lon_sensor);
-      fprintf('Selected position sensors:\n');
-      fprintf('  latitude : %s\n', lat_sensor);
-      fprintf('  longitude: %s\n', lon_sensor);
-      if ~isempty(position_status_sensor) ...
-          && ismember(position_status_sensor, sensor_list) ...
-          && ~all(isnan(data_pre.(position_status_sensor)))
-        position_status_flag = data_pre.(position_status_sensor);
-        position_status = true(size(position_status_flag));
-        if ~isempty(position_status_good)
-            position_status = position_status ...
-                            & ismember(position_status_flag, position_status_good);
-        end
-        if ~isempty(position_status_bad)
-            position_status = position_status ...
-                            & ~ismember(position_status_flag, position_status_bad);
-        end
-        data_proc.position_status = position_status;
-        data_proc.latitude(~position_status) = nan;
-        data_proc.longitude(~position_status) = nan;
-        fprintf('  position status     : %s\n', position_status_sensor);
-        fprintf('  position status good: %s\n', num2str(position_status_good));
-        fprintf('  position status bad : %s\n', num2str(position_status_bad));
-      end
-      break;
-    end
-  end
-  if ~all(isfield(data_proc, {'latitude' 'longitude'}))
-    error('glider_toolbox:processGliderData:MissingSensorPosition', ...
-          'No latitude and longitude sensors present in data set.');
-  end
-  
-  
-  %% Select depth sensor.
-  % Find preferred valid depth sensor in list of available sensors, if any.
-  % Convert char array to string cell array if needed (safe if cell array).
-  depth_sensor_list = cellstr(options.depth_sensor_list);
-  for depth_sensor_idx = 1:numel(depth_sensor_list)
-    depth_sensor = depth_sensor_list{depth_sensor_idx};
-    if ismember(depth_sensor, sensor_list) ...
-        && ~all(isnan(data_pre.(depth_sensor)))
-      data_proc.depth = data_pre.(depth_sensor);
-      fprintf('Selected depth sensor:\n');
-      fprintf('  depth: %s\n', depth_sensor);
-      break;
-    end
-  end
-  
-  
-  %% Select attitude sensors.
-  % Find preferred set of valid roll and pitch sensors in list of available 
-  % sensors.
-  attitude_sensor_list = options.attitude_sensor_list;
-  for attitude_sensor_idx = 1:numel(attitude_sensor_list)
-    roll_sensor = attitude_sensor_list(attitude_sensor_idx).roll;
-    pitch_sensor = attitude_sensor_list(attitude_sensor_idx).pitch;
-    if all(ismember({roll_sensor pitch_sensor}, sensor_list)) ...
-        && ~all(isnan(data_pre.(roll_sensor))) ...
-        && ~all(isnan(data_pre.(pitch_sensor))) 
-      data_proc.roll = data_pre.(roll_sensor);
-      data_proc.pitch = data_pre.(pitch_sensor);
-      fprintf('Selected attitude sensors:\n');
-      fprintf('  roll : %s\n', roll_sensor);
-      fprintf('  pitch: %s\n', pitch_sensor);
-      break;
-    end
-  end
-  
-  
-  %% Select heading sensor.
-  % Find preferred valid heading sensor in list of available sensors, if any.
-  % Convert char array to string cell array if needed (safe if cell array).
-  heading_sensor_list = cellstr(options.heading_sensor_list);
-  for heading_sensor_idx = 1:numel(heading_sensor_list)
-    heading_sensor = heading_sensor_list{heading_sensor_idx};
-    if ismember(heading_sensor, sensor_list) ...
-        && ~all(isnan(data_pre.(heading_sensor)))
-      data_proc.heading = data_pre.(heading_sensor);
-      fprintf('Selected heading sensor:\n');
-      fprintf('  heading: %s\n', heading_sensor);
-      break;
-    end
-  end
-  
-  
-  %% Select waypoint coordinate sensors.
-  % Find preferred set of valid waypoint latitude and longitude sensors in list 
-  % of available sensors, if any.
-  waypoint_sensor_list = options.waypoint_sensor_list;
-  for waypoint_sensor_idx = 1:numel(waypoint_sensor_list)
-    wpt_lat_sensor = waypoint_sensor_list(waypoint_sensor_idx).latitude;
-    wpt_lon_sensor = waypoint_sensor_list(waypoint_sensor_idx).longitude;
-    if all(ismember({wpt_lat_sensor wpt_lon_sensor}, sensor_list)) ...
-        && ~all(isnan(data_pre.(wpt_lat_sensor))) ...
-        && ~all(isnan(data_pre.(wpt_lon_sensor)))
-      data_proc.waypoint_latitude = data_pre.(wpt_lat_sensor);
-      data_proc.waypoint_longitude = data_pre.(wpt_lon_sensor);
-      fprintf('Selected waypoint position sensors:\n');
-      fprintf('  waypoint_latitude : %s\n', wpt_lat_sensor);
-      fprintf('  waypoint_longitude: %s\n', wpt_lon_sensor);
-      break;
-    end
-  end
-  
-  
-  %% Select segment mean water velocity component sensor.
-  % Find preferred set of valid segment mean water velocity sensors in list of 
-  % available sensors, if any.
-  water_velocity_sensor_list = options.water_velocity_sensor_list;
-  for water_velocity_sensor_idx = 1:numel(water_velocity_sensor_list)
-    wat_vel_north_sensor = ...
-      water_velocity_sensor_list(water_velocity_sensor_idx).velocity_northward;
-    wat_vel_east_sensor = ...
-      water_velocity_sensor_list(water_velocity_sensor_idx).velocity_eastward;
-    if all(ismember({wat_vel_north_sensor wat_vel_east_sensor}, sensor_list)) ...
-        && ~all(isnan(data_pre.(wat_vel_north_sensor))) ...
-        && ~all(isnan(data_pre.(wat_vel_east_sensor)))
-      data_proc.water_velocity_northward = data_pre.(wat_vel_north_sensor);
-      data_proc.water_velocity_eastward = data_pre.(wat_vel_east_sensor);
-      fprintf('Selected water velocity sensors:\n');
-      fprintf('  water_velocity_northward: %s\n', wat_vel_north_sensor);
-      fprintf('  water_velocity_eastward : %s\n', wat_vel_east_sensor);
-      break;
-    end
-  end
-  
-  
-  %% Select CTD sensor.
-  % Find preferred valid CTD sensor set in list of available sensors, if any.
-  ctd_sensor_list = options.ctd_sensor_list;
-  for ctd_sensor_idx = 1:numel(ctd_sensor_list)
-    cond_sensor = ctd_sensor_list(ctd_sensor_idx).conductivity;
-    temp_sensor = ctd_sensor_list(ctd_sensor_idx).temperature;
-    pres_sensor = ctd_sensor_list(ctd_sensor_idx).pressure;
-    time_ctd_sensor = [];
-    if isfield(ctd_sensor_list, 'time')
-      time_ctd_sensor = ctd_sensor_list(ctd_sensor_idx).time;
-    end
-    if all(ismember({cond_sensor temp_sensor pres_sensor}, sensor_list)) ...
-        && any(data_pre.(cond_sensor) > 0) ...
-        && any(data_pre.(temp_sensor) > 0) ...
-        && any(data_pre.(pres_sensor) > 0)
-      data_proc.conductivity = data_pre.(cond_sensor);
-      data_proc.temperature = data_pre.(temp_sensor);
-      data_proc.pressure = data_pre.(pres_sensor);
-      fprintf('Selected CTD sensors:\n');
-      fprintf('  conductivity: %s\n', cond_sensor);
-      fprintf('  temperature : %s\n', temp_sensor);
-      fprintf('  pressure    : %s\n', pres_sensor);
-      if ~isempty(time_ctd_sensor) ...
-          && ismember(time_ctd_sensor, sensor_list) ...
-          && any(data_pre.(time_ctd_sensor) > 0)
-        data_proc.time_ctd = data_pre.(time_ctd_sensor);
-        fprintf('  time_ctd    : %s\n', time_ctd_sensor);
-      end
-      break;
-    end
-  end
-  
-  
-  %% Select fluorescence (chlorophyll) and turbidity sensor.
-  % Find preferred set of valid fluorescence and turbidity sensors in list of 
-  % available sensors, if any.
-  flntu_sensor_list = options.flntu_sensor_list;
-  for flntu_sensor_idx = 1:numel(flntu_sensor_list)
-    chlr_sensor = flntu_sensor_list(flntu_sensor_idx).chlorophyll;
-    turb_sensor = flntu_sensor_list(flntu_sensor_idx).turbidity;
-    time_flntu_sensor = [];
-    if isfield(flntu_sensor_list, 'time')
-      time_flntu_sensor = flntu_sensor_list(flntu_sensor_idx).time;
-    end
-    if all(ismember({chlr_sensor turb_sensor}, sensor_list)) ...
-        && any(data_pre.(chlr_sensor) > 0) ...
-        && any(data_pre.(turb_sensor) > 0)
-      data_proc.chlorophyll = data_pre.(chlr_sensor);
-      data_proc.turbidity = data_pre.(turb_sensor);
-      fprintf('Selected chlorophyll and turbitidy sensors:\n');
-      fprintf('  chlorophyll: %s\n', chlr_sensor);
-      fprintf('  turbidity  : %s\n', turb_sensor);
-      if ~isempty(time_flntu_sensor) ...
-          && ismember(time_flntu_sensor, sensor_list) ...
-          && any(data_pre.(time_flntu_sensor) > 0)
-        data_proc.time_flntu = data_pre.(time_flntu_sensor);
-        fprintf('  time_flntu : %s\n', time_flntu_sensor);
-      end
-      break;
-    end
-  end
-  
-  
-  %% Select oxygen sensors.
-  % Find preferred set of valid oxygen sensors in list of available sensors, 
-  % if any.
-  oxygen_sensor_list = options.oxygen_sensor_list;
-  for oxygen_sensor_idx = 1:numel(oxygen_sensor_list)
-    oxy_con_sensor = oxygen_sensor_list(oxygen_sensor_idx).oxygen_concentration;
-    oxy_sat_sensor = oxygen_sensor_list(oxygen_sensor_idx).oxygen_saturation;
-    time_oxygen_sensor = [];
-    temperature_oxygen_sensor = [];
-    if isfield(oxygen_sensor_list, 'time')
-      time_oxygen_sensor = oxygen_sensor_list(oxygen_sensor_idx).time;
-    end
-    if isfield(oxygen_sensor_list, 'temperature')
-      temperature_oxygen_sensor = ...
-        oxygen_sensor_list(oxygen_sensor_idx).temperature;
-    end
-    if all(ismember({oxy_con_sensor oxy_sat_sensor}, sensor_list)) ...
-        && any(data_pre.(oxy_con_sensor) > 0) ...
-        && any(data_pre.(oxy_sat_sensor) > 0)
-      data_proc.oxygen_concentration = data_pre.(oxy_con_sensor);
-      data_proc.oxygen_saturation = data_pre.(oxy_sat_sensor);
-      fprintf('Selected oxygen sensors:\n');
-      fprintf('  oxygen_concentration: %s\n', oxy_con_sensor);
-      fprintf('  oxygen_saturation   : %s\n', oxy_sat_sensor);
-      if ~isempty(time_oxygen_sensor) ...
-          && ismember(time_oxygen_sensor, sensor_list) ...
-          && any(data_pre.(time_oxygen_sensor) > 0)
-        data_proc.time_oxygen = data_pre.(time_oxygen_sensor);
-        fprintf('  time_oxygen         : %s\n', time_oxygen_sensor);
-      end
-      if ~isempty(temperature_oxygen_sensor) ...
-          && ismember(temperature_oxygen_sensor, sensor_list) ...
-          && any(data_pre.(temperature_oxygen_sensor) > 0)
-        data_proc.temperature_oxygen = data_pre.(temperature_oxygen_sensor);
-        fprintf('  temperature_oxygen  : %s\n', temperature_oxygen_sensor);
-      end
-      break;
-    end
-  end
-  
-  
-  %% Select any other extra sensor.
-  % Add the preferred set of valid extra sensors available in list of sensors,
-  % for each extra sensor option given.
-  extra_sensor_option_name_list = fieldnames(options.extra_sensor_list);
-  for extra_sensor_option_name_idx = 1:numel(extra_sensor_option_name_list)
-    extra_sensor_option_name = ...
-      extra_sensor_option_name_list{extra_sensor_option_name_idx};
-    extra_sensor_option_value_list = ...
-      options.extra_sensor_list.(extra_sensor_option_name);
-    extra_sensor_option_field_list = ...
-      fieldnames(extra_sensor_option_value_list);
-    % Find preferred set of valid extra sensors in list of available sensors, 
-    % if any.
-    for extra_sensor_value_idx = 1:numel(extra_sensor_option_value_list)
-      extra_sensor_struct = ...
-        extra_sensor_option_value_list(extra_sensor_value_idx);
-      if all(structfun(@(s) isempty(s) || (ismember(s, sensor_list) && any(data_pre.(s) > 0)), ...
-                       extra_sensor_struct))
-        fprintf('Selected %s sensors:\n', extra_sensor_option_name);
-        for extra_sensor_field_idx = 1:numel(extra_sensor_option_field_list)
-          extra_sensor_field = ...
-            extra_sensor_option_field_list{extra_sensor_field_idx};
-          extra_sensor_name = extra_sensor_struct.(extra_sensor_field);
-          if ~isempty(extra_sensor_name)
-            data_proc.(extra_sensor_field) = data_pre.(extra_sensor_name);
-            fprintf('  %-24s: %s\n', extra_sensor_field, extra_sensor_name);
-          end
-        end
-        break
-      end
-    end
-  end
-    
   
   %% Fill missing time readings, if needed.
   % Regular sampling is assumed on time gaps.
@@ -876,18 +423,37 @@ function data_proc = processGliderData(data_pre, varargin)
     fprintf('Filling missing time readings...\n');
     data_proc.time = ...
       fillInvalidValues(data_proc.time, 'linear');
+    meta_proc.time.filling = 'linear';
   end
   
   
   %% Fill missing position readings, if needed.
   % Use linear interpolation of valid coordinate readings.
   if options.position_filling ...
-      && all(isfield(data_proc, {'time' 'latitude' 'longitude'}))
+      && all(isfield(data_proc, {'latitude' 'longitude'})) ...
+      && any(isfield(data_proc, {'time' 'time_position'}))
     fprintf('Filling missing position readings...\n');
-    data_proc.latitude = ...
-      fillInvalidValues(data_proc.time, data_proc.latitude, 'linear');
-    data_proc.longitude = ...
-      fillInvalidValues(data_proc.time, data_proc.longitude, 'linear');
+    if isfield(data_proc, 'time_position')
+      data_proc.latitude = ...
+        fillInvalidValues(data_proc.time_position, data_proc.latitude, ...
+                          data_proc.time, nan(size(data_proc.time)), 'linear');
+      data_proc.longitude = ...
+        fillInvalidValues(data_proc.time_position, data_proc.longitude, ...
+                          data_proc.time, nan(size(data_proc.time)), 'linear');
+      meta_proc.latitude.sources = ...
+        vertcat(cellstr(meta_proc.longitude.sources), ...
+                celllstr(meta_proc.time.sources));
+      meta_proc.longitude.sources = ...
+        vertcat(cellstr(meta_proc.longitude.sources), ...
+                cellstr(meta_proc.time.sources));
+    else
+      data_proc.latitude = ...
+        fillInvalidValues(data_proc.time, data_proc.latitude, 'linear');
+      data_proc.longitude = ...
+        fillInvalidValues(data_proc.time, data_proc.longitude, 'linear');
+    end
+    meta_proc.latitude.filling = 'linear';
+    meta_proc.longitude.filling = 'linear';
   end
   
   
@@ -897,6 +463,7 @@ function data_proc = processGliderData(data_pre, varargin)
     fprintf('Filling missing depth readings...\n');
     data_proc.depth = ...
       fillInvalidValues(data_proc.time, data_proc.depth, 'linear');
+    meta_proc.depth.filling = 'linear';
   end
   
   
@@ -909,6 +476,8 @@ function data_proc = processGliderData(data_pre, varargin)
       fillInvalidValues(data_proc.time, data_proc.roll, 'linear');
     data_proc.pitch = ...
       fillInvalidValues(data_proc.time, data_proc.pitch, 'linear');
+    meta_proc.roll.filling = 'linear';
+    meta_proc.pitch.filling = 'linear';
   end
   
   
@@ -918,6 +487,7 @@ function data_proc = processGliderData(data_pre, varargin)
     fprintf('Filling missing heading readings...\n');
     data_proc.heading = ...
       fillInvalidValues(data_proc.time, data_proc.heading, 'linear');
+    meta_proc.heading.filling = 'linear';
   end
   
   
@@ -928,9 +498,11 @@ function data_proc = processGliderData(data_pre, varargin)
       && all(isfield(data_proc, {'waypoint_latitude' 'waypoint_longitude'}))
     fprintf('Filling missing commanded waypoint readings...\n');
     data_proc.waypoint_latitude = ...
-      fillInvalidValues(data_proc.waypoint_latitude, 'previous');
+      fillInvalidValues(data_proc.waypoint_latitude, 'prev');
     data_proc.waypoint_longitude = ...
-      fillInvalidValues(data_proc.waypoint_longitude, 'previous');
+      fillInvalidValues(data_proc.waypoint_longitude, 'prev');
+    meta_proc.waypoint_latitude.filling = 'prev';
+    meta_proc.waypoint_longitude.filling = 'prev';
   end
   
   
@@ -939,6 +511,9 @@ function data_proc = processGliderData(data_pre, varargin)
     fprintf('Computing transect index by transect boundary identification...\n');
     data_proc.transect_index = ...
       findTransects(data_proc.waypoint_latitude, data_proc.waypoint_longitude);
+    meta_proc.transect_index.sources = ...
+      {'waypoint_latitude' 'waypoint_longitude'}';
+    meta_proc.transect_index.method = 'findTransects';
   end
   
   
@@ -947,16 +522,13 @@ function data_proc = processGliderData(data_pre, varargin)
     fprintf('Computing covered horizontal distance...\n');
     data_proc.distance_over_ground = ...
       computeCumulativeDistance(data_proc.latitude, data_proc.longitude);
+    meta_proc.distance_over_ground.sources = {'latitude' 'longitude'}';
+    meta_proc.distance_over_ground.method = 'computeCumulativeDistance';
   end
   
   
   %% Convert and filter pressure, if pressure available and needed.
   if isfield(data_proc, 'pressure')
-    % Convert pressure from bars to decibars, if needed (by later processings).
-    if options.pressure_conversion
-      fprintf('Performing pressure unit conversion (bars to decibars)...\n');
-      data_proc.pressure = 10 * data_proc.pressure;
-    end
     % Apply pressure filter, if needed.
     if options.pressure_filtering
       if isfield(data_proc, 'time_ctd')
@@ -964,12 +536,17 @@ function data_proc = processGliderData(data_pre, varargin)
         data_proc.pressure = ...
           applySeabirdPressureFilter(data_proc.time_ctd, data_proc.pressure, ...
                                      options.pressure_filter_constant);
+        meta_proc.pressure.sources = ...
+          vertcat(cellstr(meta_proc.pressure.sources), ...
+                  cellstr(meta_proc.time_ctd.sources));
       elseif isfield(data_proc, 'time')
         fprintf('Filtering pressure sequence using global time stamp...\n');
         data_proc.pressure = ...
           applySeabirdPressureFilter(data_proc.time, data_proc.pressure, ...
                                      options.pressure_filter_constant);
       end
+      meta_proc.pressure.filter_method = 'applySeabirdPressureFilter';
+      meta_proc.pressure.filter_parameters = options.pressure_filter_constant;
     end
   end
   
@@ -979,6 +556,8 @@ function data_proc = processGliderData(data_pre, varargin)
       && all(isfield(data_proc, {'pressure' 'latitude'}))
     fprintf('Deriving CTD depth from pressure and latitude readings...\n');
     data_proc.depth_ctd = sw_dpth(data_proc.pressure, data_proc.latitude);
+    meta_proc.depth_ctd.sources = {'pressure' 'latitude'}';
+    meta_proc.depth_ctd.method = 'sw_depth';
   end
   
   
@@ -1002,14 +581,29 @@ function data_proc = processGliderData(data_pre, varargin)
     fprintf('  profiling sequence        : %s\n', profiling_sequence);
     fprintf('  profiling sequence filling: %d\n', options.profiling_sequence_filling);
     fprintf('  minimum depth range       : %f\n', options.profile_min_range);
+    fprintf('  equal direction join      : %d\n', options.profile_join_same_dir);
     % Fill profiling sequence invalid values, if needed.
     if (options.profiling_sequence_filling && isfield(data_proc, 'time'))
       profile_stamp = ...
         fillInvalidValues(data_proc.time, profile_stamp, 'linear');
+      meta_proc.profile_index.source_filling = 'linear';
+      meta_proc.profile_index.sources = {profiling_sequence 'time'}';
+    else
+      meta_proc.profile_index.sources = profiling_sequence;
+      meta_proc.profile_index.source_filling = 'none';
     end
     % Find profile directions and indices.
     [data_proc.profile_index, data_proc.profile_direction] = ...
-      findProfiles(profile_stamp, 'range', options.profile_min_range);
+      findProfiles(profile_stamp, ...
+                  'range', options.profile_min_range, ...
+                  'join', options.profile_join_same_dir);
+    meta_proc.profile_index.method = 'findProfiles';
+    meta_proc.profile_index.min_range = options.profile_min_range;
+    meta_proc.profile_index.join_equal = options.profile_join_same_dir;
+    meta_proc.profile_direction.method = meta_proc.profile_index.method;
+    meta_proc.profile_direction.sources = meta_proc.profile_index.sources;
+    meta_proc.profile_direction.source_filling = ...
+      meta_proc.profile_index.source_filling;
   end
   
   
@@ -1081,6 +675,17 @@ function data_proc = processGliderData(data_pre, varargin)
                               'minvel', options.flow_ctd_min_velocity);
       end
     end
+    if flow_ctd_pitch_avail
+      meta_proc.flow_ctd.sources = ...
+        {flow_ctd_time flow_ctd_depth flow_ctd_pitch 'profile_index'}';
+    else
+      meta_proc.flow_ctd.sources = ...
+        {flow_ctd_time flow_ctd_depth profile_index};
+      meta_proc.flow_ctd.pitch_value = options.flow_ctd_pitch_value;
+    end
+    meta_proc.method = 'computeCTDFlowSpeed';
+    meta_proc.min_pitch = options.flow_ctd_min_pitch;
+    meta_proc.min_vel = options.flow_ctd_min_velocity;
   end
  
   
@@ -1258,10 +863,10 @@ function data_proc = processGliderData(data_pre, varargin)
         sensor_lag_constants = sensor_lag_estimator(sensor_lag_estimates);
       end
       % Correct sensor lag, if possible.
-      if isnan(sensor_lag_constants)
+      if any(isnan(sensor_lag_constants))
         fprintf('Omiting sensor lag correction %d (%s): %s.\n', ...
                 sensor_lag_option_idx, sensor_lag_cor, ...
-                'no valid parameter available');
+                'no valid parameters available');
       else
         fprintf('Performing sensor lag correction %d with settings:\n', sensor_lag_option_idx);
         fprintf('  output sensor sequence: %s\n', sensor_lag_cor);
@@ -1295,6 +900,25 @@ function data_proc = processGliderData(data_pre, varargin)
             data_proc.(sensor_lag_cor)(prof_select) = prof_cor;
           end
         end
+        if sensor_lag_flow_const
+          meta_proc.(sensor_lag_cor).sources = ...
+            {sensor_lag_raw sensor_lag_time sensor_lag_depth 'profile_index'}';
+        else
+          meta_proc.(sensor_lag_cor).sources = ...
+            {sensor_lag_raw sensor_lag_time sensor_lag_depth sensor_lag_flow 'profile_index'}';
+        end
+        meta_proc.(sensor_lag_cor).method = 'correctSensorLag';
+        meta_proc.(sensor_lag_cor).parameters = sensor_lag_constants;
+        if sensor_lag_params_avail
+          meta_proc.(sensor_lag_cor).parameter_method = 'preset';
+        else
+          meta_proc.(sensor_lag_cor).parameter_method = 'findSensorLagParams';
+          meta_proc.(sensor_lag_cor).parameter_estimator = func2str(sensor_lag_estimator);
+          meta_proc.(sensor_lag_cor).parameter_estimates = sensor_lag_estimates;
+          meta_proc.(sensor_lag_cor).parameter_exitflags = sensor_lag_exitflags;
+        end
+        meta_proc.(sensor_lag_cor).profile_min_range = options.profile_min_range;
+        meta_proc.(sensor_lag_cor).profile_gap_ratio = options.profile_max_gap_ratio;
       end
     end
   end
@@ -1547,6 +1171,28 @@ function data_proc = processGliderData(data_pre, varargin)
             data_proc.(thermal_lag_cond_cor)(prof_select) = prof_cond_cor;
           end
         end
+        if thermal_lag_flow_const
+          meta_proc.(thermal_lag_cond_cor).sources = ...
+            {thermal_lag_cond_raw thermal_lag_temp_raw thermal_lag_pres_raw ...
+             thermal_lag_time thermal_lag_depth 'profile_index'}';
+        else
+          meta_proc.(thermal_lag_cond_cor).sources = ...
+            {thermal_lag_cond_raw thermal_lag_temp_raw thermal_lag_pres_raw ...
+             thermal_lag_flow thermal_lag_time thermal_lag_depth 'profile_index'}';
+        end
+        meta_proc.(thermal_lag_cond_cor).method = 'correctThermalLag';
+        meta_proc.(thermal_lag_cond_cor).parameters = thermal_lag_constants;
+        if thermal_lag_params_avail
+          meta_proc.(thermal_lag_cond_cor).parameter_method = 'preset';
+        else
+          meta_proc.(thermal_lag_cond_cor).parameter_method = 'findThermalLagParams';
+          meta_proc.(thermal_lag_cond_cor).parameter_estimates = thermal_lag_estimates;
+          meta_proc.(thermal_lag_cond_cor).parameter_exitflags = thermal_lag_exitflags;
+          meta_proc.(thermal_lag_cond_cor).parameter_estimator = func2str(thermal_lag_estimator);
+        end
+        meta_proc.(thermal_lag_cond_cor).profile_min_range = options.profile_min_range;
+        meta_proc.(thermal_lag_cond_cor).profile_gap_ratio = options.profile_max_gap_ratio;
+        meta_proc.(thermal_lag_temp_cor) = meta_proc.(thermal_lag_cond_cor);
       end
     end
   end
@@ -1571,6 +1217,9 @@ function data_proc = processGliderData(data_pre, varargin)
       data_proc.(salinity_salt) = ...
         sw_salt(data_proc.(salinity_cond) * (10 / sw_c3515()), ...
                 data_proc.(salinity_temp), data_proc.(salinity_pres));
+      meta_proc.(salinity_salt).sources = ...
+        {salinity_cond salinity_temp salinity_pres}';
+      meta_proc.(salinity_salt).method = 'sw_salt';
     end
   end
   
@@ -1592,6 +1241,9 @@ function data_proc = processGliderData(data_pre, varargin)
       data_proc.(density_dens) = ...
         sw_dens(data_proc.(density_salt), ...
                 data_proc.(density_temp), data_proc.(density_pres));
+      meta_proc.(density_dens).sources = ...
+        {density_salt density_temp density_pres}';
+      meta_proc.(density_dens).method = 'sw_dens';
     end
   end
   

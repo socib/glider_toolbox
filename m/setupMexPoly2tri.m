@@ -10,24 +10,24 @@ function setupMexPoly2tri()
 %  official repositories on Debian based distributions, in which case the mex
 %  file is built using the following attributes:
 %    TARGET:
-%      mex_tools/poly2tri.mex(a64)
+%      /path/to/poly2tri.mex(a64)
 %    SOURCES:
-%      mex_tools/poly2tri.c
+%      /path/to/poly2tri.c
 %    INCLUDES:
-%      /usr/include/gpcl/gpc.h
+%      none
 %    LIBRARIES:
-%      /usr/lib/libgpcl.so
+%      -l gpcl
 %  Alternatively, it is possible to build the mex file using the GPC sources 
 %  directly. This is useful on systems that do not distribute the GPC library,
 %  or to use a version of GPC different from the one installed in the system.
 %  The GPC sources should be downloaded from the official web site and extracted
 %  to a directory called 'gpcl' in the same directory than the mex file source:
 %    TARGET:
-%      mex_tools/poly2tri.mex(a64)
+%      /path/to/poly2tri.mex(a64)
 %    SOURCES:
-%      mex_tools/poly2tri.c mex_tools/gpcl/gpc.c
+%      /path/to/poly2tri.c /path/to/gpcl/gpc.c
 %    INCLUDES:
-%      mex_tools/gpcl/gpc.h
+%      /path/to/gpcl/gpc.h
 %    LIBRARIES:
 %      none
 %  Please note that when using this build rule, mex file and library sources are
@@ -52,6 +52,10 @@ function setupMexPoly2tri()
 %    To solve the problem, either build the target from the shell or temporarily
 %    overwrite the environment variable LD_LIBRARY_PATH from the MATLAB session.
 %
+%  References:
+%    Alan Murta, GPC - General Polygon Clipper library:
+%    http://www.cs.man.ac.uk/~amurta/software/index.html#gpc
+%
 %  Examples:
 %    % Check that GPC development files are installed on your system,
 %    % or that GPC sources are present in the directory private/gpcl
@@ -66,17 +70,13 @@ function setupMexPoly2tri()
 %    setenv('LD_LIBRARY_PATH', ld_library_path)
 %    clear('ld_library_path')
 %
-%  References:
-%    Alan Murta, GPC - General Polygon Clipper library:
-%    http://www.cs.man.ac.uk/~amurta/software/index.html#gpc
-%
 %  See also:
 %    POLY2TRI
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2013-2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify
@@ -94,11 +94,27 @@ function setupMexPoly2tri()
 
   error(nargchk(0, 0, nargin, 'struct'));
 
-  if exist('mex_tools/gpcl/gpc.h', 'file') && ...
-     exist('mex_tools/gpcl/gpc.c', 'file')
-    mex -outdir mex_tools mex_tools/poly2tri.c mex_tools/gpcl/gpc.c
+  funcname = 'poly2tri';
+  funcpath =  which(funcname);
+  
+  if isempty(funcpath)
+    error('glider_toolbox:setup:NotFound', ...
+          'Could not find location of %s.', funcname);
+  end
+  
+  prefix = fileparts(funcpath);
+  target = fullfile(prefix, [funcname '.' mexext()]);
+  sources = fullfile(prefix, [funcname '.c']);
+  gpcldir = fullfile(prefix, 'gpcl');
+  gpclsrc = fullfile(gpcldir, 'gpc.c');
+  gpcl = 'gpcl';
+
+  if exist(gpcldir, 'dir')
+    % mex -outdir mex_tools mex_tools/poly2tri.c mex_tools/gpcl/gpc.c
+    mex('-output', target, [sources ' ' gpclsrc]);
   else
-    mex -outdir mex_tools -lgpcl mex_tools/poly2tri.c
+    % mex -outdir mex_tools -lgpcl mex_tools/poly2tri.c
+    mex('-output', target, ['-l' gpcl], sources);
   end
 
 end

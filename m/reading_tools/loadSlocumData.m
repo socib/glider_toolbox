@@ -21,7 +21,7 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
 %  load, or to specify the output format:
 %    FORMAT: data output format.
 %      String setting the format of the output DATA. Valid values are:
-%        'array': DATA is a matrix whith sensor readings as columns 
+%        'array': DATA is a matrix with sensor readings as columns 
 %           ordered as in the 'sensors' metadata field.
 %        'struct': DATA is a struct with sensor names as field names and column 
 %           vectors of sensor readings as field values.
@@ -42,12 +42,12 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
 %      present in output.
 %      Default value: 'all' (do not perform sensor filtering).
 %    PERIOD: time filtering boundaries.
-%      Two element numeric array with the start and end of the time interval of 
-%      interest (seconds since 1970-01-01 00:0:00.00 UTC). If given, only sensor
-%      cycles with timestamps within this period will be present in output.
-%      The string 'all' may also be given, in which case time filtering is not
-%      performed and all sensors cycles in input data sets will be present in 
-%      output.
+%      Two element numeric array with the start and the end of the time interval 
+%      of interest (seconds since 1970-01-01 00:00:00.00 UTC). If given, only 
+%      sensor cycles with timestamps within this period will be present in
+%      output. The string 'all' may also be given, in which case time filtering 
+%      is not performed and all sensors cycles in input data sets will be 
+%      present in output.
 %      Default value: 'all' (do not perform time filtering).
 %
 %  Notes:
@@ -75,7 +75,7 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2013-2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify

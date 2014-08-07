@@ -33,7 +33,7 @@ function [figures_proc, figures_grid] = configFigures()
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2013-2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify
@@ -78,6 +78,7 @@ function [figures_proc, figures_grid] = configFigures()
   set(0, 'DefaultAxesLineWidth', 0.25);
   % Text properties.
   set(0, 'DefaultTextFontSize',  8);
+  
   
   %% Set printing options.
   default_prntopts = struct();

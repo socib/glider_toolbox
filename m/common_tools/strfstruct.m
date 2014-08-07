@@ -1,5 +1,5 @@
 function str = strfstruct(pattern, repstruct)
-%STRFSTRUCT  Replace structure field specifiers in pattern with structure field values.
+%STRFSTRUCT  Format structure as string.
 %
 %  Syntax:
 %    STR = STRFSTRUCT(PATTERN, REPSTRUCT)
@@ -11,9 +11,9 @@ function str = strfstruct(pattern, repstruct)
 %  braces and prefixed with a dollar sign. Specifiers may also include a comma 
 %  separated list of modifiers, separated from the specifier key by a comma. 
 %  These modifiers are intended to allow transformations affecting the format 
-%  of the replacement value. These transformations are applied sequentially as 
-%  they appear in the specifier, from left to right. Each transformation is 
-%  applied to the output of the previous one, starting from the value of the 
+%  of the replacement value. The transformations are applied sequentially in the
+%  order they appear in the specifier, from left to right. Each transformation
+%  is applied to the output of the previous one, starting from the value of the 
 %  field of REPSTRUCT matching the specifier key, or the empty string if there 
 %  is no such field. Finally, if the resulting replacement value is a numeric
 %  value, it is converted to string by function NUM2STRING before applying the
@@ -24,18 +24,18 @@ function str = strfstruct(pattern, repstruct)
 %      Example:
 %        '${DEPLOYMENT_ID,%04d}' with REPSTRUCT.DEPLOYMENT_ID=2 
 %         is replaced by 0002.
-%    ^: upper case conversion.
-%      The current replacement value is converted to upper case by passing it to
-%      function UPPER.
-%      Example:
-%        '${GLIDER_NAME,^}' with REPSTRUCT.GLIDER_NAME='deepy' 
-%         is replaced by 'DEEPY'.
-%    v: lower case conversion.
+%    l: lower case conversion.
 %      The current replacement value is converted to lower case by passing it to
 %      function LOWER.
 %      Example:
-%        '${GLIDER_NAME,^}' with REPSTRUCT.GLIDER_NAME='DEEPY' 
+%        '${GLIDER_NAME,l}' with REPSTRUCT.GLIDER_NAME='DEEPY' 
 %        is replaced by 'deepy'.
+%    U: upper case conversion.
+%      The current replacement value is converted to upper case by passing it to
+%      function UPPER.
+%      Example:
+%        '${GLIDER_NAME,U}' with REPSTRUCT.GLIDER_NAME='deepy' 
+%         is replaced by 'DEEPY'.
 %    T...: time string representation.
 %      The current replacement value is passed to function DATESTR using the
 %      the modifier value as format string with leading T removed.
@@ -58,6 +58,14 @@ function str = strfstruct(pattern, repstruct)
 %        ${GLIDER_NAME,s/(-|\s*)/_}
 %        with REPSTRUCT.GLIDER_NAME='complex-compound  glider name'
 %        is replaced by 'complex_compound_glider_name'.
+%    @...: named conversion function.
+%      The current replacement value is passed to the function named by the
+%      modifier value with the leading @ removed. This is useful to specify 
+%      custom formatters for more advanced conversions.
+%      Example:
+%        ${DEPLOYMENT_ID,@dec2bin} 
+%        with REPSTRUCT.DEPLOYMENT_ID=2 
+%        is replaced by 'C'.
 %    
 %  Notes:
 %    This function is inspired by the C function STRFTIME, the shell 
@@ -74,24 +82,27 @@ function str = strfstruct(pattern, repstruct)
 %    str = strfstruct(pattern, deployment)
 %    nums_pattern = '/base/path/${GLIDER_NAME}/${DEPLOYMENT_ID,%04d}'
 %    nums_str = strfstruct(nums_pattern, deployment)
-%    case_pattern = '/base/path/${GLIDER_NAME,^}/${DEPLOYMENT_NAME}'
+%    case_pattern = '/base/path/${GLIDER_NAME,U}/${DEPLOYMENT_NAME}'
 %    case_str = strfstruct(case_pattern, deployment)
 %    date_pattern = '/base/path/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyy-mm-dd}'
 %    date_str = strfstruct(date_pattern, deployment)
 %    subs_pattern = '/base/path/${GLIDER_NAME}/${DEPLOYMENT_NAME,s/funny/boring}'
 %    subs_str = strfstruct(subs_pattern, deployment)
+%    func_pattern = '/base/path/${GLIDER_NAME}/${DEPLOYMENT_ID,@dec2bin}'
+%    func_str = strfstruct(func_pattern, deployment)
 %
 %  See also:
 %    SPRINTF
-%    DATESTR
-%    UPPER
 %    LOWER
+%    UPPER
+%    DATESTR
 %    REGEXPREP
+%    STR2FUNC
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2013-2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify
@@ -112,54 +123,62 @@ function str = strfstruct(pattern, repstruct)
   repflds = fieldnames(repstruct);
   repvals = struct2cell(repstruct);
   repkeys = upper(repflds);
-  specprefix = '${';
-  specsuffix = '}';
-  specinchar = ',';
-  specregexp = [regexptranslate('escape', specprefix) ...
-                '.*?' ...
-                regexptranslate('escape', specsuffix)];
-  match_list = unique(regexp(pattern, specregexp, 'match'));
-  str = pattern;
-  for match_idx = 1:numel(match_list)
-    match = match_list{match_idx};
-    rep = '';
-    token_list = ...
-      regexp(match(length(specprefix)+1:end-length(specsuffix)), ...
-             regexptranslate('escape', specinchar), 'split');
-    key = token_list{1};
-    [key_present, key_index] = ismember(key, repkeys);
-    if key_present
-      rep = repvals{key_index};
+  specesc = regexptranslate('escape', '$');
+  specbeg = regexptranslate('escape', '{');
+  specend = regexptranslate('escape', '}');
+  specsep = regexptranslate('escape', ',');
+  specexp = ...
+    [specesc specbeg ...
+     '((?:[^' specesc specend ']|' specesc '[' specesc specsep specend '])*)' ...
+     specend];
+  specelemexp = ...
+    ['(?:[^' specsep specesc specend ']|' specesc '[' specsep specesc specend '])*'];
+  specescexp = [ specesc '([' specsep specesc specend '])' ];
+  specescrep = '$1';
+  [token_list, split_list] = regexp(pattern, specexp, 'tokens', 'split');
+  for token_idx = 1:numel(token_list)
+    token = token_list{token_idx}{1};
+    subst = '';
+    match_list = ...
+      regexprep(regexp(token, specelemexp, 'match'), specescexp, specescrep);
+    key = match_list{1};
+    key_select = strcmp(key, repkeys);
+    if any(key_select)
+      subst = repvals{key_select};
     end
-    for token_idx = 2:numel(token_list)
-      modtok = token_list{token_idx};
-      switch modtok(1)
+    for match_idx = 2:numel(match_list)
+      modifier = match_list{match_idx};
+      switch modifier(1)
         case '%'
-          rep = sprintf(modtok, rep);
-        case '^'
-          rep = upper(rep);
-        case 'v'
-          rep = lower(rep);
+          subst = sprintf(modifier, subst);
+        case 'l'
+          subst = lower(subst);
+        case 'U'
+          subst = upper(subst);
         case 'T'
-          rep = datestr(rep, modtok(2:end));
+          subst = datestr(subst, modifier(2:end));
         case 's'
-          subsdelim = modtok(2);
-          subsbound = 2 + find(modtok(3:end) == subsdelim, 1, 'first');
-          if isempty(subsbound)
-            subspatstr = modtok(3:end);
-            subsrepstr = '';
+          substdelim = modifier(2);
+          substbound = 2 + find(modifier(3:end) == substdelim, 1, 'first');
+          if isempty(substbound)
+            substpatstr = modifier(3:end);
+            substrepstr = '';
           else
-            subspatstr = modtok(3:subsbound(1)-1);
-            subsrepstr = modtok(subsbound(1)+1:end);
+            substpatstr = modifier(3:substbound(1)-1);
+            substrepstr = modifier(substbound(1)+1:end);
           end
-          rep = regexprep(rep, subspatstr, subsrepstr);
+          subst = regexprep(subst, substpatstr, substrepstr);
+        case '@'
+          substfunc = str2func(modifier(2:end));
+          subst = substfunc(subst);
       end
-      if isnumeric(rep)
-        rep = num2str(rep);
+      if isnumeric(subst)
+        subst = num2str(subst);
       end
     end
-    str = regexprep(str, regexptranslate('escape', match), rep);
+    split_list{2, token_idx} = subst;
   end
+  str = [split_list{:}];
   
 end
  

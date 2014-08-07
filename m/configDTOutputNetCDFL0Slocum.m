@@ -1,24 +1,27 @@
-function nc_l0_info = configRTOutputNetCDFL0()
-%CONFIGRTOUTPUTNETCDFL0  Configure NetCDF output for raw glider deployment data in real time.
+function ncl0_info = configDTOutputNetCDFL0Slocum()
+%CONFIGDTOUTPUTNETCDFL0  Configure NetCDF output for raw Slocum glider deployment data in delayed time.
 %
 %  Syntax:
-%    NC_L0_INFO = CONFIGRTOUTPUTNETCDFL0()
+%    NCL0_INFO = CONFIGDTOUTPUTNETCDFL0SLOCUM()
 %
-%  NC_L0_INFO = CONFIGRTOUTPUTNETCDFL0() should return a struct describing the
-%  structure of the NetCDF file for raw glider deployment data in real time 
-%  (see the note about the file generation for more details).
+%  NCL0_INFO = CONFIGDTOUTPUTNETCDFL0SLOCUM() should return a struct describing
+%  the structure of the NetCDF file for raw Slocum glider deployment data in
+%  delayed time (see the note about the file generation for more details).
 %  The returned struct should have the following fields:
-%    DIM_NAMES: struct with string fields defining the dimension names.
-%      The size of the dimensions are inferred from the data during the
-%      processing, so only dimension names need to be provided. It should have
-%      the following fields:
-%        TIME: time dimension name.
-%    GLOBAL_ATTS: A struct array with fields 'NAME' and 'VALUE' defining global
+%    DIMENSIONS: struct array with fields 'NAME' and 'LENGTH' defining the 
+%      dimensions for variables in the file.
+%      A variable may have dimensions not listed here or with their length left
+%      undefined (empty field value), and they are inferred from the data during
+%      the generation of the file. However, it is useful to preset the length of
+%      a dimension for record or string size dimensions.
+%    ATTRIBUTES: struct array with fields 'NAME' and 'VALUE' defining global
 %      attributes of the file.
-%    VAR_META: A struct defining variable metadata. Field names are variable
-%      names and field values are structs as needed by function WRITENETCDFDATA.
-%      They should have the following fields:
-%        DIMENSIONS: string cell array with the name of the dimensions of the
+%      Global attributes might be overwritten by deployment fields with the same
+%      name.
+%    VARIABLES: struct defining variable metadata. Field names are variable
+%      names and field values are structs as needed by function SAVENC.
+%      It should have the following fields:
+%        DIMENSIONS: string cell array with the names of the dimensions of the
 %          variable.
 %        ATTRIBUTES: struct array with fields 'NAME' and 'VALUE' defining the
 %          attributes of the variable.
@@ -27,25 +30,26 @@ function nc_l0_info = configRTOutputNetCDFL0()
 %      data will be used.
 %
 %  Notes:
-%    The NetCDF file will be created by the function GENERATEOUTPUTNETCDFL0 with
-%    the metadata provided here and the data returned by PREPROCESSGLIDERDATA.
+%    The NetCDF file will be created by the function GENERATEOUTPUTNETCDF with
+%    the structure provided here and the metadata and data returned by 
+%    LOADSLOCUMDATA.
 %
 %    Please note that global attributes described here may be overwritten by
 %    deployment field values whenever the names match. This allows adding file
 %    attributes whose values are known only at runtime.
 %
 %  Examples:
-%    nc_l0_info = configRTOutputNetCDFL0()
+%    ncl0_info = configDTOutputNetCDFL0Slocum()
 %
 %  See also:
-%    GENERATENETCDFL0
-%    WRITENETCDFDATA
-%    PREPROCESSGLIDERDATA
+%    GENERATEOUTPUTNETCDF
+%    SAVENC
+%    LOADSLOCUMDATA
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2013-2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify
@@ -68,7 +72,7 @@ function nc_l0_info = configRTOutputNetCDFL0()
   % variable field to the struct defined below, with its attributes defined in 
   % a cell array (attribute name in first column and attribute value in second).
   % This cell array will be converted at the end of the function to the proper
-  % representation needed by WRITENETCDFDATA.
+  % representation needed by SAVENC.
 
   default_fill_value = realmax('double');
 
@@ -83,30 +87,29 @@ function nc_l0_info = configRTOutputNetCDFL0()
   var_attr_list.m_lat = {
     'long_name'     'latitude (dead reckoned)'
     'standard_name' 'latitude'
-    'units'         'degree_north'  
+    'units'         'nmea_degree'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_lon = {
     'long_name'     'longitude (dead reckoned)'
     'standard_name' 'longitude'
-    'units'         'degree_east'  
+    'units'         'nmea_degree'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_lat = {
     'long_name'     'latitude (GPS fix)'
     'standard_name' 'latitude'
-    'units'         'degree_north'  
+    'units'         'nmea_degree'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_lon = {
     'long_name'     'longitude (GPS fix)'
     'standard_name' 'longitude'
-    'units'         'degree_east'  
+    'units'         'nmea_degree'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_status = {
     'long_name'     'GPS status'
-    'standard_name' 'gps_status'
     'units'         '1'
     'comments'      '0 = good fix, >0 = no fix'
     '_FillValue'    default_fill_value };
@@ -114,221 +117,201 @@ function nc_l0_info = configRTOutputNetCDFL0()
   var_attr_list.c_wpt_lat = {
     'long_name'     'next waypoint latitude'
     'standard_name' 'latitude'
-    'units'         'degree_north'  
+    'units'         'nmea_degree'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.c_wpt_lon = {
     'long_name'     'next waypoint longitude'
     'standard_name' 'longitude'
-    'units'         'degree_east'  
+    'units'         'nmea_degree'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_depth = {
     'long_name'     'glider measured depth'
     'standard_name' 'depth'
-    'units'         'm'  
+    'units'         'm'
+    'positive'      'down'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_roll = {
     'long_name'     'glider roll'
-    'standard_name' 'roll'
     'units'         'rad'
     'comments'      'greater than 0 is port wing up'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_pitch = {
-    'long_name'     'glider pitch angle'
-    'standard_name' 'pitch'
+    'long_name'     'glider pitch'
     'units'         'rad'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_heading = {
     'long_name'     'glider heading'
-    'standard_name' 'heading'
     'units'         'rad'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.c_heading = {
     'long_name'     'glider commanded heading'
-    'standard_name' 'heading'
     'units'         'rad'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_speed = {
     'long_name'     'glider speed through water'
-    'standard_name' 'speed'
     'units'         'm s-1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_fin = {
     'long_name'     'glider rudder'
-    'standard_name' 'fin_position'
     'units'         'rad'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.x_inflecting = {
     'long_name'     'glider inflecting marker'
-    'standard_name' 'inflection'
     'units'         '1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_num_half_yos_in_segment = {
     'long_name'     'glider half yos number in segment'
-    'standard_name' 'half_yos_number'
     'units'         '1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_tot_num_inflections = {
     'long_name'     'total number of inflections'
-    'standard_name' 'half_yos_number'
     'units'         '1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_battery = {
     'long_name'     'battery voltage'
-    'standard_name' 'voltage'
     'units'         'V'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_vacuum = {
     'long_name'     'vacuum'
-    'standard_name' 'vacuum'
     'units'         'inHg'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_leakdetect_voltage = {
     'long_name'     'leak detector'
-    'standard_name' 'leak'
     'units'         'V'
     'comments'      '2.5V means no leak; voltage drops if leak detected'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_iridium_call_num = {
     'long_name'     'number of iridium calls'
-    'standard_name' 'number_of_iridium_calls'
     'units'         '1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_iridium_connected = {
     'long_name'     'iridium connected'
-    'standard_name' 'iridium_connected'
     'units'         '1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_iridium_dialed_num = {
     'long_name'     'number of iridium dials'
-    'standard_name' 'number_of_iridium_dials'
     'units'         '1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.x_dr_state = {
     'long_name'     'dead reckoning state'
-    'standard_name' 'dead_reckoning_state'
     'units'         '1'
     'comments'      '0 = mission_start, 1 = underwater, 2 = awaiting_fix, 3 = awaiting_postfix, 4 = awaiting_dive'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_dr_fix_time = {
     'long_name'     'dead reckoning fix time'
-    'standard_name' 'dead_reckoning_fix_time'
+    'standard_name' 'time'
     'units'         'seconds since 1970-01-01 00:00:00 +00:00'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_dr_postfix_time = {
     'long_name'     'dead reckoning postfix time'
-    'standard_name' 'dead_reckoning_postfix_time'
+    'standard_name' 'time'
     'units'         'seconds since 1970-01-01 00:00:00 +00:00'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_fix_x_lmc = {
     'long_name'     'x gps fix in local mission coordinates'
-    'standard_name' 'x_gps_fix_in_local_mission_coordinates'
     'units'         'm'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_fix_y_lmc = {
     'long_name'     'y gps fix in local mission coordinates'
-    'standard_name' 'y_gps_fix_in_local_mission_coordinates'
     'units'         'm'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_postfix_x_lmc = {
     'long_name'     'x gps postfix in local mission coordinates'
-    'standard_name' 'x_gps_postfix_in_local_mission_coordinates'
     'units'         'm'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_postfix_y_lmc = {
     'long_name'     'y gps postfix in local mission coordinates'
-    'standard_name' 'y_gps_postfix_in_local_mission_coordinates'
     'units'         'm'  
     '_FillValue'    default_fill_value };
 
   % Navigation water information.
   var_attr_list.m_water_vx = {
     'long_name'     'eastward water current'
-    'standard_name' 'eastward_water_velocity'
+    'standard_name' 'eastward_sea_water_velocity'
     'units'         'm s-1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_water_vy = {
     'long_name'     'northward water current'
-    'standard_name' 'northward_water_velocity'
+    'standard_name' 'northward_sea_water_velocity'
     'units'         'm s-1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_initial_water_vx = {
     'long_name'     'initial eastward water current'
-    'standard_name' 'eastward_water_velocity'
+    'standard_name' 'eastward_sea_water_velocity'
     'units'         'm s-1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_initial_water_vy = {
     'long_name'     'initial northward water current'
-    'standard_name' 'northward_water_velocity'
+    'standard_name' 'northward_sea_water_velocity'
     'units'         'm s-1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_final_water_vx = {
     'long_name'     'final eastward water current'
-    'standard_name' 'eastward_water_velocity'
+    'standard_name' 'eastward_sea_water_velocity'
     'units'         'm s-1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_final_water_vy = {
     'long_name'     'final northward water current'
-    'standard_name' 'northward_water_velocity'
+    'standard_name' 'northward_sea_water_velocity'
     'units'         'm s-1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_water_delta_vx = {
     'long_name'     'delta eastward water current'
-    'standard_name' 'eastward_water_velocity'
     'units'         'm s-1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_water_delta_vy = {
     'long_name'     'delta northward water current'
-    'standard_name' 'northward_water_velocity'
     'units'         'm s-1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.x_prior_seg_water_vx = {
     'long_name'     'prior segment eastward water current'
-    'standard_name' 'eastward_water_velocity'
+    'standard_name' 'eastward_sea_water_velocity'
     'units'         'm s-1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.x_prior_seg_water_vy = {
     'long_name'     'prior segment northward water current'
-    'standard_name' 'northward_water_velocity'
+    'standard_name' 'northward_sea_water_velocity'
     'units'         'm s-1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_water_depth = {
     'long_name'     'bathymetry'
     'standard_name' 'depth'
-    'units'         'm'  
+    'units'         'm'
+    'positive'      'down'
     '_FillValue'    default_fill_value };
 
   % Navigation CTD.
@@ -410,38 +393,32 @@ function nc_l0_info = configRTOutputNetCDFL0()
   % BB3SLO sensor.
   var_attr_list.sci_bb3slo_b470_scaled = {
     'long_name'     'blue backscatter'
-    'standard_name' 'blue_backscatter'
     'units'         '1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_bb3slo_b532_scaled = {
     'long_name'     'green backscatter'
-    'standard_name' 'green_backscatter'
     'units'         '1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_bb3slo_b660_scaled = {
     'long_name'     'red backscatter'
-    'standard_name' 'red_backscatter'
     'units'         '1'  
     '_FillValue'    default_fill_value };
 
   % BBFL2S sensor.
   var_attr_list.sci_bbfl2s_bb_scaled = {
     'long_name'     'backscatter'
-    'standard_name' 'backscatter'
     'units'         '1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_bbfl2s_cdom_scaled = {
     'long_name'     'cdom'
-    'standard_name' 'cdom'
     'units'         '1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_bbfl2s_chlor_scaled = {
     'long_name'     'chlorophyll'
-    'standard_name' 'chlorophyll'
     'units'         'mg Kg-3'  
     '_FillValue'    default_fill_value };
 
@@ -473,13 +450,11 @@ function nc_l0_info = configRTOutputNetCDFL0()
   % FLNTU sensor.
   var_attr_list.sci_flntu_chlor_ref = {
     'long_name'     'chlorophyll reference'
-    'standard_name' 'chlorophyll_reference'
     'units'         '1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_flntu_chlor_sig = {
     'long_name'     'chlorophyll signal'
-    'standard_name' 'chlorophyll_signal'
     'units'         '1'  
     '_FillValue'    default_fill_value };
 
@@ -497,13 +472,11 @@ function nc_l0_info = configRTOutputNetCDFL0()
 
   var_attr_list.sci_flntu_turb_ref = {
     'long_name'     'turbidity reference'
-    'standard_name' 'turbidity_reference'
     'units'         '1'  
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_flntu_turb_sig = {
     'long_name'     'turbidity signal'
-    'standard_name' 'turbidity_signal'
     'units'         '1'  
     '_FillValue'    default_fill_value };
 
@@ -549,7 +522,7 @@ function nc_l0_info = configRTOutputNetCDFL0()
   % To define the global attributes easily and readably, add them to this
   % cell array (attribute name in first column and attribute value in second).
   % This cell array will be converted at the end of the function to the proper
-  % representation needed by WRITENETCDFDATA.
+  % representation needed by SAVENC.
   global_atts = ...
   {
     'abstract'                     '' % deployment_description
@@ -560,12 +533,12 @@ function nc_l0_info = configRTOutputNetCDFL0()
     'citation'                     '' % deployment_citation
     'comment'                      'Data provided as it comes from the glider.'
     'Conventions'                  'CF-1.6'
+    'creator'                      '' % deployment_author
     'creator_email'                '' % deployment_author_email
-    'creator_name'                 '' % deployment_author
     'creator_url'                  '' % deployment_author_url
     'data_center'                  '' % deployment_data_center
     'data_center_email'            '' % deployment_data_center_email
-    'data_mode'                    'real time'
+    'data_mode'                    'delayed time'
     'date_modified'                'undefined'
     'featureType'                  'trajectory'
     'geospatial_lat_max'           'undefined'
@@ -574,9 +547,10 @@ function nc_l0_info = configRTOutputNetCDFL0()
     'geospatial_lon_max'           'undefined'
     'geospatial_lon_min'           'undefined'
     'geospatial_lon_units'         'undefined'
-    'history'                      ''
+    'history'                      sprintf('Product generated by the glider toolbox version %s (https://github.com/socib/glider_toolbox).', configGliderToolboxVersion())
     'institution'                  '' % institution_name
     'institution_references'       '' % institution_references
+    'instrument'                   '' % instrument_name
     'instrument_model'             '' % instrument_model
     'instrument_manufacturer'      '' % instrument_manufacturer
     'license'                      'Approved for public release. Distribution Unlimited.' % deployment_distribution_statement
@@ -586,8 +560,8 @@ function nc_l0_info = configRTOutputNetCDFL0()
     'principal_investigator_email' '' % deployment_principal_investigator_email
     'processing_level'             'L0 raw data not calibrated'
     'project'                      '' % deployment_project
+    'publisher'                    '' % deployment_publisher_name
     'publisher_email'              '' % deployment_publisher_email
-    'publisher_name'               '' % deployment_publisher_name
     'publisher_url'                '' % deployment_publisher_url
     'source'                       'glider'
     'source_files'                 'undefined' % source_files field set by processing script after loading data.
@@ -595,31 +569,30 @@ function nc_l0_info = configRTOutputNetCDFL0()
     'summary'                      '' % deployment_description
     'time_coverage_end'            'undefined'
     'time_coverage_start'          'undefined'
-    'title'                        'Glider deployment real time raw data'
+    'title'                        'Glider deployment delayed time raw data'
     'transmission_system'          'IRIDIUM'
   };
 
 
-  %% Define dimension names.
-  time_dim_name = 'time';
+  %% Define preset dimensions.
+  time_dimension = struct('name', {'time'}, 'length', {0});
 
 
   %% Return global and variable metadata in the correct format.
-  nc_l0_info = struct();
+  ncl0_info = struct();
   % Set the dimension names.
-  nc_l0_info.dim_names.time = time_dim_name;
+  ncl0_info.dimensions = time_dimension;
   % Set the global attributes.
-  nc_l0_info.global_atts = ...
-    struct('name', global_atts(:,1), 'value', global_atts(:,2));
+  ncl0_info.attributes = cell2struct(global_atts, {'name' 'value'}, 2);
   % Set the variable metadata.
-  nc_l0_info.var_meta = struct();
+  ncl0_info.variables = struct();
   var_name_list = fieldnames(var_attr_list);
   for var_name_idx = 1:numel(var_name_list)
     var_name = var_name_list{var_name_idx};
     var_atts = var_attr_list.(var_name);
-    nc_l0_info.var_meta.(var_name).dimensions = {time_dim_name};
-    nc_l0_info.var_meta.(var_name).attributes = ...
-      struct('name',  var_atts(:,1), 'value', var_atts(:,2));
+    ncl0_info.variables.(var_name).dimensions = {time_dimension.name};
+    ncl0_info.variables.(var_name).attributes = ...
+      cell2struct(var_atts, {'name' 'value'}, 2);
   end
 
 end

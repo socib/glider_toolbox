@@ -3,7 +3,7 @@
  * @brief MATLAB interface to get POSIX time using standard C time functions.
  * @author Joan Pau Beltran
  *
- *  Copyright (C) 2013
+ *  Copyright (C) 2013-2014
  *  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -46,7 +46,6 @@ void mexFunction( int nlhs, mxArray *plhs[],
   time(&t);
 
   /* Assign pointers to corresponding outputs. */
-  if (nlhs > 0)
-    plhs[0] = mxCreateDoubleScalar((double) t);
+  plhs[0] = mxCreateDoubleScalar((double) t);
 }
 

@@ -1,38 +1,66 @@
-function [bin_files, log_files] = getDockserverFiles(dockserver, glider_name, local_bin_dir, local_log_dir, varargin)
-%GETDOCKSERVERFILES  Get binary data files and logs from dockserver through FTP.
+function [xbds, logs] = getDockserverFiles(dockserver, glider, xbd_dir, log_dir, varargin)
+%GETDOCKSERVERFILES  Get binary data files and surface log files from dockserver through (S)FTP.
 %
 %  Syntax:
-%    GETDOCKSERVERFILES(DOCKSERVER, GLIDER_NAME, LOCAL_BIN_DIR, LOCAL_LOG_DIR)
-%    GETDOCKSERVERFILES(DOCKSERVER, GLIDER_NAME, LOCAL_BIN_DIR, LOCAL_LOG_DIR, OPT1, VAL1, ...)
+%    [XBDS, LOGS] = GETDOCKSERVERFILES(DOCKSERVER, GLIDER, XBD_DIR, LOG_DIR)
+%    [XBDS, LOGS] = GETDOCKSERVERFILES(DOCKSERVER, GLIDER, XBD_DIR, LOG_DIR, OPTIONS)
+%    [XBDS, LOGS] = GETDOCKSERVERFILES(DOCKSERVER, GLIDER, XBD_DIR, LOG_DIR, OPT1, VAL1, ...)
 %
-%  GETDOCKSERVERFILES(DOCKSERVER, GLIDER_NAME, LOCAL_BIN_DIR, LOCAL_LOG_DIR, ...)
-%  retrieve  new .[smdtne]bd files and surface dialog files of the glider named
-%  GLIDER_NAME from DOCKSERVER to LOCAL_BIN_DIR and LOCAL_LOG_DIR respectively,
-%  returning string cell arrays  with the list of downloaded files.
-%  Files already existing in the local directories are considered older than the
-%  ones in the dockserver it they are smaller.
+%  [XBDS, LOGS] = GETDOCKSERVERFILES(DOCKSERVER, GLIDER, XBD_DIR, LOG_DIR) 
+%  retrieves new binary files (.[smdtne]bd) and surface dialog files from the
+%  glider named GLIDER from the remote dockserver defined by struct DOCKSERVER
+%  to local directories XBD_DIR and LOG_DIR respectively, and returns the list
+%  of downloaded files in string cell arrays XBDS and LOGS. Existing files in 
+%  the local directories are updated only if they are smaller than remote ones.
 %
-%  DOCKSERVER is a struct with the fields needed by the function FTP:
-%    HOST: url as either fully qualified name or IP (string).
-%    USER: user to access the dockserver (string).
-%    PASS: password of the dockserver (string).
+%  DOCKSERVER is a struct with the fields needed by functions FTP or SFTP:
+%    HOST: url as either fully qualified name or IP with optional port (string).
+%    USER: user to access the dockserver if needed (string).
+%    PASS: password of the dockserver if needed (string).
+%    CONN: name or handle of connection type function, @FTP (default) or @SFTP.
 %
-%  The list of files to download may be restricted with the following options:
-%    'start': do not not download files previous to the given date.
-%        Its value may be any valid input to the function DATENUM.
-%    'end': do not not download files previous to the given date.
-%        Its value may be any valid input to the function DATENUM.
-%    'bin_name': download only binary files matching given pattern.
-%        Its value may be any valid regular expression string or false.
-%        Set it to the empty string or false to disable downloading.
-%    'log_name': download only log files matching given pattern.
-%        Its value may be any valid regular expression string.
-%        Set it to the empty string or false to disable downloading.
+%  [XBDS, LOGS] = GETDOCKSERVERFILES(DOCKSERVER, GLIDER, XBD_DIR, LOG_DIR, OPTIONS) and
+%  [XBDS, LOGS] = GETDOCKSERVERFILES(DOCKSERVER, GLIDER, XBD_DIR, LOG_DIR, OPT1, VAL1, ...)
+%  accept the following options, given in key-value pairs OPT1, VAL1... or in a
+%  struct OPTIONS with field names as option keys and field values as option 
+%  values, allowing to restrict the set of files to download:
+%    XBD: binary file name pattern.
+%      Download binary files matching given pattern only.
+%      Its value may be any valid regular expression string or empty.
+%      If empty no binary files are downloaded.
+%      Default value: '^.+\.[smdtne]bd$'
+%    LOG: log file name pattern.
+%      Download log files matching given pattern only.
+%      Its value may be any valid regular expression string or empty.
+%      If empty no log files are downloaded.
+%      Default value: '^.+\.log$' 
+%    START: initial date of the period of interest.
+%      If given, do not download files before the given date.
+%      It may be any valid input compatible with XBD2DATE and LOG2DATE
+%      options below, usually a serial date number.
+%      Default value: -Inf
+%    FINAL: final date of the period of interest.
+%      If given, do not download files after the the given date.
+%      It may be any valid input compatible with XBD2DATE and LOG2DATE
+%      options below, usually a serial date number.
+%      Default value: +Inf
+%    XBD2DATE: date of binary file.
+%      If date filtering is enabled, use the given function
+%      to extract the date of a binary file from its attributes.
+%      The function receives a struct in the format returned by function DIR
+%      and should return a date in a format comparable to START and FINAL.
+%      Default value: date from file name (see note on date filtering)
+%    LOG2DATE: date of log file.
+%      If date filtering is enabled, use the given function
+%      to extract the date of a log file from its attribtues.
+%      The function receives a struct in the format returned by function DIR
+%      and should return a date in a format comparable to START and FINAL.
+%      Default value: date from file name (see note on date filtering)
 %
 %  Notes:
-%    Date filtering is done based on the mission date from the file names, not
-%    on the file attributes. Hence it relies on remote file names having the
-%    conventional Slocum file name format.
+%    By default, date filtering is done based on the mission date computed
+%    from the file names, not on the modification time. It relies on remote
+%    file names having the conventional Slocum file name format.
 %    For binary files it is:
 %      ru07-2011-347-4-0.sbd
 %    where
@@ -55,26 +83,25 @@ function [bin_files, log_files] = getDockserverFiles(dockserver, glider_name, lo
 %   dockserver.host = 'ftp.mydockserver.org'
 %   dockserver.user = 'myself'
 %   dockserver.pass = 'top_secret'   
-%   glider_name = 'happyglider'
-%   bin_dir = '~/my_glider/binary'
-%   log_dir = '~/my_glider/log'
+%   glider = 'happyglider'
+%   xbd_dir = 'funnymission/binary'
+%   log_dir = 'funnymission/log'
 %   % Get all binary and log files.
-%   [bin_files, log_files] = ...
-%      getDockserverFiles(dockserver, glider_name, bin_dir, log_dir)
-%   % Get only small files and no logs from missions started last month:
-%   [bin_files, log_files] = ...
-%      getDockserverFiles(dockserver, glider_name, bin_dir, log_dir, ...
-%                         'bin_name', '^*.[st]bd$',   'log_name', '', ...
-%                         'start', now()-30, 'end', now())
+%   [xbds, logs] = getDockserverFiles(dockserver, glider, xbd_dir, log_dir)
+%   % Get only small files and no logs from missions started last week:
+%   [xbds, logs] = getDockserverFiles(dockserver, glider, xbd_dir, log_dir, ...
+%                                     'xbd', '^*.[st]bd$', 'log', [], ...
+%                                     'start', now()-7, 'final', now())
 %
 %  See also:
 %    FTP
-%    DATENUM
+%    SFTP
+%    REGEX
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2013-2014, 2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify
@@ -90,31 +117,47 @@ function [bin_files, log_files] = getDockserverFiles(dockserver, glider_name, lo
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  %% Argument handling.
   error(nargchk(4, 12, nargin, 'struct'));
 
-  date_filtering = false;
-  start_date = -Inf;
-  end_date = Inf;
-  bin_name = '^.+\.[smdtne]bd$';
-  log_name = '^.+\.log$';
-  for i=1:2:numel(varargin)
-    opt = varargin{i};
-    val = varargin{i+1};
-    switch lower(opt)
-      case 'start'
-        start_date = val;
-        date_filtering = true;
-      case 'end'
-        end_date = val;
-        date_filtering = true;
-      case 'bin_name'
-        bin_name = val;
-      case 'log_name'
-        log_name = val;
-      otherwise
-        error('glider_toolbox:getDockServerFiles:InvalidOption', ...
-              'Invalid option: %s.', opt);
+  
+  %% Set options and default values.
+  options.start = -Inf;
+  options.final = +Inf;
+  options.xbd = '^.+\.[smdtne]bd$';
+  options.log = '^.+\.log$';
+  options.xbd2date = ...
+    @(f)(datenum(str2double(regexp(f.name, '^.*-(\d{4})-(\d{3})-\d+-\d+\.[smdtne]bd$', ...
+                                   'tokens','once')) * [1 0 0; 0 0 1] + [0 0 1]));
+  options.log2date = ...
+    @(f)(datenum(str2double(regexp(f.name, '^.*_.*_(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})\.log$', ...
+                                   'tokens','once'))));
+  
+  
+  %% Parse optional arguments.
+  % Get option key-value pairs in any accepted call signature.
+  argopts = varargin;
+  if isscalar(argopts) && isstruct(argopts{1})
+    % Options passed as a single option struct argument:
+    % field names are option keys and field values are option values.
+    opt_key_list = fieldnames(argopts{1});
+    opt_val_list = struct2cell(argopts{1});
+  elseif mod(numel(argopts), 2) == 0
+    % Options passed as key-value argument pairs.
+    opt_key_list = argopts(1:2:end);
+    opt_val_list = argopts(2:2:end);
+  else
+    error('glider_toolbox:getDockserverFiles:InvalidOptions', ...
+          'Invalid optional arguments (neither key-value pairs nor struct).');
+  end
+  % Overwrite default options with values given in extra arguments.
+  for opt_idx = 1:numel(opt_key_list)
+    opt = lower(opt_key_list{opt_idx});
+    val = opt_val_list{opt_idx};
+    if isfield(options, opt)
+      options.(opt) = val;
+    else
+      error('glider_toolbox:getDockserverFiles:InvalidOption', ...
+            'Invalid option: %s.', opt);
     end
   end
 
@@ -124,137 +167,80 @@ function [bin_files, log_files] = getDockserverFiles(dockserver, glider_name, lo
   % Old dockservers used this other base path:
   %remote_base_dir = '/home/dockserver/gliders';
   remote_base_dir = '/var/opt/gmc/gliders';
-  remote_bin_dir = [remote_base_dir '/' lower(glider_name) '/' 'from-glider'];
-  remote_log_dir = [remote_base_dir '/' lower(glider_name) '/' 'logs'];
+  remote_xbd_dir = [remote_base_dir '/' lower(glider) '/' 'from-glider'];
+  remote_log_dir = [remote_base_dir '/' lower(glider) '/' 'logs'];
 
 
-  %% Name date format.
-  bin_date_scan = ...
-    @(s)( cellfun(@str2double, regexp(s, ...
-                                      '^.*-(\d{4})-(\d{3})-\d+-\d+\.[smdtne]bd$', ...
-                                      'tokens','once'))*[1 0 0; 0 0 1] + [0 0 1]);
-  log_date_scan = ...
-    @(s)( cellfun(@str2double, regexp(s, ...
-                                      '^.*_.*_(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})\.log$', ...
-                                      'tokens','once')) );
-
-
-  %% Date filtering parameters.
-  if date_filtering
-    bin_date_filtering_params = {start_date, end_date, bin_date_scan};
-    log_date_filtering_params = {start_date, end_date, log_date_scan};
-  else
-    bin_date_filtering_params = {};
-    log_date_filtering_params = {};
+  %% Collect some parameters given in options.
+  xbd_name = options.xbd;
+  log_name = options.log;
+  xbd_newfunc = [];
+  log_newfunc = [];
+  updatefunc = @(l,r)(l.bytes < r.bytes);
+  if isfinite(options.start) || isfinite(options.final)
+    xbd_newfunc = @(r)(options.start <= options.xbd2date(r) && ...
+                       options.xbd2date(r) <= options.final);
+    log_newfunc = @(r)(options.start <= options.log2date(r) && ...
+                       options.log2date(r) <= options.final);
   end
 
 
-  %% Open ftp connection.
-  disp(['Connecting to host ' dockserver.host '...']);
-  ftp_handle = ftp(dockserver.host, dockserver.user, dockserver.pass);
+  %% Open (S)FTP connection.
+  host = dockserver.host;
+  user = [];
+  pass = [];
+  conn = @ftp;
+  if isfield(dockserver, 'user') && ~isequal(dockserver.user, [])
+    user = dockserver.user;
+  end
+  if isfield(dockserver, 'pass') && ~isequal(dockserver.pass, [])
+    pass = dockserver.pass;
+  end
+  if isfield(dockserver, 'conn') && ~isequal(dockserver.conn, [])
+    conn = dockserver.conn;
+    if ischar(conn)
+      conn = str2func(conn);
+    end
+  end
+  disp(['Connecting to host ' host '...']);
+  ftp_handle = conn(host, user, pass);
 
 
-  %% Binary data file downloading.
+  %% Binary data file download.
   disp('Downloading binary data files...');
-  bin_files = {};
-  if bin_name
+  xbds = {};
+  if ~isequal(xbd_name, [])
     try
-     bin_files = fetchNewAndUpdatedFiles(ftp_handle, remote_bin_dir, ...
-                                         local_bin_dir, bin_name, ...
-                                         bin_date_filtering_params{:});
+     xbds = getfiles(ftp_handle, 'target', xbd_dir, ...
+                     'source', remote_xbd_dir, 'include', xbd_name, ...
+                     'new', xbd_newfunc, 'update', updatefunc);
     catch exception
-      warning('glider_toolbox:reading_tools:BinDownloadingError', ...
+      warning('glider_toolbox:getDockserverFiles:DownloadError', ...
               'Error downloading binary data files: %s', exception.message);
     end
-    disp([num2str(numel(bin_files)) ' new/updated binary data files fetched.']);
+    disp([num2str(numel(xbds)) ' new/updated binary data files fetched.']);
   end
 
 
-  %% Surface log file downloading.
+  %% Surface log file download.
   disp('Downloading surface log files...');
-  log_files = {};
-  if log_name
+  logs = {};
+  if ~isequal(xbd_name, [])
     try
-     log_files = fetchNewAndUpdatedFiles(ftp_handle, remote_log_dir, ...
-                                         local_log_dir, log_name, ...
-                                         log_date_filtering_params{:});
+     logs = getfiles(ftp_handle, 'target', log_dir, ...
+                     'source', remote_log_dir, 'include', log_name, ...
+                     'new', log_newfunc, 'update', updatefunc);
     catch exception
-      warning('glider_toolbox:reading_tools:LogDownloadingError', ...
+      warning('glider_toolbox:getDockserverFiles:DownloadError', ...
               'Error downloading surface log files: %s.', exception.message);
     end
-    disp([num2str(numel(log_files)) ' new/updated surface log files fetched.']);
+    disp([num2str(numel(logs)) ' new/updated surface log files fetched.']);
   end
 
+  
   %% Close ftp connection.
   close(ftp_handle);
   disp(['Closed connection to host ' dockserver.host '.']);
 
 end
 
-
-function files = fetchNewAndUpdatedFiles(ftp_handle, remote_dir, local_dir, name, start_date, end_date, date_scan)
-%FETCHNEWANDUPDATEDFILES Fetch only new or updated files from remote ftp directory.
-%
-%  FILES = FETCHNEWANDUPDATEDFILES(FTP_HANDLE, REMOTE_DIR, LOCAL_DIR, NAME)
-%  Download all files with names matching the pattern NAME from remote directory
-%  REMOTE_DIR  to local directory LOCAL_DIR using the valid ftp connection
-%  FTP_HANDLE. It returns the list of donloaded files.
-%
-%  FILES = FETCHNEWANDUPDATEDFILES(..., START_DATE, END_DATE, DATE_SCAN)
-%  filters the files to download to those ones whose date obtained from name
-%  scanning according to DATE_SCAN falls between START_DATE and END_DATE.
-  files = {};
-  % Enable date filtering if optional argument has be passed.
-  filter_date = (nargin==7);
-  % List remote files.
-  remote_files = dir(ftp_handle, remote_dir);
-  % Check the list of remote files.
-  if isempty(remote_files)
-    disp(['Non existing or empty remote directory ' remote_dir '.']);
-    return;
-  end
-  % Go to remote directory (it should be save here).
-  cd(ftp_handle, remote_dir);
-  % Select files mathcing name pattern and date.
-  remote_match = ~cellfun(@isempty, regexp({remote_files.name}, name, 'match'));
-  remote_files = remote_files(remote_match);
-  if filter_date
-    remote_dates = cellfun(@(s) datenum(date_scan(s)), {remote_files.name});
-    remote_indate = ...
-      datenum(start_date) <= remote_dates & remote_dates <= datenum(end_date);
-    remote_files = remote_files(remote_indate);
-  end
-  if isempty(remote_files)
-    disp(['No files satisfying criteria in remote directory ' remote_dir '.']);
-    return;
-  end
-  % Check for files already existing in the local directory.
-  [status, attrout] = fileattrib(local_dir);
-  if ~status
-    % Create local directory.
-    [success, message] = mkdir(local_dir);
-    if ~success
-      error('glider_toolbox:reading_tools:LocalDirectoryError', ...
-            'Could not create directory %s: %s.', local_dir, message);
-    end
-  elseif ~attrout.directory
-    % Given local directory path points to a file, not a directory.
-    error('glider_toolbox:getDockServerFiles:LocalDirectoryError', ...
-          'Not a directory: %s.', attrout.Name);
-  else
-    % Select only new files or files whose size is bigger in the dockserver.
-    local_files = dir(local_dir);
-    [existing, local_idx] = ismember({remote_files.name}, {local_files.name});
-    updated = ...
-      [remote_files(existing).bytes] > [local_files(local_idx(existing)).bytes];
-    to_download = ~existing;
-    to_download(existing) = updated;
-    remote_files = remote_files(to_download);
-  end
-  if isempty(remote_files)
-    disp(['No new/updated files in remote directory ' remote_dir '.']);
-    return;
-  end
-  % Download the files.
-  files = cellfun(@(f) mget(ftp_handle, f, local_dir), {remote_files.name});
-end

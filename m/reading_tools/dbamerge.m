@@ -21,7 +21,7 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
 %  values:
 %    FORMAT: data output format.
 %      String setting the format of the output DATA. Valid values are:
-%        'array': DATA is a matrix whith sensor readings as columns 
+%        'array': DATA is a matrix with sensor readings as columns 
 %           ordered as in the 'sensors' metadata field.
 %        'struct': DATA is a struct with sensor names as field names and column 
 %           vectors of sensor readings as field values.
@@ -43,11 +43,11 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
 %      Default value: 'all' (do not perform sensor filtering).
 %    PERIOD: time filtering boundaries.
 %      Two element numeric array with the start and end of the time interval of 
-%      interest (seconds since 1970-01-01 00:0:00.00 UTC). If given, only sensor
-%      cycles with timestamps within this period will be present in output.
-%      The string 'all' may also be given, in which case time filtering is not
-%      performed and all sensors cycles in input data sets will be present in 
-%      output.
+%      interest (seconds since 1970-01-01 00:00:00.00 UTC). If given, only
+%      sensor cycles with timestamps within this period will be present in 
+%      output. The string 'all' may also be given, in which case time filtering 
+%      is not performed and all sensors cycles in input data sets will be 
+%      present in output.
 %      Default value: 'all' (do not perform time filtering).
 %
 %  Notes:
@@ -85,7 +85,7 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2013-2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify
@@ -243,7 +243,8 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
     data(ts_nav_missing, ts_nav_col) = ...
       data(ts_nav_missing, num_cols_nav + ts_sci_col);
     
-    timestamp_merged = timestamp_nav; % Unique timestamp to be used for time filtering.
+    % Unique timestamp to be used for time filtering.
+    timestamp_merged = timestamp_nav;
   end
   
   
@@ -268,7 +269,7 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
     end
     ts_merged = data(:, ts_merged_col);
     ts_select = ~(ts_merged < time_range(1) | ts_merged > time_range(2));
-    data = data(ts_select,:);
+    data = data(ts_select, :);
   end
   
   
@@ -276,7 +277,10 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
   switch output_format
     case 'array'
     case 'struct'
-      data = cell2struct(num2cell(data,1), meta.sensors, 2);
+      data = cell2struct(num2cell(data, 1), meta.sensors, 2);
+    otherwise
+      error('glider_toolbox:dbamerge:InvalidFormat', ...
+            'Invalid output format: %s.', output_format)
   end
 
 end

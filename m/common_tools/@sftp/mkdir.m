@@ -1,23 +1,21 @@
-function preprocessing_options = configDataPreprocessing()
-%CONFIGDATAPREPROCESSING  Configure glider data preprocessing.
+function mkdir(h, dirname)
+%MKDIR  Create a new directory on an SFTP server.
 %
 %  Syntax:
-%    PREPROCESSING_OPTIONS = CONFIGDATAPREPROCESSING()
+%    MKDIR(H, DIRNAME)
 %
-%  PREPROCESSING_OPTIONS = CONFIGDATAPREPROCESSING() should return a struct
-%  setting the options for glider data preprocessing as needed by the function
-%  PREPROCESSGLIDERDATA.
+%  MKDIR(H, DIRNAME) creates a directory on the server.
 %
 %  Examples:
-%    preprocessing_options = configDataPreprocessing()
+%    mkdir(h, dirname)
 %
 %  See also:
-%    PREPROCESSGLIDERDATA
+%    SFTP
 %
 %  Author: Joan Pau Beltran
 %  Email: joanpau.beltran@socib.cat
 
-%  Copyright (C) 2013
+%  Copyright (C) 2014
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %
 %  This program is free software: you can redistribute it and/or modify
@@ -33,16 +31,6 @@ function preprocessing_options = configDataPreprocessing()
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(0, 0, nargin, 'struct'));
+  mexsftp('mkdir', h.sftp_handle, dirname);
   
-  preprocessing_options.nmea_conversion_sensor_list = {
-    'm_gps_lat'
-    'm_gps_lon'
-    'm_lat'
-    'm_lon'
-    'c_wpt_lat'
-    'c_wpt_lon'
-  };
-
 end
-
