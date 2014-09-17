@@ -43,7 +43,7 @@ function gridding_options = configDataGridding()
   gridding_options.position_list(1).latitude = 'latitude';
   gridding_options.position_list(1).longitude = 'longitude';
 
-  gridding_options.depth_list = {'depth_ctd' 'depth'};
+  gridding_options.depth_list = {'depth' 'depth_ctd'};
 
   gridding_options.depth_step = 1;
 
