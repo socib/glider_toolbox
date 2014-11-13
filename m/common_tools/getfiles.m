@@ -173,8 +173,10 @@ function files = getfiles(connection, varargin)
   else
     latts = dir();
   end
-  [existing, lindex] = ismember({ratts.name}', {latts.name}');
   select = true(size(ratts));
+  lexist = false(size(ratts));
+  lindex = zeros(size(ratts));
+  [lexist(:), lindex(:)] = ismember({ratts.name}', {latts.name}');
   if ~include_all
     select(select) = ...
       ~cellfun(@isempty, regexp({ratts(select).name}, include, 'match'));
@@ -184,12 +186,12 @@ function files = getfiles(connection, varargin)
       cellfun(@isempty, regexp({ratts(select).name}, exclude, 'match'));
   end
   if ~new_all
-    select(select & ~existing) = arrayfun(newfunc, ratts(select & ~existing));
+    select(select & ~lexist) = arrayfun(newfunc, ratts(select & ~lexist));
   end
   if ~update_all
-    select(select & existing) = arrayfun(updatefunc, ...
-                                         latts(lindex(select & existing)), ...
-                                         ratts(select & existing));
+    select(select & lexist) = arrayfun(updatefunc, ...
+                                       latts(lindex(select & lexist)), ...
+                                       ratts(select & lexist));
   end
   if (totarget)
     getfunc = @(name)(mget(connection, name, target));
