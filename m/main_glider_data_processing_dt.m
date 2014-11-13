@@ -227,13 +227,16 @@ for deployment_idx = 1:numel(deployment_list)
   netcdf_l1_file = strfstruct(config.paths_local.netcdf_l1, deployment);
   netcdf_l2_file = strfstruct(config.paths_local.netcdf_l2, deployment);
   source_files = {};
-  meta_raw = [];
-  data_raw = [];
-  data_preprocessed = [];
-  data_processed = [];
-  data_gridded = [];
-  outputs = [];
-  figures = [];
+  meta_raw = struct();
+  data_raw = struct();
+  meta_preprocessed = struct();
+  data_preprocessed = struct();
+  meta_processed = struct();
+  data_processed = struct();
+  meta_gridded = struct();
+  data_gridded = struct();
+  outputs = struct();
+  figures = struct();
   deployment_name  = deployment.deployment_name;
   deployment_id = deployment.deployment_id;
   deployment_start = deployment.deployment_start;
@@ -486,7 +489,7 @@ for deployment_idx = 1:numel(deployment_list)
 
 
   %% Process preprocessed glider data.
-  if ~isempty(data_preprocessed)
+  if ~isempty(fieldnames(data_preprocessed))
     disp('Processing glider data...');
     try
       [data_processed, meta_processed] = ...
@@ -499,7 +502,7 @@ for deployment_idx = 1:numel(deployment_list)
 
 
   %% Generate L1 NetCDF file (processed data), if needed and possible.
-  if ~isempty(data_processed) && ~isempty(netcdf_l1_file)
+  if ~isempty(fieldnames(data_processed)) && ~isempty(netcdf_l1_file)
     disp('Generating NetCDF L1 output...');
     try
       outputs.netcdf_l1 = generateOutputNetCDF( ...
@@ -518,7 +521,7 @@ for deployment_idx = 1:numel(deployment_list)
 
 
   %% Generate processed data figures.
-  if ~(isempty(figure_dir) || isempty(data_processed))
+  if ~isempty(fieldnames(data_processed)) && ~isempty(figure_dir)
     disp('Generating figures from processed data...');
     try
       figures.figproc = generateGliderFigures( ...
@@ -533,7 +536,7 @@ for deployment_idx = 1:numel(deployment_list)
 
 
   %% Grid processed glider data.
-  if ~isempty(data_processed)
+  if ~isempty(fieldnames(data_processed))
     disp('Gridding glider data...');
     try
       [data_gridded, meta_gridded] = ...
@@ -546,7 +549,7 @@ for deployment_idx = 1:numel(deployment_list)
 
 
   %% Generate L2 (gridded data) netcdf file, if needed and possible.
-  if ~isempty(data_gridded) && ~isempty(netcdf_l2_file)
+  if ~isempty(fieldnames(data_gridded)) && ~isempty(netcdf_l2_file)
     disp('Generating NetCDF L2 output...');
     try
       outputs.netcdf_l2 = generateOutputNetCDF( ...
@@ -565,7 +568,7 @@ for deployment_idx = 1:numel(deployment_list)
 
 
   %% Generate gridded data figures.
-  if ~(isempty(figure_dir) || isempty(data_gridded))
+  if ~isempty(fieldnames(data_gridded)) && ~isempty(figure_dir)
     disp('Generating figures from gridded data...');
     try
       figures.figgrid = generateGliderFigures( ...
@@ -580,7 +583,7 @@ for deployment_idx = 1:numel(deployment_list)
 
 
   %% Copy selected products to corresponding public location, if needed.
-  if ~isempty(outputs)
+  if ~isempty(fieldnames(outputs))
     disp('Copying public outputs...');
     output_name_list = fieldnames(outputs);
     for output_name_idx = 1:numel(output_name_list)
@@ -621,7 +624,7 @@ for deployment_idx = 1:numel(deployment_list)
   %% Copy selected figures to its public location, if needed.
   % Copy all generated figures or only the ones in the include list (if any) 
   % excluding the ones in the exclude list. 
-  if ~isempty(figures) ...
+  if ~isempty(fieldnames(figures)) ...
       && isfield(config.paths_public, 'figure_dir') ...
       && ~isempty(config.paths_public.figure_dir)
     disp('Copying public figures...');
