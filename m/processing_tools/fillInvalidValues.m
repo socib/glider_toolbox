@@ -29,12 +29,12 @@ function [filled, invalid] = fillInvalidValues(varargin)
 %      values in Y over corresponding entries in independent variable vector X 
 %      using function INTERP1 with given method. X and Y should have the same 
 %      dimensions.
-%  FILLED is a a copy of vector Y but with invalid values filled.
+%  FILLED is a copy of vector Y but with invalid values filled.
 %
-%  FILLED = FILLINVALIDVALUES(X, Y, VALUE) fills invalid values in X
+%  FILLED = FILLINVALIDVALUES(X, Y, VALUE) fills invalid values in Y
 %  using number VALUE as fill value. X is ignored.
 %
-%  FILLED = FILLINVALIDVALUES(X, Y) fills invalid values in X
+%  FILLED = FILLINVALIDVALUES(X, Y) fills invalid values in Y
 %  using 'linear' as default interpolation method.
 %
 %  FILLED = FILLINVALIDVALUES(Y, ...) assumes that X = 1:N, where N is the 
@@ -139,7 +139,7 @@ function [filled, invalid] = fillInvalidValues(varargin)
     filled = y;
     filled(invalid) = method;
   elseif self_fill
-    % Fill invalid values with given method using valid in the sequence itself.
+    % Fill invalid values with given method using values from sequence itself.
     switch method
       case 'none'
         filled = y;
