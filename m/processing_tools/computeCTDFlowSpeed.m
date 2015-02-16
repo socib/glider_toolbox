@@ -139,16 +139,16 @@ function flow = computeCTDFlowSpeed(varargin)
   
   %% Parse option arguments.
   % Get option key-value pairs in any accepted call signature.
-  argopt = varargin(narginnum+1:end);
-  if isscalar(argopt) && isstruct(argopt{1})
+  argopts = varargin(narginnum+1:end);
+  if isscalar(argopts) && isstruct(argopts{1})
     % Options passed as a single option struct argument:
     % field names are option keys and field values are option values.
-    opt_key_list = fieldnames(argopt{1});
-    opt_val_list = struct2cell(argopt{1});
-  elseif mod(numel(argopt), 2) == 0
+    opt_key_list = fieldnames(argopts{1});
+    opt_val_list = struct2cell(argopts{1});
+  elseif mod(numel(argopts), 2) == 0
     % Options passed as key-value argument pairs.
-    opt_key_list = argopt(1:2:end);
-    opt_val_list = argopt(2:2:end);
+    opt_key_list = argopts(1:2:end);
+    opt_val_list = argopts(2:2:end);
   else
     error('glider_toolbox:findCTDFlowSpeed:InvalidOptions', ...
           'Invalid optional arguments (neither key-value pairs nor struct).');
