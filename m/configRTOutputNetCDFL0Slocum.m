@@ -330,7 +330,7 @@ function ncl0_info = configRTOutputNetCDFL0Slocum()
   var_attr_list.m_water_pressure = {
     'long_name'     'water pressure'
     'standard_name' 'pressure'
-    'units'         'bar'  
+    'units'         'bar'
     '_FillValue'    default_fill_value };
 
   % Navigation FLNTU.
@@ -381,7 +381,7 @@ function ncl0_info = configRTOutputNetCDFL0Slocum()
   var_attr_list.sci_water_pressure = {
     'long_name'     'water pressure'
     'standard_name' 'pressure'
-    'units'         'bar'  
+    'units'         'bar'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_ctd41cp_timestamp = {
