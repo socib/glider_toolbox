@@ -1,4 +1,4 @@
-function [valid, full_rows] = validateProfile(depth, varargin)
+function [valid, full_rows, varargout] = validateProfile(depth, varargin)
 %VALIDATEPROFILE  Check if profile sequence is a proper profile and if it is well sampled.
 %
 %  Syntax:
@@ -13,8 +13,20 @@ function [valid, full_rows] = validateProfile(depth, varargin)
 %  column arrays DATA1, ... , DATAN is properly sampled over the profile range, 
 %  according to criteria in option struct OPTIONS or in option key-value pairs 
 %  OPT1, VAL1... The profile is required to have a minimum depth range and 
-%  contain no significant gaps. The number of rows of DEPTH, and DATA1, ... , 
-%  DATAN should be the same. Valid options are:
+%  contain no significant gaps of invalid data readings or depth inversions.
+%  The number of rows of DEPTH, and DATA1, ... , DATAN should be the same.
+%
+%  [VALID, FULL_ROWS] = VALIDATEPROFILE(DEPTH, DATA1, ... , DATAN, ...) 
+%  also returns a logical column vector FULL_ROWS with the same number of 
+%  elements as DEPTH, showing whether respective entries in DEPTH or rows in
+%  DATA1, ... , DATAN contain some invalid value or lie in a depth inversion.
+%
+%  [VALID, FULL_ROWS, DATA1, ... , DATAN] = VALIDATEPROFILE(DEPTH, DATA1, ... , DATAN, ...)
+%  also returns then same input data DATA1, ... , DATAN but with entries 
+%  corresponding to invalid rows in FULL_ROWS replaced according to the mask
+%  value specified in options.
+%
+%  Valid options are:
 %    RANGE: minimum depth range (in the same units as DEPTH).
 %      A profile is invalid if the difference between the maximum and minimum
 %      depth values is smaller than given threshold.
@@ -26,11 +38,15 @@ function [valid, full_rows] = validateProfile(depth, varargin)
 %      because of invalid values (NaN) in some column of DATA, or because of 
 %      invalid entries in DEPTH.
 %      Default value: 1 (only empty profiles are invalid).
+%    MASK: replacement value for invalid data readings.
+%      When data outputs are requested, respective data inputs are returned
+%      but with entries correponding to invalid rows replaced by the given
+%      value. If empty ([]), the entries are removed instead of replaced.
+%      Default value: nan
 %
-%  [VALID, FULL_ROWS]= VALIDATEPROFILE(...) also returns a logical column vector
-%  FULL_ROWS with the same number of elements as DEPTH, showing whether
-%  respective entries in DEPTH or rows in DATA1 , ... , DATAN contain some 
-%  invalid value.
+%  New in version 1.1:
+%    Identify and discard depth inversions in the profile.
+%    Return input data with invalid rows masked with specified value.
 %
 %  Notes:
 %    This function is based on the previous work by Tomeu Garau, in functions
@@ -38,11 +54,12 @@ function [valid, full_rows] = validateProfile(depth, varargin)
 %    same name) and CLEANPROFILE. He is the true glider man.
 %
 %  Examples:
-%    depth = [1 2   3 nan  5 nan   7  nan   9  10]'
-%    data1 = [0 0 nan nan  4 nan nan    7   8   9]'
-%    data2 = [1 4 nan nan 25 nan  49   64 nan 100]'
+%    depth = [1 2 3 2  5 nan   7 nan   9  10]'
+%    data1 = [0 1 1 1  4 nan nan   7   8   9]'
+%    data2 = [1 4 4 4 25 nan  49  64 nan 100]'
 %    data =  [data1 data2]
-%    % Default options: any profile is valid, usefull to retrieve valid rows.
+%    % Default options: any profile is valid,
+%    % useful to retrieve valid rows and flag depth inversions.
 %    [valid, full_rows] = validateProfile(depth, data)
 %    depth(full_rows)
 %    data(full_rows, :)
@@ -52,6 +69,15 @@ function [valid, full_rows] = validateProfile(depth, varargin)
 %    valid = validateProfile(depth, data1, data2, 'gap', 0.25)
 %    % Valid profile: large enough range and small enough gap.
 %    valid = validateProfile(depth, data1, data2, 'range', 5, 'gap', 0.75)
+%    % Mask invalid rows in input data with default value (NaN):
+%    [valid, full_rows, data1, data2] = ...
+%      validateProfile(depth, data(:,1), data(:,2))
+%    % Mask invalid rows in input data with a different value (NaN):
+%    [valid, full_rows, data1, data2] = ...
+%      validateProfile(depth, data(:,1), data(:,2), 'mask', 9999)
+%    % Remove invalid rows in input data:
+%    [valid, full_rows, data1, data2] = ...
+%      validateProfile(depth, data(:,1), data(:,2), 'mask', [])
 %
 %  See also:
 %    ISNAN
@@ -80,22 +106,23 @@ function [valid, full_rows] = validateProfile(depth, varargin)
   
   %% Parse basic input arguments.
   % Get numeric (non option) arguments.
-  nargdata = find(~cellfun(@isnumeric, varargin), 1, 'first') - 1;
-  if isempty(nargdata)
-    nargdata = numel(varargin);
+  nargnum = find(~cellfun(@isnumeric, varargin), 1, 'first') - 1;
+  if isempty(nargnum)
+    nargnum = numel(varargin);
   end
-  data = [varargin{1:nargdata}];
+  data = [varargin{1:nargnum}];
 
   
   %% Set options and default values.
   options.range = 0;
   options.gap = 1;
+  options.mask = nan;
   
   
   %% Parse optional arguments.
   % Get numeric data arguments and option arguments.
   % Get option key-value pairs in any accepted call signature.
-  argopts = varargin(nargdata+1:end);
+  argopts = varargin(nargnum+1:end);
   if isscalar(argopts) && isstruct(argopts{1})
     % Options passed as a single option struct argument:
     % field names are option keys and field values are option values.
@@ -123,15 +150,75 @@ function [valid, full_rows] = validateProfile(depth, varargin)
   
   
   %% Validate the profile.
+  % Flag invalid data and depth inversions.
+  depth_valid = ~isnan(depth(:));
+  data_valid = ~any(isnan(data), 2);
+  [depth_min_value, depth_min_index] = min(depth);
+  [depth_max_value, depth_max_index] = max(depth);
+  % CUMMIN and CUMMAX are available in Octave but not in MATLAB
+  % (in release 2014b they are in the Statistics Toolbox).
+  % With them, we could use this one-liners:
+  %{
+  if (depth_min_index < depth_max_index)
+    monotonic = cummax(depth(:) == flipud(cummin(flipud(depth(:))));
+  elseif (depth_min_index > depth_max_index)
+    monotonic = cummin(depth(:) == flipud(cummax(flipud(depth(:))));
+  else
+    monotonic = true(size(depth(:)));
+  end
+  %}
+  if (depth_min_index < depth_max_index)
+    omax = find(depth_valid, 1, 'first');
+    omin = find(depth_valid, 1, 'last');
+  elseif (depth_min_index > depth_max_index)
+    omax = find(depth_valid, 1, 'last');
+    omin = find(depth_valid, 1, 'first');
+  else
+    omax = depth_max_index;
+    omin = depth_min_index;
+  end
+  cmax = depth(:);
+  cmin = depth(:);
+  tmax = depth(omax);
+  tmin = depth(omin);
+  for k = 0:sign(omin-omax):(omin-omax)
+    if cmax(omax + k) > tmax
+      tmax = cmax(omax + k);
+    else
+      cmax(omax + k) = tmax;
+    end
+    if cmin(omin - k) < tmin
+      tmin = cmin(omin - k);
+    else
+      cmin(omin - k) = tmin;
+    end
+  end
+  if (depth_min_index < depth_max_index)
+    cmax(omin+1:end) = tmax;
+    cmin(1:omax-1) = tmin;
+  elseif (depth_min_index > depth_max_index)
+    cmax(1:omin-1) = tmax;
+    cmin(omax+1:end) = tmin;
+  end
+  monotonic = (cmax == cmin);
   % Initialize output.
-  full_rows = ~any(isnan([depth(:) data]), 2);
+  full_rows = depth_valid & data_valid & monotonic;
   valid = false;
+  for k = 1:min(nargnum, nargout - 2)
+    masked = varargin{k};
+    if isequal(options.mask, [])
+      masked(~full_rows, :) = [];
+    else
+      masked(~full_rows, :) = options.mask;
+    end
+    varargout{k} = masked;
+  end
   % Emptiness check.
   if ~any(full_rows)
     return
   end
   % Range check.
-  depth_range = max(depth(:)) - min(depth(:));
+  depth_range =  depth_max_value - depth_min_value;
   if depth_range < options.range 
     return
   end

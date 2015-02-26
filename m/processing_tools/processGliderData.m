@@ -95,24 +95,41 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
 %      Boolean setting whether a depth sequence should be derived from CTD
 %      pressure readings.
 %      Default value: true
-%    PROFILING_SEQUENCE: depth or pressure sequence choices for cast identification.
-%      String cell array with the names of the pressure or depth sequence to be
-%      used for cast identification, in order of preference.
-%      Default value: {'depth_ctd' 'depth'}
-%    PROFILING_SEQUENCE_FILLING: profiling sequence interpolation switch.
-%      Boolean setting whether the missing values in the profiling sequence
-%      should be filled by interpolation before cast identification.
-%      Default value: true
+%    PROFILING_LIST: cast identification settings.
+%      Struct array selecting input sequences and parameters for cast boundary
+%      identification, in order of preference. It should have the following
+%      fields:
+%        DEPTH: depth or pressure sequence name.
+%      It may have the following optional fields (empty or missing):
+%        TIME: time sequence name or empty.
+%          Default value: []
+%        STALL: scalar with the maximum vertical displacement when stalled.
+%          Default value: 3
+%        SHAKE: scalar with the maximum duration of a vertical shake.
+%          Default value: 20
+%        INVERSION: scalar with the maximum depth inversion allowed during a
+%          cast.
+%          Default value: 3
+%        INTERRUPT: scalar with the maximum duration of stalled and/or shake 
+%          intervals during a cast.
+%          Default value: 180
+%        LENGTH: scalar with the minimum depth range a cast must span.
+%          Default value: 10
+%        PERIOD: scalar with the minimum duration range a cast must last.
+%          Default value: 0
+%      Each struct in the array specifies a choice of inputs for cast boundary
+%      identification. The time sequence is optional and is relevant only if
+%      the SHAKE, INTERRUPT or PERIOD options are specified. Identification will
+%      be performed with the first input choice whose input sequences are 
+%      available. If no input choice is available, profiles are not identified.
+%      Default value: struct('depth', {'depth' 'depth_ctd' 'depth_ctd'}, ...
+%                            'time',  {'time'  'time_ctd'  'time'});
 %    PROFILE_MIN_RANGE: minimum depth range allowed for a valid profile.
 %      Non negative real number setting the minimum depth range threshold for
 %      cast validation. If the difference between the maximum and the minimum 
-%      depth reached in a cast is less than the given threshold, the cast will
-%      be invalid. Set it to zero to prevent discarting any cast.
+%      depth of a valid reading in a cast is less than the given threshold,
+%      the cast will be discarded. Set it to zero to prevent discading any cast.
 %      Default value: 10
-%    PROFILE_JOIN_SAME_DIR: whether join consecutive profiles with the same direction.
-%      Boolean setting whether consecutive valid profiles with the same vertical
-%      direction should be joined into one.
-%      Default value: false
 %    PROFILE_MAX_GAP_RATIO: maximum gap depth ratio allowed for a valid profile.
 %      Real number (in [0..1]) setting the maximum gap ratio threshold for cast
 %      cast validation. A gap is a sequence of consecutive readings in which the
@@ -120,7 +137,7 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
 %      The gap ratio is the ratio of the depth range covered during the gap to
 %      the total depth covered of the cast. If the ratio of the largest gap
 %      to the total depth range is greater than the given threshold, the cast
-%      will be invalid. Set it to 1 to prevent discarting any cast.
+%      will be discarded. Set it to 1 to prevent discarding any cast.
 %      Default value: 0.8
 %    FLOW_CTD_LIST: CTD flow speed derivation input set choices.
 %      Struct array selecting input sequences for CTD flow speed derivation, in
@@ -128,7 +145,7 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
 %        TIME: time sequence name.
 %        DEPTH: depth sequence name.
 %        PITCH: pitch sequence name.
-%      Each struct in the struct specifies a choice of inputs for CTD flow speed 
+%      Each struct in the array specifies a choice of inputs for CTD flow speed 
 %      derivation. Pitch sequence is optional. If missing or empty, the nominal 
 %      pitch value may be used (see below). Derivation will be performed only if
 %      if the casts are properly identified, and using the first input choice 
@@ -267,12 +284,30 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
 %        PRESSURE: string with the name of the original pressure sequence (field
 %          in DATA_PROC).
 %      Each struct in the struct array specifies a density derivation.
-%      It will be performed only if all the original sequences are available.
+%      It will be performed only if all the or'time'iginal sequences are available.
 %      Default value: struct('density',     {'density'     'density_corrected_thermal'}, ...
 %                            'salinity',    {'salinity'    'salinity_corrected_thermal'}, ...
 %                            'temperature', {'temperature' 'temperature'}, ...
 %                            'pressure',    {'pressure'    'pressure'})
-%  
+%
+%  The following options are deprecated and should not be used:
+%    PROFILING_SEQUENCE_LIST: vertical sequence choices for cast identification.
+%      String cell array with the names of the pressure or depth sequence to be
+%      used for cast identification, in order of preference.
+%      Deprecated in v1.1.0:
+%        Superseeded by PROFILING_LIST.
+%    PROFILE_JOIN_SAME_DIR: whether join consecutive profiles with the same direction.
+%      Boolean setting whether consecutive valid profiles with the same vertical
+%      direction should be joined into one.
+%      Deprecated in v1.1.0:
+%        Superseeded by PROFILING_LIST.
+%    PROFILING_SEQUENCE_FILLING: profiling sequence interpolation switch.
+%      Boolean setting whether the missing values in the profiling sequence
+%      should be filled by interpolation before cast identification.
+%      Deprecated in v1.1.0:
+%        Not needed anymore since profile identification is consistent and 
+%        robust against missing values.
+%
 %  Notes:
 %    This function is based on the previous work by Tomeu Garau. He is the true
 %    glider man.
@@ -317,6 +352,15 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
   
   error(nargchk(2, 56, nargin, 'struct'));
   
+  %% Configure default values for optional profile identification settings.
+  default_profiling_time = [];
+  default_profiling_stall = 3;
+  default_profiling_shake = 20;
+  default_profiling_inversion = 3;
+  default_profiling_interrupt = 180;
+  default_profiling_length = 10;
+  default_profiling_period =  0;
+  
   
   %% Configure default values for optional sensor lag settings. 
   default_sensor_lag_time_list = {'time'};
@@ -344,15 +388,20 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
   options.attitude_filling = false;
   options.heading_filling = false;
   options.waypoint_filling = false;
-
+  
   options.pressure_filtering = true;
   options.pressure_filter_constant = 4; % Recommended setting from Seabird Data Processing Manual.
   options.depth_ctd_derivation = true;
   
-  options.profiling_sequence_list = {'depth_ctd' 'depth'};
-  options.profiling_sequence_filling = true;
+  options.profiling_list = ...
+    struct('depth', {'depth' 'depth_ctd' 'depth_ctd'}, ...
+           'time',  {'time'  'time_ctd'  'time'});
+    
+  options.profiling_sequence_list = [];    % Deprecated in v1.1.0.
+  options.profiling_sequence_filling = []; % Deprecated in v1.1.0.
+  options.profile_join_same_dir = [];      % Deprecated in v1.1.0.
+  
   options.profile_min_range = 10;
-  options.profile_join_same_dir = false;
   options.profile_max_gap_ratio = 0.8;
   
   options.flow_ctd_list = struct('time', {}, 'depth', {}, 'pitch', {});
@@ -409,6 +458,23 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
       error('glider_toolbox:processGliderData:InvalidOption', ...
             'Invalid option: %s.', opt);
     end
+  end
+  
+  
+  %% Handle deprecated options.
+  % Handle deprecated options for profile identification.
+  if ~isempty(options.profiling_sequence_list) ...
+      || ~isempty(options.profiling_sequence_filling) ...
+      || ~isempty(options.profile_join_same_dir)
+    warning('glider_toolbox:findProfiles:DeprecatedOption', ...
+            'Deprecated option: %s, %s and %s. See option: %s.', ...
+            'profiling_sequence_list', 'profiling_sequence_filling', ...
+            'profile_join_same_dir', 'profiling_list');
+    options.profiling_list = ...
+      struct('depth', options.profiling_sequence_list, ...
+             'stall', options.profile_min_range, ...
+             'interrupt', options.join * inf, ...
+             'inversion', options.join * inf);
   end
   
   
@@ -562,48 +628,106 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
   
   
   %% Identify start and end of profiles.
-  % Find preferred profiling sequence (e.g. navigation depth, CTD derived depth,
-  % pressure ...) present in the already processed data.
-  profiling_sequence_list = cellstr(options.profiling_sequence_list);
-  profiling_sequence_avail = false;
-  for profiling_sequence_idx = 1:numel(profiling_sequence_list)
-    profiling_sequence = profiling_sequence_list{profiling_sequence_idx};
-    if isfield(data_proc, profiling_sequence) ...
-        && ~all(isnan(data_proc.(profiling_sequence)))
-      profile_stamp = data_proc.(profiling_sequence);
-      profiling_sequence_avail = true;
-      break;
+  % Find preferred vertical coordinate sequence
+  % (e.g. navigation depth, CTD-derived depth, pressure...)
+  % with optional duration sequence (navigation time, CTD timestamp, ...)
+  % and identification parameters.
+  profiling_avail = false;
+  for profiling_option_idx = 1:numel(options.profiling_list)
+    profiling_option = options.profiling_list(profiling_option_idx);
+    profiling_depth = profiling_option.depth;
+    profiling_time = default_profiling_time;
+    profiling_stall = default_profiling_stall;
+    profiling_shake = default_profiling_shake;
+    profiling_inversion = default_profiling_inversion;
+    profiling_interrupt = default_profiling_interrupt;
+    profiling_length = default_profiling_length;
+    profiling_period = default_profiling_period;
+    if isfield(profiling_option, 'time') && ~isempty(profiling_option.time)
+      profiling_time = profiling_option.time;
+    end
+    if isfield(profiling_option, 'stall') && ~isempty(profiling_option.stall)
+      profiling_stall = profiling_option.stall;
+    end
+    if isfield(profiling_option, 'shake') && ~isempty(profiling_option.shake)
+      profiling_shake = profiling_option.shake;
+    end
+    if isfield(profiling_option, 'inversion') ...
+        && ~isempty(profiling_option.inversion)
+      profiling_inversion = profiling_option.inversion;
+    end
+    if isfield(profiling_option, 'interrupt') ...
+        && ~isempty(profiling_option.interrupt)
+      profiling_interrupt = profiling_option.interrupt;
+    end
+    if isfield(profiling_option, 'length') && ~isempty(profiling_option.length)
+      profiling_length = profiling_option.legnth;
+    end
+    if isfield(profiling_option, 'preiod') && ~isempty(profiling_option.period)
+      profiling_period = profiling_option.period;
+    end
+    profiling_depth_avail = false;
+    profiling_time_avail = false;
+    if isfield(data_proc, profiling_depth) ...
+        && ~all(isnan(data_proc.(profiling_depth)))
+      profiling_depth_avail = true;
+    end
+    if isfield(data_proc, profiling_time) ...
+        && any(data_proc.(profiling_time) > 0)
+      profiling_time_avail = true;
+    end
+    if profiling_depth_avail
+      if isempty(profiling_time)
+        profiling_vars = {data_proc.(profiling_depth)};
+        profiling_avail = true;
+        break;
+      elseif profiling_time_avail
+        profiling_vars = ...
+          {data_proc.(profiling_time) data_proc.(profiling_depth)};
+        profiling_avail = true;
+        break;
+      end
     end
   end
   % Compute profile boundaries and direction if profiling sequence available.
-  if profiling_sequence_avail
+  if profiling_avail
     fprintf('Computing vertical direction and profile index with settings:\n');
-    fprintf('  profiling sequence        : %s\n', profiling_sequence);
-    fprintf('  profiling sequence filling: %d\n', options.profiling_sequence_filling);
-    fprintf('  minimum depth range       : %f\n', options.profile_min_range);
-    fprintf('  equal direction join      : %d\n', options.profile_join_same_dir);
-    % Fill profiling sequence invalid values, if needed.
-    if (options.profiling_sequence_filling && isfield(data_proc, 'time'))
-      profile_stamp = ...
-        fillInvalidValues(data_proc.time, profile_stamp, 'linear');
-      meta_proc.profile_index.source_filling = 'linear';
-      meta_proc.profile_index.sources = {profiling_sequence 'time'}';
-    else
-      meta_proc.profile_index.sources = profiling_sequence;
-      meta_proc.profile_index.source_filling = 'none';
+    fprintf('  vertical   sequence: %s\n', profiling_depth);
+    if profiling_time_avail
+      fprintf('  horizontal sequence: %s\n', profiling_time);
     end
+    fprintf('  maximum profile stall     : %f\n', profiling_stall);
+    fprintf('  maximum profile shake     : %f\n', profiling_shake);
+    fprintf('  minimum profile inversion : %f\n', profiling_inversion);
+    fprintf('  minimum profile interrupt : %f\n', profiling_interrupt);
+    fprintf('  minimum profile length    : %f\n', profiling_length);
+    fprintf('  minimum profile period    : %f\n', profiling_period);
     % Find profile directions and indices.
-    [data_proc.profile_index, data_proc.profile_direction] = ...
-      findProfiles(profile_stamp, ...
-                  'range', options.profile_min_range, ...
-                  'join', options.profile_join_same_dir);
+    [data_proc.profile_index, data_proc.profile_direction] = findProfiles( ...
+        profiling_vars{:}, ...
+        'stall', profiling_stall, 'shake', profiling_shake, ...
+        'inversion', profiling_inversion, 'interrupt', profiling_interrupt, ...
+        'length', profiling_length, 'period', profiling_period);
     meta_proc.profile_index.method = 'findProfiles';
-    meta_proc.profile_index.min_range = options.profile_min_range;
-    meta_proc.profile_index.join_equal = options.profile_join_same_dir;
+    if profiling_time_avail
+      meta_proc.profile_index.sources = {profiling_time profiling_depth};
+    else
+      meta_proc.profile_index.sources = {profiling_depth};
+    end
+    meta_proc.profile_index.shake = profiling_shake;
+    meta_proc.profile_index.stall = profiling_stall;
+    meta_proc.profile_index.inversion = profiling_inversion;
+    meta_proc.profile_index.interrupt = profiling_interrupt;
+    meta_proc.profile_index.length = profiling_length;
+    meta_proc.profile_index.period = profiling_period;
     meta_proc.profile_direction.method = meta_proc.profile_index.method;
     meta_proc.profile_direction.sources = meta_proc.profile_index.sources;
-    meta_proc.profile_direction.source_filling = ...
-      meta_proc.profile_index.source_filling;
+    meta_proc.profile_direction.shake = meta_proc.profile_index.shake;
+    meta_proc.profile_direction.stall = meta_proc.profile_index.stall;
+    meta_proc.profile_direction.inversion = meta_proc.profile_index.inversion;
+    meta_proc.profile_direction.interrupt = meta_proc.profile_index.interrupt;
+    meta_proc.profile_direction.length = meta_proc.profile_index.length;
+    meta_proc.profile_direction.period = meta_proc.profile_index.period;
   end
   
   
@@ -680,7 +804,7 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
         {flow_ctd_time flow_ctd_depth flow_ctd_pitch 'profile_index'}';
     else
       meta_proc.flow_ctd.sources = ...
-        {flow_ctd_time flow_ctd_depth profile_index};
+        {flow_ctd_time flow_ctd_depth 'profile_index'};
       meta_proc.flow_ctd.pitch_value = options.flow_ctd_pitch_value;
     end
     meta_proc.method = 'computeCTDFlowSpeed';
@@ -832,11 +956,11 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
             prof2_vars = ...
               {prof2_time(:) prof2_depth(:) prof2_raw(:) prof2_flow(:)};
           end
-          [prof1_valid, ~] = ...
+          [prof1_valid, ~, prof1_vars{:}] = ...
             validateProfile(prof1_depth(:), prof1_vars{:}, ...
                             'range', options.profile_min_range, ...
                             'gap', options.profile_max_gap_ratio);
-          [prof2_valid, ~] = ...
+          [prof2_valid, ~, prof2_vars{:}] = ...
             validateProfile(prof2_depth(:), prof2_vars{:}, ...
                             'range', options.profile_min_range, ...
                             'gap', options.profile_max_gap_ratio);
@@ -891,7 +1015,7 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
             prof_flow = data_proc.(sensor_lag_flow)(prof_select);
             prof_vars = {prof_time(:) prof_raw(:) prof_flow(:)};
           end
-          [prof_valid, ~] = ...
+          [prof_valid, ~, prof_vars{:}] = ...
             validateProfile(prof_depth(:), prof_vars{:}, ...
                             'range', options.profile_min_range, ...
                             'gap', options.profile_max_gap_ratio);
@@ -1092,11 +1216,11 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
             prof2_vars = ...
               {prof2_time(:) prof2_cond(:) prof2_temp(:) prof2_pres(:) prof2_flow(:)};
           end
-          [prof1_valid, ~] = ...
+          [prof1_valid, ~, prof1_vars{:}] = ...
             validateProfile(prof1_depth(:), prof1_vars{:}, ...
                             'range', options.profile_min_range, ...
                             'gap', options.profile_max_gap_ratio);
-          [prof2_valid, ~] = ...
+          [prof2_valid, ~, prof2_vars{:}] = ...
             validateProfile(prof2_depth(:), prof2_vars{:}, ...
                             'range', options.profile_min_range, ...
                             'gap', options.profile_max_gap_ratio);
@@ -1160,7 +1284,7 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
             prof_vars = ...
               {prof_time(:) prof_cond_raw(:) prof_temp_raw(:) prof_flow(:)};
           end
-          [prof_valid, ~] = ...
+          [prof_valid, ~, prof_vars{:}] = ...
             validateProfile(prof_depth(:), prof_vars{:}, ...
                             'range', options.profile_min_range, ...
                             'gap', options.profile_max_gap_ratio);

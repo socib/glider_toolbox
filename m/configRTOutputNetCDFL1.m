@@ -190,19 +190,23 @@ function ncl1_info = configRTOutputNetCDFL1()
     'long_name'     'profile index'
     'standard_name' ''
     'units'         '1'
+    'comment'       'N = inside profile N, N + 0.5 = between profiles N and N + 1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'        []
-    'method'         []
-    'min_range'      []
-    'join_equal'     []
-    'source_filling' [] };
+    'sources'       []
+    'method'        []
+    'length'        []
+    'period'        []
+    'inversion'     []
+    'interrupt'     []
+    'stall'         []
+    'shake'         [] };
   
   var_attr_list.profile_direction = {
     'long_name'     'glider vertical speed direction'
     'standard_name' ''
     'units'         '1'
-    'comment'       '-1 = ascending, 0 = inflecting, 1 = descending'
+    'comment'       '-1 = ascending, 0 = inflecting or stalled, 1 = descending'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'       []

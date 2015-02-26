@@ -36,20 +36,28 @@ function options = configDataProcessingSlocumG1()
   error(nargchk(0, 0, nargin, 'struct'));
 
   options = struct();
-  
+
   options.time_filling = true;
   options.position_filling = true;
   options.depth_filling = true;
   options.attitude_filling = true;
   options.heading_filling = true;
   options.waypoint_filling = true;
-  
+
   options.pressure_filtering = true;
   options.pressure_filter_constant = 4; % Recommended setting from Seabird Data Processing Manual.
   options.depth_ctd_derivation = true;
-  
-  options.profiling_sequence_list = {'depth_ctd' 'depth'};
-  options.profiling_sequence_filling = true;
+
+  options.profiling_list(1).depth = 'depth';
+  options.profiling_list(1).time = 'time';
+  options.profiling_list(2).depth = 'depth_ctd';
+  options.profiling_list(2).time = 'time_ctd';
+  options.profiling_list(3).depth = 'depth_ctd';
+  options.profiling_list(3).time = 'time';
+  % Use default values for profile identification parameters:
+  % stall (3), inversion (3), and length (10), and
+  % shake (20), interrupt (180), and period (0).
+
   options.profile_min_range = 10;
   options.profile_max_gap_ratio = 0.6;
 
@@ -73,7 +81,7 @@ function options = configDataProcessingSlocumG1()
     struct('conductivity_corrected', {}, 'temperature_corrected', {}, ...
            'conductivity_original', {}, 'temperature_original', {}, ...
            'pressure_original', {}, 'parameters', {});
-  
+
   options.thermal_lag_list(1).conductivity_corrected = 'conductivity_corrected_thermal';
   options.thermal_lag_list(1).temperature_corrected  = 'temperature_corrected_thermal';
   options.thermal_lag_list(1).conductivity_original  = 'conductivity';
@@ -83,7 +91,7 @@ function options = configDataProcessingSlocumG1()
   options.thermal_lag_list(1).parameters             = 'auto';
   options.thermal_lag_list(1).estimator              = @nanmedian;
   options.thermal_lag_list(1).minopts                = struct();
-  
+
   options.salinity_list(1).salinity     = 'salinity';
   options.salinity_list(1).conductivity = 'conductivity';
   options.salinity_list(1).temperature  = 'temperature';
