@@ -5,14 +5,15 @@ function [stampnum, hhmmss, ddmmyy] = fillSGMissingGPSDate(hhmmss, ddmmyy)
 %    STAMPNUM = FILLSGMISSINGGPSDATE(DDMMYY, HHMMSS)
 %    [STAMPNUM, HHMMSS, DDMMYY] = FILLSGMISSINGGPSDATE(HHMMSS, DDMMYY)
 %
-%  STAMPNUM = FILLSGMISSINGGPSDATE(DDMMYY, HHMMSS) fills the date component
-%  of GPS timestamps given by character arrays or string cell arrays HHMMSS
-%  and DDMMYY and returns them as serial date numbers in array STARTNUM. See
-%  note below.
+%  Description:
+%    STAMPNUM = FILLSGMISSINGGPSDATE(DDMMYY, HHMMSS) fills the date component
+%    of GPS timestamps given by character arrays or string cell arrays HHMMSS
+%    and DDMMYY and returns them as serial date numbers in array STARTNUM.
+%    See note below.
 %
-%  [STAMPNUM, HHMMSS, DDMMYY] = FILLSGMISSINGGPSDATE(HHMMSS, DDMMYY)
-%  also returns the same input arrays HHMMSS and DDMMYY but with the empty
-%  entries in DDMMYY filled with the corresponding date component value.
+%    [STAMPNUM, HHMMSS, DDMMYY] = FILLSGMISSINGGPSDATE(HHMMSS, DDMMYY) also 
+%    returns the same input arrays HHMMSS and DDMMYY but with the empty
+%    entries in DDMMYY filled with the corresponding date component value.
 %
 %  Notes:
 %    GPS lines in Seaglider log may have no date component and the corresponding
@@ -25,11 +26,12 @@ function [stampnum, hhmmss, ddmmyy] = fillSGMissingGPSDate(hhmmss, ddmmyy)
 %
 %  See also:
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

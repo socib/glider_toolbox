@@ -1,29 +1,28 @@
 function outputSignal = seabirdFilter(inputSignal, timeConstant, samplingPeriod)
-%SEABIRDFILTER - Applies a low-pass filter to an input signal
+%SEABIRDFILTER  Applies a low-pass filter to an input signal
 %
-% The filter runs a low-pass filter on an input signal. A low-pass filter
-% smoothes high frequency (rapidly changing) data. To produce zero phase
-% (no time shift), the filter is first run forward through the data and then run
-% backward through the data. This removes any delays caused by the filter.
-% This filter is described in SeaBird Data Processing Manual (page 91).
+%  Syntax:
+%    outputSignal = seabirdFilter(inputSignal, timeConstant, samplingPeriod)
 %
-% Syntax:
-%   outputSignal = seabirdFilter(inputSignal, timeConstant, samplingPeriod)
+%  Description:
+%    The filter runs a low-pass filter on an input signal. A low-pass filter
+%    smoothes high frequency (rapidly changing) data. To produce zero phase
+%    (no time shift), the filter is first run forward through the data and then
+%    run backward through the data, so that no delays are caused by the filter.
+%    This filter is described in SeaBird Data Processing Manual (page 91).
 %
-% Inputs:
+%  Inputs:
 %    inputSignal    - Signal to be filtered
 %    timeConstant   - Duration of the filter (in s)
 %    samplingPeriod - Sampling period of the input signal (in s)
 %
-% Outputs:
+%  Outputs:
 %    outputSignal - inputSignal filtered with desired parameters
 %
-% Example:
-%
+%  Example:
 %    dataSize = 500;
 %    samplingPeriod = 2;
 %    time = (0:(dataSize-1))' * samplingPeriod;
-%
 %    originalSignal = 100 * (1 + sin(linspace(0, 2 * pi, dataSize)'));
 %    someNoise      =  10 * (rand(dataSize, 1) - 0.5);
 %    inputSignal    = originalSignal + someNoise;
@@ -38,18 +37,23 @@ function outputSignal = seabirdFilter(inputSignal, timeConstant, samplingPeriod)
 %    ylabel('Depth (meters)');
 %    title('Glider depth');
 %
-% Other m-files required: none
-% Subfunctions: none
-% MAT-files required: none
+%  See also:
+%    BUTTER
+%    BUTTORD
+%    CHEBY1
+%    FILTER
 %
-% See also: BUTTER, BUTTORD, CHEBY1, FILTER
+%  Other m-files required: none
+%  Subfunctions: none
+%  MAT-files required: none
+%  Dec 2010; Last revision: 23-Dec-2010
+%
+% Authors:
+%   Bartolome Garau  <tomeu.garau@socib.es>
 
-% Author: Bartolome Garau
-% email: tomeu.garau@socib.es
-% Website: http://www.socib.es
-% Dec 2010; Last revision: 23-Dec-2010
-% Copyright (C) 2013-2014
-% ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 % 
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

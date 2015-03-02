@@ -7,46 +7,49 @@ function [valid, full_rows, varargout] = validateProfile(depth, varargin)
 %    VALID = VALIDATEPROFILE(DEPTH, DATA1, ... , DATAN, OPT1, VAL1, ...)
 %    [VALID, FULL_ROWS]= VALIDATEPROFILE(...)
 %
-%  VALID = VALIDATEPROFILE(DEPTH, DATA1, ... , DATAN, OPTIONS) and 
-%  VALID = VALIDATEPROFILE(DEPTH, DATA1, ... , DATAN, OPT1, VAL1, ...) check if 
-%  vector DEPTH is a proper profile depth sequence and if data in vectors or 
-%  column arrays DATA1, ... , DATAN is properly sampled over the profile range, 
-%  according to criteria in option struct OPTIONS or in option key-value pairs 
-%  OPT1, VAL1... The profile is required to have a minimum depth range and 
-%  contain no significant gaps of invalid data readings or depth inversions.
-%  The number of rows of DEPTH, and DATA1, ... , DATAN should be the same.
+%  Description:
+%    VALID = VALIDATEPROFILE(DEPTH, DATA1, ... , DATAN, OPTIONS) and 
+%    VALID = VALIDATEPROFILE(DEPTH, DATA1, ... , DATAN, OPT1, VAL1, ...) check 
+%    whether vector DEPTH is a proper profile depth sequence
+%    and if data in vectors or column arrays DATA1, ... , DATAN
+%    is properly sampled over the profile range, according to criteria in 
+%    options given in key-value pairs OPT1, VAL1... or in a struct OPTIONS 
+%    with field names as option keys and field values as option values.
+%    The profile is required to have a minimum depth range and 
+%    contain no significant gaps of invalid data readings or depth inversions.
+%    The number of rows of DEPTH, and DATA1, ... , DATAN should be the same.
 %
-%  [VALID, FULL_ROWS] = VALIDATEPROFILE(DEPTH, DATA1, ... , DATAN, ...) 
-%  also returns a logical column vector FULL_ROWS with the same number of 
-%  elements as DEPTH, showing whether respective entries in DEPTH or rows in
-%  DATA1, ... , DATAN contain some invalid value or lie in a depth inversion.
+%    [VALID, FULL_ROWS] = VALIDATEPROFILE(DEPTH, DATA1, ... , DATAN, ...) 
+%    also returns a logical column vector FULL_ROWS with the same number of 
+%    elements as DEPTH, showing whether respective entries in DEPTH or rows in
+%    DATA1, ... , DATAN contain some invalid value or lie in a depth inversion.
 %
-%  [VALID, FULL_ROWS, DATA1, ... , DATAN] = VALIDATEPROFILE(DEPTH, DATA1, ... , DATAN, ...)
-%  also returns then same input data DATA1, ... , DATAN but with entries 
-%  corresponding to invalid rows in FULL_ROWS replaced according to the mask
-%  value specified in options.
+%    [VALID, FULL_ROWS, DATA1, ... , DATAN] = VALIDATEPROFILE(DEPTH, DATA1, ... , DATAN, ...)
+%    also returns then same input data DATA1, ... , DATAN but with entries 
+%    corresponding to invalid rows in FULL_ROWS replaced according to the mask
+%    value specified in options.
 %
-%  Valid options are:
-%    RANGE: minimum depth range (in the same units as DEPTH).
-%      A profile is invalid if the difference between the maximum and minimum
-%      depth values is smaller than given threshold.
-%      Default value: 0 (only empty profiles are invalid).
-%    GAP: maximum gap ratio (in [0,1]).
-%      A profile is invalid if the ratio of the depth range of the largest gap
-%      to the depth range of the whole profile is larger than given threshold.
-%      A gap is a sequence of consecutive incomplete measurements, either 
-%      because of invalid values (NaN) in some column of DATA, or because of 
-%      invalid entries in DEPTH.
-%      Default value: 1 (only empty profiles are invalid).
-%    MASK: replacement value for invalid data readings.
-%      When data outputs are requested, respective data inputs are returned
-%      but with entries correponding to invalid rows replaced by the given
-%      value. If empty ([]), the entries are removed instead of replaced.
-%      Default value: nan
+%    Valid options are:
+%      RANGE: minimum depth range (in the same units as DEPTH).
+%        A profile is invalid if the difference between the maximum and minimum
+%        depth values is smaller than given threshold.
+%        Default value: 0 (only empty profiles are invalid).
+%      GAP: maximum gap ratio (in [0,1]).
+%        A profile is invalid if the ratio of the depth range of the largest gap
+%        to the depth range of the whole profile is larger than given threshold.
+%        A gap is a sequence of consecutive incomplete measurements, either 
+%        because of invalid values (NaN) in some column of DATA, or because of 
+%        invalid entries in DEPTH.
+%        Default value: 1 (only empty profiles are invalid).
+%      MASK: replacement value for invalid data readings.
+%        When data outputs are requested, respective data inputs are returned
+%        but with entries correponding to invalid rows replaced by the given
+%        value. If empty ([]), the entries are removed instead of replaced.
+%        Default value: nan
 %
-%  New in version 1.1:
-%    Identify and discard depth inversions in the profile.
-%    Return input data with invalid rows masked with specified value.
+%    New in version v1.1.0:
+%      Identify and discard depth inversions in the profile.
+%      Return input data with invalid rows masked with specified value.
 %
 %  Notes:
 %    This function is based on the previous work by Tomeu Garau, in functions
@@ -82,11 +85,12 @@ function [valid, full_rows, varargout] = validateProfile(depth, varargin)
 %  See also:
 %    ISNAN
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
@@ -105,7 +109,7 @@ function [valid, full_rows, varargout] = validateProfile(depth, varargin)
   
   
   %% Parse basic input arguments.
-  % Get numeric (non option) arguments.
+  % Get numeric (non-option) arguments.
   nargnum = find(~cellfun(@isnumeric, varargin), 1, 'first') - 1;
   if isempty(nargnum)
     nargnum = numel(varargin);

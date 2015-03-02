@@ -6,58 +6,59 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 %    [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP, OPTIONS)
 %    [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP, OPT1, VAL1, ...)
 %
-%  [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP) combines data from 
-%  arrays in cell array DATA_LIST and metadata from structs in cell array 
-%  META_LIST into a single data set with data in array DATA and metadata in 
-%  struct array META. Elements in META_LIST and DATA_LIST should have the format
-%  returned by function DBA2MAT, but do not need to have the same sensor set.
-%  Outputs META and DATA have the same format, too.
-%  META is a struct array combining the information in elements of META_LIST.
-%  It has following fields:
-%    HEADERS: struct array built concatenating the HEADERS field of all elements
-%      in META_LIST.
-%    SENSORS: string cell array with the names of the sensors present in the
-%      returned data array (in the same column order), built merging the SENSORS
-%      field of all elements in META_LIST.
-%    UNITS: string cell array with the units of the sensors present in the
-%      returned data array (in the same column order), built merging the UNITS
-%      field of all elements in META_LIST.
-%    BYTES: array with the number of bytes of each sensor present in the 
-%      returned data array, (in the same column order), built merging the BYTES
-%      field of all elements in META_LIST.
-%    SOURCES: string cell array built concatenating the SOURCES field of all 
-%      elements in META_LIST.
-%  DATA is a numeric array combining the rows of arrays in DATA_LIST, reordering
-%  the sensor columns if needed, and sorting the resulting rows according to a 
-%  timestamp from sensor named by string TIMESTAMP.
+%  Description:
+%    [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP) combines data from 
+%    arrays in cell array DATA_LIST and metadata from structs in cell array 
+%    META_LIST into a single data set with data in array DATA and metadata in 
+%    struct array META. Elements in META_LIST and DATA_LIST should have the
+%    format returned by function DBA2MAT, but they do not need to have the same
+%    set of sensors. Outputs META and DATA have the same format, too.
+%    META is a struct array combining the information in elements of META_LIST.
+%    It has following fields:
+%      HEADERS: struct array built concatenating the HEADERS field of all 
+%        elements in META_LIST.
+%      SENSORS: string cell array with the names of the sensors present in the
+%        returned data array (in the same column order), built merging 
+%        the SENSORS field of all elements in META_LIST.
+%      UNITS: string cell array with the units of the sensors present in the
+%        returned data array (in the same column order), built merging 
+%        the UNITS field of all elements in META_LIST.
+%      BYTES: array with the number of bytes of each sensor present in the 
+%        returned data array, (in the same column order), built merging 
+%        the BYTES field of all elements in META_LIST.
+%      SOURCES: string cell array built concatenating the SOURCES field
+%        of all elements in META_LIST.
+%    DATA is a numeric array combining the rows of arrays in DATA_LIST,
+%    reordering the sensor columns if needed, and sorting the resulting rows
+%    according to a timestamp from sensor named by string TIMESTAMP.
 %
-%  [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP, OPTIONS) and 
-%  [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP, OPT1, VAL1, ...) 
-%  accept the following options given in key-value pairs OPT1, VAL1... or in a
-%  struct OPTIONS with field names as option keys and field values as option 
-%  values:
-%    FORMAT: data output format.
-%      String setting the format of the output DATA. Valid values are:
-%        'array': DATA is a matrix with sensor readings as columns 
-%           ordered as in the 'sensors' metadata field.
-%        'struct': DATA is a struct with sensor names as field names and column 
-%           vectors of sensor readings as field values.
-%      Default value: 'array'
-%    SENSORS: sensor filtering list.
-%      String cell array with the names of the sensors of interest. If given,
-%      only sensors present in both the input data sets and this list will be 
-%      present in output. The string 'all' may also be given, in which case 
-%      sensor filtering is not performed and all sensors in input list will be 
-%      present in output.
-%      Default value: 'all' (do not perform sensor filtering).
-%    PERIOD: time filtering boundaries.
-%      Two element numeric array with the start and end of the time interval of 
-%      interest (seconds since 1970-01-01 00:0:00.00 UTC). If given, only sensor
-%      cycles with timestamps within this period will be present in output.
-%      The string 'all' may also be given, in which case time filtering is not
-%      performed and all sensors cycles in input data sets will be present in 
-%      output.
-%      Default value: 'all' (do not perform time filtering).
+%    [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP, OPTIONS) and 
+%    [META, DATA] = DBACAT(META_LIST, DATA_LIST, TIMESTAMP, OPT1, VAL1, ...) 
+%    accept the following options given in key-value pairs OPT1, VAL1...
+%    or in a struct OPTIONS with field names as option keys and field values
+%    as option values:
+%      FORMAT: data output format.
+%        String setting the format of the output DATA. Valid values are:
+%          'array': DATA is a matrix with sensor readings as columns 
+%            ordered as in the 'sensors' metadata field.
+%          'struct': DATA is a struct with sensor names as field names
+%            and column vectors of sensor readings as field values.
+%        Default value: 'array'
+%      SENSORS: sensor filtering list.
+%        String cell array with the names of the sensors of interest. If given,
+%        only sensors present in both the input data sets and this list
+%        will be present in output. The string 'all' may also be given,
+%        in which case sensor filtering is not performed and all sensors
+%        in the input list will be present in output.
+%        Default value: 'all' (do not perform sensor filtering).
+%      PERIOD: time filtering boundaries.
+%        Two element numeric array with the start and the end of the period
+%        of interest (seconds since 1970-01-01 00:0:00.00 UTC). If given, 
+%        only sensor cycles with timestamps within this period will be present
+%        in output. The string 'all' may also be given, in which case time 
+%        filtering is not performed and all sensors cycles in the input list
+%        will be present in output.
+%        Default value: 'all' (do not perform time filtering).
 %
 %  Notes:
 %    This function should be used to combine data from several navigation files,
@@ -87,11 +88,12 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 %    DBA2MAT
 %    DBAMERGE
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

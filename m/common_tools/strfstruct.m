@@ -4,68 +4,70 @@ function str = strfstruct(pattern, repstruct)
 %  Syntax:
 %    STR = STRFSTRUCT(PATTERN, REPSTRUCT)
 %
-%  STR = STRFSTRUCT(PATTERN, REPSTRUCT) replaces structure field specifiers in
-%  string PATTERN with the corresponding field values in struct REPSTRUCT.
-%  Recognized field specifier keys match the fields in structure REPSTRUCT.
-%  They are names of fields of REPSTRUCT in capital letters, enclosed in curly 
-%  braces and prefixed with a dollar sign. Specifiers may also include a comma 
-%  separated list of modifiers, separated from the specifier key by a comma. 
-%  These modifiers are intended to allow transformations affecting the format 
-%  of the replacement value. The transformations are applied sequentially in the
-%  order they appear in the specifier, from left to right. Each transformation
-%  is applied to the output of the previous one, starting from the value of the 
-%  field of REPSTRUCT matching the specifier key, or the empty string if there 
-%  is no such field. Finally, if the resulting replacement value is a numeric
-%  value, it is converted to string by function NUM2STRING before applying the
-%  replacement. Recognized modifiers are:
-%    %...: string conversion with desired format using SPRINTF.
-%      The current replacement value is passed to function SPRINTF using the
-%      modifier value as format string.
-%      Example:
-%        '${DEPLOYMENT_ID,%04d}' with REPSTRUCT.DEPLOYMENT_ID=2 
-%         is replaced by 0002.
-%    l: lower case conversion.
-%      The current replacement value is converted to lower case by passing it to
-%      function LOWER.
-%      Example:
-%        '${GLIDER_NAME,l}' with REPSTRUCT.GLIDER_NAME='DEEPY' 
-%        is replaced by 'deepy'.
-%    U: upper case conversion.
-%      The current replacement value is converted to upper case by passing it to
-%      function UPPER.
-%      Example:
-%        '${GLIDER_NAME,U}' with REPSTRUCT.GLIDER_NAME='deepy' 
-%         is replaced by 'DEEPY'.
-%    T...: time string representation.
-%      The current replacement value is passed to function DATESTR using the
-%      the modifier value as format string with leading T removed.
-%      Example:
-%        ${DEPLOYMENT_END,Tyyyymmmdd} 
-%        with REPSTRUCT.DEPLOYMENT_END=datenum([2001 01 17 0 0 0]) 
-%        is replaced by '2001Jan17'.
-%    s/.../...: regular expression replacement.
-%      The current replacement value is passed to function REGEXPREP to replace
-%      the occurrences of a pattern subexpression by a replacement, both
-%      specified in the modifier as substrings separated by a delimiter. The 
-%      delimiter is the second character in the modifier (here is '/', but any
-%      other character may be used). The pattern is the substring between the 
-%      first and the second occurrence of the delimiter in the modifier. The 
-%      replacement is the substring starting right after the second occurence 
-%      of the delimiter until the end of the modifier. If the replacement is
-%      the null string, the second delimiter is optional, and subexpressions in
-%      the current replacement value matching the pattern are deleted.
-%      Example:
-%        ${GLIDER_NAME,s/(-|\s*)/_}
-%        with REPSTRUCT.GLIDER_NAME='complex-compound  glider name'
-%        is replaced by 'complex_compound_glider_name'.
-%    @...: named conversion function.
-%      The current replacement value is passed to the function named by the
-%      modifier value with the leading @ removed. This is useful to specify 
-%      custom formatters for more advanced conversions.
-%      Example:
-%        ${DEPLOYMENT_ID,@dec2bin} 
-%        with REPSTRUCT.DEPLOYMENT_ID=2 
-%        is replaced by 'C'.
+%  Description:
+%    STR = STRFSTRUCT(PATTERN, REPSTRUCT) replaces structure field specifiers in
+%    string PATTERN with the corresponding field values in struct REPSTRUCT.
+%    Recognized field specifier keys match the fields in structure REPSTRUCT.
+%    They are names of fields of REPSTRUCT in capital letters, enclosed in curly
+%    braces and prefixed with a dollar sign. Specifiers may also include a comma
+%    separated list of modifiers, separated from the specifier key by a comma. 
+%    These modifiers are intended to allow transformations affecting the format 
+%    of the replacement value. The transformations are applied sequentially in 
+%    the same order as they appear in the specifier, from left to right.
+%    Each transformation is applied to the output of the previous one, starting
+%    from the value of the field of REPSTRUCT matching the specifier key,
+%    or the empty string if there is no such field. Finally, if the resulting 
+%    replacement value is a numeric value, it is converted to string by function
+%    NUM2STRING before applying the replacement. Recognized modifiers are:
+%      %...: string conversion with desired format using SPRINTF.
+%        The current replacement value is passed to function SPRINTF using the
+%        modifier value as format string.
+%        Example:
+%          '${DEPLOYMENT_ID,%04d}' with REPSTRUCT.DEPLOYMENT_ID=2 
+%           is replaced by 0002.
+%      l: lower case conversion.
+%        The current replacement value is converted to lower case by passing it
+%        to function LOWER.
+%        Example:
+%          '${GLIDER_NAME,l}' with REPSTRUCT.GLIDER_NAME='DEEPY' 
+%          is replaced by 'deepy'.
+%      U: upper case conversion.
+%        The current replacement value is converted to upper case by passing it
+%        to function UPPER.
+%        Example:
+%          '${GLIDER_NAME,U}' with REPSTRUCT.GLIDER_NAME='deepy' 
+%           is replaced by 'DEEPY'.
+%      T...: time string representation.
+%        The current replacement value is passed to function DATESTR using the
+%        the modifier value as format string with leading T removed.
+%        Example:
+%          ${DEPLOYMENT_END,Tyyyymmmdd} 
+%          with REPSTRUCT.DEPLOYMENT_END=datenum([2001 01 17 0 0 0]) 
+%          is replaced by '2001Jan17'.
+%      s/.../...: regular expression replacement.
+%        The current replacement value is passed to function REGEXPREP to
+%        replace the occurrences of a pattern subexpression by a replacement,
+%        both specified in the modifier as substrings separated by a delimiter.
+%        The delimiter is the second character in the modifier (here is '/',
+%        but any other character may be used). The pattern is the substring
+%        between the first and the second occurrence of the delimiter in the 
+%        modifier. The replacement is the substring starting right after thes
+%        second occurence of the delimiter until the end of the modifier.
+%        If the replacement is the null string, the second delimiter is optional
+%        and subexpressions in the current replacement value matching the
+%        pattern are deleted.
+%        Example:
+%          ${GLIDER_NAME,s/(-|\s*)/_}
+%          with REPSTRUCT.GLIDER_NAME='complex-compound  glider name'
+%          is replaced by 'complex_compound_glider_name'.
+%      @...: named conversion function.
+%        The current replacement value is passed to the function named by the
+%        modifier value with the leading @ removed. This is useful to specify 
+%        custom formatters for more advanced conversions.
+%        Example:
+%          ${DEPLOYMENT_ID,@dec2bin} 
+%          with REPSTRUCT.DEPLOYMENT_ID=2 
+%          is replaced by 'C'.
 %    
 %  Notes:
 %    This function is inspired by the C function STRFTIME, the shell 
@@ -99,11 +101,12 @@ function str = strfstruct(pattern, repstruct)
 %    REGEXPREP
 %    STR2FUNC
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

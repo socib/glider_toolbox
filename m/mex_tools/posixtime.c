@@ -1,10 +1,11 @@
 /**
  * @file
  * @brief MATLAB interface to get POSIX time using standard C time functions.
- * @author Joan Pau Beltran
+ * @author Joan Pau Beltran  <joanpau.beltran@socib.cat>
  *
- *  Copyright (C) 2013-2014
+ *  Copyright (C) 2013-2015
  *  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+ *  <http://www.socib.es>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

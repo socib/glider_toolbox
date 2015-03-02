@@ -4,25 +4,26 @@ function [temp, cond] = calibrateSBECT(temp_freq, cond_freq, pres, temp_coefs, c
 %  Syntax:
 %    [TEMP, COND] = CALIBRATESBECT(TEMP_FREQ, COND_FREQ, PRES, TEMP_COEFS, COND_COEFS)
 %
-%  [TEMP, COND] = CALIBRATESBECT(TEMP_FREQ, COND_FREQ, PRES, TEMP_COEFS, COND_COEFS) 
-%  applies the equations described in Seabird Electronics calibration sheet
-%  to convert the temperature and conductivity raw measurements (Hz) in arrays
-%  TEMP_FREQ and COND_FREQ to engineering units (ITS90 ºC and Siemens/m)
-%  in arrays TEMP and COND, using the pressure readings in PRES (dbar) and the 
-%  calibration coefficients in arrays or structs TEMP_COEFS and COND_COEFS.
+%  Description:
+%    [TEMP, COND] = CALIBRATESBECT(TEMP_FREQ, COND_FREQ, PRES, TEMP_COEFS, COND_COEFS) 
+%    applies the equations described in Seabird Electronics calibration sheet
+%    to convert the temperature and conductivity raw measurements (Hz) in arrays
+%    TEMP_FREQ and COND_FREQ to engineering units (ITS90 ºC and Siemens/m)
+%    in arrays TEMP and COND, using the pressure readings in PRES (dbar) and the 
+%    calibration coefficients in arrays or structs TEMP_COEFS and COND_COEFS.
 %
-%  The calibration equations are:
-%    TEMP = 1/(T_G + T_H*ln(1/F_T) + T_I*ln(1/F_T)^2 + T_J*ln(1/F_T)^3) - 273.15
-%    COND = 0.1*(C_G + C_H*F_C^2 + C_I*F_C^3 + C_J*F_C^4)/(1 + CTCOR*TEMP + CPCOR*PRES)
-%  where
-%    F_T: temperature signal frequency in kHz (TEMP_FREQ * 1e-3).
-%    F_C: conductivity signal frequency in kHz (COND_FREQ * 1e-3).
-%    T_G, T_H, T_I, T_J: temperature calibration coefficients.
-%      These should be fields of struct TEMP_COEFS or its elements if it is an
-%      array (in that order).
-%    C_G, C_H, C_I, C_J, CTCOR, CPCOR: conductivity calibration coefficients.
-%      These should be fields of struct COND_COEFS or its elements if it is an
-%      array (in that order).
+%    The calibration equations are:
+%      TEMP = 1/(T_G + T_H*ln(1/F_T) + T_I*ln(1/F_T)^2 + T_J*ln(1/F_T)^3) - 273.15
+%      COND = 0.1*(C_G + C_H*F_C^2 + C_I*F_C^3 + C_J*F_C^4)/(1 + CTCOR*TEMP + CPCOR*PRES)
+%    where
+%      F_T: temperature signal frequency in kHz (TEMP_FREQ * 1e-3).
+%      F_C: conductivity signal frequency in kHz (COND_FREQ * 1e-3).
+%      T_G, T_H, T_I, T_J: temperature calibration coefficients.
+%        These should be fields of struct TEMP_COEFS or its elements if it 
+%        is an array (in that order).
+%      C_G, C_H, C_I, C_J, CTCOR, CPCOR: conductivity calibration coefficients.
+%        These should be fields of struct COND_COEFS or its elements if it 
+%        is an array (in that order).
 %
 %  Notes:
 %    The equations and coefficients are provided in the calibration sheets of
@@ -39,11 +40,12 @@ function [temp, cond] = calibrateSBECT(temp_freq, cond_freq, pres, temp_coefs, c
 %    cond_coefs = [-9.92304872     1.11163373    -2.02979731e-3  2.29265437e-4 -9.57e-8  3.25e-6]
 %    [temp, cond] = calibrateSBECT(temp_freq, cond_freq, pres, temp_coefs, cond_coefs)
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

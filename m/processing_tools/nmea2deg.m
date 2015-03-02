@@ -5,13 +5,14 @@ function varargout = nmea2deg(varargin)
 %    DEG = NMEA2DEG(NMEA)
 %    [DEGLAT, DEGLON] = NMEA2DEG(NMEALAT, NMEALON)
 %
-%  DEG = NMEA2DEG(NMEA) converts the scalar or array NMEA from NMEA latitude or
-%  longitude degrees to decimal degrees applying the transformation:
-%     DEG = FIX(NMEA/100) + REM(NMEA,100)/60;
+%  Description:
+%    DEG = NMEA2DEG(NMEA) converts the scalar or array NMEA from NMEA latitude
+%    or longitude degrees to decimal degrees applying the transformation:
+%      DEG = FIX(NMEA/100) + REM(NMEA,100)/60;
 %
-%  [DEGLAT, DEGLON] = NMEA2DEG(NMEALAT, NMEALON) performs the same conversion
-%  to each of its input arguments separately.
-%    
+%    [DEGLAT, DEGLON] = NMEA2DEG(NMEALAT, NMEALON) performs the same conversion
+%    to each of its input arguments separately.
+%
 %  Examples:
 %    nmea2deg(3330.00)
 %    nmea = [36015.00 -445.25]
@@ -29,11 +30,12 @@ function varargout = nmea2deg(varargin)
 %    FIX
 %    REM
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

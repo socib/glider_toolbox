@@ -4,18 +4,20 @@ function [glider_toolbox_dir] = configGliderToolboxPath()
 %  Syntax:
 %    GLIDER_TOOLBOX_DIR = CONFIGGLIDERTOOLBOXPATH()
 %
-%  GLIDER_TOOLBOX_DIR = CONFIGGLIDERTOOLBOXPATH() adds the directory
-%  containing this function and all its subdirectories to the workspace
-%  path and returns the full directory path.
+%  Description:
+%    GLIDER_TOOLBOX_DIR = CONFIGGLIDERTOOLBOXPATH() adds the directory
+%    containing this function and all its subdirectories to the workspace
+%    path and returns the full directory path.
 %
 %  Examples:
 %    glider_toolbox_dir = configGliderToolboxPath()
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

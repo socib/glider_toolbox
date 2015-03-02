@@ -6,56 +6,57 @@ function [meta, data] = dba2mat(filename, varargin)
 %    [META, DATA] = DBA2MAT(FILENAME, OPTIONS)
 %    [META, DATA] = DBA2MAT(FILENAME, OPT1, VAL1, ...)
 %
-%  [META, DATA] = DBA2MAT(FILENAME) reads the dba file named by string FILENAME,
-%  loading its metadata in struct META and its data in array DATA.
+%  Description:
+%    [META, DATA] = DBA2MAT(FILENAME) reads the dba file named by string 
+%    FILENAME, loading its metadata in struct META and its data in array DATA.
 %
-%  [META, DATA] = DBA2MAT(FILENAME, OPTIONS) and 
-%  [META, DATA] = DBA2MAT(FILENAME, OPT1, VAL1, ...) accept the following 
-%  options given in key-value pairs OPT1, VAL1... or in a struct OPTIONS with 
-%  field names as option keys and field values as option values:
-%    FORMAT: data output format.
-%      String setting the format of the output DATA. Valid values are:
-%        'array': DATA is a matrix with sensor readings as columns ordered
-%          as in the 'sensors' metadata field.
-%        'struct': DATA is a struct with sensor names as field names and
-%          column vectors of sensor readings as field values.
-%      Default value: 'array'
-%    SENSORS: sensor filtering list.
-%      String cell array with the names of the sensors of interest. If given,
-%      only sensors present in both the input data sets and this list will be 
-%      present in output. The string 'all' may also be given, in which case 
-%      sensor filtering is not performed and all sensors in input list will be 
-%      present in output.
-%      Default value: 'all' (do not perform sensor filtering).
+%    [META, DATA] = DBA2MAT(FILENAME, OPTIONS) and 
+%    [META, DATA] = DBA2MAT(FILENAME, OPT1, VAL1, ...) accept the following 
+%    options given in key-value pairs OPT1, VAL1... or in a struct OPTIONS with 
+%    field names as option keys and field values as option values:
+%      FORMAT: data output format.
+%        String setting the format of the output DATA. Valid values are:
+%          'array': DATA is a matrix with sensor readings as columns ordered
+%            as in the 'sensors' metadata field.
+%          'struct': DATA is a struct with sensor names as field names and
+%            column vectors of sensor readings as field values.
+%        Default value: 'array'
+%      SENSORS: sensor filtering list.
+%        String cell array with the names of the sensors of interest. If given,
+%        only the sensors present in both the input data file and this list
+%        will be present in output. The string 'all' may also be given,
+%        in which case sensor filtering is not performed and all sensors
+%        in the input data file will be present in output.
+%        Default value: 'all' (do not perform sensor filtering).
 %
-%  META has the following fields based on the tags of the ascii header:
-%    HEADERS: a struct with the ascii tags present in dba header with fields:
-%      DBD_LABEL: ascii tag in dba header.
-%      ENCODING_VER: ascii tag in dba header.
-%      NUM_ASCII_TAGS: ascii tag in dba header.
-%      ALL_SENSORS: ascii tag in dba header.
-%      FILENAME: ascii tag in dba header.
-%      THE8X3_FILENAME: ascii tag in dba header.
-%      FILENAME_EXTENSION: ascii tag in dba header.
-%      FILENAME_LABEL: ascii tag in dba header.
-%      MISSION_NAME: ascii tag in dba header.
-%      FILEOPEN_TIME: ascii tag in dba header.
-%      SENSORS_PER_CYCLE: ascii tag in dba header.
-%      NUM_LABEL_LINES: ascii tag in dba header.
-%      NUM_SEGMENTS: ascii tag in dba header.
-%      SEGMENT_FILENAMES: string cell array with the contents of the ascii tags
-%        SEGMENT_FILENAME_0, ..., SEGMENT_FILENAME_N-1.
-%    SENSORS: string cell array with the names of the sensors present in the
-%      returned data array (in the same column order as the data).
-%    UNITS: string cell array with the units of the sensors present in the
-%      returned data array.
-%    BYTES: array with the number of bytes of each sensor present in the 
-%      returned data array.
-%    SOURCES: string cell array containing FILENAME.
+%    META has the following fields based on the tags of the ascii header:
+%      HEADERS: a struct with the ascii tags present in dba header with fields:
+%        DBD_LABEL: ascii tag in dba header.
+%        ENCODING_VER: ascii tag in dba header.
+%        NUM_ASCII_TAGS: ascii tag in dba header.
+%        ALL_SENSORS: ascii tag in dba header.
+%        FILENAME: ascii tag in dba header.
+%        THE8X3_FILENAME: ascii tag in dba header.
+%        FILENAME_EXTENSION: ascii tag in dba header.
+%        FILENAME_LABEL: ascii tag in dba header.
+%        MISSION_NAME: ascii tag in dba header.
+%        FILEOPEN_TIME: ascii tag in dba header.
+%        SENSORS_PER_CYCLE: ascii tag in dba header.
+%        NUM_LABEL_LINES: ascii tag in dba header.
+%        NUM_SEGMENTS: ascii tag in dba header.
+%        SEGMENT_FILENAMES: string cell array with the contents of
+%           the ascii tags SEGMENT_FILENAME_0, ... , SEGMENT_FILENAME_N-1.
+%      SENSORS: string cell array with the names of the sensors present
+%        in the returned data array (in the same column order as the data).
+%      UNITS: string cell array with the units of the sensors present
+%        in the returned data array.
+%      BYTES: array with the number of bytes of each sensor present
+%        in the returned data array.
+%      SOURCES: string cell array containing FILENAME.
 %
 %  Notes:
 %    A description of the dba format may be found here:
-%      http://marine.rutgers.edu/~kerfoot/slocum/data/readme/wrc_doco/dbd_file_format.txt
+%      <http://marine.rutgers.edu/~kerfoot/slocum/data/readme/wrc_doco/dbd_file_format.txt>
 %
 %  Examples:
 %    % Retrieve data from all sensors as array:
@@ -71,11 +72,12 @@ function [meta, data] = dba2mat(filename, varargin)
 %    DBACAT
 %    DBAMERGE
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

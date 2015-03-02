@@ -8,76 +8,80 @@ function [hfig, haxs, hlgn, hcba, htrj, hbeg, hend, hwpt, hcur] = plotTransectCu
 %    PLOTTRANSECTCURRENTMAP(H, OPT1, VAL1, ...)
 %    [HFIG, HAXS, HLGN, HCBA, HTRJ, HBEG, HEND, HWPT, HCUR] = PLOTTRANSECTCURRENTMAP(...)
 %
-%  PLOTTRANSECTCURRENTMAP(OPTIONS) and 
-%  PLOTTRANSECTCURRENTMAP(OPT1, VAL1, ...) generate a new figure with a line
-%  plot of the trajectory described in glider data over a map, with an optional 
-%  line plot of the waypoint path and a vector plot of the estimated average 
-%  currents, according to options in key-value pairs OPT1, VAL1... or in struct
-%  OPTIONS with field names as option keys and field values as option values.
-%  The map is generated with M_PROJ, M_PATCH and M_GSHHS_H or M_USERCOAST.
-%  The line plots are generated with M_PLOT, and the vector plot with M_VEC.
-%  Recognized options are:
-%    LATDATA: trajectory latitude coordinate data.
-%      Vector of data to use as latitude coordinate of the glider trajectory.
-%      Default value: []
-%    LONDATA: trajectory longitude coordinate data.
-%      Vector of data to use as longitude coordindate of the glider trajectory.
-%      Default value: []
-%    WPTLATDATA: waypoint path latitude data.
-%      Vector of data to use as latitude coordinates of the waypoint path.
-%      Default value: []
-%    WPTLONDATA: waypoint path longitude data.
-%      Vector of data to use as longitude coordinates of the waypoint path.
-%      Default value: []
-%    CURNORDATA: northward current data.
-%      Vector of data to use as northward component of water velocity estimates.
-%      Default value: []
-%    CUREASDATA: eastward current data.
-%      Vector of data to use as eastward component of water velocity estimates.
-%      Default value: []
-%    CURSCALE: current unit scale.
-%      Scalar specifying the length of current vectors in inches.
-%      Default value: 1
-%    COASTFILE: precomputed coast line data file.
-%      String with the path to the coast file to be passed to function 
-%      M_USERCOAST to generate the land patch. If empty, M_GSHHS_H is called
-%      instead
-%      Default value: [] (call M_GSHHS_H)
-%    XLABEL: horizontal axis label data.
-%      Struct defining x label properties. Label's text is in property 'String'.
-%      Default value: struct()
-%    YLABEL: vertical axis label data.
-%      Struct defining y label properties. Label's text is in property 'String'.
-%      Default value: struct()
-%    CLABEL: color bar label data.
-%      Struct defining color bar label properties. Label's text is in property 
-%      'String'. Actually this will be the colorbar's child object 'Title'.
-%      Default value: struct()
-%    TITLE: axes title data.
-%      Struct defining axes title properties. Title's text is in property 
-%      'String'.
-%      Default value: struct()
-%    AXSPROPS: extra axis properties.
-%      Struct of axis properties to be set for the plot axes with function SET.
-%      Default value: struct()
-%    FIGPROPS: extra figure properties.
-%      Struct of figure properties to be set for the figure with function SET.
-%      Default value: struct()
+%  Description:
+%    PLOTTRANSECTCURRENTMAP(OPTIONS) and 
+%    PLOTTRANSECTCURRENTMAP(OPT1, VAL1, ...) generate a new figure with a line
+%    plot of the trajectory described in glider data over a map, with an 
+%    optional line plot of the waypoint path and a vector plot of the estimated
+%    average currents, according to options in key-value pairs OPT1, VAL1...
+%    or in struct OPTIONS with field names as option keys and field values as
+%    option values. The map is generated with M_PROJ, M_PATCH and M_GSHHS_H or
+%    M_USERCOAST. The line plots are generated with M_PLOT, and the vector plot
+%    with M_VEC. Recognized options are:
+%      LATDATA: trajectory latitude coordinate data.
+%        Vector to use as latitude coordinate of the glider trajectory.
+%        Default value: []
+%      LONDATA: trajectory longitude coordinate data.
+%        Vector to use as longitude coordindate of the glider trajectory.
+%        Default value: []
+%      WPTLATDATA: waypoint path latitude data.
+%        Vector to use as latitude coordinates of the waypoint path.
+%        Default value: []
+%      WPTLONDATA: waypoint path longitude data.
+%        Vector to use as longitude coordinates of the waypoint path.
+%        Default value: []
+%      CURNORDATA: northward current data.
+%        Vector to use as northward component of water velocity estimates.
+%        Default value: []
+%      CUREASDATA: eastward current data.
+%        Vector to use as eastward component of water velocity estimates.
+%        Default value: []
+%      CURSCALE: current unit scale.
+%        Scalar specifying the length of current vectors in inches.
+%        Default value: 1
+%      COASTFILE: precomputed coast line data file.
+%        String with the path to the coast file to be passed to function 
+%        M_USERCOAST to generate the land patch. If empty, M_GSHHS_H is called
+%        instead.
+%        Default value: [] (call M_GSHHS_H)
+%      XLABEL: horizontal axis label data.
+%        Struct defining x label properties.
+%        The text of the label is in property 'String'.
+%        Default value: struct()
+%      YLABEL: vertical axis label data.
+%        Struct defining y label properties.
+%        The text of the label is in property 'String'.
+%        Default value: struct()
+%      CLABEL: color bar label data.
+%        Struct defining color bar label properties.
+%        The text of the label is in property 'String'.
+%        Actually this will be the colorbar's child object 'Title'.
+%        Default value: struct()
+%      TITLE: axes title data.
+%        Struct defining axes title properties.
+%        The text of the label is in property 'String'.
+%        Default value: struct()
+%      AXSPROPS: extra axis properties.
+%        Struct of axis properties to set for the plot axes with function SET.
+%        Default value: struct()
+%      FIGPROPS: extra figure properties.
+%        Struct of figure properties to set for the figure with function SET.
+%        Default value: struct()
 %
-%  PLOTTRANSECTCURRENTMAP(H, ...) does not create a new figure, but plots 
-%  to figure given by figure handle H.
-%  
-%  [HFIG, HAXS, HLGN, HCBA, HTRJ, HBEG, HEND, HWPT, HCUR] = PLOTTRANSECTCURRENTMAP(...) 
-%  returns handles for the figure, axes, legend, color bar, lines and patch 
-%  objects in HFIG, HAXS, HLGN, HCBA, HTRJ, HBEG, HEND, HWPT, and HCUR 
-%  respectively.
+%    PLOTTRANSECTCURRENTMAP(H, ...) does not create a new figure, but plots 
+%    to figure given by figure handle H.
+%
+%    [HFIG, HAXS, HLGN, HCBA, HTRJ, HBEG, HEND, HWPT, HCUR] = PLOTTRANSECTCURRENTMAP(...) 
+%    returns handles for the figure, axes, legend, color bar, lines and patch 
+%    objects in HFIG, HAXS, HLGN, HCBA, HTRJ, HBEG, HEND, HWPT, and HCUR 
+%    respectively.
 %
 %  Notes:
 %    This function requires the files from the Global Self-consistant 
 %    Hierarchical High-resolution Shorelines data suite (GSHHS) to be available 
 %    in the path when no user defined coast file is provided. Please see
 %    installation details in M_Map official site:
-%      http://www.eos.ubc.ca/~rich/private/mapug.html#p9.5
+%      <http://www.eos.ubc.ca/~rich/private/mapug.html#p9.5>
 %
 %    The map is plotted in the geographic coordinate system (longitude-latitude,
 %    no projection) and the map boundaries are selected such that the resulting
@@ -113,11 +117,12 @@ function [hfig, haxs, hlgn, hcba, htrj, hbeg, hend, hwpt, hcur] = plotTransectCu
 %    M_PLOT
 %    SET
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

@@ -4,15 +4,16 @@ function [figures_proc, figures_grid] = configFigures()
 %  Syntax:
 %    [FIGURES_PROC, FIGURES_GRID] = CONFIGFIGURES()
 %
-%  [FIGURES_PROC, FIGURES_GRID] = CONFIGFIGURES() should return structs
-%  FIGURES_PROC and FIGURES_GRID defining the figures to be generated from
-%  processed glider data and gridded glider data respectively in the format
-%  accepted by function GENERATEGLIDERFIGURES.
+%  Description:
+%    [FIGURES_PROC, FIGURES_GRID] = CONFIGFIGURES() should return structs
+%    FIGURES_PROC and FIGURES_GRID defining the figures to be generated from
+%    processed glider data and gridded glider data respectively in the format
+%    accepted by function GENERATEGLIDERFIGURES.
 %
-%  Additionally, default values of axis, figure and plot object properties for 
-%  glider figure plots might be set. This is usually done calling the function
-%  SET with the root object (0) and prepending figure property names with 
-%  'DefaultFigure...' and axis property names with 'DefaultAxes...'.
+%    Additionally, default values of axis, figure and plot object properties
+%    for glider figure plots might be set. This is usually done calling the
+%    function SET with the root object (0) and prepending figure property names
+%    with 'DefaultFigure...' and axis property names with 'DefaultAxes...'.
 %
 %  Notes:
 %    Edit this file defining the desired figures for processed and gridded data
@@ -30,11 +31,12 @@ function [figures_proc, figures_grid] = configFigures()
 %    PLOTPROFILESTATISTICS
 %    SET
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

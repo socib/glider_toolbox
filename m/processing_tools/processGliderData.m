@@ -6,307 +6,313 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
 %    [DATA_PROC, META_PROC] = PROCESSGLIDERDATA(DATA_PRE, META_PRE, OPTIONS)
 %    [DATA_PROC, META_PROC] = PROCESSGLIDERDATA(DATA_PRE, META_PRE, OPT1, VAL1, ...)
 %
-%  DATA_PROC = PROCESSGLIDERDATA(DATA_PRE, META_PRE, ...) processes preprocessed
-%  data from a glider deploymnet according to given options, performing the 
-%  following actions:
-%    - Interpolation of reference sensors: 
-%      Missing values of time, latitude and longitude sequences are filled 
-%      by interpolation if required.
-%    - Interpolation of optional reference sensors:
-%      Missing values of navigation depth, pitch, roll and heading sequences, 
-%      if present, are filled by interpolation if required.
-%    - Identification of transects:
-%      Transects are identified finding their boundaries at changes of waypoint
-%      coordinates, if they are available.
-%    - Computation of distance over ground:
-%      The planar distance covered along the trajectory is computed cumulating
-%      the distance between consecutive points with valid position coordinates.
-%    - Pressure processing:
-%      Pressure is optionally filtered using a filter proposed by Seabird.
-%      Depth is optionally derived from pressure and longitude sequences.
-%    - Identification of casts:
-%      Upcasts and downcasts are identified finding local extrema of the chosen 
-%      depth or pressure sequence, and the glider vertical direction is deduced.
-%    - CTD flow speed derivation:
-%      Flow speed through the CTD cell may be derived from selected depth,
-%      time and pitch sequences. A nominal pitch value may be given if the pitch
-%      sequence is not available.
-%    - Sensor lag correction:
-%      Any already selected sequence may be corrected from sensor lag effects.
-%      The sensor lag time constant may be provided as option or estimated from
-%      identified consecutive casts with opposite directions.
-%    - Thermal lag correction:
-%      Any temperature and conductivity sequence pair may be corrected from
-%      thermal lag effects. The thermal lag parameters may be provided as option
-%      or estimated from identified consecutive casts with opposite directions.
-%    - Salinity derivation:
-%      In situ salinity may be derived from any set of conductivity, temperature
-%      and pressure sequences already selected or produced.
-%    - Density derivation:
-%      In situ density may be derived from any set of conductivity, temperature 
-%      and pressure sequences already selected or produced.
+%  Description:
+%    DATA_PROC = PROCESSGLIDERDATA(DATA_PRE, META_PRE, ...) processes 
+%    preprocessed data from a glider deploymnet according to given options, 
+%    performing the following actions:
+%      - Interpolation of reference sensors: 
+%        Missing values of time, latitude and longitude sequences are filled 
+%        by interpolation if required.
+%      - Interpolation of optional reference sensors:
+%        Missing values of navigation depth, pitch, roll and heading sequences, 
+%        if present, are filled by interpolation if required.
+%      - Identification of transects:
+%        Transects are identified finding their boundaries at changes of 
+%        waypoint coordinates, if they are available.
+%      - Computation of distance over ground:
+%        The planar distance covered along the trajectory is computed cumulating
+%        the distance between consecutive positions with valid coordinates.
+%      - Pressure processing:
+%        Pressure is optionally filtered using a filter proposed by Seabird.
+%        Depth is optionally derived from pressure and longitude sequences.
+%      - Identification of casts:
+%        Upcasts and downcasts are identified finding local extrema of the
+%        chosen depth or pressure sequence, and the glider vertical direction
+%        is deduced.
+%      - CTD flow speed derivation:
+%        Flow speed through the CTD cell may be derived from selected depth,
+%        time and pitch sequences. A nominal pitch value may be given if the
+%        pitch sequence is not available.
+%      - Sensor lag correction:
+%        Any already selected sequence may be corrected from sensor lag effects.
+%        The sensor lag time constant may be provided as option or estimated
+%        from identified consecutive casts with opposite directions.
+%      - Thermal lag correction:
+%        Any temperature and conductivity sequence pair may be corrected from
+%        thermal lag effects. The thermal lag parameters may be provided as
+%        option or estimated from identified consecutive casts with opposite
+%        directions.
+%      - Salinity derivation:
+%        In situ salinity may be derived from any set of conductivity,
+%        temperature and pressure sequences already selected or produced.
+%      - Density derivation:
+%        In situ density may be derived from any set of conductivity,
+%        temperature and pressure sequences already selected or produced.
 %
-%  DATA_PRE should be a struct in the format returned by PREPROCESSGLIDERDATA,
-%  where each field is a sequence of measurements of the variable with the same
-%  name.
+%    DATA_PRE should be a struct in the format returned by PREPROCESSGLIDERDATA,
+%    where each field is a sequence of measurements of the variable with the 
+%    same name.
 %
-%  DATA_PROC is a struct in the same format as DATA_PRE, with time sequences 
-%  resulting from the processing actions described above, performed according
-%  to the options described below.
+%    DATA_PROC is a struct in the same format as DATA_PRE, with time sequences 
+%    resulting from the processing actions described above, performed according
+%    to the options described below.
 %
-%  META_PROC is also a struct with one field per variable, adding processing 
-%  metadata to any existing metadata in META_PRE.
+%    META_PROC is also a struct with one field per variable, adding processing 
+%    metadata to any existing metadata in META_PRE.
 %
-%  Options may be given in key-value pairs OPT1, VAL1... or in a struct OPTIONS
-%  with field names as option keys and field values as option values.
-%  Recognized options are:
-%    TIME_FILLING: time interpolation switch.
-%      Boolean setting whether time missing values should be filled by 
-%      interpolation.
-%      Default value: false
-%    POSITION_FILLING: position interpolation switch.
-%      Boolean setting whether latitude and longitude missing values should be 
-%      filled by interpolation.
-%      Default value: false
-%    DEPTH_FILLING: depth interpolation switch.
-%      Boolean setting whether depth missing values should be filled by
-%      interpolation.
-%      Default value: false
-%    ATTITUDE_FILLING: attitude interpolation switch.
-%      Boolean setting whether roll and pitch missing values should be filled by
-%      interpolation.
-%      Default value: false
-%    HEADING_FILLING: heading interpolation switch.
-%      Boolean setting whether heading missing values should be filled by
-%      interpolation.
-%      Default value: false
-%    WAYPOINT_FILLING: waypoint interpolation switch.
-%      Boolean setting whether waypoint latitude and longitude missing values 
-%      should be filled with the previous valid value.
-%      Default value: true
-%    PRESSURE_FILTERING: Seabird pressure filtering switch.
-%      Boolean setting whether pressure should be filtered with low pass filter 
-%      described in the Seabird Data Processing Manual.
-%      Default value: true
-%    PRESSURE_FILTER_CONSTANT: Seabird pressure filter parameter.
-%      Non negative number, the time constant for the Seabird low-pass filter.
-%      Default value: 4 (recommended by Seabird Data Processing Manual)
-%    DEPTH_CTD_DERIVATION: depth from CTD pressure derivation.
-%      Boolean setting whether a depth sequence should be derived from CTD
-%      pressure readings.
-%      Default value: true
-%    PROFILING_LIST: cast identification settings.
-%      Struct array selecting input sequences and parameters for cast boundary
-%      identification, in order of preference. It should have the following
-%      fields:
-%        DEPTH: depth or pressure sequence name.
-%      It may have the following optional fields (empty or missing):
-%        TIME: time sequence name or empty.
-%          Default value: []
-%        STALL: scalar with the maximum vertical displacement when stalled.
-%          Default value: 3
-%        SHAKE: scalar with the maximum duration of a vertical shake.
-%          Default value: 20
-%        INVERSION: scalar with the maximum depth inversion allowed during a
-%          cast.
-%          Default value: 3
-%        INTERRUPT: scalar with the maximum duration of stalled and/or shake 
-%          intervals during a cast.
-%          Default value: 180
-%        LENGTH: scalar with the minimum depth range a cast must span.
-%          Default value: 10
-%        PERIOD: scalar with the minimum duration range a cast must last.
-%          Default value: 0
-%      Each struct in the array specifies a choice of inputs for cast boundary
-%      identification. The time sequence is optional and is relevant only if
-%      the SHAKE, INTERRUPT or PERIOD options are specified. Identification will
-%      be performed with the first input choice whose input sequences are 
-%      available. If no input choice is available, profiles are not identified.
-%      Default value: struct('depth', {'depth' 'depth_ctd' 'depth_ctd'}, ...
-%                            'time',  {'time'  'time_ctd'  'time'});
-%    PROFILE_MIN_RANGE: minimum depth range allowed for a valid profile.
-%      Non negative real number setting the minimum depth range threshold for
-%      cast validation. If the difference between the maximum and the minimum 
-%      depth of a valid reading in a cast is less than the given threshold,
-%      the cast will be discarded. Set it to zero to prevent discading any cast.
-%      Default value: 10
-%    PROFILE_MAX_GAP_RATIO: maximum gap depth ratio allowed for a valid profile.
-%      Real number (in [0..1]) setting the maximum gap ratio threshold for cast
-%      cast validation. A gap is a sequence of consecutive readings in which the
-%      value of at least one of the sensors taken into account is invalid.
-%      The gap ratio is the ratio of the depth range covered during the gap to
-%      the total depth covered of the cast. If the ratio of the largest gap
-%      to the total depth range is greater than the given threshold, the cast
-%      will be discarded. Set it to 1 to prevent discarding any cast.
-%      Default value: 0.8
-%    FLOW_CTD_LIST: CTD flow speed derivation input set choices.
-%      Struct array selecting input sequences for CTD flow speed derivation, in
-%      order of preference. It should have the following fields:
-%        TIME: time sequence name.
-%        DEPTH: depth sequence name.
-%        PITCH: pitch sequence name.
-%      Each struct in the array specifies a choice of inputs for CTD flow speed 
-%      derivation. Pitch sequence is optional. If missing or empty, the nominal 
-%      pitch value may be used (see below). Derivation will be performed only if
-%      if the casts are properly identified, and using the first input choice 
-%      whose time and depth sequences are available, and either the pitch 
-%      sequence is available or the pitch nominal value is set. If no input
-%      choice is available, CTD flow speed is not derived.
-%      Default value: struct('time', {}, 'depth', {}, 'pitch', {}) (no derivation)
-%    FLOW_CTD_PITCH_VALUE: nominal pitch value for CTD flow speed derivation.
-%      Number with the nominal pitch value (radians) to use for CTD flow speed
-%      derivation when no pitch sequence is available.
-%      Default value: [] (no default pitch value)
-%    FLOW_CTD_MIN_PITCH: low pitch threshold for CTD flow speed derivation.
-%      Number with the minimum absolute pitch value below which flow speed is 
-%      considered invalid during CTD flow speed derivation.
-%      Default value: 0 (all values are valid).
-%    FLOW_CTD_MIN_VELOCITY: low velocity threshold for CTD flow speed derivation.
-%      Number with the minimum absolute vertical velocity value below which 
-%      flow speed is considered invalid during CTD flow speed derivation.
-%      Default value: 0 (all values are valid).
-%    SENSOR_LAG_LIST: sensor lag correction settings.
-%      Struct array specifying which sequences should be produced by correcting 
-%      the sensor lag in the corresponding original sensor sequences.
-%      It should have the following fields:
-%        CORRECTED: string with the name for the corrected sequence (field in 
-%          struct DATA_PROC).
-%        ORIGINAL: string with the name of the original sequence (field in 
-%          struct DATA_PROC).
-%        PARAMETERS: non negative number as predefined time constant, or string 
-%          'auto' for automatic estimation from casts.
-%      It may have the following optional fields (empty or missing):
-%        TIME: string cell array with the names of the time sequence to use 
-%          for estimation or correction, in order of preference.
-%          Default value: {'time'}
-%        DEPTH: string cell array with the names of the depth sequence to use 
-%          for estimation or correction, in order of preference.
-%          Default value: {'depth'}
-%        FLOW: string cell array with the names of the flow sequence to use
-%          for estimation or correction, in order of preference. This is only
-%          used if flow speed is not constant.
-%          Default value: {'flow_ctd'}
-%        CONSTANT_FLOW: boolean setting whether parameters are static or dynamic
-%          (varying with the flow speed).
-%          Default value: false
-%        ESTIMATOR: function handle or string with the name of the estimator to
-%          use to combine the parameter estimates computed for each cast pair.
-%          Default value: @nanmedian
-%        MINOPTS: struct to pass custom minimization options for estimation,
-%          in the format accepted by function FINDSENSORLAGPARAMS.
-%          Default value: struct()
-%      Each struct in the struct array specifies a sensor lag correction.
-%      It will be performed only if the casts are properly identified,
-%      all the input sequences are available, and the correction parameter is
-%      available too (either given as option or estimated from pair of casts).
-%      Default value: struct('corrected', {}, 'original', {}, 'parameters', {})
-%    THERMAL_LAG_LIST: thermal lag correction settings.
-%      Struct array specifying which temperature and conductivity sequences
-%      should be produced by correcting the thermal lag in the corresponding 
-%      original sensor sequences.
-%      It should have the following fields:
-%        CONDUCTIVITY_CORRECTED: string with the name for the corrected
-%          conductivity sequence (field in DATA_PROC).
-%        TEMPERATURE_CORRECTED: string with the name for the corrected
-%          temperature sequence (field in DATA_PROC).
-%        CONDUCTIVITY_ORIGINAL: string with the name of the original
-%          conductivity sequence (field in DATA_PROC).
-%        TEMPERATURE_ORIGINAL: string with the name of the original temperature
-%          sequence (field in DATA_PROC).
-%        PRESSURE_ORIGINAL: string with the name of the original pressure
-%          sequence (field in DATA_PROC).
-%        PARAMETERS: numeric vector with predefined thermal lag parameters or
-%          string 'auto' for automatic estimation from casts. Parameter vector's
-%          should be a 2 element array  when flow speed is constant (error and 
-%          error time), and a 4 element array otherwise (error offset, error 
-%          slope, error time offset and error time slope).
-%      It may have the following optional fields (empty or missing):
-%        TIME: string cell array with the names of the time sequence to use 
-%          for estimation or correction, in order of preference.
-%          Default value: {'time_ctd' 'time'}
-%        DEPTH: string cell array with the names of the depth sequence to use 
-%          for estimation or correction, in order of preference. Depth is only
-%          used to ignore invalid profiles.
-%          Default value: {'depth_ctd' 'depth'}
-%        FLOW: string cell array with the names of the flow sequence to use
-%          for estimation or correction, in order of preference. This is only
-%          used if flow speed is not constant.
-%          Default value: {'flow_ctd'}
-%        CONSTANT_FLOW: boolean setting whether parameters are static or dynamic
-%          (varying with the flow speed).
-%          Default value: false
-%        ESTIMATOR: function handle or string with the name of the estimator to
-%          use to combine the parameter estimates computed for each cast pair.
-%          Default value: @nanmedian
-%        MINOPTS: struct to pass custom minimization options for estimation,
-%          in the format accepted by function FINDTHERMALLAGPARAMS.
-%          Default value: struct()
-%      Each struct in the struct array specifies a thermal lag correction.
-%      It will be performed only if casts are properly identified, all the 
-%      input sequences are available, and the correction parameters are
-%      available too (either given as option or estimated from pair of casts).
-%      Default value: struct('conductivity_corrected', {'conductivity_corrected_thermal'}, ...
-%                            'temperature_corrected',  {'temperature_corrected_thermal'}, ...         
-%                            'conductivity_original', {'conductivity'}, ...
-%                            'temperature_original', {'temperature'}, ...
-%                            'pressure_original', {'pressure'}, ...
-%                            'parameters', {'auto'} )
-%    SALINITY_LIST: salinity derivation settings.
-%      Struct cell array specifying which salinity sequences should be produced
-%      by derivation from corresponding conductivity, temperature and pressure
-%      sequences.
-%      It should have the following fields:
-%        SALINITY: string with the name for the salinity sequence (field in 
-%          DATA_PROC).
-%        CONDUCTIVITY: string with the name of the original conductivity 
-%          sequence (field in DATA_PROC).
-%        TEMPERATURE: string with the name of the original temperature 
-%          sequence (field in DATA_PROC).
-%        PRESSURE: string with the name of the original pressure sequence (field
-%          in DATA_PRE).
-%      Each struct in the struct array specifies a salinity derivation.
-%      It will be performed only if all the original sequences are available.
-%      Default value: struct('salinity',     {'salinity     salinity_corrected_thermal'}, ...
-%                            'conductivity', {'conductivity conductivity'}, ...
-%                            'temperature',  {'temperature  temperature_corrected_thermal'},
-%                            'pressure',     {'pressure' '  pressure});
-%    DENSITY_LIST: density derivation settings.
-%      Struct cell array specifying which salinity sequences should be produced
-%      by derivation from corresponding salinity, temperature and pressure
-%      sequences.
-%      It should have the following fields:
-%        DENSITY: string with the name for the density sequence (field in 
-%          DATA_PROC).
-%        SALINITY: string with the name of the original salinity sequence 
-%          (field in DATA_PROC).
-%        TEMPERATURE: string with the name of the original temperature 
-%          sequence (field in DATA_PROC).
-%        PRESSURE: string with the name of the original pressure sequence (field
-%          in DATA_PROC).
-%      Each struct in the struct array specifies a density derivation.
-%      It will be performed only if all the or'time'iginal sequences are available.
-%      Default value: struct('density',     {'density'     'density_corrected_thermal'}, ...
-%                            'salinity',    {'salinity'    'salinity_corrected_thermal'}, ...
-%                            'temperature', {'temperature' 'temperature'}, ...
-%                            'pressure',    {'pressure'    'pressure'})
+%    Options may be given in key-value pairs OPT1, VAL1... or in a struct
+%    OPTIONS with field names as option keys and field values as option values.
+%    Recognized options are:
+%      TIME_FILLING: time interpolation switch.
+%        Boolean setting whether time missing values should be filled by 
+%        interpolation.
+%        Default value: false
+%      POSITION_FILLING: position interpolation switch.
+%        Boolean setting whether latitude and longitude missing values should be 
+%        filled by interpolation.
+%        Default value: false
+%      DEPTH_FILLING: depth interpolation switch.
+%        Boolean setting whether depth missing values should be filled by
+%        interpolation.
+%        Default value: false
+%      ATTITUDE_FILLING: attitude interpolation switch.
+%        Boolean setting whether roll and pitch missing values should be
+%        filled by interpolation.
+%        Default value: false
+%      HEADING_FILLING: heading interpolation switch.
+%        Boolean setting whether heading missing values should be filled by
+%        interpolation.
+%        Default value: false
+%      WAYPOINT_FILLING: waypoint interpolation switch.
+%        Boolean setting whether waypoint latitude and longitude missing values 
+%        should be filled with the previous valid value.
+%        Default value: true
+%      PRESSURE_FILTERING: Seabird pressure filtering switch.
+%        Boolean setting whether pressure should be filtered with low pass
+%        filter described in the Seabird Data Processing Manual.
+%        Default value: true
+%      PRESSURE_FILTER_CONSTANT: Seabird pressure filter parameter.
+%        Non-negative number, the time constant for the Seabird low-pass filter.
+%        Default value: 4 (recommended by Seabird Data Processing Manual)
+%      DEPTH_CTD_DERIVATION: depth from CTD pressure derivation.
+%        Boolean setting whether a depth sequence should be derived from CTD
+%        pressure readings.
+%        Default value: true
+%      PROFILING_LIST: cast identification settings.
+%        Struct array selecting input sequences and parameters for cast
+%        boundary identification, in order of preference. It should have 
+%        the following fields:
+%          DEPTH: depth or pressure sequence name.
+%        It may have the following optional fields (empty or missing):
+%          TIME: time sequence name or empty.
+%            Default value: []
+%          STALL: scalar with the maximum vertical displacement when stalled.
+%            Default value: 3
+%          SHAKE: scalar with the maximum duration of a vertical shake.
+%            Default value: 20
+%          INVERSION: scalar with the maximum depth inversion allowed during a
+%            cast.
+%            Default value: 3
+%          INTERRUPT: scalar with the maximum duration of stalled and/or shake 
+%            intervals during a cast.
+%            Default value: 180
+%          LENGTH: scalar with the minimum depth range a cast must span.
+%            Default value: 10
+%          PERIOD: scalar with the minimum duration range a cast must last.
+%            Default value: 0
+%        Each struct in the array specifies a choice of inputs for cast 
+%        boundary identification. The time sequence is optional and is
+%        relevant only if the SHAKE, INTERRUPT or PERIOD options are used.
+%        Identification will be performed with the first input choice whose 
+%        input sequences are available. If no input choice is available,
+%        profiles are not identified.
+%        Default value: struct('depth', {'depth' 'depth_ctd' 'depth_ctd'}, ...
+%                              'time',  {'time'  'time_ctd'  'time'});
+%      PROFILE_MIN_RANGE: minimum depth range allowed for a valid profile.
+%        Non-negative real number setting the minimum depth range threshold for
+%        cast validation. If the difference between the maximum and the minimum 
+%        depth of a valid reading in a cast is less than the given threshold,
+%        the cast will be discarded. Set it to 0 to prevent discarding any cast.
+%        Default value: 10
+%      PROFILE_MAX_GAP_RATIO: maximum gap ratio allowed for a valid profile.
+%        Real number (in [0..1]) setting the maximum gap ratio threshold for
+%        cast validation. A gap is a sequence of consecutive readings taken
+%        during a depth inversion or in which the value of at least one of the
+%        involved sensors is invalid. The gap ratio is the ratio of the depth 
+%        range covered during the gap over the total depth covered of the cast.
+%        If the ratio of the largest gap over the total depth range is greater
+%        than the given threshold, the cast will be discarded.
+%        Set it to 1 to prevent discarding any cast.
+%        Default value: 0.8
+%      FLOW_CTD_LIST: CTD flow speed derivation input set choices.
+%        Struct array selecting input sequences for CTD flow speed derivation,
+%        in order of preference. It should have the following fields:
+%          TIME: time sequence name.
+%          DEPTH: depth sequence name.
+%          PITCH: pitch sequence name.
+%        Each struct in the array specifies a choice of inputs for CTD flow 
+%        speed derivation. Pitch sequence is optional. If missing or empty, 
+%        the nominal pitch value may be used (see FLOW_CTD_PITCH VALUE below).
+%        Derivation will be performed only if the casts are properly identified,
+%        and using the first input choice whose time and depth sequences are 
+%        available, and either the pitch sequence is available or the pitch 
+%        nominal value is set. If no input choice is available, CTD flow speed
+%        is not derived.
+%        Default value: struct('time', {}, 'depth', {}, 'pitch', {})
+%      FLOW_CTD_PITCH_VALUE: nominal pitch value for CTD flow speed derivation.
+%        Number with the nominal pitch value (radians) to use for CTD flow
+%        speed derivation when no pitch sequence is available.
+%        Default value: [] (no default pitch value)
+%      FLOW_CTD_MIN_PITCH: low pitch threshold for CTD flow derivation.
+%        Number with the minimum absolute pitch value below which flow speed is 
+%        considered invalid during CTD flow speed derivation.
+%        Default value: 0 (all values are valid).
+%      FLOW_CTD_MIN_VELOCITY: low velocity threshold for CTD flow derivation.
+%        Number with the minimum absolute vertical velocity value below which 
+%        flow speed is considered invalid during CTD flow speed derivation.
+%        Default value: 0 (all values are valid).
+%      SENSOR_LAG_LIST: sensor lag correction settings.
+%        Struct array specifying the sequences to produce by correcting
+%        the sensor lag in the corresponding original sensor sequences.
+%        It should have the following fields:
+%          CORRECTED: string with the name for the corrected sequence (field in 
+%            struct DATA_PROC).
+%          ORIGINAL: string with the name of the original sequence (field in 
+%            struct DATA_PROC).
+%          PARAMETERS: non-negative number as predefined time constant,
+%            or string 'auto' for automatic estimation from casts.
+%        It may have the following optional fields (empty or missing):
+%          TIME: string cell array with the names of the time sequence to use 
+%            for estimation or correction, in order of preference.
+%            Default value: {'time'}
+%          DEPTH: string cell array with the names of the depth sequence to use 
+%            for estimation or correction, in order of preference.
+%            Default value: {'depth'}
+%          FLOW: string cell array with the names of the flow sequence to use
+%            for estimation or correction, in order of preference. This is only
+%            used if flow speed is not constant.
+%            Default value: {'flow_ctd'}
+%          CONSTANT_FLOW: boolean setting whether parameters are static or
+%            dynamic (varying with the flow speed).
+%            Default value: false
+%          ESTIMATOR: function handle or string with the name of the estimator
+%            to combine the parameter estimates computed for each cast pair.
+%            Default value: @nanmedian
+%          MINOPTS: struct to pass custom minimization options for estimation,
+%            in the format accepted by function FINDSENSORLAGPARAMS.
+%            Default value: struct()
+%        Each struct in the struct array specifies a sensor lag correction.
+%        It will be performed only if the casts are properly identified,
+%        all the input sequences are available, and the correction parameter is
+%        available too (either given as option or estimated from pair of casts).
+%        Default value: struct('corrected',  {}, ...
+%                              'original',   {}, ...
+%                              'parameters', {})
+%      THERMAL_LAG_LIST: thermal lag correction settings.
+%        Struct array specifying the temperature and conductivity sequences
+%        to produce by correcting the thermal lag in the corresponding 
+%        original sensor sequences.
+%        It should have the following fields:
+%          CONDUCTIVITY_CORRECTED: string with the name for the corrected
+%            conductivity sequence (field in DATA_PROC).
+%          TEMPERATURE_CORRECTED: string with the name for the corrected
+%            temperature sequence (field in DATA_PROC).
+%          CONDUCTIVITY_ORIGINAL: string with the name of the original
+%            conductivity sequence (field in DATA_PROC).
+%          TEMPERATURE_ORIGINAL: string with the name of the original 
+%            temperature sequence (field in DATA_PROC).
+%          PRESSURE_ORIGINAL: string with the name of the original 
+%            pressure sequence (field in DATA_PROC).
+%          PARAMETERS: numeric vector with predefined thermal lag parameters or
+%            string 'auto' for automatic estimation from casts. If a vector, it
+%            should be a 2 element array when flow speed is constant (error and 
+%            error time), and a 4 element array otherwise (error offset, error 
+%            slope, error time offset and error time slope).
+%        It may have the following optional fields (empty or missing):
+%          TIME: string cell array with the names of the time sequence to use 
+%            for estimation or correction, in order of preference.
+%            Default value: {'time_ctd' 'time'}
+%          DEPTH: string cell array with the names of the depth sequence to use 
+%            for estimation or correction, in order of preference.
+%            Depth is only used to ignore invalid profiles.
+%            Default value: {'depth_ctd' 'depth'}
+%          FLOW: string cell array with the names of the flow sequence to use
+%            for estimation or correction, in order of preference.
+%            This is only used if flow speed is not constant.
+%            Default value: {'flow_ctd'}
+%          CONSTANT_FLOW: boolean setting whether parameters are static or 
+%            dynamic (varying with the flow speed).
+%            Default value: false
+%          ESTIMATOR: function handle or string with the name of the estimator
+%             to combine the parameter estimates computed for each cast pair.
+%            Default value: @nanmedian
+%          MINOPTS: struct to pass custom minimization options for estimation,
+%            in the format accepted by function FINDTHERMALLAGPARAMS.
+%            Default value: struct()
+%        Each struct in the struct array specifies a thermal lag correction.
+%        It will be performed only if casts are properly identified, all the 
+%        input sequences are available, and the correction parameters are
+%        available too (either given as option or estimated from pair of casts).
+%        Default value: struct('conductivity_corrected', {'conductivity_corrected_thermal'}, ...
+%                              'temperature_corrected',  {'temperature_corrected_thermal'}, ...         
+%                              'conductivity_original', {'conductivity'}, ...
+%                              'temperature_original', {'temperature'}, ...
+%                              'pressure_original', {'pressure'}, ...
+%                              'parameters', {'auto'} )
+%      SALINITY_LIST: salinity derivation settings.
+%        Struct cell array specifying which salinity sequences to produce
+%        by derivation from corresponding conductivity, temperature 
+%        and pressure sequences. It should have the following fields:
+%          SALINITY: string with the name for the salinity sequence
+%            (field in DATA_PROC).
+%          CONDUCTIVITY: string with the name of the original conductivity 
+%            sequence (field in DATA_PROC).
+%          TEMPERATURE: string with the name of the original temperature 
+%            sequence (field in DATA_PROC).
+%          PRESSURE: string with the name of the original pressure sequence
+%            (field in DATA_PRE).
+%        Each struct in the struct array specifies a salinity derivation.
+%        It will be performed only if all the original sequences are available.
+%        Default value: struct('salinity',     {'salinity     salinity_corrected_thermal'}, ...
+%                              'conductivity', {'conductivity conductivity'}, ...
+%                              'temperature',  {'temperature  temperature_corrected_thermal'},
+%                              'pressure',     {'pressure' '  pressure});
+%      DENSITY_LIST: density derivation settings.
+%        Struct cell array specifying which salinity sequences to produce
+%        by derivation from corresponding salinity, temperature
+%        and pressure sequences. It should have the following fields:
+%          DENSITY: string with the name for the density sequence (field in 
+%            DATA_PROC).
+%          SALINITY: string with the name of the original salinity sequence 
+%            (field in DATA_PROC).
+%          TEMPERATURE: string with the name of the original temperature 
+%            sequence (field in DATA_PROC).
+%          PRESSURE: string with the name of the original pressure sequence (field
+%            in DATA_PROC).
+%        Each struct in the struct array specifies a density derivation.
+%        It will be performed only if all the or'time'iginal sequences are available.
+%        Default value: struct('density',     {'density'     'density_corrected_thermal'}, ...
+%                              'salinity',    {'salinity'    'salinity_corrected_thermal'}, ...
+%                              'temperature', {'temperature' 'temperature'}, ...
+%                              'pressure',    {'pressure'    'pressure'})
 %
-%  The following options are deprecated and should not be used:
-%    PROFILING_SEQUENCE_LIST: vertical sequence choices for cast identification.
-%      String cell array with the names of the pressure or depth sequence to be
-%      used for cast identification, in order of preference.
-%      Deprecated in v1.1.0:
-%        Superseeded by PROFILING_LIST.
-%    PROFILE_JOIN_SAME_DIR: whether join consecutive profiles with the same direction.
-%      Boolean setting whether consecutive valid profiles with the same vertical
-%      direction should be joined into one.
-%      Deprecated in v1.1.0:
-%        Superseeded by PROFILING_LIST.
-%    PROFILING_SEQUENCE_FILLING: profiling sequence interpolation switch.
-%      Boolean setting whether the missing values in the profiling sequence
-%      should be filled by interpolation before cast identification.
-%      Deprecated in v1.1.0:
-%        Not needed anymore since profile identification is consistent and 
-%        robust against missing values.
+%    The following options are deprecated and should not be used:
+%      PROFILING_SEQUENCE_LIST: sequence choices for cast identification.
+%        String cell array with the names of the pressure or depth sequence to
+%        use for cast identification, in order of preference.
+%        Deprecated in v1.1.0:
+%          Superseeded by PROFILING_LIST.
+%      PROFILE_JOIN_SAME_DIR: join consecutive profiles with the same direction.
+%        Boolean setting whether consecutive valid profiles with the same 
+%        vertical direction should be joined into one.
+%        Deprecated in v1.1.0:
+%          Superseeded by PROFILING_LIST.
+%      PROFILING_SEQUENCE_FILLING: profiling sequence interpolation switch.
+%        Boolean setting whether the missing values in the profiling sequence
+%        should be filled by interpolation before cast identification.
+%        Deprecated in v1.1.0:
+%          Not needed anymore since profile identification is consistent and 
+%          robust against missing values.
 %
 %  Notes:
 %    This function is based on the previous work by Tomeu Garau. He is the true
@@ -331,11 +337,12 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
 %    SW_SALT
 %    SW_DENS
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
@@ -1050,8 +1057,8 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
   
   %% Perform thermal lag estimation and correction, if needed.
   % Conductivity, temperature, pressure, and time sequences must be present in 
-  % already processed data. CTD flow speed sequence is also required for non 
-  % constant flow (unpumped) CTDs.
+  % already processed data. CTD flow speed sequence is also required for 
+  % non-constant flow (unpumped) CTDs.
   for thermal_lag_option_idx = 1:numel(options.thermal_lag_list)
     % Get thermal lag arguments, setting options to default values if needed.
     % Name of corrected conductivity and temperature sequences must be specified in option.

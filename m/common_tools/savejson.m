@@ -5,11 +5,12 @@ function json = savejson(object, varargin)
 %    JSON = SAVEJSON(OBJECT)
 %    SAVEJSON(OBJECT, FILENAME)
 %
-%  JSON = SAVEJSON(OBJECT) serializes the value of OBJECT in string JSON
-%  encoded in Javascript Object Notation format (JSON).
+%  Description:
+%    JSON = SAVEJSON(OBJECT) serializes the value of OBJECT in string JSON
+%    encoded in Javascript Object Notation format (JSON).
 %
-%  SAVEJSON(OBJECT, FILENAME) performs the same conversion but prints it to the
-%  file named by string FILENAME.
+%    SAVEJSON(OBJECT, FILENAME) performs the same conversion but prints 
+%    it to the file named by string FILENAME.
 %
 %  Notes:
 %    This function is inspired by a previous function by Tomeu Garau with the
@@ -36,7 +37,7 @@ function json = savejson(object, varargin)
 %  References:
 %    Crockford, D.; 2006:
 %    The application/json Media Type for JavaScript Object Notation (JSON).
-%    http://www.ietf.org/rfc/rfc4627.txt
+%    <http://www.ietf.org/rfc/rfc4627.txt>
 %
 %  Examples:
 %    % Encode to string:
@@ -64,11 +65,12 @@ function json = savejson(object, varargin)
 %    FWRITE
 %    FCLOSE
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

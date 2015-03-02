@@ -8,61 +8,60 @@ function [hfig, haxs, hlgs, hlns] = plotProfileStatistics(varargin)
 %    PLOTPROFILESTATISTICS(H, OPT1, VAL1, ...)
 %    [HFIG, HAXS, HLGS, HLNS] = PLOTPROFILESTATISTICS(...)
 %
-%  PLOTPROFILESTATISTICS(OPTIONS) and 
-%  PLOTPROFILESTATISTICS(OPT1, VAL1, ...) generate a new figure with line plots
-%  of statistical profiles of gridded glider data according to options in 
-%  key-value pairs OPT1, VAL1... or in struct OPTIONS with field names as option
-%  keys and field values as option values. A profile statistic subplot is 
-%  produced for each given variable, showing the mean value and the standard 
-%  deviation of each given measured variable along the horizontal dimension 
-%  over the given vertical coordinate for that subplot.
-%  The statistics are computed with the functions MEAN and STD.
-%  The line plots are generated with the function PLOT.
-%  Recognized options are:
-%    MDATA: measurement data.
-%      Cell array of matrices with variable data from which the profile
-%      statistics will be computed. One subplot will be produced for each
-%      matrix. The subplot layout is given by the size of the cell array.
-%      The first dimension of each matrix should be the profile instance.
-%      The second dimension of each matrix should be the depth level.
-%      Default value: {[]}
-%    YDATA: vertical coordinate data.
-%      Cell array of vectors with the vertical coordinate data for each sublot.
-%      The number of vectors in the cell array should match the number of 
-%      matrices in MDATA, and their lengths should match the second dimension
-%      of the corresponding matrix.
-%      Default value: {[]}
-%    XLABEL: horizontal axis label data.
-%      Struct array defining x label properties for each subplot.
-%      Label's text is in property 'String'.
-%      Default value: repmat(struct(), size(MDATA))
-%    YLABEL: vertical axis label data.
-%      Struct array defining y label properties for each subplot.
-%      Label's text is in property 'String'.
-%      Default value: repmat(struct(), size(MDATA))
-%    TITLE: axes title data.
-%      Struct array defining axes title properties for each subplot.
-%      Title's text is in property 'String'.
-%      Default value: repmat(struct(), size(MDATA))
-%    AXSPROPS: extra axis properties.
-%      Struct array of axis properties to be set for each subplot axes with 
-%      function SET.
-%      Default value: repmat(struct(), size(MDATA))
-%    FIGPROPS: extra figure properties.
-%      Struct of figure properties to be set for the figure with function SET.
-%      Default value: struct()
+%  Description:
+%    PLOTPROFILESTATISTICS(OPTIONS) and 
+%    PLOTPROFILESTATISTICS(OPT1, VAL1, ...) generate a new figure with
+%    line plots of statistical profiles of gridded glider data according
+%    to options in  key-value pairs OPT1, VAL1... or in struct OPTIONS
+%    with field names as option keys and field values as option values.
+%    A profile statistic subplot is produced for each given variable,
+%    showing the mean value and the standard deviation of each given measured
+%    variable along the horizontal dimension over the given vertical coordinate
+%    for that subplot. The statistics are computed with the functions MEAN 
+%    and STD. The line plots are generated with the function PLOT.
+%    Recognized options are:
+%      MDATA: measurement data.
+%        Cell array of matrices with variable data from which the profile
+%        statistics will be computed. One subplot will be produced for each
+%        matrix. The subplot layout is given by the size of the cell array.
+%        The first dimension of each matrix should be the profile instance.
+%        The second dimension of each matrix should be the depth level.
+%        Default value: {[]}
+%      YDATA: vertical coordinate data.
+%        Cell array of vectors with the vertical coordinate data for each 
+%        subplot. The number of vectors in the cell array should match the 
+%        number of matrices in MDATA, and their lengths should match the second
+%        dimension of the corresponding matrix.
+%        Default value: {[]}
+%      XLABEL: horizontal axis label data.
+%        Struct array defining x label properties for each subplot.
+%        Label's text is in property 'String'.
+%        Default value: repmat(struct(), size(MDATA))
+%      YLABEL: vertical axis label data.
+%        Struct array defining y label properties for each subplot.
+%        Label's text is in property 'String'.
+%        Default value: repmat(struct(), size(MDATA))
+%      TITLE: axes title data.
+%        Struct array defining axes title properties for each subplot.
+%        Title's text is in property 'String'.
+%        Default value: repmat(struct(), size(MDATA))
+%      AXSPROPS: extra axis properties.
+%        Struct array of axis properties to be set for each subplot axes with 
+%        function SET.
+%        Default value: repmat(struct(), size(MDATA))
+%      FIGPROPS: extra figure properties.
+%        Struct of figure properties to be set for the figure with function SET.
+%        Default value: struct()
 %
-%  PLOTPROFILESTATISTICS(H, ...) does not create a new figure, but plots 
-%  to figure given by figure handle H.
-%  
-%  [HFIG, HAXS, HLGS, HLNS] = PLOTPROFILESTATISTICS(...) returns handles for the
-%  figure, subplot axes, subplot legends, and lineseries, in HFIG, HAXS, HLGS,
-%  and HLNS, respectively. HFIG, HAXS, and HLGS, have the same dimensions as 
-%  suplots in the figure, MxN, and HLNS has dimensions 2xMxN, where M and N are
-%  the number of rows and the number of columnds in cell array MDATA.
+%    PLOTPROFILESTATISTICS(H, ...) does not create a new figure,
+%    but plots to figure given by figure handle H.
 %
-%  Notes:
-%    
+%    [HFIG, HAXS, HLGS, HLNS] = PLOTPROFILESTATISTICS(...) returns
+%    handles for the figure, subplot axes, subplot legends, and lineseries,
+%    in HFIG, HAXS, HLGS,  and HLNS, respectively. The dimesnions of HFIG, HAXS, 
+%    and HLGS match the number of suplots in the figure, MxN, and HLNS is 2xMxN,
+%    where M and N are the number of rows and columns in cell array MDATA.
+%
 %  Examples:
 %    [hfig, haxs, hlgs, hlns] = ...
 %      plotProfileStatistics(gcf, ...
@@ -82,11 +81,12 @@ function [hfig, haxs, hlgs, hlns] = plotProfileStatistics(varargin)
 %    PLOT
 %    SET
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

@@ -4,28 +4,29 @@ function [chlr, cdom, scat] = calibrateWLECOBbFl2(chlr_cnts, cdom_cnts, scat_cnt
 %  Syntax:
 %    [CHLR, CDOM, SCAT] = CALIBRATEWLECOBBFL2(CHLR_CNTS, CDOM_CNTS, SCAT_CNTS, CHLR_COEFS, CDOM_COEFS, SCAT_COEFS)
 %
-%  [CHLR, CDOM, SCAT] = CALIBRATEWLECOBBFL2(CHLR_CNTS, CDOM_CNTS, SCAT_CNTS, CHLR_COEFS, CDOM_COEFS, SCAT_COEFS) 
-%  applies the affine transformation (scale and offset) described in WET Labs 
-%  calibration sheet to convert raw measurements (counts) of chlorophyll 
-%  concentration, CDOM concetration and scattering in arrays CHLR_CNTS, 
-%  CDOM_CNTS and SCAT_CNTS to engineering units (ug l-1, ppb and  m-1 sr-1) 
-%  in arrays CHLR, CDOM, SCAT, using the calibration coefficients in arrays or 
-%  structs CHLR_COEFS, CDOM_COEFS and SCAT_COEFS.
+%  Description:
+%    [CHLR, CDOM, SCAT] = CALIBRATEWLECOBBFL2(CHLR_CNTS, CDOM_CNTS, SCAT_CNTS, CHLR_COEFS, CDOM_COEFS, SCAT_COEFS) 
+%    applies the affine transformation (scale and offset) described in WET Labs 
+%    calibration sheet to convert raw measurements (counts) of chlorophyll 
+%    concentration, CDOM concetration and scattering in arrays CHLR_CNTS, 
+%    CDOM_CNTS and SCAT_CNTS to engineering units (ug l-1, ppb and  m-1 sr-1) 
+%    in arrays CHLR, CDOM, SCAT, using the calibration coefficients in arrays 
+%    or structs CHLR_COEFS, CDOM_COEFS and SCAT_COEFS.
 %
-%  The calibration equation of each signal is a simple offset and scale:
-%    CHLR = CHLR_SF*(CHLR_CNTS - CHLR_DC)
-%    CDOM = CDOM_SF*(CDOM_CNTS - CDOM_DC)
-%    SCAT = SCAT_SF*(SCAT_CNTS - SCAT_DC)
-%  where
-%    CHLR_SF and CHLR_DC: chlorophyll scale factor and dark counts.
-%      These should be fields of struct CHLR_COEFS, shortened to SF and DC,
-%      or its elements if it is an array (in that order).
-%    CDOM_SF and CDOM_DC: CDOM scale factor and dark counts.
-%      These should be fields of struct CDOM_COEF, shortened to SF and DC,
-%      or its elements if it is an array (in that order).
-%    SCAT_SF and SCAT_DC: scattering scale factor and dark counts.
-%      These should be fields of struct SCAT_COEFS, shortened to SF and DC,
-%      or its elements if it is an array (in that order).
+%    The calibration equation of each signal is a simple offset and scale:
+%      CHLR = CHLR_SF*(CHLR_CNTS - CHLR_DC)
+%      CDOM = CDOM_SF*(CDOM_CNTS - CDOM_DC)
+%      SCAT = SCAT_SF*(SCAT_CNTS - SCAT_DC)
+%    where
+%      CHLR_SF and CHLR_DC: chlorophyll scale factor and dark counts.
+%        These should be fields of struct CHLR_COEFS, shortened to SF and DC,
+%        or its elements if it is an array (in that order).
+%      CDOM_SF and CDOM_DC: CDOM scale factor and dark counts.
+%        These should be fields of struct CDOM_COEF, shortened to SF and DC,
+%        or its elements if it is an array (in that order).
+%      SCAT_SF and SCAT_DC: scattering scale factor and dark counts.
+%        These should be fields of struct SCAT_COEFS, shortened to SF and DC,
+%        or its elements if it is an array (in that order).
 %
 %  Notes:
 %    The equations and coefficients are provided in the calibration sheets of
@@ -43,13 +44,12 @@ function [chlr, cdom, scat] = calibrateWLECOBbFl2(chlr_cnts, cdom_cnts, scat_cnt
 %      calibrateWLECOBbFl2(chlr_cnts, cdom_cnts, scat_cnts, ...
 %                          chlr_coefs, cdom_coefs, scat_coefs)
 %
-%  See also:
-%
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

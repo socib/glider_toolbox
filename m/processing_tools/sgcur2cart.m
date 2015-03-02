@@ -4,10 +4,11 @@ function [eastward, northward] = sgcur2cart(speed, direction)
 %  Syntax:
 %    [EASTWARD, NORTHWARD] = SGCUR2CART(SPEED, DIRECTION)
 %
-%  [EASTWARD, NORTHWARD] = SGCUR2CART(SPEED, DIRECTION) computes the eastward
-%  and northward components of the sea water velocity (m s-1) from the magnitude
-%  and direction estimates in SPEED (m s-1) and DIRECTION (degrees) provided by
-%  Seaglider gliders. All arguments are the same size.
+%  Description:
+%    [EASTWARD, NORTHWARD] = SGCUR2CART(SPEED, DIRECTION) computes the eastward
+%    and northward components of the sea water velocity (m s-1) from magnitude
+%    and direction estimates in SPEED (m s-1) and DIRECTION (degrees)
+%    provided by Seaglider gliders. All arguments are the same size.
 %
 %  Notes:
 %    This is just a convenience function to give a name to the conversion.
@@ -20,11 +21,12 @@ function [eastward, northward] = sgcur2cart(speed, direction)
 %  See also:
 %    POL2CART
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

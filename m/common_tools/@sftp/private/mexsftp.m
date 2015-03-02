@@ -17,60 +17,64 @@ function varargout = mexsftp(funcname, varargin)
 %    MEXSFTP('delfile', H, PATH)
 %    MEXSFTP('getfile', H, RPATH, LPATH)
 %    MEXSFTP('putfile', H, LPATH, RPATH)
-% 
-%  H = MEXSFTP('create', H, HOST, PORT, USER, PASS) creates a connection to the
-%  server, initializing the ssh and sftp sessions and the working directory,
-%  and returns a reference to the sftp connection.
-%  If no port, user or password are given, the default values are used.
 %
-%  MEXSFTP('delete', H) closes a connection to the server, and deletes the 
-%  referenced sftp connection, destroying the ssh and sftp sessions.
+%  Description:
+%    H = MEXSFTP('create', H, HOST, PORT, USER, PASS) creates a connection
+%    to the server, initializing the ssh and sftp sessions and the working
+%    directory, and returns a reference to the sftp connection.
+%    If no port, user or password are given, the default values are used.
 %
-%  MEXSFTP('connect', H, HOST, PORT, USER, PASS)  opens a connection to the
-%  server using the internal reference to the already existing sftp connection.
-%  If no port, user or password are given, the default values are used.
-%  
-%  MEXSFTP('disconnect', H) closes a connection to the server, but does not 
-%  delete the referenced sftp connection.
+%    MEXSFTP('delete', H) closes a connection to the server, and deletes the 
+%    referenced sftp connection, destroying the ssh and sftp sessions.
 %
-%  PATH = MEXSFTP('pwd', H) returns the current working directory on the server.
+%    MEXSFTP('connect', H, HOST, PORT, USER, PASS) opens a connection to the
+%    server using the internal reference to the already created sftp connection.
+%    If no port, user or password are given, the default values are used.
 %
-%  MEXSFTP('cwd', H, PATH) changes the current working directory on the server.
+%    MEXSFTP('disconnect', H) closes a connection to the server, but does not 
+%    delete the referenced sftp connection.
 %
-%  ATTS = MEXSFTP('lsfile', H, FILE) returns the attributes of a file on the
-%  server in a scalar struct with the following fields:
-%    NAME: string with the file name (without leading directory path).
-%    BYTES: double with the file size in bytes.
-%    ISDIR: logical whether the file is a directory.
-%    DATE: array with the modification time as a date vector.
+%    PATH = MEXSFTP('pwd', H) returns the current working directory on the
+%    server.
 %
-%  ATTS = MEXSFTP('lsdir', H, DIRECTORY) returns the attributes of all entries
-%  in directory on the server in a struct array with the fields described above.
+%    MEXSFTP('cwd', H, PATH) changes the current working directory on the
+%    server.
 %
-%  ATTS = MEXSFTP('lsglob', H, GLOB) returns the attributes of all files on the
-%  server whose name matches the given glob in a struct array with the fields 
-%  described above. Wildcards are only allowed in the file name, not in the
-%  leading directory path. If no file matches the glob, the result is empty.
+%    ATTS = MEXSFTP('lsfile', H, FILE) returns the attributes of a file on the
+%    server in a scalar struct with the following fields:
+%      NAME: string with the file name (without leading directory path).
+%      BYTES: double with the file size in bytes.
+%      ISDIR: logical whether the file is a directory.
+%      DATE: array with the modification time as a date vector.
 %
-%  MEXSFTP('mkdir', H, PATH) creates a new directory on the server.
-%  Parent directories should exist.
+%    ATTS = MEXSFTP('lsdir', H, DIRECTORY) returns the attributes of all
+%    entries in a directory on the server in a struct array with the fields
+%    described above.
 %
-%  MEXSFTP('rmdir', H, PATH) deletes a directory from the server.
-%  Directory should be empty.
-%  
-%  MEXSFTP('rename', H, SOURCE, TARGET) renames or moves a file on the server.
-%  Parent directories of new path should exist.
+%    ATTS = MEXSFTP('lsglob', H, GLOB) returns the attributes of all files on
+%    the server whose name matches a glob in a struct array with the fields
+%    described above. Wildcards are only allowed in the file name, not in the 
+%    leading directory path. If no file matches the glob, the result is empty.
 %
-%  MEXSFTP('delfile', H, PATH) deletes a file on the server.
-%  File can not be a directory, use 'rmdir' instead.
+%    MEXSFTP('mkdir', H, PATH) creates a new directory on the server.
+%    Parent directories should exist.
 %
-%  MEXSFTP('getfile', H, RPATH, LPATH) downloads the file from the remote path
-%  on the server to the local path. Local path is the full name of the target,
-%  and leading directories should exist. Remote path must not be a directory.
+%    MEXSFTP('rmdir', H, PATH) deletes a directory from the server.
+%    Directory should be empty.
 %
-%  MEXSFTP('putfile', H, LPATH, RPATH) uploads a file from the local path to the
-%  the remote path on the server. Remote path is the full name of the target
-%  and leading directories should exist. Local path must not be a directory.
+%    MEXSFTP('rename', H, SOURCE, TARGET) renames or moves a file on the server.
+%    Parent directories of new path should exist.
+%
+%    MEXSFTP('delfile', H, PATH) deletes a file on the server.
+%    File can not be a directory, use 'rmdir' instead.
+%
+%    MEXSFTP('getfile', H, RPATH, LPATH) downloads the file from the remote path
+%    on the server to the local path. Local path is the full name of the target,
+%    and leading directories should exist. Remote path must not be a directory.
+%
+%    MEXSFTP('putfile', H, LPATH, RPATH) uploads a file from the local path to
+%    the remote path on the server. Remote path is the full name of the target
+%    and leading directories should exist. Local path must not be a directory.
 %
 %  Notes:
 %    This function provides an interface to perform operations through an SFTP
@@ -82,16 +86,17 @@ function varargout = mexsftp(funcname, varargin)
 %
 %  References:
 %    Aris Adamantiadis and Andreas Schneider, libssh library:
-%    http://www.libssh.org/
+%    <http://www.libssh.org/>
 %
 %  See also:
 %    SFTP
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

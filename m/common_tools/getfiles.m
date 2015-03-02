@@ -5,45 +5,46 @@ function files = getfiles(connection, varargin)
 %    FILES = GETFILES(CONNECTION, OPTIONS)
 %    FILES = GETFILES(CONNECTION, OPT1, VAL1, ...)
 %
-%  FILES = GETFILES(CONNECTION, OPTIONS) and
-%  FILES = GETFILES(CONNECTION, OPT1, VAL1, ...) retrieve files from a directory
-%  on a remote server through the FTP-like object CONNECTION according to the 
-%  options given in key-value pairs OPT1, VAL1... or in struct OPTIONS with 
-%  field names as option keys and field values as option values.
-%  Recognized options are:
-%    SOURCE: remote source directory.
-%      String with the name of the remote directory to download the files from.
-%      If not given, the current working directory on the server is used.
-%      Default value: [] (use remote current working directory)
-%    TARGET: local target directory.
-%      String with the name of the local directory to download the files to.
-%      If empty, the current working directory on the local client is used.
-%      Default value: [] (use local current remote directory)
-%    INCLUDE: name pattern of files to include in the download.
-%      String with the pattern (regular expression) of the files to download.
-%      Only files whose name match this pattern are downloaded.
-%      If not given, all files in the source directory are downloaded.
-%      Default value: [] (download all files in source directory)
-%    EXCLUDE: name pattern of files to exclude from the download.
-%      String with the pattern (regular expression) of the files to exclude.
-%      All files whose name match this pattern are not downloaded.
-%      If not given, all files are downloaded.
-%      Default value: [] (do not exclude any file)
-%    NEW: filter new files on the remote server.
-%      Name or handle of the predicate function new files on the server must
-%      satisfy to be included in the download. The function receives a single
-%      input with the attributes of the new files as returned by DIR operation,
-%      and returns one logical output whether to download respective file.
-%      If not given, all new files are downloaded.
-%      Default value: [] (download all new files)
-%    UPDATE: filter files on the server already existing at the local side.
-%      Name or handle of the predicate function files on the server must
-%      satisfy to be consider them updated and include them in the download.
-%      The function receives two inputs: the attributes of corresponding local
-%      and remote files as returned by DIR operation, and returns one output 
-%      whether to update the local file with the remote one.
-%      If not given, the update test is based on the modification time, and only
-%      files on the server newer than respective local files are downloaded.
+%  Description:
+%    FILES = GETFILES(CONNECTION, OPTIONS) and
+%    FILES = GETFILES(CONNECTION, OPT1, VAL1, ...) retrieve files from a 
+%    directory on a remote server through the FTP-like object CONNECTION 
+%    according to the options given in key-value pairs OPT1, VAL1... or in 
+%    scalar struct OPTIONS with field names as option keys and field values as 
+%    option values. Recognized options are:
+%      SOURCE: remote source directory.
+%       String with the name of the remote directory to download the files from.
+%       If not given, the current working directory on the server is used.
+%       Default value: [] (use remote current working directory)
+%     TARGET: local target directory.
+%       String with the name of the local directory to download the files to.
+%       If empty, the current working directory on the local client is used.
+%       Default value: [] (use local current remote directory)
+%     INCLUDE: name pattern of files to include in the download.
+%       String with the pattern (regular expression) of the files to download.
+%       Only files whose name match this pattern are downloaded.
+%       If not given, all files in the source directory are downloaded.
+%       Default value: [] (download all files in source directory)
+%     EXCLUDE: name pattern of files to exclude from the download.
+%       String with the pattern (regular expression) of the files to exclude.
+%       All files whose name match this pattern are not downloaded.
+%       If not given, all files are downloaded.
+%       Default value: [] (do not exclude any file)
+%     NEW: filter new files on the remote server.
+%       Name or handle of the predicate function new files on the server must
+%       satisfy to be included in the download. The function receives a single
+%       input with the attributes of the new files as returned by DIR operation,
+%       and returns one logical output whether to download respective file.
+%       If not given, all new files are downloaded.
+%       Default value: [] (download all new files)
+%     UPDATE: filter files on the server already existing at the local side.
+%       Name or handle of the predicate function files on the server must
+%       satisfy to consider them as updated and include them in the download.
+%       The function receives two inputs: the attributes of corresponding local
+%       and remote files as returned by DIR operation, and returns one output 
+%       whether to update the local file with the remote one.
+%       If not given, the test is based on the modification time, and only
+%       files on the server newer than respective local files are downloaded.
 %      Default value: [] (overwrite all exisiting files)
 %
 %  Examples:
@@ -63,11 +64,12 @@ function files = getfiles(connection, varargin)
 %    FTP
 %    SFTP
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

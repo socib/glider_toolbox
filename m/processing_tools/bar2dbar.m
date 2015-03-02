@@ -4,8 +4,9 @@ function dbar = bar2dbar(bar)
 %  Syntax:
 %    DBAR = BAR2DBAR(BAR)
 %
-%  DBAR = BAR2DBAR(BAR) converts pressure readings in array BAR from bars to
-%  decibars by multiplying by 10.
+%  Description:
+%    DBAR = BAR2DBAR(BAR) converts pressure readings in array BAR from bars to
+%    decibars by multiplying by 10.
 %
 %  Notes:
 %    This is simply a convenience function to call the conversion with an
@@ -14,13 +15,12 @@ function dbar = bar2dbar(bar)
 %  Examples:
 %    dbar = bar2dbar(bar)
 %
-%  See also:
-%
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

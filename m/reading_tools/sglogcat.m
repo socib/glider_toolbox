@@ -6,78 +6,82 @@ function [meta, data] = sglogcat(meta_list, data_list, varargin)
 %    [META, DATA] = SGLOGCAT(META_LIST, DATA_LIST, OPTIONS)
 %    [META, DATA] = SGLOGCAT(META_LIST, DATA_LIST, OPT1, VAL1, ...)
 %
-%  [META, DATA] = SGLOGCAT(META_LIST, DATA_LIST) combines metadata from structs 
-%  in struct array META_LIST and data in cell or struct array DATA_LIST into a 
-%  single data set with metadata in struct META and data in struct DATA.
-%  Respective elements in META_LIST and DATA_LIST should be in the format 
-%  returned by function SGLOG2MAT, but do not need to have the same parameters 
-%  or variables, and are sorted according to the mission number and the dive
-%  number. Outputs META and DATA are in the same format, too.
+%  Description:
+%    [META, DATA] = SGLOGCAT(META_LIST, DATA_LIST) combines metadata in
+%    struct array META_LIST and data in cell or struct array DATA_LIST into
+%    a single data set with metadata in struct META and data in struct DATA.
+%    Respective elements in META_LIST and DATA_LIST should be in the format 
+%    returned by function SGLOG2MAT, but do not need to have the same parameters 
+%    or variables, and are sorted according to the mission number and the dive
+%    number. Outputs META and DATA are in the same format, too.
 %
-%  META is a struct array combining the information in elements of META_LIST,
-%  ordered according to the mission number and the dive number. It has the 
-%  following fields:
-%    HEADERS: struct array with all log headers.
-%      This is the concatenation of the HEADERS field of all elements in
-%      META_LIST.
-%    START_SECS: number with the reference time for timestamped data lines 
-%      (start time of first dive as seconds since 1970 Janyuay 01 00:00:00 UTC).
-%    PARAMS: struct with the names of the fields of non-scalar parameters.
-%      This is the union of the PARAMS field of all elements in META_LIST.
-%    GCHEAD: string cell array with the names of the fields for the GC lines.
-%      This is the concatenation of the GCHEAD field of all elements in 
-%      META_LIST.
-%    DEVICES: string cell array with the names of the fields for device lines.
-%      This is the concatenation of the DEVICES field of all elements in
-%      META_LIST.
-%    SENSORS: string cell array with the names of the fields for sensor lines.
-%      This is the concatenation of the SENSORS field of all elements in 
-%      META_LIST.
-%    SOURCES: string cell array with the name of the source files.
-%      This is the concatenation the SOURCES field of all elements in META_LIST.
+%    META is a struct array combining the information in elements of META_LIST,
+%    ordered according to the mission number and the dive number.
+%    It has the following fields:
+%      HEADERS: struct array with all log headers.
+%        This is the concatenation of the HEADERS field of all elements
+%        in META_LIST.
+%      START_SECS: number with the reference time for timestamped lines (start
+%        time of first dive as seconds since 1970 January 01 00:00:00 UTC).
+%      PARAMS: struct with the names of the fields of non-scalar parameters.
+%        This is the union of the PARAMS field of all elements in META_LIST.
+%      GCHEAD: string cell array with the names of the fields for the GC lines.
+%        This is the concatenation of the GCHEAD field of all elements
+%        in META_LIST.
+%      DEVICES: string cell array with the names of the fields for device lines.
+%        This is the concatenation of the DEVICES field of all elements
+%        in META_LIST.
+%      SENSORS: string cell array with the names of the fields for sensor lines.
+%        This is the concatenation of the SENSORS field of all elements
+%        in META_LIST.
+%      SOURCES: string cell array with the name of the source files.
+%        This is the concatenation the SOURCES field of all elements
+%        in META_LIST.
 %
-%  DATA is a struct combining the data in DATA_LIST, ordered according to the 
-%  mission number and the dive number, and with the time fields (seconds since 
-%  start of dive) of timestamed parameters (GC, STATE and SM_CCo) converted to
-%  seconds from the earlier dive start time.
+%    DATA is a struct combining the data in DATA_LIST, ordered according to
+%    the mission number and the dive number, and with the time fields
+%    of timestamed parameters (GC, STATE and SM_CCo) converted to
+%    seconds since the start time of the first dive.
 %
-%  [META, DATA] = SGLOGCAT(META_LIST, DATA_LIST, OPTIONS) and 
-%  [META, DATA] = SGLOGCAT(META_LIST, DATA_LIST, OPT1, VAL1, ...) accept the 
-%  following options given in key-value pairs OPT1, VAL1... or in a struct 
-%  OPTIONS with field names as option keys and field values as option values:
-%    FORMAT: data output format.
-%      String setting the format of the output DATA. Valid values are:
-%        'array': DATA is a struct with a scalar field for each scalar parameter 
-%          and an array or cell array field for each non scalar parameter.
-%          Values of non scalar parameters are in the column order given by 
-%          the corresponding field of the PARAMS metadata field.
-%        'merged': DATA is a struct with a scalar or column vector field for
-%          each scalar parameter or entry of a non-scalar parameter. For scalar
-%          parameters, the field is named after the parameter, while for non
-%          scalar parameters the field names are the parameter name and its
-%          field names, separated by underscore.
-%        'struct': DATA is a struct with a scalar field for each scalar 
-%          parameter and a struct array for each non scalar parameter. The
-%          fields of the non scalar parameters are given by the corresponding 
-%          field of the PARAMS metadata field.
-%      Default value: 'array'
-%    PARAMS: parameter filtering list.
-%      String cell array with the names of the parameters of interest. If given,
-%      only parameters present in both the input data set and this list will be 
-%      present in output. For non scalar parameters, the name of the identifier
-%      as it appears in the log line specifies including all of its fields.
-%      Individual parameter fields are selected with the identifier and the name
-%      of the field separated by underscore (e.g. 'GC_st_secs'). The string
-%      'all' may also be given, in which case parameter filtering is not
-%      performed and all parameters in input list will be present in output.
-%      Default value: 'all' (do not perform parameter filtering).
-%    PERIOD: dive start time filtering boundaries.
-%      Two element numeric array with the start and end of the time interval of 
-%      interest (seconds since 1970-01-01 00:00:00.00 UTC). If given, only data 
-%      from dives with start time within this period will be present in output.
-%      The string 'all' may also be given, in which case time filtering is not 
-%      performed and data from all dives will be present in output.
-%      Default value: 'all' (do not perform time filtering).
+%    [META, DATA] = SGLOGCAT(META_LIST, DATA_LIST, OPTIONS) and 
+%    [META, DATA] = SGLOGCAT(META_LIST, DATA_LIST, OPT1, VAL1, ...) accept
+%    the following options given in key-value pairs OPT1, VAL1... or in a struct
+%    OPTIONS with field names as option keys and field values as option values:
+%      FORMAT: data output format.
+%        String setting the format of the output DATA. Valid values are:
+%          'array': DATA is a struct with a scalar field for each scalar 
+%            parameter and an array or cell array field for each non-scalar 
+%            parameter. Values of non-scalar parameters are in the column order 
+%            given by the corresponding field of the PARAMS metadata field.
+%          'merged': DATA is a struct with a scalar or column vector field for
+%            each scalar parameter or entry of a non-scalar parameter. 
+%            For scalar parameters, the field is named after the parameter,
+%            while for non-scalar parameters the field names are the parameter
+%            name and its field names, separated by underscore.
+%          'struct': DATA is a struct with a scalar field for each scalar 
+%            parameter and a struct array for each non-scalar parameter.
+%            The fields of the non-scalar parameters are given by
+%            the corresponding field of the PARAMS metadata field.
+%        Default value: 'array'
+%      PARAMS: parameter filtering list.
+%        String cell array with the names of the parameters of interest.
+%        If given, only parameters present in both the input list and this list
+%        will be present in output. For non-scalar parameters, the name 
+%        of the identifier as it appears in the log line specifies including
+%        all of its fields. Individual parameter fields are selected 
+%        with the identifier and the name of the field separated by underscore
+%        (e.g. 'GC_st_secs'). The string 'all' may also be given, in which case
+%        parameter filtering is not performed and all parameters in input list
+%        will be present in output.
+%        Default value: 'all' (do not perform parameter filtering).
+%      PERIOD: dive start time filtering boundaries.
+%        Two element numeric array with the start and the end of the period 
+%        of interest (seconds since 1970-01-01 00:00:00.00 UTC). If given, 
+%        only data from dives with start time within this period will be 
+%        present in output. The string 'all' may also be given, in which case 
+%        time filtering is not performed and data from all dives will be 
+%        present in output.
+%        Default value: 'all' (do not perform time filtering).
 %
 %  Examples:
 %    [meta, data] = sglogcat(meta_list, data_list)
@@ -88,11 +92,12 @@ function [meta, data] = sglogcat(meta_list, data_list, varargin)
 %    SGENGCAT
 %    SGLOGENGMERGE
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
@@ -220,15 +225,15 @@ function [meta, data] = sglogcat(meta_list, data_list, varargin)
 
   %% Compute data availability according to required output.
   % Compute some support variables useful for the rest of the code:
-  % - The list of available fields is the union of the fields in each dataset.
-  % - A dataset x field table setting whether j-th field is in i-th dataset.
-  % - A dataset x field table setting whether j-th field is nested i-th dataset.
-  % - A dataset x field table setting whether j-th field is a struct in i-th dataset.
-  % - A struct setting the member availablity for non scalar parameters:
-  %   Each field is named after a non scalar parameter and its value is a 
-  %   dataset x member table setting whether k-th member is in corresponding
-  %   field of i-th dataset.
-  % If parameter filtering is requested, ignore non requested fields and members.
+  % - The list of available fields is the union of the fields in each data set.
+  % - A data set x field table setting whether j-th field is in i-th data set.
+  % - A data set x field table setting whether j-th field is nested in i-th data set.
+  % - A data set x field table setting whether j-th field is a struct in i-th data set.
+  % - A struct setting the member availablity for non-scalar parameters:
+  %   Each field is named after a non-scalar parameter and its value is a 
+  %   data set x member table setting whether k-th member is in corresponding
+  %   field of i-th data set.
+  % If parameter filtering is requested, ignore non-requested fields and members.
   field_list = cellfun(@fieldnames, column_list, 'UniformOutput', false);
   field_list = unique(vertcat(field_list{:}));
   field_present_list = ...
@@ -310,7 +315,7 @@ function [meta, data] = sglogcat(meta_list, data_list, varargin)
     member_list = field_member_list.(field);
     if isempty(member_list)
       % Parameter is scalar, the same in all formats.
-      % For consistency with non scalar parameters, ensure column layout.
+      % For consistency with non-scalar parameters, ensure column layout.
       field_value_list = ...
         cellfun(@(d)(d.(field)), values_list(field_present), ...
                 'UniformOutput', false);

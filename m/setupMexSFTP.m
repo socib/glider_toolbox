@@ -4,40 +4,41 @@ function setupMexSFTP()
 %  Syntax:
 %    SETUPMEXSFTP()
 %
-%  SETUPMEXSFTP() builds a mex file interface to perform operations through an 
-%  SFTP connection to a remote server using the API provided by the library 
-%  libssh. This interface is used in the implementation of the SFTP methods.
-%  If libssh is installed from the official repositories on Debian based 
-%  distributions, the mex file is built using the following attributes:
-%    TARGET:
-%      /path/to/@sftp/private/mexsftp.mex(a64)
-%    SOURCES:
-%      /path/to/@sftp/private/mexsftp.c
-%    INCLUDES:
-%      none
-%    LIBRARIES:
-%      -l ssh
-%  Alternatively, it is possible to build the mex file using precompiled 
-%  versions of the library for other platforms available at the web site,
-%  or a version of the library compiled from sources locally.
-%  The header files and the binary files should be located in the respective 
-%  directories 'libssh/include/libssh' and 'libssh/lib' in the same directory
-%  than the mex file source.
-%    TARGET:
-%      /path/to/@sftp/private/mexsftp.mex(a64)
-%    SOURCES:
-%      /path/to/@sftp/private/mexsftp.c
-%    INCLUDES:
-%      -I /path/to/@sftp/private/libssh/include
-%    LIBRARIES:
-%      -L /path/to/@sftp/private/libssh/lib
-%      -Wl,-rpath=$ORIGIN/libssh/lib
-%      -l ssh
+%  Description:
+%    SETUPMEXSFTP() builds a mex file interface to perform operations through an
+%    SFTP connection to a remote server using the API provided by the library 
+%    libssh. This interface is used in the implementation of the SFTP methods.
+%    If libssh is installed from the official repositories on Debian based 
+%    distributions, the mex file is built using the following attributes:
+%      TARGET:
+%        /path/to/@sftp/private/mexsftp.mex(a64)
+%      SOURCES:
+%        /path/to/@sftp/private/mexsftp.c
+%      INCLUDES:
+%        none
+%      LIBRARIES:
+%        -l ssh
+%    Alternatively, it is possible to build the mex file using precompiled 
+%    versions of the library for other platforms available at the web site,
+%    or a version of the library compiled from sources locally.
+%    The header files and the binary files should be located in the respective 
+%    directories 'libssh/include/libssh' and 'libssh/lib' in the same directory
+%    than the mex file source.
+%      TARGET:
+%        /path/to/@sftp/private/mexsftp.mex(a64)
+%      SOURCES:
+%        /path/to/@sftp/private/mexsftp.c
+%      INCLUDES:
+%        -I /path/to/@sftp/private/libssh/include
+%      LIBRARIES:
+%        -L /path/to/@sftp/private/libssh/lib
+%        -Wl,-rpath=$ORIGIN/libssh/lib
+%        -l ssh
 %
 %  Notes:
 %    The libssh library provides a client API for the SFTP protocol. 
 %    The official web site of the library is:
-%      https://www.libssh.org/
+%      <https://www.libssh.org/>
 %
 %    On Debian based systems, the libssh library may be installed from the main
 %    section of the official repositories running the following command as root:
@@ -55,7 +56,7 @@ function setupMexSFTP()
 %
 %  References:
 %    Aris Adamantiadis and Andreas Schneider, libssh library:
-%    http://www.libssh.org/
+%    <http://www.libssh.org/>
 %
 %  Examples:
 %    % Check that libssh is properly installed on the system
@@ -75,11 +76,12 @@ function setupMexSFTP()
 %    MEXSFTP
 %    SFTP
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

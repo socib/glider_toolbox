@@ -7,66 +7,68 @@ function [profile_index, profile_direction] = findProfiles(varargin)
 %    [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(STAMP, DEPTH, OPT1, VAL1)
 %    [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(DEPTH, ...)
 %
-%  [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(DEPTH) and
-%  [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(STAMP, DEPTH)
-%  identify upcast and downcast profiles in depth (or pressure) vector DEPTH,
-%  with optional timestamps in vector STAMP, and computes a vector of profile
-%  indices PROFILE_INDEX and a vector of vertical direction PROFILE_DIRECTION.
-%  STAMP, DEPTH, PROFILE_DIRECTION and PROFILE_INDEX are the same length N,
-%  and if STAMP is not specified, it is assumed to be the sample index [1:N].
-%  PROFILE_DIRECTION entries may be 1 (down), 0 (flat), -1 (up).
-%  PROFILE_INDEX entries associate each sample with the number of the profile it
-%  belongs to. Samples in the middle of a profile are flagged with a whole 
-%  number, starting from 1 and increased by 1 every time a new cast is 
-%  identified, while samples between profiles are flagged with an offset of 0.5.
-%  See note on identification algorithm below.
+%  Description:
+%    [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(DEPTH) and
+%    [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(STAMP, DEPTH)
+%    identify upcast and downcast profiles in depth (or pressure) vector DEPTH,
+%    with optional timestamps in vector STAMP, and computes a vector of profile
+%    indices PROFILE_INDEX and a vector of vertical direction PROFILE_DIRECTION.
+%    STAMP, DEPTH, PROFILE_DIRECTION and PROFILE_INDEX are the same length N,
+%    and if STAMP is not specified, it is assumed to be the sample index [1:N].
+%    PROFILE_DIRECTION entries may be 1 (down), 0 (flat), -1 (up).
+%    PROFILE_INDEX entries associate each sample with the number of the profile
+%    it belongs to. Samples in the middle of a profile are flagged with a whole 
+%    number, starting at 1 and increased by 1 every time a new cast is detected,
+%    while samples between profiles are flagged with an offset of 0.5.
+%    See note on identification algorithm below.
 %
-%  [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(..., OPTIONS) and
-%  [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(..., OPT1, VAL1) accept
-%  the following options given in key-value pairs OPT1, VAL1... or in a struct 
-%  OPTIONS with field names as option keys and field values as option values:
-%    STALL: maximum range of a stalled segment (in the same units as DEPTH).
-%      Only strictly monotonic intervals of depth spanning a depth range
-%      not less than the given value are considered valid profile segments.
-%      Shorter intervals are considered stalled segments inside or between
-%      profiles.
-%      Default value: 0 (all segments are valid cast segments)
-%    SHAKE: maximum duration of a shake segment (in the same units as STAMP).
-%      Only strictly monotonic intervals of depth with duration
-%      not less than the given value are considered valid profile segments.
-%      Shorter intervals are considered shake segments inside or between
-%      profiles.
-%      Default value: 0 (all segments are valid cast segments)
-%    INVERSION: maximum depth inversion between cast segments of a profile.
-%      Consecutive valid cast segments with the same direction are joined 
-%      together in the same profile if the range of the introduced depth 
-%      inversion, if any, is less than the given value.
-%      Default value: 0 (never join cast segments)
-%    INTERRUPT: maximum time separation between cast segments of a profile.
-%      Consecutive valid cast segments with the same direction are joined 
-%      together in the same profile if the duration of the lapse (sequence of
-%      stalled segments or shakes between them) is less than the given value.
-%      When STAMP is not specified, the duration will be the number of samples
-%      between them.
-%      Default value: 0 (never join cast segments)
-%    LENGTH: minimum length of a profile.
-%      A sequence of joined cast segments will be considered a valid profile
-%      only if the total spanned depth is greater or equal than the given value.
-%      Default value: 0 (all profiles are valid)
-%    PERIOD: minimum duration of a profile.
-%      A sequence of joined cast segments will be considered a valid profile
-%      only if the total duration is greater or equal than the given value.
-%      Default value: 0 (all profiles are valid)
+%    [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(..., OPTIONS) and
+%    [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(..., OPT1, VAL1) accept
+%    the following options given in key-value pairs OPT1, VAL1... or in a struct 
+%    OPTIONS with field names as option keys and field values as option values:
+%      STALL: maximum range of a stalled segment (in the same units as DEPTH).
+%        Only strictly monotonic intervals of depth spanning a depth range
+%        not less than the given value are considered valid profile segments.
+%        Shorter intervals are considered stalled segments inside or between
+%        profiles.
+%        Default value: 0 (all segments are valid cast segments)
+%      SHAKE: maximum duration of a shake segment (in the same units as STAMP).
+%        Only strictly monotonic intervals of depth with duration
+%        not less than the given value are considered valid profile segments.
+%        Shorter intervals are considered shake segments inside or between
+%        profiles.
+%        Default value: 0 (all segments are valid cast segments)
+%      INVERSION: maximum depth inversion between cast segments of a profile.
+%        Consecutive valid cast segments with the same direction are joined 
+%        together in the same profile if the range of the introduced depth 
+%        inversion, if any, is less than the given value.
+%        Default value: 0 (never join cast segments)
+%      INTERRUPT: maximum time separation between cast segments of a profile.
+%        Consecutive valid cast segments with the same direction are joined 
+%        together in the same profile if the duration of the lapse (sequence of
+%        stalled segments or shakes between them) is less than the given value.
+%        When STAMP is not specified, the duration will be the number of samples
+%        between them.
+%        Default value: 0 (never join cast segments)
+%      LENGTH: minimum length of a profile.
+%        A sequence of joined cast segments will be considered a valid profile
+%        only if the total spanned depth is greater or equal than the given.
+%        value.
+%        Default value: 0 (all profiles are valid)
+%      PERIOD: minimum duration of a profile.
+%        A sequence of joined cast segments will be considered a valid profile
+%        only if the total duration is greater or equal than the given value.
+%        Default value: 0 (all profiles are valid)
 %
-%  The following options are deprecated and should not be used:
-%     RANGE: minimum depth range.
-%       Deprecated in v1.1.0:
-%         Superseded by STALL.
-%     JOIN: whether to join consecutive profiles with the same direction.
-%       Deprecated in v1.1.0:
-%         Superseded by INTERRUPT and INVERSION:
-%         Equivalent to INVERSION = INF and INTERRUPT = INF, and
-%         INVERSION = 0 and INTERRUPT = 0.
+%    The following options are deprecated and should not be used:
+%       RANGE: minimum depth range.
+%         Deprecated in v1.1.0:
+%           Superseded by STALL.
+%       JOIN: whether to join consecutive profiles with the same direction.
+%         Deprecated in v1.1.0:
+%           Superseded by INTERRUPT and INVERSION:
+%           Equivalent to INVERSION = INF and INTERRUPT = INF, and
+%           INVERSION = 0 and INTERRUPT = 0.
 %
 %  Notes:
 %    Direction is inferred from the sign of forward differences of vector DEPTH.
@@ -102,11 +104,12 @@ function [profile_index, profile_direction] = findProfiles(varargin)
 %       findProfiles(depth, 'stall', 1.5, 'inversion', 1.5, 'interrupt', inf)
 %    stairs(profile_index, '-m')
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
@@ -137,7 +140,7 @@ function [profile_index, profile_direction] = findProfiles(varargin)
   
   
   %% Parse basic input arguments.
-  % Get numeric (non option) arguments.
+  % Get numeric (non-option) arguments.
   nargnum = find(~cellfun(@isnumeric, varargin), 1, 'first') - 1;
   if isempty(nargnum)
     nargnum = nargin;

@@ -4,8 +4,9 @@ function a = profileArea(x1, y1, x2, y2)
 %  Syntax:
 %    A = PROFILEAREA(X1, Y1, X2, Y2)
 %
-%  A = PROFILEAREA(X1, Y1, X2, Y2) returns the area A enclosed by consecutive 
-%  profiles with opposite directions given by vectors X1 and Y1, and X2 and Y2.
+%  Description:
+%    A = PROFILEAREA(X1, Y1, X2, Y2) returns the area A enclosed by consecutive 
+%    profiles with opposite directions in vectors X1 and Y1, and X2 and Y2.
 %
 %  Notes:
 %    This function is a simpler rewording of a previous function by Tomeu Garau,
@@ -34,11 +35,12 @@ function a = profileArea(x1, y1, x2, y2)
 %  See also:
 %    POLYAREA
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
@@ -58,7 +60,7 @@ function a = profileArea(x1, y1, x2, y2)
   % Join both profiles discarding invalid coordinates.
   % The resulting contour may be a complex polygon.
   % Decompose it in triangular components and sum up their areas.
-  % We could use ISFINITE instead of ISNAN to discard all non numerical values.
+  % We could use ISFINITE instead of ISNAN to discard all non-numerical values.
   % However, this may not be practical because the decomposition would omit 
   % infinite triangles, and their contribution to the total area would be 0.
   xy = [x1(:) y1(:); x2(:) y2(:)];

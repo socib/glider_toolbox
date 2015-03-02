@@ -5,13 +5,14 @@ function list = mput(h, path)
 %    MPUT(H, PATH)
 %    LIST = MPUT(H, PATH)
 %
-%  MPUT(H, PATH) uploads file(s) to the server.
-%  If the path is a directory, the directory and its contents are uploaded.
-%  If the path is a file, the file itself is uploaded.
-%  Otherwise, the path is considered a glob which may contain wildcards 
-%  ('*'), and only files matching the glob are uploaded, if any.
+%  Description:
+%    MPUT(H, PATH) uploads file(s) to the server.
+%    If the path is a directory, the directory and its contents are uploaded.
+%    If the path is a file, the file itself is uploaded.
+%    Otherwise, the path is considered a glob which may contain wildcards 
+%    ('*'), and only files matching the glob are uploaded, if any.
 %
-%  LIST = MPUT(H, ...) returns the list of uploaded files.
+%    LIST = MPUT(H, ...) returns the list of uploaded files.
 %
 %  Examples:
 %    % Upload file to remote working directory:
@@ -24,11 +25,12 @@ function list = mput(h, path)
 %  See also:
 %    SFTP
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

@@ -80,29 +80,32 @@ function [xbds, logs] = getDockserverFiles(dockserver, glider, xbd_dir, log_dir,
 %    glider man.
 %
 %  Examples:
-%   dockserver.host = 'ftp.mydockserver.org'
-%   dockserver.user = 'myself'
-%   dockserver.pass = 'top_secret'   
-%   glider = 'happyglider'
-%   xbd_dir = 'funnymission/binary'
-%   log_dir = 'funnymission/log'
-%   % Get all binary and log files.
-%   [xbds, logs] = getDockserverFiles(dockserver, glider, xbd_dir, log_dir)
-%   % Get only small files and no logs from missions started last week:
-%   [xbds, logs] = getDockserverFiles(dockserver, glider, xbd_dir, log_dir, ...
-%                                     'xbd', '^*.[st]bd$', 'log', [], ...
-%                                     'start', now()-7, 'final', now())
+%    dockserver.host = 'ftp.mydockserver.org'
+%    dockserver.user = 'myself'
+%    dockserver.pass = 'top_secret'   
+%    glider = 'happyglider'
+%    xbd_dir = 'funnymission/binary'
+%    log_dir = 'funnymission/log'
+%    % Get all binary and log files.
+%    [xbds, logs] = getDockserverFiles(dockserver, glider, xbd_dir, log_dir)
+%    % Get only small files and no logs from missions started last week:
+%    [xbds, logs] = ...
+%      getDockserverFiles(dockserver, glider, xbd_dir, log_dir, ...
+%                         'xbd', '^*.[st]bd$', 'log', [], ...
+%                         'start', now()-7, 'final', now())
 %
 %  See also:
 %    FTP
 %    SFTP
+%    DIR
 %    REGEX
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014, 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

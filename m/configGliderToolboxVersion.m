@@ -4,8 +4,9 @@ function version = configGliderToolboxVersion()
 %  Syntax:
 %    VERSION = CONFIGGLIDERTOOLBOXVERSION()
 %
-%  VERSION = CONFIGGLIDERTOOLBOXVERSION() should return the identifier of the
-%  current version of the toolbox (see note on versions below).
+%  Description:
+%    VERSION = CONFIGGLIDERTOOLBOXVERSION() should return the identifier
+%    of the current version of the toolbox (see note on versions below).
 %
 %  Notes:
 %    It is highly recommended to modify the returned version when using a forked
@@ -18,11 +19,12 @@ function version = configGliderToolboxVersion()
 %  Examples:
 %    version = configGliderToolboxVersion()
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
@@ -39,6 +41,6 @@ function version = configGliderToolboxVersion()
 
   error(nargchk(0, 0, nargin, 'struct'));
   
-  version = '1.0.0';
+  version = '1.1.0';
 
 end

@@ -1,103 +1,107 @@
 %MAIN_GLIDER_DATA_PROCESSING_DT  Run delayed time glider processing chain.
 %
-%  This script develops the full processing chain for delayed time glider data:
-%    - Check for configured deployments to process in delayed mode.
-%    - Convert deployment binary files to human readable format, if needed.
-%    - Load data from all files in a single and consistent structure.
-%    - Generate standarized product version of raw data (NetCDF level 0).
-%    - Preprocess raw data applying simple unit conversions and factory
-%      calibrations without modifying their nominal value:
-%        -- Select reference sensors for time and space coordinates.
-%           Perform unit conversions if necessary.
-%        -- Select extra navigation sensors: waypoints, pitch, depth...
-%           Perform unit conversions if necessary.
-%        -- Select sensors of interest: CTD, oxygen, ocean color...
-%           Perform unit conversions and factory calibrations if necessary.
-%    - Process preprocessed data to obtain well referenced trajectory data with
-%      new derived measurements and corrections:
-%        -- Fill missing values of time and space reference sensors.
-%        -- Fill missing values of other navigation sensors.
-%        -- Identify transect boundaries at waypoint changes.
-%        -- Identify cast boundaries from vertical direction changes.
-%        -- Apply generic sensor processings: sensor lag correction... 
-%        -- Process CTD data: pressure filtering, thermal lag correction...
-%        -- Derive new measurements: depth, salinity, density...
-%    - Generate standarized product version of trajectory data (NetCDF level 1).
-%    - Generate descriptive figures from trajectory data.
-%    - Interpolate/bin trajectory data to obtain gridded data (vertical 
-%      instantaneous profiles of already processed data).
-%    - Generate standarized product version of gridded data (NetCDF level 2).
-%    - Generate descriptive figures from gridded data.
-%    - Copy generated data products to its public location, if needed.
-%    - Copy generated figures to its public location and generate figure
-%      information service file, if needed.
+%  Description:
+%    This script develops the processing chain for delayed time glider data:
+%      - Check for configured deployments to process in delayed mode.
+%      - Convert deployment binary files to human readable format, if needed.
+%      - Load data from all files in a single and consistent structure.
+%      - Generate standarized product version of raw data (NetCDF level 0).
+%      - Preprocess raw data applying simple unit conversions and factory
+%        calibrations without modifying their nominal value:
+%          -- Select reference sensors for time and space coordinates.
+%             Perform unit conversions if necessary.
+%          -- Select extra navigation sensors: waypoints, pitch, depth...
+%             Perform unit conversions if necessary.
+%          -- Select sensors of interest: CTD, oxygen, ocean color...
+%             Perform unit conversions and factory calibrations if necessary.
+%      - Process preprocessed data to obtain well referenced trajectory data
+%        with new derived measurements and corrections:
+%          -- Fill missing values of time and space reference sensors.
+%          -- Fill missing values of other navigation sensors.
+%          -- Identify transect boundaries at waypoint changes.
+%          -- Identify cast boundaries from vertical direction changes.
+%          -- Apply generic sensor processings: sensor lag correction... 
+%          -- Process CTD data: pressure filtering, thermal lag correction...
+%          -- Derive new measurements: depth, salinity, density...
+%      - Generate standarized product version of trajectory data (NetCDF 
+%        level 1).
+%      - Generate descriptive figures from trajectory data.
+%      - Interpolate/bin trajectory data to obtain gridded data (vertical 
+%        instantaneous profiles of already processed data).
+%      - Generate standarized product version of gridded data (NetCDF level 2).
+%      - Generate descriptive figures from gridded data.
+%      - Copy generated data products to its public location, if needed.
+%      - Copy generated figures to its public location and generate figure
+%        information service file, if needed.
 %
-%  Deployment information is queried from a data base with GETDEPLOYMENTINFODB.
-%  Data base access parameters may be configured in CONFIGDBACCESS.
-%  Selected deployments and their metadata fields may be configured in 
-%  CONFIGDTDEPLOYMENTINFOQUERYDB.
+%    Deployment information is queried from a data base by GETDEPLOYMENTINFODB.
+%    Data base access parameters may be configured in CONFIGDBACCESS.
+%    Selected deployments and their metadata fields may be configured in 
+%    CONFIGDTDEPLOYMENTINFOQUERYDB.
 %
-%  For each deployment, the messages produced during each processing step are
-%  recorded to a log file. This recording is enabled just before the processing
-%  of the deployment starts, and it is turned off when the processing finishes,
-%  with the function DIARY.
+%    For each deployment, the messages produced during each processing step are
+%    recorded to a log file. This recording is enabled just before the start of
+%    the processing of the deployment, and it is turned off when the processing
+%    finishes, with the function DIARY.
 %
-%  Input deployment raw data is loaded from a directory of raw text files with 
-%  LOADSLOCUMDATA or LOADSEAGLIDERDATA. For Slocum gliders a directory of raw 
-%  binary files may also be specified, and automatic conversion to text file 
-%  format may be enabled. The conversion is performed by function XBD2DBA, 
-%  which is called with each binary file in the specified binary directory
-%  and with a renaming pattern to specify the name of the resulting text file,
-%  and performs a system call to the 'dbd2asc' program by WRC.
-%  The path to the 'dbd2asc' program may be configured in CONFIGWRCPROGRAMS.
-%  Input file conversion and data loading options may be configured in 
-%  CONFIGDTFILEOPTIONSSLOCUM and CONFIGDTFILEOPTIONSSEAGLIDER.
+%    Input deployment raw data is loaded from a directory of raw text files
+%    with LOADSLOCUMDATA or LOADSEAGLIDERDATA. For Slocum gliders a directory
+%    of raw  binary files may also be specified, and automatic conversion to
+%    text file format may be enabled. The conversion is performed by function
+%    XBD2DBA, which is called for each binary file in the specified binary
+%    directory with a renaming pattern to specify the name of the resulting
+%    text file, and performs a system call to program 'dbd2asc' by WRC.
+%    The path to the 'dbd2asc' program may be configured in CONFIGWRCPROGRAMS.
+%    Input file conversion and data loading options may be configured in 
+%    CONFIGDTFILEOPTIONSSLOCUM and CONFIGDTFILEOPTIONSSEAGLIDER.
 %
-%  Output products, figures and processing logs are generated to local paths.
-%  Input and output paths may be configured using expressions built upon
-%  deployment field value replacements in CONFIGDTPATHSLOCAL.
+%    Output products, figures and processing logs are generated to local paths.
+%    Input and output paths may be configured using expressions built upon
+%    deployment field value replacements in CONFIGDTPATHSLOCAL.
 %
-%  Raw data is preprocessed to apply some simple unit conversions with the
-%  function PREPROCESSGLIDERDATA. The preprocessing options and its parameters 
-%  may be configured in CONFIGDATAPREPROCESSINGSLOCUM and 
-%  CONFIGDATAPREPROCESSINGSEAGLIDER.
+%    Raw data is preprocessed to apply some simple unit conversions with the
+%    function PREPROCESSGLIDERDATA. The preprocessing options and its 
+%    parameters may be configured in CONFIGDATAPREPROCESSINGSLOCUM and 
+%    CONFIGDATAPREPROCESSINGSEAGLIDER.
 %
-%  Preprocessed data is processed with PROCESSGLIDERDATA to obtain properly 
-%  referenced data with in a trajectory data set structure. The desired 
-%  processing actions (interpolations, filterings, corrections and derivations) 
-%  and its parameters may be configured in CONFIGDATAPROCESSINGSLOCUMG1, 
-%  CONFIGDATAPROCESSINGSLOCUMG2 and CONFIGDATAPROCESSINGSEAGLIDER.
+%    Preprocessed data is processed with PROCESSGLIDERDATA to obtain properly 
+%    referenced data with a trajectory data structure. The desired processing 
+%    actions (interpolations, filterings, corrections and derivations) 
+%    and its parameters may be configured in CONFIGDATAPROCESSINGSLOCUMG1, 
+%    CONFIGDATAPROCESSINGSLOCUMG2 and CONFIGDATAPROCESSINGSEAGLIDER.
 %
-%  Processed data is interpolated/binned with GRIDGLIDERDATA to obtain a data 
-%  set with the structure of a trajectory of instantaneous vertical profiles 
-%  sampled at a common set of regular depth levels. The desired gridding 
-%  parameters may be configured in CONFIGDATAGRIDDING.
+%    Processed data is interpolated/binned with GRIDGLIDERDATA to obtain a data 
+%    set with the structure of a trajectory of instantaneous vertical profiles 
+%    sampled at a common set of regular depth levels. The desired gridding 
+%    parameters may be configured in CONFIGDATAGRIDDING.
 %
-%  Raw data is stored in NetCDF format as level 0 output product with
-%  GENERATEOUTPUTNETCDF. The file mimics the appearance of raw data text files,
-%  but gathering all useful data in a single place. Hence, the structure of the 
-%  resulting NetCDF file varies with each type of glider, and may be configured
-%  in CONFIGDTOUTPUTNETCDFL0SLOCUM and CONFIGDTOUTPUTNETCDFL0SEAGLIDER. 
-%  Processed and gridded data sets are stored in NetCDF format as level 1 and 
-%  level 2 output products respectively. The structure of these files does not 
-%  depend on the type of glider the data comes from, and it may be configured 
-%  in CONFIGDTOUTPUNETCDFL1 and CONFIGDTOUTPUTNETCDFL2 respectively.
+%    Standard products in NetCDF format are generated from raw data,
+%    processed data and gridded data with GENERATEOUTPUTNETCDF.
+%    Raw data is stored in NetCDF format as level 0 output product.
+%    This file mimics the appearance of the raw data text files, but gathering
+%    all useful data in a single place. Hence, the structure of the resulting
+%    NetCDF file varies with each type of glider, and may be configured
+%    in CONFIGDTOUTPUTNETCDFL0SLOCUM and CONFIGDTOUTPUTNETCDFL0SEAGLIDER. 
+%    Processed and gridded data sets are stored in NetCDF format as level 1 and 
+%    level 2 output products respectively. The structure of these files does not 
+%    depend on the type of glider the data comes from, and may be configured 
+%    in CONFIGDTOUTPUNETCDFL1 and CONFIGDTOUTPUTNETCDFL2 respectively.
 %
-%  Figures describing the collected glider data may be generated from processed
-%  data and from gridded data. Figures are generated by GENERATEGLIDERFIGURES,
-%  and may be configured in CONFIGFIGURES. Available plots are: scatter plots of
-%  measurements on vertical transect sections, temperature-salinity diagrams,
-%  trajectory and current maps, and profile statistics plots. Other plot 
-%  functions may be used, provided that their call syntax is coherent with the 
-%  design of GENERATEGLIDERFIGURES.
+%    Figures describing the collected glider data may be generated from 
+%    processed data and from gridded data. Figures are generated by 
+%    GENERATEGLIDERFIGURES, and may be configured in CONFIGFIGURES.
+%    Available plots are: scatter plots of measurements on vertical transect 
+%    sections, temperature-salinity diagrams, trajectory and current maps,
+%    and profile statistics plots. Other plot functions may be used,
+%    provided that their call syntax is compatible with GENERATEGLIDERFIGURES.
 %
-%  Selected data output products and figures may be copied to a public location
-%  for distribution purposes. For figures, a service file describing the
-%  available figures and their public location may also be generated. This file
-%  is generated by function SAVEJSON with the figure information returned by
-%  GENERATEGLIDERFIGURES adapted to reflect the new public location. Public
-%  products and figures to copy and their locations may be configured in
-%  CONFIGDTPATHSPUBLIC.
+%    Selected data output products and figures may be copied to a public 
+%    location for distribution purposes. For figures, a service file describing
+%    the available figures and their public location may also be generated.
+%    This file is generated by function SAVEJSON with the figure information
+%    returned by GENERATEGLIDERFIGURES updated with the new public location.
+%    Public products and figures to copy and their locations may be configured
+%    in CONFIGDTPATHSPUBLIC.
 %
 %  See also:
 %    CONFIGWRCPROGRAMS
@@ -133,11 +137,12 @@
 %    This script is based on the previous work by Tomeu Garau. He is the true
 %    glider man.
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

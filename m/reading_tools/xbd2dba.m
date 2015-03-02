@@ -6,35 +6,36 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
 %    DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE, OPTIONS)
 %    DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE, OPT1, VAL1, ...)
 %
-%  DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE) converts the binary file(s) 
-%  named by string or string cell array DBD_FILES (xxx.[smdtne]bd files) to the 
-%  corresponding text representation in the ascii file named by string DBA_FILE,
-%  and returns the absolute path of the generated file in string DBA_FILE_FULL.
-%  The conversion is done invocating the system program 'dbd2asc' provided
-%  by the Webb Research Company with the contents of DBD_FILES as argument,
-%  and capturing its output to DBA_FILE. The call is done in the current 
-%  directory through the function SYSTEM (this may be relevant for the cache 
-%  directory involved in the conversion).
+%  Description:
+%    DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE) converts the binary file(s) 
+%    named by string or string cell array DBD_FILES (xxx.[smdtne]bd files) 
+%    to the corresponding text representation in the ascii file named by string
+%    DBA_FILE, and returns the absolute path of the generated file in string
+%    DBA_FILE_FULL. The conversion is done invocating the system program 
+%    'dbd2asc' provided by the Webb Research Company with the contents of 
+%    DBD_FILES as argument, and capturing its output to DBA_FILE.
+%    The call is done in the current directory through the function SYSTEM 
+%    (this may be relevant for the cache directory involved in the conversion).
 %
-%  DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE, OPTIONS) and
-%  DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE, OPT1, VAL1, ...) accept the
-%  following options given in key-value pairs OPT1, VAL1... or in a struct 
-%  OPTIONS with field names as option keys and field values as option values:
-%    CMDNAME: conversion program executable.
-%      String with the conversion program command name, including the
-%      path if needed. This is useful if the 'dbd2asc' program has been renamed
-%      or it is not in your system path.
-%      Default value: 'dbd2asc'.
-%    CMDOPTS:
-%      String with extra options to use in the program call. It will be placed 
-%      into the command line just before the input file names. This is useful 
-%      for passing options like '-k' or '-o'. 
-%      Default value: '' (no command options)
-%    CACHE: cache directory.
-%      String with the cache directory to use. It will be passed as the -c
-%      option value in the conversion command call. If empty the -c option
-%      will not be used.
-%      Default value: '' (do not use -c command option)
+%    DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE, OPTIONS) and
+%    DBA_FILE_FULL = XBD2DBA(DBD_FILES, DBA_FILE, OPT1, VAL1, ...) accept
+%    the following options given in key-value pairs OPT1, VAL1... or in struct 
+%    OPTIONS with field names as option keys and field values as option values:
+%      CMDNAME: conversion program executable.
+%        String with the conversion program command name, including the path
+%        if needed. This is useful if the 'dbd2asc' program has been renamed
+%        or it is not in your system path.
+%        Default value: 'dbd2asc'.
+%      CMDOPTS:
+%        String with extra options to use in the program call.
+%        It is placed into the command line just before the input file names.
+%        This is useful for passing options like '-k' or '-o'. 
+%        Default value: '' (no command options)
+%      CACHE: cache directory.
+%        String with the cache directory to use.
+%        It is passed as the -c option value in the conversion command call.
+%        If empty the -c option will not be used.
+%        Default value: '' (do not use -c command option)
 %
 %  Notes:
 %    This function is intended to allow Slocum binary file conversion from
@@ -59,11 +60,12 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
 %    DBACAT
 %    DBAMERGE
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

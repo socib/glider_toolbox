@@ -6,64 +6,69 @@ function [data_grid, meta_grid] = gridGliderData(data_proc, meta_proc, varargin)
 %    [DATA_GRID, META_GRID] = GRIDGLIDERDATA(DATA_PROC, META_PROC, OPTIONS)
 %    [DATA_GRID, META_GRID] = GRIDGLIDERDATA(DATA_PROC, META_PROC, OPT1, VAL1, ...)
 %
-%  DATA_GRID = GRIDGLIDERDATA(DATA_PROC, META_PROC) converts glider trajectory 
-%  data in struct DATA_PROC to vertical instantaneous profiles defined at 
-%  regular depth intervals in DATA_GRID using default option values (see below).
+%  Description:
+%    DATA_GRID = GRIDGLIDERDATA(DATA_PROC, META_PROC) converts glider trajectory 
+%    data in struct DATA_PROC to vertical instantaneous profiles defined at 
+%    regular intervals of depth in DATA_GRID using default option values.
+%    See options description below.
 %
-%  DATA_PROC should be a struct in the format returned by PROCESSGLIDERDATA,
-%  where each field is a time sequence of readings of the variable with the same
-%  name. At least it should have a sequence for each reference coordinate: time,
-%  latitude and longitude, and depth. It also should have a sequence of profile
-%  indices that flags each reading with the number of the cast it belongs to.
+%    DATA_PROC should be a struct in the format returned by PROCESSGLIDERDATA,
+%    where each field is a vector of readings of the variable with the same 
+%    name along the glider trajectory. At least it should have a sequence for
+%    each reference coordinate: time, latitude and longitude, and depth.
+%    It also should have a sequence of profile indices that flags each reading
+%    with the number of the cast it belongs to.
 %
-%  META_PROC is also a struct as returned by PROCESSGLIDERDATA, and gridding
-%  information is added to any existing metadata of each reference coordinate
-%  variable or data variable in returned struct META_GRID.
+%    META_PROC is also a struct as returned by PROCESSGLIDERDATA, and gridding
+%    information is added to any existing metadata of each reference coordinate
+%    variable or data variable in returned struct META_GRID.
 %
-%  DATA_GRID is a struct with two kind of fields: bidimensional arrays with 
-%  profiles of gridded variables as rows, and one dimensional reference 
-%  coordinate sequences: LATITUDE, LONTGITUDE, DEPTH, TIME and PROFILE_INDEX.
-%  Coordinate sequences are selected according to preferred choices in options.
-%  Only variables selected in options and also present in DATA_PROC are gridded.
-%  Selected variables not present in DATA_PROC are silently omited.
+%    DATA_GRID is a struct with two kind of fields: bidimensional arrays with 
+%    profiles of gridded variables as rows, and one dimensional reference 
+%    coordinate sequences: LATITUDE, LONTGITUDE, DEPTH, TIME and PROFILE_INDEX.
+%    Coordinate sequences are selected according to preferred choices in 
+%    options (see below). Only variables selected in options and also present 
+%    in DATA_PROC are gridded. Selected variables not present in DATA_PROC are
+%    silently omited.
 %
-%  Each cast identified in DATA_PROC is converted to an instantaneous vertical 
-%  profile. The position and time coordinates of the new profile are the mean 
-%  values of the respective coordinates in the cast. All profiles are defined at
-%  the same depth coordinates, computed as the depth range of the whole 
-%  trajectory divided into regular intervals of given resolution. The cast data
-%  is interpolated over the new depth grid binning the readings that lay in the 
-%  corresponding depth intervals.
+%    Each cast identified in DATA_PROC is converted to an instantaneous 
+%    vertical profile. The position and time coordinates of the new profile are
+%    the mean values of the respective coordinates in the cast. All profiles 
+%    are defined at the same depth coordinates, computed as the depth range of
+%    the whole trajectory divided into regular intervals of given resolution. 
+%    The cast data is interpolated over the new depth grid binning the readings 
+%    that lay in the corresponding depth intervals.
 %
-%  Options may be given in key-value pairs OPT1, VAL1... or in a struct OPTIONS 
-%  with field names as option keys and field values as option values.
-%  Recognized options are:
-%    PROFILE_LIST: profile index sequence choices.
-%      String cell array with the names of the sequence to be used as profile 
-%      index, in order of preference.
-%      Default value: {'profile_index'}
-%    TIME_LIST: timestamp sequence choices.
-%      String cell array with the names of the sequence to be used as time 
-%      coordinates, in order of preference.
-%      Default value: {'time'}
-%    POSITION_LIST: latitude and longitude sequence choices.
-%      Struct array with the names of the sequence the to be used as 
-%      latitude and longitude coordinates, in order of preference.
-%      It should have the following fields:
-%        LATITUDE: latitude sequence name.
-%        LONGITUDE: longitude sequence name.
-%      Default value: struct('latitude',  {latitude}, 'longitude', {'longitude'})
-%    DEPTH_LIST: depth sequence choices.
-%      String cell array with the names of the sequence to be use as depth
-%      coordinate, in order of preference.
-%      Default value: {'depth'}
-%    DEPTH_STEP: depth resolution.
-%      Positive number setting the depth resolution for output profiles.
-%      Default value: 1
-%    VARIABLE_LIST: list of variables to be included in output profiles.
-%      String cell array with the names of the variables to be interpolated over
-%      the output profiles.
-%      Default value: {} (do nothing except compute profile coordinates)
+%    Options may be given in key-value pairs OPT1, VAL1... or in a struct 
+%    OPTIONS with field names as option keys and field values as option values.
+%    Recognized options are:
+%      PROFILE_LIST: profile index sequence choices.
+%        String cell array with the names of the sequence to be used as profile 
+%        index, in order of preference.
+%        Default value: {'profile_index'}
+%      TIME_LIST: timestamp sequence choices.
+%        String cell array with the names of the sequence to be used as time 
+%        coordinates, in order of preference.
+%        Default value: {'time'}
+%      POSITION_LIST: latitude and longitude sequence choices.
+%        Struct array with the names of the sequence the to be used as 
+%        latitude and longitude coordinates, in order of preference.
+%        It should have the following fields:
+%          LATITUDE: latitude sequence name.
+%          LONGITUDE: longitude sequence name.
+%        Default value: struct('latitude',  {'latitude'}, 
+%                              'longitude', {'longitude'})
+%      DEPTH_LIST: depth sequence choices.
+%        String cell array with the names of the sequence to be use as depth
+%        coordinate, in order of preference.
+%        Default value: {'depth'}
+%      DEPTH_STEP: depth resolution.
+%        Positive number setting the depth resolution for output profiles.
+%        Default value: 1
+%      VARIABLE_LIST: list of variables to be included in output profiles.
+%        String cell array with the names of the variables to be interpolated
+%        over the output profiles.
+%        Default value: {} (do nothing except compute profile coordinates)
 %
 %  Notes:
 %    This function is an improved version of a previous function by Tomeu Garau
@@ -71,8 +76,8 @@ function [data_grid, meta_grid] = gridGliderData(data_proc, meta_proc, varargin)
 %      - Support for reference coordinate sequence selection, variables to
 %        interpolate, gridding options.
 %      - Use the mean value of readings lying in the depth interval centered at
-%        each new depth level with the diameter of the depth resolution (instead
-%        of interpolation).
+%        each new depth level with the diameter of the depth resolution
+%        (instead of interpolation).
 %
 %  Examples:
 %    [data_grid, meta_grid] = gridGliderData(data_proc, meta_proc, options)
@@ -80,11 +85,12 @@ function [data_grid, meta_grid] = gridGliderData(data_proc, meta_proc, varargin)
 %  See also:
 %    PROCESSGLIDERDATA
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

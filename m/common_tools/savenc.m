@@ -5,35 +5,37 @@ function savenc(var_data, var_meta, global_meta, filename)
 %    SAVENC(VAR_DATA, VAR_META, GLOBAL_META)
 %    SAVENC(VAR_DATA, VAR_META, GLOBAL_META, FILENAME)
 %
-%  SAVENC(VAR_DATA, VAR_META, GLOBAL_META) creates a NetCDF file according to 
-%  global properties given in struct GLOBAL_META with the variables defined by 
-%  the structs VAR_META and VAR_DATA.
-%  GLOBAL_META is struct with the following fields:
-%    DIMENSIONS: struct array describing the dimensions, with fields:
-%      NAME: string with the name of the dimension.
-%      LENGTH: number with the length of the dimension (0 for record dimension).
-%    ATTRIBUTES: struct array with global attributes with fields:
-%      NAME: string with the name of the attribute.
-%      VALUE: arbitrary typed value with the value of the attribute.
-%    NAME: string with the name of the NetCDF file to be written.
-%  For every field in struct VAR_DATA a variable is created with the values in 
-%  the field value. VAR_META should have a field with the same name containing 
-%  the metadata for that variable in a struct with fields:
-%    DIMENSIONS: (mandatory) string cell array with the name of the dimensions 
-%      of the variable.
-%    ATTRIBUTES: (optional) struct array with fields 'NAME' and 'VALUE' 
-%      specifying the attributes of the variable.
-%    DATATYPE: (optional) string with the NetCDF data type of the variable.
-%      It should be one of 'double', 'float', 'int', 'short', 'byte', or 'char'.
-%      If this field is missing, the type is derived from the class of the data,
-%      and if it is not valid the default data type 'double' is used.
-%    NAME: (optional) string with the variable name as it should appear in the
-%      NetCDF file. If this field is missing the variable is named after the
-%      field name. This is useful when the desired variable name can not be used
-%      as field name.
+%  Description:
+%    SAVENC(VAR_DATA, VAR_META, GLOBAL_META) creates a NetCDF file according to
+%    global properties given in struct GLOBAL_META with the variables defined by
+%    the structs VAR_META and VAR_DATA.
+%    GLOBAL_META is struct with the following fields:
+%      DIMENSIONS: struct array describing the dimensions with fields:
+%        NAME: string with the name of the dimension.
+%        LENGTH: number with the length of the dimension, or 0 to indicate
+%          a record dimension.
+%      ATTRIBUTES: struct array with global attributes with fields:
+%        NAME: string with the name of the attribute.
+%        VALUE: arbitrary typed value with the value of the attribute.
+%      NAME: string with the name of the NetCDF file to be written.
+%    For every field in struct VAR_DATA a variable is created with the values in
+%    the field value. VAR_META should have a field with the same name containing
+%    the metadata for that variable in a struct with fields:
+%      DIMENSIONS: (mandatory) string cell array with the name of the dimensions
+%        of the variable.
+%      ATTRIBUTES: (optional) struct array with fields 'NAME' and 'VALUE' 
+%        specifying the attributes of the variable.
+%      DATATYPE: (optional) string with the NetCDF data type of the variable.
+%        Allowed types are 'double', 'float', 'int', 'short', 'byte', or 'char'.
+%        If this field is missing, the type is derived from the class of the 
+%        data, and if it is not valid the default data type 'double' is used.
+%      NAME: (optional) string with the variable name as it should appear in the
+%        NetCDF file. If this field is missing the variable is named after the
+%        field name. This is useful when the desired variable name can not be
+%        used as field name.
 %
-%  SAVENC(VAR_DATA, VAR_META, GLOBAL_META, FILENAME) will create a NetCDF file 
-%  named FILENAME, overriding the 'NAME' field in GLOBAL_META.
+%    SAVENC(VAR_DATA, VAR_META, GLOBAL_META, FILENAME) will create a NetCDF file 
+%    named FILENAME, overriding the 'NAME' field in GLOBAL_META.
 %
 %  Notes:
 %    Fill value and scale conversions are always performed.
@@ -81,11 +83,12 @@ function savenc(var_data, var_meta, global_meta, filename)
 %  See also:
 %    LOADNC
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

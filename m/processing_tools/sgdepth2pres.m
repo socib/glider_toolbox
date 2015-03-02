@@ -4,9 +4,10 @@ function pres = sgdepth2pres(depth)
 %  Syntax:
 %    PRES = SGDEPTH2PRES(DEPTH)
 %
-%  PRES = SGDEPTH2PRES(DEPTH) converts depth estimates (cm) in array DEPTH to 
-%  pressure readings in engineering units (dbar) in array PRES, reversing the 
-%  on board conversion performed by a Seaglider glider (see note below).
+%  Description:
+%    PRES = SGDEPTH2PRES(DEPTH) converts depth estimates (cm) in array DEPTH to 
+%    pressure readings in engineering units (dbar) in array PRES, reversing the 
+%    on board conversion performed by a Seaglider glider (see note below).
 %
 %  Notes:
 %    Seaglider gliders do not report pressure measurements. Instead, the 
@@ -17,13 +18,12 @@ function pres = sgdepth2pres(depth)
 %  Examples:
 %    pres = sgdepth2pres(depth)
 %
-%  See also:
-%
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

@@ -6,49 +6,51 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
 %    [META, DATA] = DBAMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI, OPTIONS)
 %    [META, DATA] = DBAMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI, OPT1, VAL1, ...) 
 %
-%  [META, DATA] = DBAMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI) merges the
-%  navigation and science data sets described by metadata structs META_NAV and
-%  META_SCI, and data arrays DATA_NAV and DATA_SCI into a single data set
-%  described by metadata struct META and data array or struct DATA (see format
-%  option described below). Input metadata and data should be in the format
-%  returned by the function DBACAT. Sensor cycles from both data sets are merged
-%  based on the order of the respective timestamps. See note on merging process.
+%  Description:
+%    [META, DATA] = DBAMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI) merges the
+%    navigation and science data sets described by metadata structs META_NAV and
+%    META_SCI, and data arrays DATA_NAV and DATA_SCI into a single data set
+%    described by metadata struct META and data array or struct DATA 
+%    (see format option described below). Input metadata and data should be
+%    in the format returned by the function DBACAT. Sensor cycles from both 
+%    data sets are merged based on the order of the respective timestamps.
+%    See note on merging process.
 %
-%  [META, DATA] = DBAMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI, OPTIONS) and
-%  [META, DATA] = DBAMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI, OPT1, VAL1, ...) 
-%  accept the following options given in key-value pairs OPT1, VAL1... or in a
-%  struct OPTIONS with field names as option keys and field values as option 
-%  values:
-%    FORMAT: data output format.
-%      String setting the format of the output DATA. Valid values are:
-%        'array': DATA is a matrix with sensor readings as columns 
-%           ordered as in the 'sensors' metadata field.
-%        'struct': DATA is a struct with sensor names as field names and column 
-%           vectors of sensor readings as field values.
-%      Default value: 'array'
-%    TIMENAV: navigation data time stamp.
-%      String setting the navigation data time sensor for merging and sorting 
-%      sensor cycles.
-%      Default value: 'm_present_time'
-%    TIMESCI: scientific data time stamp.
-%      String setting the scientific data time sensor for merging and sorting 
-%      sensor cycles.
-%      Default value: 'sci_m_present_time'
-%    SENSORS: sensor filtering list.
-%      String cell array with the names of the sensors of interest. If given,
-%      only sensors present in both the input data sets and this list will be 
-%      present in output. The string 'all' may also be given, in which case 
-%      sensor filtering is not performed and all sensors in input list will be 
-%      present in output.
-%      Default value: 'all' (do not perform sensor filtering).
-%    PERIOD: time filtering boundaries.
-%      Two element numeric array with the start and end of the time interval of 
-%      interest (seconds since 1970-01-01 00:00:00.00 UTC). If given, only
-%      sensor cycles with timestamps within this period will be present in 
-%      output. The string 'all' may also be given, in which case time filtering 
-%      is not performed and all sensors cycles in input data sets will be 
-%      present in output.
-%      Default value: 'all' (do not perform time filtering).
+%    [META, DATA] = DBAMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI, OPTIONS) and
+%    [META, DATA] = DBAMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI, OPT1, VAL1, ...) 
+%    accept the following options given in key-value pairs OPT1, VAL1...
+%    or in a struct OPTIONS with field names as option keys and field values
+%    as option values:
+%      FORMAT: data output format.
+%        String setting the format of the output DATA. Valid values are:
+%          'array': DATA is a matrix with sensor readings as columns 
+%            ordered as in the 'sensors' metadata field.
+%          'struct': DATA is a struct with sensor names as field names
+%            and column vectors of sensor readings as field values.
+%        Default value: 'array'
+%      TIMENAV: navigation data time stamp.
+%        String setting the navigation data time sensor for merging and sorting 
+%        sensor cycles.
+%        Default value: 'm_present_time'
+%      TIMESCI: scientific data time stamp.
+%        String setting the scientific data time sensor for merging and sorting 
+%        sensor cycles.
+%        Default value: 'sci_m_present_time'
+%      SENSORS: sensor filtering list.
+%        String cell array with the names of the sensors of interest. If given,
+%        only sensors present in both the input data sets and this list
+%        will be present in output. The string 'all' may also be given,
+%        in which case sensor filtering is not performed and all sensors
+%        in input data sets will be present in output.
+%        Default value: 'all' (do not perform sensor filtering).
+%      PERIOD: time filtering boundaries.
+%        Two element numeric array with the start and the end of the period
+%        of interest (seconds since 1970-01-01 00:0:00.00 UTC). If given, 
+%        only sensor cycles with timestamps within this period will be
+%        present in output. The string 'all' may also be given, in which case
+%        time filtering is not performed and all sensors cycles in the input 
+%        data sets will be present in output.
+%        Default value: 'all' (do not perform time filtering).
 %
 %  Notes:
 %    This function should be used to merge data from navigation and science data
@@ -72,7 +74,7 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
 %    Otherwise if the sensor originates in the navigation bay, the science bay 
 %    instance is prepended with the prefix 'sci_dup_'. This renaming is the 
 %    behaviour of the original program 'dba_merge', as described here:
-%      http://marine.rutgers.edu/~kerfoot/slocum/data/readme/wrc_doco/dbd_file_format.txt
+%      <http://marine.rutgers.edu/~kerfoot/slocum/data/readme/wrc_doco/dbd_file_format.txt>
 %
 %  Examples:
 %    [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci)
@@ -82,11 +84,12 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
 %    DBA2MAT
 %    DBACAT
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

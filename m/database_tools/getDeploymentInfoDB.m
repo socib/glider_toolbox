@@ -1,56 +1,57 @@
 function data = getDeploymentInfoDB(query, dbname, varargin)
-%GETDEPLOYMENTINFODB  Get deployment information from data base.
+%GETDEPLOYMENTINFODB  Get deployment information from database.
 %
 %  Syntax:
 %    DATA = GETDEPLOYMENTINFODB(QUERY, DBNAME)
 %    DATA = GETDEPLOYMENTINFODB(QUERY, DBNAME, OPTIONS)
 %    DATA = GETDEPLOYMENTINFODB(QUERY, DBNAME, OPT1, VAL1, ...)
 %
-%  DATA = GETDEPLOYMENTINFODB(QUERY, DBNAME) executes the query given by 
-%  string QUERY on the data base named by string DBNAME and returns a struct
-%  DATA with fields given by corresponding columns in the query result.
+%  Description:
+%    DATA = GETDEPLOYMENTINFODB(QUERY, DBNAME) executes the query given by 
+%    string QUERY on the database named by string DBNAME and returns a struct
+%    DATA with fields given by corresponding columns in the query result.
 %
-%  DATA = GETDEPLOYMENTINFODB(QUERY, DBNAME, OPTIONS) and 
-%  DATA = GETDEPLOYMENTINFODB(QUERY, DBNAME, OPT1, VAL1, ...) accept the 
-%  following options given in key-value pairs OPT1, VAL1... or in struct OPTIONS
-%  with field names as option keys and field values as option values:
-%    USER: data base user name.
-%      String with the name of the user of the data base.
-%      Default value: '' (user name not required by data base)
-%    PASS: data base user password.
-%      String with the password of the user of the data base.
-%      Default value: '' (user name not required by data base)
-%    SERVER: data base server url.
-%      String with the URL of the data base server.
-%      Default value: [] (do not specify a URL when connection to data base)
-%    DRIVER: data base driver.
-%      String with the name of the driver to access the data base.
-%      Default value: [] (do not specify a driver when connecting to data base)
-%    FIELDS: data base column renaming.
-%      String cell array with alternative field names for output structure.
-%      It should have the same number of elements than selected columns.
-%      If empty, renaming is not done, and column names are used as field names.
-%      Default value: [] (do not rename columns)
-%    TIME_FIELDS: timestamp fields.
-%      String cell array with the name of the output fields to be converted to
-%      from timestamp string to serial date number.
-%      Default value: {'deployment_start' 'deployment_end'}
-%    TIME_FORMAT: timestamp field format.
-%      String with the format of the timestamp columns returned by the query.
-%      Default value: 'yyyy-mm-dd HH:MM:SS' (ISO 8601 format)
+%    DATA = GETDEPLOYMENTINFODB(QUERY, DBNAME, OPTIONS) and 
+%    DATA = GETDEPLOYMENTINFODB(QUERY, DBNAME, OPT1, VAL1, ...) accept the 
+%    following options given in key-value pairs OPT1, VAL1... or in struct
+%    OPTIONS with field names as option keys and field values as option values:
+%      USER: database user name.
+%        String with the name of the user of the database.
+%        Default value: '' (user name not required by database)
+%      PASS: database user password.
+%        String with the password of the user of the database.
+%        Default value: '' (user name not required by database)
+%      SERVER: database server url.
+%        String with the URL of the database server.
+%        Default value: [] (do not specify a URL when connection to database)
+%      DRIVER: database driver.
+%        String with the name of the driver to access the database.
+%        Default value: [] (do not specify a driver when connecting to database)
+%      FIELDS: database column renaming.
+%        String cell array with alternative field names for output structure.
+%        It should have the same number of elements than selected columns.
+%        If empty, no renaming is done and column names are used as field names.
+%        Default value: [] (do not rename columns)
+%      TIME_FIELDS: timestamp fields.
+%        String cell array with the name of the output fields to be converted to
+%        from timestamp string to serial date number.
+%        Default value: {'deployment_start' 'deployment_end'}
+%      TIME_FORMAT: timestamp field format.
+%        String with the format of the timestamp columns returned by the query.
+%        Default value: 'yyyy-mm-dd HH:MM:SS' (ISO 8601 format)
 %
-%  The returned struct DATA should have the following fields to be considered 
-%  a deployment structure:
-%    DEPLOYMENT_ID: deployment identifier (invariant over time).
-%    DEPLOYMENT_NAME: deployment name (may eventually change).
-%    DEPLOYMENT_START: deployment start date (see note on time format).
-%    DEPLOYMENT_END: deployment end date (see note on time format).
-%    GLIDER_NAME: glider platform name (used by Slocum gliders in file names).
-%    GLIDER_SERIAL: glider serial code (used by Seaglider gliders in file names).
-%    GLIDER_MODEL: glider model name (like Slocum G1, Slocum G2, Seaglider).
-%  The returned structure may include other fields, which are considered to be
-%  global deployment attributes by functions generating final products like
-%  GENERATEOUTPUTNETCDF.
+%    The returned struct DATA should have the following fields to be considered 
+%    a deployment structure:
+%      DEPLOYMENT_ID: deployment identifier (invariant over time).
+%      DEPLOYMENT_NAME: deployment name (may eventually change).
+%      DEPLOYMENT_START: deployment start date (see note on time format).
+%      DEPLOYMENT_END: deployment end date (see note on time format).
+%      GLIDER_NAME: glider platform name (present in Slocum file names).
+%      GLIDER_SERIAL: glider serial code (present in Seaglider file names).
+%      GLIDER_MODEL: glider model name (like Slocum G1, Slocum G2, Seaglider).
+%    The returned structure may include other fields, which are considered to be
+%    global deployment attributes by functions generating final products like
+%    GENERATEOUTPUTNETCDF.
 %
 %  Notes:
 %    Time columns selected in the query should be returned as UTC timestamp
@@ -72,11 +73,12 @@ function data = getDeploymentInfoDB(query, dbname, varargin)
 %    FETCH
 %    DATENUM
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
@@ -133,7 +135,7 @@ function data = getDeploymentInfoDB(query, dbname, varargin)
   end
   
   
-  %% Retrieve data from data base as a structure.
+  %% Retrieve data from database as a structure.
   if isempty(options.driver) && isempty(options.server)
     access_params = {options.user options.pass};
   else

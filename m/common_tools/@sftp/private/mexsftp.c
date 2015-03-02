@@ -1,10 +1,11 @@
 /**
  * @file
  * @brief Mex interface to libssh for sftp connection.
- * @author Joan Pau Beltran
+ * @author Joan Pau Beltran  <joanpau.beltran@socib.cat>
  *
- *  Copyright (C) 2014
+ *  Copyright (C) 2014-2015
  *  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+ *  <http://www.socib.es>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +25,7 @@
  *
  * The libssh library provides a client API for the SFTP protocol. 
  * The official web site of the library is:
- *   https://www.libssh.org/
+ *   <https://www.libssh.org/>
  * 
  * On Debian based systems, the package libssh-dev in the official
  * repositories provides the development files for the libssh library.

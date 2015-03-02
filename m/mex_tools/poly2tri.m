@@ -4,12 +4,13 @@ function [xtri, ytri] = poly2tri(x, y)
 %  Syntax:
 %    [XTRI, YTRI] = POLY2TRI(X, Y)
 %
-%  [XTRI, YTRI] = POLY2TRI(X, Y) triangulates the polygon with coordinates in
-%  vectors X and Y, returning the coordinates of the resulting triangulation in
-%  3xM arrays XTRI and YTRI, where M is the number of triangles in the
-%  decomposition, and each column defines a triangle. X and Y must have the same 
-%  dimensions. The polygon may be self-intersecting, and it is supposed to be
-%  closed even if the first vertex is not repeated at the end.
+%  Description:
+%    [XTRI, YTRI] = POLY2TRI(X, Y) triangulates the polygon with coordinates in
+%    vectors X and Y, returning the coordinates of the resulting triangulation
+%    3-by-M arrays XTRI and YTRI, where M is the number of triangles in the
+%    decomposition, and each column defines a triangle. X and Y must b the same 
+%    size. The polygon may be self-intersecting, and it is supposed to be
+%    closed even if the first vertex is not repeated at the end.
 %
 %  Notes:
 %    The true decomposition is performed by the function GPC_POLYGON_TO_TRISTRIP
@@ -30,13 +31,14 @@ function [xtri, ytri] = poly2tri(x, y)
 %
 %  References:
 %    Alan Murta, GPC - General Polygon Clipper library:
-%    http://www.cs.man.ac.uk/~amurta/software/index.html#gpc
+%    <http://www.cs.man.ac.uk/~amurta/software/index.html#gpc>
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

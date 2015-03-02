@@ -1,10 +1,11 @@
 /**
  * @file
  * @brief MATLAB interface for polygon triangulation using GPC library.
- * @author Joan Pau Beltran
+ * @author Joan Pau Beltran  <joanpau.beltran@socib.cat>
  *
- *  Copyright (C) 2013-2014
+ *  Copyright (C) 2013-2015
  *  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+ *  <http://www.socib.es>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,7 +27,7 @@
  * polygons written by Alan Murta at the University of Manchester. It also 
  * provides a triangulation function decomposing a polygon into triangle strips.
  * The official web site of the library is:
- *   http://www.cs.man.ac.uk/~amurta/software/index.html#gpc
+ *   <http://www.cs.man.ac.uk/~amurta/software/index.html#gpc>
  * 
  * On Debian based systems, the package ligpcl-dev in the non-free section of
  * the official repositories provides the development files for the GPC library.

@@ -6,224 +6,228 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %    [DATA_PRE, META_PRE] = PREPROCESSGLIDERDATA(DATA_RAW, META_RAW, OPTIONS)
 %    [DATA_PRE, META_PRE] = PREPROCESSGLIDERDATA(DATA_RAW, META_RAW, OPT1, VAL1, ...)
 %
-%  [DATA_PRE, META_PRE] = PREPROCESSGLIDERDATA(DATA_RAW, META_RAW, ...)
-%  preprocesses glider deployment data according to given options,
-%  performing the following actions:
-%    - Selection of time sensors: 
-%      A time sequence is selected.
-%      Optionally, a unit conversion may be applied, if needed.
-%      This sequence is mandatory, processing aborts if missing.
-%    - Selection of horizontal position sensors:
-%      Latitude and longitude sequences are selected.
-%      A position flag is also selected, if any, and bad values are masked as 
-%      missing. Optionally, a unit conversion may be applied, if needed.
-%      Latitude and longitude are mandatory, processing aborts if missing.
-%    - Selection of optional reference sensors:
-%      Navigation depth, pitch, roll and heading sequences are selected, if any.
-%      Unit conversions may be applied, if needed.
-%    - Selection of water velocity sensors or estimates.
-%      Mean segment water eastward and northward velocity sequences are 
-%      selected, if any. Unit conversions may be applied, if needed.
-%    - Selection of commanded trajectory sensors:
-%      Commanded waypoint longitude and latitude sequences are selected, if any.
-%      Unit conversions may be applied, if needed.
-%    - Selection of CTD sensor:
-%      Conductivity, temperature and pressure sequences are selected, if any.
-%      Optionally the CTD timestamp sequence is selected, too.
-%      Unit conversion may be applied to pressure readings, if needed; and 
-%      factory calibrations may be applied to temperature and conductivity.
-%    - Selection of fluorescence and/or scattering sensor:
-%      Chlorophyll, turbidity, CDOM and/or scattering sequences are selected, 
-%      if any. Optionally the sensor timestamp sequence is selected, too.
-%      Manufacturer calibrations may be applied, if needed.
-%    - Selection of oxygen sensors:
-%      Oxygen concentration and saturation sequences are selected, if any.
-%      Optionally oxygen sensor timestamp and temperature sequences are 
-%      selected. Unit conversion and manufacturer calibrations may be applied.
-%    - Selection of other sensors of interest:
-%      Sequences from extra sensors configured in options are selected.
-%      Unit conversion and manufacturer calibrations may be applied, if needed.
+%  Description:
+%    [DATA_PRE, META_PRE] = PREPROCESSGLIDERDATA(DATA_RAW, META_RAW, ...)
+%    preprocesses glider deployment data according to given options,
+%    performing the following actions:
+%      - Selection of time sensors: 
+%        A time sequence is selected.
+%        Optionally, a unit conversion may be applied, if needed.
+%        This sequence is mandatory, processing aborts if missing.
+%      - Selection of horizontal position sensors:
+%        Latitude and longitude sequences are selected.
+%        A position flag is also selected, if any, and bad values are masked
+%        as missing. Optionally, a unit conversion may be applied, if needed.
+%        Latitude and longitude are mandatory, processing aborts if missing.
+%      - Selection of optional reference sensors:
+%        Navigation depth, pitch, roll, and heading sequences are selected,
+%        if any. Unit conversions may be applied, if needed.
+%      - Selection of water velocity sensors or estimates.
+%        Mean segment water eastward and northward velocity sequences are 
+%        selected, if any. Unit conversions may be applied, if needed.
+%      - Selection of commanded trajectory sensors:
+%        Commanded waypoint longitude and latitude sequences are selected,
+%        if any. Unit conversions may be applied, if needed.
+%      - Selection of CTD sensor:
+%        Conductivity, temperature and pressure sequences are selected, if any.
+%        Optionally the CTD timestamp sequence is selected, too.
+%        Unit conversion may be applied to pressure readings, if needed; and 
+%        factory calibrations may be applied to temperature and conductivity.
+%      - Selection of fluorescence and/or scattering sensor:
+%        Chlorophyll, turbidity, CDOM and/or scattering sequences are selected, 
+%        if any. Optionally the sensor timestamp sequence is selected, too.
+%        Manufacturer calibrations may be applied, if needed.
+%      - Selection of oxygen sensors:
+%        Oxygen concentration and saturation sequences are selected, if any.
+%        Optionally oxygen sensor timestamp and temperature sequences are 
+%        selected. Unit conversion and manufacturer calibrations may be applied.
+%      - Selection of other sensors of interest:
+%        Sequences from extra sensors configured in options are selected.
+%        Unit conversions and manufacturer calibrations may be applied,
+%        if needed.
 %
-%  DATA_RAW should be a struct in the format returned by LOADSLOCUMDATA or
-%  LOADSEAGLIDERDATA, where each field is a vector sequence from the sensor 
-%  or variable with the same name. META_RAW should be the struct with the
-%  metadata required for the preprocessing. Currently it is only used for the
-%  following actions:
-%    - Seaglider log parameter alignment (see option SG_DIVE_PARAMS below).
+%      DATA_RAW should be a struct in the format returned by LOADSLOCUMDATA or
+%      LOADSEAGLIDERDATA, where each field is a vector sequence from the sensor 
+%      or variable with the same name. META_RAW should be the struct with the
+%      metadata required for the preprocessing. Currently it is only used for
+%      the following actions:
+%        - Seaglider log parameter alignment (see option SG_DIVE_PARAMS below).
 %
-%  Preprocessed data is returned in struct DATA_PRE, where each field is a
-%  sequence of readings selected and preprocessed according to given options
-%  (see below). META_PRE is a struct with the same fields keeping track of the
-%  source of each selected sequence and how it has been modified.
+%    Preprocessed data is returned in struct DATA_PRE, where each field is a
+%    sequence of readings selected and preprocessed according to given options
+%    (see below). META_PRE is a struct with the same fields keeping track of
+%    the source of each selected sequence and how it has been modified.
 %
-%  Options may be given in key-value pairs OPT1, VAL1... or in a struct OPTIONS 
-%  with field names as option keys and field values as option values.
-%  Recognized options are:
-%    SG_DIVE_PARAMS: Seaglider dive parameters to align with column data.
-%      String cell array with the names of the Seaglider log parameters that
-%      need to align with the rest of the data collected during the dive as
-%      required by function ALIGNSGDIVEPARAMS.
-%      Default value: {}
-%    TIME_LIST: time sensor choices.
-%      Struct array with the time sensor choices, in order of preference.
-%      It should have the following fields:
-%        TIME: time sequence name.
-%      It may have the following optional fields (empty or missing):
-%        CONVERSION: time unit conversion.
-%          Handle or name of the time unit conversion.
-%          If present and not empty, the selected sequence is converted through
-%          that function.
-%      Default value: struct('time', {'m_present_time' 'sci_m_present_time'})
-%    POSITION_LIST: longitude and latitude sensor choices.
-%      Struct array selecting longitude and latitude sensor sets in order
-%      of preference, with optional mask of valid position readings.
-%      It should have the following fields:
-%        LONGITUDE: longitude sequence name.
-%        LATITUDE: latitude sequence name.
-%      It may have the following optional fields (empty or missing):
-%        STATUS: position status sequence name.
-%        STATUS_GOOD: position status good values or filter.
-%        STATUS_BAD:  position status bad values or filter.
-%        CONVERSION: position coordinate conversion.
-%          Handle or name of the position coordinate conversion function.
-%          If present and not empty, the selected longitude and latitude 
-%          sequences are converted through this function.
-%        TIME: time component of position reading timestamp.
-%        DATE: date component of position reading timestamp.
-%        TIME_CONVERSION: position timestamp conversion.
-%          Handle or name of the position timestamp conversion function.
-%          If present and not empty, the selected position time stamp and
-%          position date stamp sequences are converted through this function to
-%          a sequence of absolute timepstamps.
-%      Default value: struct('longitude', {'m_gps_lon' 'm_lon'}, ...
-%                            'latitude', {'m_gps_lat' 'm_lat'}, ...
-%                            'position_status', {'m_gps_status' []}, ...
-%                            'position_status_good', {0 []}, ...
-%                            'position_status_bad', {[] []}, ...
-%                            'conversion', {@nmea2deg @nmea2deg})
-%    DEPTH_LIST: depth sensor choices.
-%      Struct array with the depth sensor choices, in order of preference.
-%      It should have the following fields:
-%        DEPTH: depth sequence name.
-%      It may have the following optional fields (empty or missing):
-%        CONVERSION: depth unit conversion.
-%          Handle or name of the depth coordinate conversion function.
-%          If present and not empty, the selected depth sequence is converted 
-%          through this function. 
-%      Default value: struct('depth', {'m_depth'});
-%    ATTITUDE_LIST: roll and pitch sensor choices.
-%      Struct array selecting roll and pitch sequences, in order of preference.
-%      It should have the following fields:
-%        ROLL: roll sensor name.
-%        PITCH: pitch sensor name.
-%      It may have the following optional fields (empty or missing):
-%        CONVERSION: roll and pitch unit conversion.
-%          Handle or name of the attitude conversion function.
-%          If present and not empty, the each selected roll and pitch sequence
-%          is converted through this function.
-%      Default value: struct('roll', {'m_roll'}, 'pitch', {'m_pitch'})
-%    HEADING_LIST: heading sensor choices.
-%      Struct array with the heading sensor choices, in order of preference.
-%      It should have the following fields:
-%        HEADING: heading sequence name.
-%      It may have the following optional fields (empty or missing):
-%        CONVERSION: heading unit conversion.
-%          Handle or name of the heading unit conversion.
-%          If present and not empty, the selected sequence is converted through
-%          that function.
-%      Default value: struct('heading', {'m_heading'})
-%    WAYPOINT_LIST: waypoint longitude and latitude choices.
-%      Struct array selecting waypoint longitude and latitude sequences, in
-%      order of preference. It should have the following fields:
-%        LONGITUDE: waypoint longitude sequence name.
-%        LATITUDE: waypoint latitude sequence name.
-%      It may have the following optional fields (empty or missing):
-%        CONVERSION: position coordinate conversion.
-%          Handle or name of the position coordinate conversion function.
-%          If present and not empty, the selected waypoint longitude and 
-%          latitude sequences are converted through this function. 
-%      Default value: struct('longitude', {'c_wpt_lon'}, ...
-%                            'latitude',  {'c_wpt_lat'}, ...
-%                            'conversion', {@nmea2deg})
-%    WATER_VELOCITY_LIST: water velocity choices.
-%      Struct array selecting estimates water velocity components, in order of
-%      preference. It should have the following fields:
-%        VELOCITY_EASTWARD: water velocity eastward component sensor name.
-%        VELOCITY_NORTHWARD: water velocity northward component sensor name.
-%        CONVERSION: water velocity conversion.
-%          Handle or name of the water velocity conversion function.
-%          If present and not empty, the selected water velocity component 
-%          sequences are converted through this function. 
-%      Default value: struct('velocity_eastward', {'m_final_water_vx'}, ...
-%                            'velocity_northward', {'m_final_water_vy'})
-%    CTD_LIST: CTD sensor choices.
-%      Struct array selecting the CTD sensors, in order of preference.
-%      It should have the following fields:
-%        CONDUCTIVITY: conductivity sequence name.
-%        TEMPERATURE: temperature sequence name.
-%        PRESSURE: pressure sequence name.
-%      It may have the following optional fields (empty or missing):
-%        TIME: CTD timestamp sequence name.
-%        PRESSURE_CONVERSION: pressure unit conversion.
-%          Handle or name of the pressure unit conversion function.
-%          If present and not empty, the selected pressure sequence is 
-%          converted through this function.
-%        CALIBRATION: conductivity and temperature factory calibration.
-%          Handle or name of the temperature and conductivity factory
-%          calibration function. If present and not empty, the raw conductivity
-%          and temperature sequences, and the pressure sequence are passed to
-%          this function to get the calibrated temperature and conductivity.
-%      Default value:
-%        struct('conductivity', {'sci_water_cond'        'm_water_cond'}, ...
-%               'temperature',  {'sci_water_temp'        'm_water_temp'}, ...
-%               'pressure',     {'sci_water_pressure'    'm_water_pressure'}, ...
-%               'time',         {'sci_ctd41cp_timestamp' []}
-%               'pressure_conversion', {@bar2dbar        @bar2dbar})
-%    OXYGEN_LIST: oxygen sensor set choices.
-%      Struct array selecting the oxygen sensor sets, in order of preference.
-%      It should have the following fields:
-%        OXYGEN_CONCENTRATION: concentration of oxygen sequence name.
-%        OXYGEN_SATURATION: saturation of oxygen sequence name.
-%      It may have the following optional fields (empty or missing):
-%        TEMPERATURE: oxygen temperature sequence name.
-%        TIME: oxygen timestamp sequence name.
-%      Default value: struct('oxygen_concentration', {'sci_oxy3835_oxygen'}, ...
-%                            'oxygen_saturation',    {'sci_oxy3835_saturation'}, ...
-%                            'temperature',          {'sci_oxy3835_temp'}, ...
-%                            'time',                 {'sci_oxy3835_timestamp'})
-%    OPTICS_LIST: fluorescence and scattering sensor set choices.
-%      Struct array selecting the fluorescence and scattering sensor sets in 
-%      order of preference. It may have the following fields (empty or missing):
-%        CHLOROPHYLL: chlorophyl sequence name.
-%        TURBIDITY: turbidity sequence name.
-%        CDOM: CDOM sequence name.
-%        SCATTER_650: 650 nm wavelength scattering sequence name.
-%        TIME: optic sensor timestamp sequence name.
-%        CALIBRATION: fluorescence and scattering factory calibration.
-%          Handle or name of the optic sensor factory calibration function.
-%          If present and not empty, the selected raw sequences are passed to
-%          this function to get the calibrated optic measurements.
-%      Default value: struct('chlorophyll', {'sci_flntu_chlor_units'}, ...
-%                            'turbidity',   {'sci_flntu_turb_units'}, ...
-%                            'cdom',        {[]}, ...
-%                            'scatter_650', {[]}, ...
-%                            'time',        {'sci_flntu_timestamp'})
-%    EXTRA_SENSOR_LIST: other sensor set choices.
-%      Struct selecting other sensor sets of interest. Each field in the struct
-%      represents a sensor of interest. The field name is the sensor name 
-%      (e.g. battery_info) and the field value should be a struct array 
-%      with the sensor choices in order of preference, where field names are
-%      the final sequence names (fields in struct DATA_PRE, e.g. 
-%      battery_nominal_capacity and battery_total_consumption) and field values 
-%      are the original sequence name choices (fields in struct DATA_RAW, e.g. 
-%      f_coulomb_battery_capacity m_coulomb_amphr_total).
-%      Default value: struct()
-%    CALIBRATION_PARAMETER_LIST: calibration parameters for each variable.
-%      Struct with the calibration parameters of each uncalibrated raw variable.
-%      For each variable with calibration parameters there should be a field 
-%      with the same name and whose value is a struct with its parameter names 
-%      as field names and its parameter values as field values.
-%      Default value: struct()
+%    Options may be given in key-value pairs OPT1, VAL1... or in a struct
+%    OPTIONS with field names as option keys and field values as option values.
+%    Recognized options are:
+%      SG_DIVE_PARAMS: Seaglider dive parameters to align with column data.
+%        String cell array with the names of the Seaglider log parameters that
+%        need to align with the rest of the data collected during the dive as
+%        required by function ALIGNSGDIVEPARAMS.
+%        Default value: {}
+%      TIME_LIST: time sensor choices.
+%        Struct array with the time sensor choices, in order of preference.
+%        It should have the following fields:
+%          TIME: time sequence name.
+%        It may have the following optional fields (empty or missing):
+%          CONVERSION: time unit conversion.
+%            Handle or name of the time unit conversion.
+%            If present and not empty, the selected sequence is converted 
+%            through that function.
+%        Default value: struct('time', {'m_present_time' 'sci_m_present_time'})
+%      POSITION_LIST: longitude and latitude sensor choices.
+%        Struct array selecting longitude and latitude sensor sets in order
+%        of preference, with optional mask of valid position readings.
+%        It should have the following fields:
+%          LONGITUDE: longitude sequence name.
+%          LATITUDE: latitude sequence name.
+%        It may have the following optional fields (empty or missing):
+%          STATUS: position status sequence name.
+%          STATUS_GOOD: position status good values or filter.
+%          STATUS_BAD:  position status bad values or filter.
+%          CONVERSION: position coordinate conversion.
+%            Handle or name of the position coordinate conversion function.
+%            If present and not empty, the selected longitude and latitude 
+%            sequences are converted through this function.
+%          TIME: time component of position reading timestamp.
+%          DATE: date component of position reading timestamp.
+%          TIME_CONVERSION: position timestamp conversion.
+%            Handle or name of the position timestamp conversion function.
+%            If present and not empty, the selected position time stamp and
+%            position date stamp sequences are converted through this function
+%            to a sequence of absolute timepstamps.
+%        Default value: struct('longitude', {'m_gps_lon' 'm_lon'}, ...
+%                              'latitude', {'m_gps_lat' 'm_lat'}, ...
+%                              'position_status', {'m_gps_status' []}, ...
+%                              'position_status_good', {0 []}, ...
+%                              'position_status_bad', {[] []}, ...
+%                              'conversion', {@nmea2deg @nmea2deg})
+%      DEPTH_LIST: depth sensor choices.
+%        Struct array with the depth sensor choices, in order of preference.
+%        It should have the following fields:
+%          DEPTH: depth sequence name.
+%        It may have the following optional fields (empty or missing):
+%          CONVERSION: depth unit conversion.
+%            Handle or name of the depth coordinate conversion function.
+%            If present and not empty, the selected depth sequence is converted 
+%            through this function. 
+%        Default value: struct('depth', {'m_depth'});
+%      ATTITUDE_LIST: roll and pitch sensor choices.
+%        Struct array with the roll and pitch sensor choices sequences, 
+%        in order of preference. It should have the following fields:
+%          ROLL: roll sensor name.
+%          PITCH: pitch sensor name.
+%        It may have the following optional fields (empty or missing):
+%          CONVERSION: roll and pitch unit conversion.
+%            Handle or name of the attitude conversion function.
+%            If present and not empty, each selected roll and pitch sequence
+%            is converted through this function.
+%        Default value: struct('roll', {'m_roll'}, 'pitch', {'m_pitch'})
+%      HEADING_LIST: heading sensor choices.
+%        Struct array with the heading sensor choices, in order of preference.
+%        It should have the following fields:
+%          HEADING: heading sequence name.
+%        It may have the following optional fields (empty or missing):
+%          CONVERSION: heading unit conversion.
+%            Handle or name of the heading unit conversion.
+%            If present and not empty, the selected sequence is converted through
+%            that function.
+%        Default value: struct('heading', {'m_heading'})
+%      WAYPOINT_LIST: waypoint longitude and latitude choices.
+%        Struct array selecting waypoint longitude and latitude sequences,
+%        in order of preference. It should have the following fields:
+%          LONGITUDE: waypoint longitude sequence name.
+%          LATITUDE: waypoint latitude sequence name.
+%        It may have the following optional fields (empty or missing):
+%          CONVERSION: position coordinate conversion.
+%            Handle or name of the position coordinate conversion function.
+%            If present and not empty, the selected waypoint longitude and 
+%            latitude sequences are converted through this function. 
+%        Default value: struct('longitude', {'c_wpt_lon'}, ...
+%                              'latitude',  {'c_wpt_lat'}, ...
+%                              'conversion', {@nmea2deg})
+%      WATER_VELOCITY_LIST: water velocity choices.
+%        Struct array selecting estimates water velocity components,
+%        in order of preference. It should have the following fields:
+%          VELOCITY_EASTWARD: water velocity eastward component sensor name.
+%          VELOCITY_NORTHWARD: water velocity northward component sensor name.
+%          CONVERSION: water velocity conversion.
+%            Handle or name of the water velocity conversion function.
+%            If present and not empty, the selected water velocity component 
+%            sequences are converted through this function. 
+%        Default value: struct('velocity_eastward', {'m_final_water_vx'}, ...
+%                              'velocity_northward', {'m_final_water_vy'})
+%      CTD_LIST: CTD sensor choices.
+%        Struct array selecting the CTD sensors, in order of preference.
+%        It should have the following fields:
+%          CONDUCTIVITY: conductivity sequence name.
+%          TEMPERATURE: temperature sequence name.
+%          PRESSURE: pressure sequence name.
+%        It may have the following optional fields (empty or missing):
+%          TIME: CTD timestamp sequence name.
+%          PRESSURE_CONVERSION: pressure unit conversion.
+%            Handle or name of the pressure unit conversion function.
+%            If present and not empty, the selected pressure sequence is 
+%            converted through this function.
+%          CALIBRATION: conductivity and temperature factory calibration.
+%            Handle or name of the temperature and conductivity factory
+%            calibration function. If present and not empty, the raw 
+%            conductivity and temperature sequences, and the pressure sequence
+%            are passed to this function to get the calibrated temperature
+%            and conductivity.
+%        Default value:
+%          struct('conductivity', {'sci_water_cond'        'm_water_cond'}, ...
+%                 'temperature',  {'sci_water_temp'        'm_water_temp'}, ...
+%                 'pressure',     {'sci_water_pressure'    'm_water_pressure'}, ...
+%                 'time',         {'sci_ctd41cp_timestamp' []}
+%                 'pressure_conversion', {@bar2dbar        @bar2dbar})
+%      OXYGEN_LIST: oxygen sensor set choices.
+%        Struct array selecting the oxygen sensor sets, in order of preference.
+%        It should have the following fields:
+%          OXYGEN_CONCENTRATION: concentration of oxygen sequence name.
+%          OXYGEN_SATURATION: saturation of oxygen sequence name.
+%        It may have the following optional fields (empty or missing):
+%          TEMPERATURE: oxygen temperature sequence name.
+%          TIME: oxygen timestamp sequence name.
+%        Default value: struct('oxygen_concentration', {'sci_oxy3835_oxygen'}, ...
+%                              'oxygen_saturation',    {'sci_oxy3835_saturation'}, ...
+%                              'temperature',          {'sci_oxy3835_temp'}, ...
+%                              'time',                 {'sci_oxy3835_timestamp'})
+%      OPTICS_LIST: fluorescence and scattering sensor set choices.
+%        Struct array selecting the fluorescence and scattering sensor sets,
+%        in  order of preference. It may have the following optional fields 
+%        (empty or missing):
+%          CHLOROPHYLL: chlorophyl sequence name.
+%          TURBIDITY: turbidity sequence name.
+%          CDOM: CDOM sequence name.
+%          SCATTER_650: 650 nm wavelength scattering sequence name.
+%          TIME: optic sensor timestamp sequence name.
+%          CALIBRATION: fluorescence and scattering factory calibration.
+%            Handle or name of the optic sensor factory calibration function.
+%            If present and not empty, the selected raw sequences are passed to
+%            this function to get the calibrated optic measurements.
+%        Default value: struct('chlorophyll', {'sci_flntu_chlor_units'}, ...
+%                              'turbidity',   {'sci_flntu_turb_units'}, ...
+%                              'cdom',        {[]}, ...
+%                              'scatter_650', {[]}, ...
+%                              'time',        {'sci_flntu_timestamp'})
+%      EXTRA_SENSOR_LIST: other sensor set choices.
+%        Struct selecting other sensor sets of interest, where each field 
+%        represents a sensor of interest. The field name is an arbitrary sensor 
+%        name (e.g. battery_info), and the field value should be a struct array 
+%        with the sensor choices in order of preference, where field names are
+%        the final sequence names (fields in struct DATA_PRE, e.g. 
+%        battery_nominal_capacity and battery_total_consumption) and field 
+%        values are the original sequence name choices (fields in struct 
+%        DATA_RAW, e.g. f_coulomb_battery_capacity and m_coulomb_amphr_total).
+%        Default value: struct()
+%      CALIBRATION_PARAMETER_LIST: calibration parameters for each variable.
+%        Struct with the calibration parameters of each uncalibrated variable.
+%        For each raw variable with calibration parameters there should be a 
+%        field with the same name and whose value is a struct with the parameter
+%        names as field names and its parameter values as field values.
+%        Default value: struct()
 %
 %  Examples:
 %    data_pre = preprocessGliderData(data_raw, meta_raw, options)
@@ -237,11 +241,12 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %    CALIBRATESBECT
 %    CALIBRATEWLECBBFL2
 %    
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
