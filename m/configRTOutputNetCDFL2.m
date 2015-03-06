@@ -78,11 +78,10 @@ function ncl2_info = configRTOutputNetCDFL2()
   default_fill_value = realmax('double');
 
   var_attr_list.time = {
-    'long_name'     'navigation epoch time'
+    'long_name'     'profile grid time'
     'standard_name' 'time'
     'units'         'seconds since 1970-01-01 00:00:00 +00:00'
     'axis'          'T'
-    'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
     'grid_sources'     []
@@ -91,12 +90,11 @@ function ncl2_info = configRTOutputNetCDFL2()
     'grid_max'         [] };
 
   var_attr_list.depth = {
-    'long_name'     'glider depth'
+    'long_name'     'profile grid depth'
     'standard_name' 'depth'
     'units'         'm'
     'positive'      'down'
     'axis'          'Z'
-    'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
     'conversion'       []
@@ -107,11 +105,11 @@ function ncl2_info = configRTOutputNetCDFL2()
     'grid_max'         [] };
 
   var_attr_list.latitude = {
-    'long_name'     'latitude'
+    'long_name'     'profile grid latitude'
     'standard_name' 'latitude'
     'units'         'degree_north'
     'axis'          'Y'
-    'coordinates'   'time depth latitude longitude'
+    'coordinates'   'time'
     '_FillValue'    default_fill_value
     'sources'          []
     'conversion'       []
@@ -121,11 +119,11 @@ function ncl2_info = configRTOutputNetCDFL2()
     'grid_method'      [] };
 
   var_attr_list.longitude = {
-    'long_name'     'longitude'
+    'long_name'     'profile grid longitude'
     'standard_name' 'longitude'
     'axis'          'X'
     'units'         'degree_east'
-    'coordinates'   'time depth latitude longitude'
+    'coordinates'   'time'
     '_FillValue'    default_fill_value
     'sources'          []
     'conversion'       []
@@ -177,7 +175,7 @@ function ncl2_info = configRTOutputNetCDFL2()
     'long_name'     'profile index'
     'standard_name' ''
     'units'         '1'
-    'coordinates'   'time depth latitude longitude'
+    'coordinates'   'time latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
     'method'           []
