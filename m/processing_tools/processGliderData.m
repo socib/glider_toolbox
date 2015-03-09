@@ -708,8 +708,8 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
     end
     fprintf('  maximum profile stall     : %f\n', profiling_stall);
     fprintf('  maximum profile shake     : %f\n', profiling_shake);
-    fprintf('  minimum profile inversion : %f\n', profiling_inversion);
-    fprintf('  minimum profile interrupt : %f\n', profiling_interrupt);
+    fprintf('  maximum profile inversion : %f\n', profiling_inversion);
+    fprintf('  maximum profile interrupt : %f\n', profiling_interrupt);
     fprintf('  minimum profile length    : %f\n', profiling_length);
     fprintf('  minimum profile period    : %f\n', profiling_period);
     % Find profile directions and indices.
