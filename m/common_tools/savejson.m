@@ -129,13 +129,16 @@ function json = savejsonObject(object)
   keys = fieldnames(object);
   vals = struct2cell(structfun(@savejsonValue, object, 'UniformOutput', false));
   pairs = [keys(:) vals(:)]';
-  if isempty(pairs)
-    json = '{}';
-  else
-    json = ['{' ...
-            sprintf('"%s":%s,', pairs{:, 1:end-1}) ...
-            sprintf('"%s":%s', pairs{:, end}) ...
-            '}'];
+  switch size(pairs, 2)
+    case 0
+      json = '{}';
+    case 1
+      json = ['{' sprintf('"%s":%s', pairs{:}) '}'];
+    otherwise
+      json = ['{' ...
+              sprintf('"%s":%s,', pairs{:, 1:end-1}) ...
+              sprintf('"%s":%s', pairs{:, end}) ...
+              '}'];
   end
 end
 
@@ -146,10 +149,13 @@ function json = savejsonArray(object)
   else
     vals = arrayfun(@savejsonValue, object, 'UniformOutput', false);
   end
-  if isempty(vals)
-    json = '[]';
-  else
-    json  = ['[' sprintf('%s,', vals{1:end-1}) sprintf('%s', vals{end}) ']'];
+  switch numel(vals)
+    case 0
+      json = '[]';
+    case 1
+      json  = ['[' sprintf('%s', vals{:}) ']'];
+    otherwise
+      json  = ['[' sprintf('%s,', vals{1:end-1}) sprintf('%s', vals{end}) ']'];
   end
 end
 
