@@ -114,7 +114,7 @@ function setupMexPoly2tri()
 
   if exist(gpcldir, 'dir')
     % mex -outdir mex_tools mex_tools/poly2tri.c mex_tools/gpcl/gpc.c
-    mex('-output', target, [sources ' ' gpclsrc]);
+    mex('-output', target, sources, gpclsrc);
   else
     % mex -outdir mex_tools -lgpcl mex_tools/poly2tri.c
     mex('-output', target, ['-l' gpcl], sources);
