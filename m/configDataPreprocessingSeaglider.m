@@ -53,14 +53,14 @@ function preprocessing_options = configDataPreprocessingSeaglider()
   preprocessing_options.position_list(1).time_conversion = ...
     @(d,t)(utc2posixtime(fillSGMissingGPSDate(d,t)));
   
-  preprocessing_options.depth_list = struct('depth', {});
+  preprocessing_options.depth_list(1).depth = 'depth';
   
   preprocessing_options.attitude_list(1).roll = 'rollAng';
   preprocessing_options.attitude_list(1).pitch = 'pitchAng';
   preprocessing_options.attitude_list(1).conversion = @deg2rad;
   
-  preprocessing_options.heading_list.heading = 'head';
-  preprocessing_options.attitude_list(1).conversion = @deg2rad;
+  preprocessing_options.heading_list(1).heading = 'head';
+  preprocessing_options.heading_list(1).conversion = @deg2rad;
 
   preprocessing_options.waypoint_list(1).longitude = 'TGT_LATLONG_tgt_lon';
   preprocessing_options.waypoint_list(1).latitude = 'TGT_LATLONG_tgt_lat';
@@ -73,7 +73,6 @@ function preprocessing_options = configDataPreprocessingSeaglider()
   preprocessing_options.ctd_list(1).conductivity = 'sbect_condFreq';
   preprocessing_options.ctd_list(1).temperature  = 'sbect_tempFreq';
   preprocessing_options.ctd_list(1).pressure     = 'depth';
-  preprocessing_options.ctd_list(1).time         = 'sci_ctd41cp_timestamp';
   preprocessing_options.ctd_list(1).pressure_conversion = @sgdepth2pres;
   preprocessing_options.ctd_list(1).calibration = @calibrateSBECT;
   
