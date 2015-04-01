@@ -635,7 +635,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         end
         data_pre.heading = heading_conversion_func(data_pre.heading);
         meta_pre.heading.conversion = func2str(heading_conversion_func);
-        fprintf('  conversion : %s\n', func2str(heading_conversion));
+        fprintf('  conversion : %s\n', func2str(heading_conversion_func));
       end
       break;
     end
