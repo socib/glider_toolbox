@@ -2396,101 +2396,101 @@ function ncl0_info = configDTOutputNetCDFL0Seaglider()
     'units'         'Celsius'
     'comments'      'Temperature-compensated phase from Aanderaa oxygen optode.'
     '_FillValue'    default_fill_value };
-  
-  var_attr_list.wl1_Cdomref1 = {
-    'long_name'     'CDOM reference'
-    'units'         'counts'
-    'comments'      'CDOM signal output 1 reference.'
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.wl1_Cdomsig1 = {
-    'long_name'     'CDOM signal'
-    'units'         'counts'
-    'comments'      'CDOM signal output 1 backscatter.'
-    '_FillValue'    default_fill_value };
 
   var_attr_list.wl1_Chlref1 = {
     'long_name'     'chlorophyll reference'
     'units'         'counts'
-    'comments'      'Chlorophyll signal output 1 reference.'
+    'comments'      'WETLabs ECO triplet puck chlorophyll output reference.'
     '_FillValue'    default_fill_value };
 
   var_attr_list.wl1_Chlsig1 = {
     'long_name'     'chlorophyll signal'
     'units'         'counts'
-    'comments'      'Chlorophyll signal output 1 backscatter.'
+    'comments'      'WETLabs ECO triplet puck chlorophyll output signal.'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.wl1_Cdomref1 = {
+    'long_name'     'CDOM reference'
+    'units'         'counts'
+    'comments'      'WETLabs ECO triplet puck CDOM output reference.'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.wl1_Cdomsig1 = {
+    'long_name'     'CDOM signal'
+    'units'         'counts'
+    'comments'      'WETLabs ECO triplet puck CDOM output signal.'
     '_FillValue'    default_fill_value };
 
   var_attr_list.wl1_ref1 = {
-    'long_name'     'wavelength 1 backscatter reference'
+    'long_name'     'backscatter reference'
     'units'         'counts'
-    'comments'      'Wavelength 1 reference.'
+    'comments'      'WETLabs ECO triplet puck backscatter output reference.'
     '_FillValue'    default_fill_value };
 
   var_attr_list.wl1_sig1 = {
-    'long_name'     'wavelength 1 backscatter signal'
+    'long_name'     'backscatter signal'
     'units'         'counts'
-    'comments'      'Wavelength 1 backscatter.'
+    'comments'      'WETLabs ECO triplet puck backscatter output signal.'
     '_FillValue'    default_fill_value };
 
   var_attr_list.wl1_temp1 = {
-    'long_name'     'backscatter temperature'
+    'long_name'     'bbfl2 triplet temperature'
     'units'         'Celsius'
-    'comments'      'Backscatter temperature.'
+    'comments'      'WETLabs ECO triplet puck temperature.'
     '_FillValue'    default_fill_value };
   
-  var_attr_list.wlbbfl2vmt_wl600ref = {
-    'long_name'     'wl600 backscatter reference'
-    'units'         'counts'
-    'comments'      'WETLabs triplet puck 600 backscatter output reference.'
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.wlbbfl2vmt_wl600sig = {
-    'long_name'     'wl600 backscatter signal'
-    'units'         'counts'
-    'comments'      'WETLabs triplet puck 600 backscatter output signal.'
-    '_FillValue'    default_fill_value };
-    
-  var_attr_list.wlbbfl2vmt_wl650ref = {
-    'long_name'     'wl650 backscatter reference'
-    'units'         'counts'
-    'comments'      'WETLabs triplet puck 650 backscatter output reference.'
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.wlbbfl2vmt_wl650sig = {
-    'long_name'     'wl650 backscatter signal'
-    'units'         'counts'
-    'comments'      'WETLabs triplet puck backscatter output signal.'
-    '_FillValue'    default_fill_value };
-
   var_attr_list.wlbbfl2vmt_Chlref = {
     'long_name'     'chlorophyll reference'
     'units'         'counts'
-    'comments'      'WETLabs triplet puck chlorophyll signal output reference.'
+    'comments'      'WETLabs ECO triplet puck chlorophyll signal output reference.'
     '_FillValue'    default_fill_value };
 
   var_attr_list.wlbbfl2vmt_Chlsig = {
     'long_name'     'chlorophyll signal'
     'units'         'counts'
-    'comments'      'WETLabs triplet puck chlorophyll signal output backscatter.'
+    'comments'      'WETLabs ECO triplet puck chlorophyll signal output backscatter.'
     '_FillValue'    default_fill_value };
-
+    
   var_attr_list.wlbbfl2vmt_Cdomref = {
     'long_name'     'CDOM reference'
     'units'         'counts'
-    'comments'      'WETLabs triplet puck CDOM signal output reference.'
+    'comments'      'WETLabs ECO triplet puck CDOM signal output reference.'
     '_FillValue'    default_fill_value };
 
   var_attr_list.wlbbfl2vmt_Cdomsig = {
     'long_name'     'CDOM signal'
     'units'         'counts'
-    'comments'      'WETLabs triplet puck CDOM signal output backscatter.'
+    'comments'      'WETLabs ECO triplet puck CDOM signal output backscatter.'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.wlbbfl2vmt_wl600ref = {
+    'long_name'     'backscatter reference'
+    'units'         'counts'
+    'comments'      'WETLabs ECO triplet puck backscatter output reference.'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.wlbbfl2vmt_wl600sig = {
+    'long_name'     'backscatter signal'
+    'units'         'counts'
+    'comments'      'WETLabs ECO triplet puck backscatter output signal.'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.wlbbfl2vmt_wl650ref = {
+    'long_name'     'backscatter reference'
+    'units'         'counts'
+    'comments'      'WETLabs ECO triplet puck backscatter output reference.'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.wlbbfl2vmt_wl650sig = {
+    'long_name'     'backscatter signal'
+    'units'         'counts'
+    'comments'      'WETLabs ECO triplet puck backscatter output signal.'
     '_FillValue'    default_fill_value };
 
   var_attr_list.wlbbfl2vmt_L2VMTtemp = {
     'long_name'     'bbfl2 triplet temperature'
     'units'         'Celsius'
-    'comments'      'WETLabs triplet puck temperature.'
+    'comments'      'WETLabs ECO triplet puck temperature.'
     '_FillValue'    default_fill_value };
 
 
