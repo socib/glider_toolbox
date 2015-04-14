@@ -54,6 +54,7 @@ function preprocessing_options = configDataPreprocessingSeaglider()
     @(d,t)(utc2posixtime(fillSGMissingGPSDate(d,t)));
   
   preprocessing_options.depth_list(1).depth = 'depth';
+  preprocessing_options.depth_list(1).conversion = @cm2m;
   
   preprocessing_options.attitude_list(1).roll = 'rollAng';
   preprocessing_options.attitude_list(1).pitch = 'pitchAng';
