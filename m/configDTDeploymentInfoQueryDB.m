@@ -4,12 +4,13 @@ function [sql_query, deployment_fields] = configDTDeploymentInfoQueryDB()
 %  Syntax:
 %    [SQL_QUERY, DEPLOYMENT_FIELDS] = CONFIGDTDEPLOYMENTINFOQUERYDB()
 %
-%  [SQL_QUERY, DEPLOYMENT_FIELDS] = CONFIGDTDEPLOYMENTINFOQUERYDB() should 
-%  return the SQL query to retrieve the information about glider deployments
-%  to be processed in delayed time. String SQL_QUERY is the query to execute. 
-%  The mapping between deployment fields and data base table columns is given 
-%  by the string cell array DEPLOYMENT_FIELDS. Deployment fields are described 
-%  in GETDEPLOYMENTINFODB.
+%  Description:
+%    [SQL_QUERY, DEPLOYMENT_FIELDS] = CONFIGDTDEPLOYMENTINFOQUERYDB() should 
+%    return the SQL query to retrieve the information about glider deployments
+%    to be processed in delayed time. String SQL_QUERY is the query to execute. 
+%    The mapping between deployment fields and data base table columns is given 
+%    by the string cell array DEPLOYMENT_FIELDS. Deployment fields are described 
+%    in GETDEPLOYMENTINFODB.
 %
 %  Notes:
 %    Edit this file filling in the field mapping of your data base and the
@@ -21,11 +22,12 @@ function [sql_query, deployment_fields] = configDTDeploymentInfoQueryDB()
 %  See also:
 %    GETDEPLOYMENTINFODB
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

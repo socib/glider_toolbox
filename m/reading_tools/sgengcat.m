@@ -6,58 +6,58 @@ function [meta, data] = sgengcat(meta_list, data_list, varargin)
 %    [META, DATA] = SGENGCAT(META_LIST, DATA_LIST, OPTIONS)
 %    [META, DATA] = SGENGCAT(META_LIST, DATA_LIST, OPT1, VAL1, ...)
 %
-%  [META, DATA] = SGENGCAT(META_LIST, DATA_LIST) combines metadata from structs 
-%  in struct array META_LIST and data in cell or struct array DATA_LIST into a 
-%  single data set with metadata in struct META and data in struct DATA.
-%  Respective elements in META_LIST and DATA_LIST should be in the format 
-%  returned by function SGENG2MAT, but do not need to have the same parameters 
-%  or variables. Outputs META and DATA are in the same format, too, and gather
-%  the input data sorted according to the mission number and the dive number.
+%  Description:
+%    [META, DATA] = SGENGCAT(META_LIST, DATA_LIST) combines metadata in
+%    struct array META_LIST and data in cell or struct array DATA_LIST into
+%    a single data set with metadata in struct META and data in struct DATA.
+%    Respective elements in META_LIST and DATA_LIST should be in the format 
+%    returned by function SGENG2MAT, but do not need to have the same parameters 
+%    or variables. Outputs META and DATA are in the same format, too, and gather
+%    the input data sorted according to the mission number and the dive number.
 %
-%  META is a struct array combining the information in elements of META_LIST,
-%  ordered according to the mission number and the dive number. It has the 
-%  following fields:
-%    HEADERS: struct array with all eng headers.
-%      This is the concatenation of the HEADERS field of all elements in
-%      META_LIST.
-%    START_SECS: number with the reference time for timestamped lines 
-%      (start time of first dive as seconds since 1970 Janyuay 01 00:00:00 UTC).
-%    COLUMNS: string cell array with the names of the columns in the returned 
-%      data array (in the same column order as the data).
-%    SOURCES: string cell array containing FILENAME.
+%    META is a struct array combining the information in elements of META_LIST,
+%    ordered according to the mission number and the dive number.
+%    It has the following fields:
+%      HEADERS: struct array with all eng headers.
+%        This is the concatenation of the HEADERS field of all elements in
+%        META_LIST.
+%      START_SECS: number with the reference time for timestamped lines (start
+%        time of first dive as seconds since 1970 January 01 00:00:00 UTC).
+%      COLUMNS: string cell array with the names of the columns in the returned 
+%        data array (in the same column order as the data).
+%      SOURCES: string cell array containing FILENAME.
 %
-%  DATA is an array or a struct combining the data in DATA_LIST, ordered 
-%  according to the mission number and the dive number, and with the time fields
-%  (seconds since start of dive) seconds from the earlier dive start time.
+%    DATA is an array or a struct combining the data in DATA_LIST, ordered 
+%    according to the mission number and the dive number, and with the time 
+%    fields as seconds since the start time of the first dive.
 %
-%  [META, DATA] = SGENGCAT(META_LIST, DATA_LIST, TIMESTAMP, OPTIONS) and 
-%  [META, DATA] = SGENGCAT(META_LIST, DATA_LIST, TIMESTAMP, OPT1, VAL1, ...) 
-%  accept the following options given in key-value pairs OPT1, VAL1... or in a
-%  struct OPTIONS with field names as option keys and field values as option 
-%  values:
-%    FORMAT: data output format.
-%      String setting the format of the output DATA. Valid values are:
-%        'array': DATA is a matrix with data readings as columns ordered as in
-%          the columns metadata field.
-%        'struct': DATA is a struct with column names as field names and column 
-%           vectors of data columns as field values.
-%      Default value: 'array'
-%    COLUMNS: data column filtering list.
-%      String cell array with the names of the data columns of interest. If 
-%      given, only parameters present in both the input data set and this list
-%      will be present in output. The string 'all' may also be given, in which
-%      case column filtering is not performed and all data in input list will
-%      be present in output.
-%      Default value: 'all' (do not perform column filtering).
-%    PERIOD: time filtering boundaries.
-%      Two element numeric array with the start and end of the time interval of 
-%      interest (seconds since 1970-01-01 00:00:00.00 UTC). If given, only data 
-%      from dives with start time within this period will be present in output.
-%      The string 'all' may also be given, in which case time filtering is not 
-%      performed and data from all dives will be present in output.
-%      Default value: 'all' (do not perform time filtering).
-%
-%  Notes:
+%    [META, DATA] = SGENGCAT(META_LIST, DATA_LIST, TIMESTAMP, OPTIONS) and 
+%    [META, DATA] = SGENGCAT(META_LIST, DATA_LIST, TIMESTAMP, OPT1, VAL1, ...) 
+%    accept the following options given in key-value pairs OPT1, VAL1...
+%    or in a struct OPTIONS with field names as option keys and field values
+%    as option values:
+%      FORMAT: data output format.
+%        String setting the format of the output DATA. Valid values are:
+%          'array': DATA is a matrix with data readings as columns ordered
+%            as in the columns metadata field.
+%          'struct': DATA is a struct with column names as field names
+%            and column vectors of data columns as field values.
+%        Default value: 'array'
+%      COLUMNS: data column filtering list.
+%        String cell array with the names of the data columns of interest.
+%        If given, only parameters present in both the input list and this list
+%        will be present in output. The string 'all' may also be given,
+%        in which case column filtering is not performed and all columns
+%        in the input list will be present in output.
+%        Default value: 'all' (do not perform column filtering).
+%      PERIOD: time filtering boundaries.
+%        Two element numeric array with the start and the end of the period 
+%        of interest (seconds since 1970-01-01 00:00:00.00 UTC). If given,
+%        only data from dives with start time within this period will be
+%        present in output. The string 'all' may also be given, in which case
+%        time filtering is not performed and data from all dives will be
+%        present in output.
+%        Default value: 'all' (do not perform time filtering).
 %
 %  Examples:
 %    [meta, data] = sgengcat(meta_list, data_list)
@@ -68,11 +68,12 @@ function [meta, data] = sgengcat(meta_list, data_list, varargin)
 %    SGLOGCAT
 %    SGLOGENGMERGE
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

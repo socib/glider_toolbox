@@ -5,23 +5,25 @@ function new_pressure = applySeabirdPressureFilter(time, old_pressure, time_cons
 %    NEW_PRESSURE = APPLYSEABIRDPRESSUREFILTER(TIME, OLD_PRESSURE, TIME_CONSTANT)
 %    NEW_PRESSURE = APPLYSEABIRDPRESSUREFILTER(TIME, OLD_PRESSURE)
 %
-%  NEW_PRESSURE = APPLYSEABIRDPRESSUREFILTER(TIME, OLD_PRESSURE, TIME_CONSTANT)
-%  applies a low pass filter to the pressure time serie in vector OLD_PRESSURE
-%  with irregular timestamps in vector TIME. The filter applied is the function 
-%  SEABIRDFILTER with duration parameter given by double TIME_CONSTANT.
-%  The filtered pressure is returned in vector NEW_PRESSURE.
+%  Description:
+%    NEW_PRESSURE = APPLYSEABIRDPRESSUREFILTER(TIME, OLD_PRESSURE, TIME_CONSTANT)
+%    applies a low pass filter to the pressure time serie in vector OLD_PRESSURE
+%    with irregular timestamps in vector TIME. The filter applied is the one in
+%    function SEABIRDFILTER with duration parameter given by the scalar
+%    TIME_CONSTANT. The filtered pressure is returned in vector NEW_PRESSURE.
 %
-%  NEW_PRESSURE = APPLYSEABIRDPRESSUREFILTER(TIME, OLD_PRESSURE) applies the low
-%  pass filter with default duration parameter of 4 time units.
+%    NEW_PRESSURE = APPLYSEABIRDPRESSUREFILTER(TIME, OLD_PRESSURE) applies 
+%    the low pass filter with default duration parameter of 4 time units.
 %
-%  The filtering is performed as follows:
-%    - Invalid values (NaN) in input are ignored, but preserved in the result.
-%    - The signal is resampled at regular intervals of unit time length.
-%      Hence, if TIME is given in seconds, the filter is applied to a new
-%      sequence with sampling rate 1 Hz.
-%    - The filter in function SEABIRDFILTER is applied to the resampled signal
-%      with duration parameter TIME_CONSTANT.
-%    - The resulting filtered signal is resampled at the original time instants.
+%    The filtering is performed as follows:
+%      - Invalid values (NaN) in input are ignored, but preserved in the result.
+%      - The signal is resampled at regular intervals of unit time length.
+%        Hence, if TIME is given in seconds, the filter is applied to a new
+%        sequence with sampling rate 1 Hz.
+%      - The filter in function SEABIRDFILTER is applied to the resampled signal
+%        with duration parameter TIME_CONSTANT.
+%      - The resulting filtered signal is resampled at the original time
+%        instants.
 % 
 %  Notes:
 %    This function is a version of the function APPLYPRESSUREFILTER created by
@@ -40,11 +42,12 @@ function new_pressure = applySeabirdPressureFilter(time, old_pressure, time_cons
 %    SEABIRDFILTER
 %    INTERP1
 %
-%  Author: Bartolome Garau
-%  Email: tgarau@socib.es
+%  Authors:
+%    Bartolome Garau  tgarau@socib.es
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

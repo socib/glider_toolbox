@@ -6,16 +6,17 @@ function list = mget(h, path, target)
 %    MGET(H, PATH, TARGET)
 %    LIST = MGET(H, ...)
 %
-%  MGET(H, PATH) downloads file(s) from the server to the current directory.
-%  If the path is a directory, the directory and its contents are downloaded.
-%  If the path is a file, tha file itself is downloaded.
-%  Otherwise, the path is considered a glob which may contain wildcards 
-%  ('?' or '*'), and only files matching the glob are downloaded, if any.
+%  Description:
+%    MGET(H, PATH) downloads file(s) from the server to the current directory.
+%    If the path is a directory, the directory and its contents are downloaded.
+%    If the path is a file, tha file itself is downloaded.
+%    Otherwise, the path is considered a glob which may contain wildcards 
+%    ('?' or '*'), and only files matching the glob are downloaded, if any.
 %
-%  MGET(H, PATH, TARGET) downloads the file(s) to the given target directory
-%  instead of the current one.
+%    MGET(H, PATH, TARGET) downloads the file(s) to the given target directory
+%    instead of the current one.
 %
-%  LIST = MGET(H, ...) returns the list of downloaded files.
+%    LIST = MGET(H, ...) returns the list of downloaded files.
 %
 %  Examples:
 %    % Download file from remote working directory to current working directory:
@@ -31,11 +32,12 @@ function list = mget(h, path, target)
 %  See also:
 %    SFTP
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

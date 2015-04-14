@@ -4,9 +4,10 @@ function basestations = configBasestations()
 %  Syntax:
 %    BASESTATIONS = CONFIGBASESTATIONS()
 %
-%  BASESTATIONS = CONFIGBASESTATIONS() should return a struct array with the
-%  access parameters for the basestations containing Seaglider glider data, as
-%  needed by the function GETBASESTATIONFILES.
+%  Description:
+%    BASESTATIONS = CONFIGBASESTATIONS() should return a struct array with the
+%    access parameters for the basestations containing Seaglider glider data, as
+%    needed by the function GETBASESTATIONFILES.
 %
 %  Notes:
 %    Edit this file filling in the parameters of your basestations.
@@ -19,11 +20,12 @@ function basestations = configBasestations()
 %  See also:
 %    GETBASESTATIONFILES
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

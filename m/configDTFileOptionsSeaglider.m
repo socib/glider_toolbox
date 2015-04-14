@@ -4,22 +4,21 @@ function seaglider_options = configDTFileOptionsSeaglider()
 %  Syntax:
 %    SEAGLIDER_OPTIONS = CONFIGDTFILEOPTIONSSEAGLIDER()
 %
-%  SEAGLIDER_OPTIONS = CONFIGDTFILEOPTIONSSEAGLIDER() should return a struct 
-%  with the parameters that control which are the deployment files, whether 
-%  they need to be converted, and which files and data should be used
-%  in delayed time mode. The returned struct should have the following fields:
-%    LOG_NAME_PATTERN: string with the name pattern of Seaglider log files 
-%      to be loaded by LOADSEAGLIDERDATA for processing.
-%    ENG_NAME_PATTERN: string with the name pattern of Seaglider eng files.
-%      to be loaded by LOADSEAGLIDERDATA for processing.
-%    LOG_PARAMS: string cell array with the name of the parameters from log
-%      files to be loaded by LOADSEAGLIDERDATA. Restricting the list of
-%      parameters to load may reduce the memory footprint.
-%    ENG_COLUMNS: string cell array with the name of the data columns from eng
-%      files to be loaded by LOADSEAGLIDERDATA. Restricting the list of columns 
-%      to load may reduce the memory footprint.
-%
-%  Notes:
+%  Description:
+%    SEAGLIDER_OPTIONS = CONFIGDTFILEOPTIONSSEAGLIDER() should return a struct 
+%    with the parameters that control which are the deployment files,
+%    whether they need to be converted, and which files and data should be used
+%    in delayed time mode. The returned struct should have the following fields:
+%      LOG_NAME_PATTERN: string with the name pattern of Seaglider log files 
+%        to be loaded by LOADSEAGLIDERDATA for processing.
+%      ENG_NAME_PATTERN: string with the name pattern of Seaglider eng files.
+%        to be loaded by LOADSEAGLIDERDATA for processing.
+%      LOG_PARAMS: string cell array with the name of the parameters from
+%        log files to be loaded by LOADSEAGLIDERDATA. Restricting the list of
+%        parameters to load may reduce the memory footprint.
+%      ENG_COLUMNS: string cell array with the name of the data columns from
+%        eng files to be loaded by LOADSEAGLIDERDATA. Restricting the list of
+%        columns to load may reduce the memory footprint.
 %
 %  Examples:
 %    seaglider_options = configDTFileOptionsSeaglider()
@@ -28,11 +27,12 @@ function seaglider_options = configDTFileOptionsSeaglider()
 %    MAIN_GLIDER_DATA_PROCESSING_DT
 %    LOADSEAGLIDERDATA
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

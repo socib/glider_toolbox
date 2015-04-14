@@ -6,102 +6,106 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
 %    NC = GENERATEOUTPUTNETCDF(FILENAME, DATA, META, DEPLOYMENT, VARS, DIMS, ATTS, OPTIONS)
 %    NC = GENERATEOUTPUTNETCDF(FILENAME, DATA, META, DEPLOYMENT, VARS, DIMS, ATTS, OPT1, VAL1, ...)
 %
-%  NC = GENERATEOUTPUTNETCDF(FILENAME, DATA, META, DEPLOYMENT, VARS, DIMS, ATTS)
-%  calls SAVENC to generate a NetCDF file named FILENAME from deployment data in 
-%  struct DATA, according to the template defined by variable metadata in VARS,
-%  dimension definitions in struct DIMS and global attributes in struct array 
-%  ATTS, and returns the absolute name of the generated file in string NC.
+%  Description:
+%    NC = GENERATEOUTPUTNETCDF(FILENAME, DATA, META, DEPLOYMENT, VARS, DIMS, ATTS)
+%    calls SAVENC to generate a NetCDF file named FILENAME from deployment data
+%    in struct DATA, according to the template defined by variable metadata in
+%    VARS, dimension definitions in struct DIMS and global attributes in struct
+%    array ATTS, and returns the absolute name of the generated file in string
+%    NC.
 %
-%  DATA and VARS should be structs with one field per variable with the variable
-%  data and the variable metadata respectively, as needed by SAVENC. To allow
-%  runtime defined variable metadata, META might be a struct with variable names 
-%  as field names and runtime defined variable attributes as values. Each field
-%  should be a struct with the vattribute names as field names and the attribute
-%  values as field values. If the value of a variable attribute in a field of 
-%  VARS is left undefined (empty) and its name matches a field name of the 
-%  corresponding variable field in META, the value is overwritten.
+%    DATA and VARS should be structs with one field per variable with the
+%    variable data and the variable metadata respectively, as needed by SAVENC.
+%    To allow runtime defined variable metadata, META might be a struct with 
+%    variable names as field names and runtime defined variable attributes as 
+%    values. Each field should be a struct with the vattribute names as field
+%    names and the attribute values as field values. If the value of a variable
+%    attribute in a field of VARS is left undefined (empty) and its name matches
+%    a field name of the corresponding variable field in META, the value is
+%    overwritten.
 %
-%  DIMS should be a struct as needed by SAVENC. To allow runtime defined 
-%  dimensions and predefined dimensions (useful for the case of string
-%  variables), variables may specifye dimensions in VARS which are not defined 
-%  in DIMS or with undefined length (empty LENGTH field value), and they are 
-%  inferred from the size of the data values.
+%    DIMS should be a struct as needed by SAVENC. To allow runtime defined 
+%    dimensions and predefined dimensions (useful for the case of string
+%    variables), variables may specifye dimensions in VARS which are not defined 
+%    in DIMS or with undefined length (empty LENGTH field value), and they are 
+%    inferred from the size of the data values.
 %
-%  ATTS should be a struct array as needed by SAVENC, too. To allow runtime 
-%  defined global attributes, attributes in ATTS whose name matches a field name
-%  in struct DEPLOYMENT are overwritten with the field value.
-%  In addition, if the following global attributes are present in struct ATTS, 
-%  they are updated with values computed from data (see options below):
-%    DATE_MODIFIED: modification time given by POSIXTIME ('yyyy-mm-ddTHH:MM:SS+00:00').
-%    GEOSPATIAL_LAT_MAX: maximum latitude value inferred from data.
-%    GEOSPATIAL_LAT_MIN: minimum latitude value inferred from data.
-%    GEOSPATIAL_LAT_UNITS: latitude units given by variable attributes.
-%    GEOSPATIAL_LON_MAX: maximum longitude value inferred from data.
-%    GEOSPATIAL_LON_MIN: minimum longitude value inferred from data.
-%    GEOSPATIAL_LON_UNITS: longitude units given by variable attributes.
-%    GEOSPATIAL_VERTICAL_MAX: maximum vertical value inferred from data.
-%    GEOSPATIAL_VERTICAL_MIN: minimum vertical value inferred from data.
-%    GEOSPATIAL_VERTICAL_UNITS: vertical units given by variable attributes.
-%    GEOSPATIAL_VERTICAL_POSITIVE: vertical positive direction given by variable attributes.
-%    TIME_COVERAGE_END: maximum time value inferred from data.
-%    TIME_COVERAGE_START: minimum time value inferred from data.
-%    TIME_COVERAGE_UNITS: time units given by value variable attributes.
+%    ATTS should be a struct array as needed by SAVENC, too. To allow runtime 
+%    defined global attributes, attributes in ATTS whose name matches a field
+%    name in struct DEPLOYMENT are overwritten with the field value.
+%    In addition, if the following global attributes are present in struct ATTS, 
+%    they are updated with values computed from data (see options below):
+%      DATE_MODIFIED: modification time given by POSIXTIME ('yyyy-mm-ddTHH:MM:SS+00:00').
+%      GEOSPATIAL_LAT_MAX: maximum latitude value inferred from data.
+%      GEOSPATIAL_LAT_MIN: minimum latitude value inferred from data.
+%      GEOSPATIAL_LAT_UNITS: latitude units given by variable attributes.
+%      GEOSPATIAL_LON_MAX: maximum longitude value inferred from data.
+%      GEOSPATIAL_LON_MIN: minimum longitude value inferred from data.
+%      GEOSPATIAL_LON_UNITS: longitude units given by variable attributes.
+%      GEOSPATIAL_VERTICAL_MAX: maximum vertical value inferred from data.
+%      GEOSPATIAL_VERTICAL_MIN: minimum vertical value inferred from data.
+%      GEOSPATIAL_VERTICAL_UNITS: vertical units given by variable attributes.
+%      GEOSPATIAL_VERTICAL_POSITIVE: vertical positive direction given by variable attributes.
+%      TIME_COVERAGE_END: maximum time value inferred from data.
+%      TIME_COVERAGE_START: minimum time value inferred from data.
+%      TIME_COVERAGE_UNITS: time units given by value variable attributes.
 %
-%  NC = GENERATEOUTPUTNETCDF(..., OPTIONS) and
-%  NC = GENERATEOUTPUTNETCDF(..., OPT1, VAL1, ...) accept the following options 
-%  given in key-value pairs OPT1, VAL1... or in a struct OPTIONS with field 
-%  names as option keys and field values as option values, to control the
-%  generation of coverage metadata:
-%    MODIFIED: modification time stamp.
-%      String with the timestamp for the 'date_modified' attribute.
-%      Default value: 
-%        datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00:00');
-%    TIME: variable choices for time coverage information.
-%      Char array or string cell array with the names of the variables from
-%      which to extract the time coverage information, in order of preference.
-%      Default value: 'time'
-%    TIME_CONVERSION: conversion to POSIX time for time coverage.
-%      String cell array of function names or cell array of function handles 
-%      with the functions to convert time variables in option TIME to POSIX time
-%      format (seconds since 1970-01-01 00:00:00 UTC). If a single value is
-%      provided, the same conversion is used for all variable choices.
-%      If empty, no conversion is applied.
-%    TIME_FORMAT: format for time coverage timestamps.
-%      String cell array of function names or cell array of function handles 
-%      with the functions to convert time variables in option TIME to the 
-%      desired timestamp format (instead of using the numeric values). If a 
-%      single value is provided, the same format is used for all variable
-%      choices. If empty, no format is applied and the numeric values are used.
-%      Default value: @(t)(datestr(posixtime2utc(t), 'yyyy-mm-ddTHH:MM:SS+00:00'))
-%    POSITION: variable choice for position coverage information.
-%      Two column string cell array with the names of the variables from which 
-%      to extract the position coverage information (latitude and longitude).
-%      Columns correspond to the x and y coordinates respectively.
-%      Default value: {'longitude' 'latitude'}
-%    POSITION_CONVERSION: conversion to decimal degrees for position coverage.
-%      String cell array of function names or cell array of function handles 
-%      with the functions to convert position variables in option POSITION to
-%      longitude and latitude in decimal degrees (in that order). If a single 
-%      value is provided, the same conversion is used for all variable choices.
-%      If empty, no conversion is applied.
-%      Default value: [] (no conversion applied)
-%    VERTICAL: variable choice for latitude coverage information.
-%      Char array or string cell array with the names of the variables from
-%      which to extract the vertical coverage information, in order of 
-%      preference.
-%      Default value: 'depth'
-%    VERTICAL_CONVERSION: conversion to meters for vertical coverage.
-%      String cell array of function names or cell array of function handles 
-%      with the functions to convert vertical coordinate variables in option 
-%      VERTICAL to meters. If a single value is provided, the same conversion 
-%      is used for all variable choices. If empty, no conversion is applied.
-%      Default value: [] (no conversion applied)
-%    VERTICAL_POSITIVE: vertical positive direction.
-%      Char array or string cell array with the positive direction of the
-%      correponding vertical coordinate variables in option VERTICAL ('up' or 
-%      'down'). If a single string is provided, the same direction is assumed
-%      for all vertical coordinate variables.
-%      Default value: 'down'
+%    NC = GENERATEOUTPUTNETCDF(..., OPTIONS) and
+%    NC = GENERATEOUTPUTNETCDF(..., OPT1, VAL1, ...) accept the following
+%    options given in key-value pairs OPT1, VAL1... or in a struct OPTIONS 
+%    with field names as option keys and field values as option values, 
+%    to control the generation of coverage metadata:
+%      MODIFIED: modification time stamp.
+%        String with the timestamp for the 'date_modified' attribute.
+%        Default value: 
+%          datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00:00');
+%      TIME: variable choices for time coverage information.
+%        Char array or string cell array with the names of the variables from
+%        which to extract the time coverage information, in order of preference.
+%        Default value: 'time'
+%      TIME_CONVERSION: conversion to POSIX time for time coverage.
+%        String cell array of function names or cell array of function handles 
+%        with the functions to convert time variables in option TIME to POSIX
+%        time format (seconds since 1970-01-01 00:00:00 UTC). If a single value
+%        is provided, the same conversion is used for all variable choices.
+%        If empty, no conversion is applied.
+%      TIME_FORMAT: format for time coverage timestamps.
+%        String cell array of function names or cell array of function handles 
+%        with the functions to convert each time variable choice in option TIME
+%        to the desired timestamp format (instead of using the numeric values).
+%        If a single value is provided, the same format is used for all choices.
+%        If empty, no format is applied and the numeric values are used.
+%        Default value: @(t)(datestr(posixtime2utc(t), 'yyyy-mm-ddTHH:MM:SS+00:00'))
+%      POSITION: variable choice for position coverage information.
+%        Two column string cell array with the names of the variables from which 
+%        to extract the position coverage information (latitude and longitude).
+%        Columns correspond to the x and y coordinates respectively.
+%        Default value: {'longitude' 'latitude'}
+%      POSITION_CONVERSION: conversion to decimal degrees for position coverage.
+%        String cell array of function names or cell array of function handles 
+%        with the functions to convert each choice of position variables in 
+%        option POSITION to longitude and latitude in decimal degrees
+%        (in that order). If a single value is provided, the same conversion 
+%        is used for all variable choices. If empty, no conversion is applied.
+%        Default value: [] (no conversion applied)
+%      VERTICAL: variable choice for latitude coverage information.
+%        Char array or string cell array with the names of the variables from
+%        which to extract the vertical coverage information, in order of 
+%        preference.
+%        Default value: 'depth'
+%      VERTICAL_CONVERSION: conversion to meters for vertical coverage.
+%        String cell array of function names or cell array of function handles 
+%        with the functions to convert each choice of vertical coordinate 
+%        variable in option VERTICAL to meters. If a single value is provided,
+%        the same conversion is used for all variable choices. If empty, 
+%        no conversion is applied.
+%        Default value: [] (no conversion applied)
+%      VERTICAL_POSITIVE: vertical positive direction.
+%        Char array or string cell array with the positive direction of each
+%        choice of vertical coordinate variable in option VERTICAL ('up' or 
+%        'down'). If a single string is provided, the same direction is assumed
+%        for all vertical coordinate variables.
+%        Default value: 'down'
 %
 %  Notes:
 %    Usually input data is the output of LOADSLOCUMDATA or LOADSEAGLIDERDATA, 
@@ -134,11 +138,12 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
 %    PROCESSGLIDERDATA
 %    GRIDGLIDERDATA
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

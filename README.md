@@ -118,7 +118,7 @@ developed to automatically process the data from a glider fleet is not needed:
   [loadjson]: http://www.socib.es/users/glider/glider_toolbox/doc/m/common_tools/loadjson
   [savejson]: http://www.socib.es/users/glider/glider_toolbox/doc/m/common_tools/savejson
   [strc]: http://www.socib.es/users/glider/glider_toolbox/doc/m/common_tools/strc
-  [strfstruct]: http://www.socib.es/users/glider/glider_toolbox/doc/m/common_tools/strc
+  [strfstruct]: http://www.socib.es/users/glider/glider_toolbox/doc/m/common_tools/strfstruct
   [sftp_libssh]: http://repository.socib.es/repository/entry/show/Top/Public+Staff/jbeltran/Octave+and+MATLAB/Octave+and+MATLAB+notes#Connect%20to%20an%20SFTP%20remote%20server
   [@sftp]: http://www.socib.es/users/glider/glider_toolbox/doc/m/common_tools/@sftp/sftp
 
@@ -154,8 +154,9 @@ and [SOCIB][socib] by Tomeu Garau. He is the true glider man.
 Copyright
 ---------
 
-Copyright (C) 2013, 2014
-ICTS SOCIB - Servei d'observació i predicció costaner de les Illes Balears.
+Copyright (C) 2013-2015
+ICTS SOCIB - Servei d'observació i predicció costaner de les Illes Balears
+<http://www.socib.es>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

@@ -8,72 +8,73 @@ function [params, exitflag, residual] = findThermalLagParams(varargin)
 %    PARAMS = FINDTHERMALLAGPARAMS(..., OPT1, VAL1, ...)
 %    [PARAMS, EXITFLAG, RESIDUAL] = FINDTHERMALLAGPARAMS(...)
 %
-%  PARAMS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, TIME2, COND2, TEMP2, PRES2)
-%  finds the thermal lag parameters for two CTD profiles with constant flow
-%  speed (pumped CTD) given by sequences of time (s), conductivity (S/m), 
-%  temperature (deg C) and pressure (dbar) in respective vectors TIME1, COND1, 
-%  TEMP1 and PRES1, and TIME2, COND2, TEMP2 and PRES2. The profiles are supposed
-%  to measure the same column of water in opposite directions. The computed 
-%  parameters are returned in a two element vector PARAMS, with the error 
-%  magnitude (alpha), and the error time constant (tau). A detailed description 
-%  of these parameters may be found in the references listed below (Lueck 1990).
+%    PARAMS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, TIME2, COND2, TEMP2, PRES2)
+%    finds the thermal lag parameters for two CTD profiles with constant flow
+%    speed (pumped CTD) given by sequences of time (s), conductivity (S/m), 
+%    temperature (deg C) and pressure (dbar) in respective vectors TIME1, COND1, 
+%    TEMP1 and PRES1, and TIME2, COND2, TEMP2 and PRES2. The profiles are 
+%    supposed to measure the same column of water in opposite directions.
+%    The computed parameters are returned in a two element vector PARAMS,
+%    with the error magnitude (alpha), and the error time constant (tau).
+%    A detailed description of these parameters may be found in the references
+%    listed below (Lueck 1990).
 %
-%  Based on the assumption that both profiles should be as similar as possible,
-%  the function solves the minimization problem of finding the thermal lag 
-%  parameters such that the area between profiles of temperature and salinity 
-%  is minimal; where salinity is derived from temperature, conductivity and 
-%  pressure sequences using SW_SALT with the corrected temperature sequence
-%  returned by CORRECTTHERMALLAG. This problem is solved with the function 
-%  FMINCON, using default values for the initial guess and the parameter bounds.
-%  See OPTIONS description below.
+%    Under the assumption that both profiles should be as similar as possible,
+%    the function solves the minimization problem of finding the thermal lag 
+%    parameters such that the area between profiles of temperature and salinity 
+%    is minimal; where salinity is derived from temperature, conductivity and 
+%    pressure sequences using SW_SALT with the corrected temperature sequence
+%    returned by CORRECTTHERMALLAG. This problem is solved by function FMINCON,
+%    using default values for the initial guess and the parameter bounds.
+%    See OPTIONS description below.
 %
-%  PARAMS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, FLOW1, TIME2, DEPTH2, TEMP2, PRES2, FLOW2, ...)
-%  performs the same estimation but for a pair of CTD profiles with variable 
-%  flow speed (unpumped CTD), given by respective vectors FLOW1 and FLOW2.
-%  The estimated parameters are returned in a four element vector PARAMS, with 
-%  the offset and the slope of the error magnitude (alpha_o and alpha_s) and the
-%  offset and the slope of the error time (tau_o and tau_s). Details on these
-%  parameters may be found in references below (Morison 1994).
+%    PARAMS = FINDTHERMALLAGPARAMS(TIME1, COND1, TEMP1, PRES1, FLOW1, TIME2, DEPTH2, TEMP2, PRES2, FLOW2, ...)
+%    performs the same estimation but for a pair of CTD profiles with variable 
+%    flow speed (unpumped CTD), given by respective vectors FLOW1 and FLOW2.
+%    The estimated parameters are returned in a four element vector PARAMS,
+%    with the offset and the slope of the error magnitude (alpha_o and alpha_s)
+%    and the offset and the slope of the error time (tau_o and tau_s). Details
+%    on these parameters may be found in references below (Morison 1994).
 %
-%  PARAMS = FINDTHERMALLAGPARAMS(..., OPTIONS) and 
-%  PARAMS = FINDTHERMALLAGPARAMS(..., OPT1, VAL1, ...) allow passing extra 
-%  options given in key-value pairs OPT1, VAL1... or in a struct OPTIONS with 
-%  field names as option keys and field values as option values.
-%  Recognized options are:
-%    GRAPHICS: whether graphic output should be produced.
-%      A boolean. If true a nice figure showing the minimization process will be
-%      displayed. It includes the parameter values, the objective function 
-%      value, a temperature-salinity diagram, a pressure-salinity diagram, 
-%      a temperature-time plot, and a conductivity-time plot.
-%      Default value: false.
-%    GUESS: initial guess for minimization function FMINCON.
-%      A two or four element vector with the initial guess for each parameter.
-%      Default value:
-%        For constant flow speed: [0.0677 11.1431] (see note below)
-%        For variable flow speed: [0.0135 0.0264 7.1499 2.7858] (Morison 1994)
-%    LOWER: lower bounds of parameters for minimization function FMINCON.
-%      A two or four element vector with the lower bound for each parameter.
-%      Default value:
-%        For constant flow speed: [0 0] (no correction)
-%        For variable flow speed: [0 0 0 0] (no correction)
-%    UPPER: upper bounds of parameters for minimization function FMINCON.
-%      A two or four element vector with the upper bound for each parameter.
-%      Default value:
-%        For constant flow speed: [4 2.5*RANGE(TIME1)]
-%        For variable flow speed: [2 1 RANGE(TIME1) RANGE(TIME1)/2]
-%    OPTIMOPTS: extra options for the minimization function FMINCON.
-%      An option struct as needed by the function FMINCON.
-%      Default value: default options for FMINCON, except for:
-%        'Algorithm': 'interior-point'
-%        'FinDiffType': 'central'
-%        'TolFun': 1e-4
-%        'TolCon': 1e-5
-%        'TolX': 1e-5
-%        'Display': 'off'
+%    PARAMS = FINDTHERMALLAGPARAMS(..., OPTIONS) and 
+%    PARAMS = FINDTHERMALLAGPARAMS(..., OPT1, VAL1, ...) allow passing extra 
+%    options given in key-value pairs OPT1, VAL1... or in a struct OPTIONS with 
+%    field names as option keys and field values as option values.
+%    Recognized options are:
+%      GRAPHICS: whether graphic output should be produced.
+%        A boolean. If true a nice figure showing the minimization process will
+%        be displayed. It includes the parameter values, the objective function 
+%        value, a temperature-salinity diagram, a pressure-salinity diagram, 
+%        a temperature-time plot, and a conductivity-time plot.
+%        Default value: false.
+%      GUESS: initial guess for minimization function FMINCON.
+%        A two or four element vector with the initial guess for each parameter.
+%        Default value:
+%          For constant flow speed: [0.0677 11.1431] (see note below)
+%          For variable flow speed: [0.0135 0.0264 7.1499 2.7858] (Morison 1994)
+%      LOWER: lower bounds of parameters for minimization function FMINCON.
+%        A two or four element vector with the lower bound for each parameter.
+%        Default value:
+%          For constant flow speed: [0 0] (no correction)
+%          For variable flow speed: [0 0 0 0] (no correction)
+%      UPPER: upper bounds of parameters for minimization function FMINCON.
+%        A two or four element vector with the upper bound for each parameter.
+%        Default value:
+%          For constant flow speed: [4 2.5*RANGE(TIME1)]
+%          For variable flow speed: [2 1 RANGE(TIME1) RANGE(TIME1)/2]
+%      OPTIMOPTS: extra options for the minimization function FMINCON.
+%        An option struct as needed by the function FMINCON.
+%        Default value: default options for FMINCON, except for:
+%          'Algorithm': 'interior-point'
+%          'FinDiffType': 'central'
+%          'TolFun': 1e-4
+%          'TolCon': 1e-5
+%          'TolX': 1e-5
+%          'Display': 'off'
 %
-%  [PARAMS, EXITFLAG, RESIDUAL] = FINDTHERMALLAGPARAMS(...) also returns the 
-%  exit code of the minimization function FMINCON in EXITFLAG, and the resulting
-%  residual area in RESIDUAL. EXITFLAG is positive when minimization succeeds.
+%    [PARAMS, EXITFLAG, RESIDUAL] = FINDTHERMALLAGPARAMS(...) also returns the 
+%    exit code of the minimization function FMINCON in EXITFLAG, and the 
+%    residual area in RESIDUAL. EXITFLAG is positive when minimization succeeds.
 %
 %  Notes:
 %    This function is an improved version of a previous function by Tomeu Garau,
@@ -170,11 +171,12 @@ function [params, exitflag, residual] = findThermalLagParams(varargin)
 %    SW_DENS
 %    COMPUTECTDFLOWSPEED
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
@@ -193,7 +195,7 @@ function [params, exitflag, residual] = findThermalLagParams(varargin)
   
   
   %% Parse basic input arguments.
-  % Get numeric (non option) arguments.
+  % Get numeric (non-option) arguments.
   nargnum = find(~cellfun(@isnumeric, varargin), 1, 'first') - 1;
   if isempty(nargnum)
     nargnum = nargin;
@@ -236,16 +238,16 @@ function [params, exitflag, residual] = findThermalLagParams(varargin)
   
   %% Parse option arguments.
   % Get option key-value pairs in any accepted call signature.
-  argopt = varargin(nargnum+1:end);
-  if isscalar(argopt) && isstruct(argopt{1})
+  argopts = varargin(nargnum+1:end);
+  if isscalar(argopts) && isstruct(argopts{1})
     % Options passed as a single option struct argument:
     % field names are option keys and field values are option values.
-    opt_key_list = fieldnames(argopt{1});
-    opt_val_list = struct2cell(argopt{1});
-  elseif mod(numel(argopt), 2) == 0
+    opt_key_list = fieldnames(argopts{1});
+    opt_val_list = struct2cell(argopts{1});
+  elseif mod(numel(argopts), 2) == 0
     % Options passed as key-value argument pairs.
-    opt_key_list = argopt(1:2:end);
-    opt_val_list = argopt(2:2:end);
+    opt_key_list = argopts(1:2:end);
+    opt_val_list = argopts(2:2:end);
   else
     error('glider_toolbox:findThermalLagParams:InvalidOptions', ...
           'Invalid optional arguments (neither key-value pairs nor struct).');

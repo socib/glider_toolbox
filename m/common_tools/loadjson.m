@@ -5,11 +5,12 @@ function object = loadjson(json, varargin)
 %    OBJECT = LOADJSON(JSON)
 %    OBJECT = LOADJSON([], FILENAME)
 %
-%  OBJECT = LOADJSON(JSON) deserializes the value of OBJECT from string JSON
-%  encoded in Javascript Object Notation format (JSON).
+%  Description:
+%    OBJECT = LOADJSON(JSON) deserializes the value of OBJECT from string JSON
+%    encoded in Javascript Object Notation format (JSON).
 %
-%  OBJECT = LOADJSON([], FILENAME) performs the same conversion but reading from
-%  the file named by string FILENAME. The first argument is ignored.
+%    OBJECT = LOADJSON([], FILENAME) performs the same conversion but reading
+%    from the file named by string FILENAME. The first argument is ignored.
 %
 %  Notes:
 %    This function is inspired by a previous function by Tomeu Garau with the
@@ -35,7 +36,7 @@ function object = loadjson(json, varargin)
 %  References:
 %    Crockford, D.; 2006:
 %    The application/json Media Type for JavaScript Object Notation (JSON).
-%    http://www.ietf.org/rfc/rfc4627.txt
+%    <http://www.ietf.org/rfc/rfc4627.txt>
 %
 %  Examples:
 %    % Decode from string:
@@ -59,11 +60,12 @@ function object = loadjson(json, varargin)
 %    FREAD
 %    FCLOSE
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

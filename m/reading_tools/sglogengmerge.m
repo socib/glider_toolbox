@@ -6,52 +6,53 @@ function [meta, data] = sglogengmerge(meta_log, data_log, meta_eng, data_eng, va
 %    [META, DATA] = SGLOGENGMERGE(META_LOG, DATA_LOG, META_ENG, DATA_ENG, OPTIONS)
 %    [META, DATA] = SGLOGENGMERGE(META_LOG, DATA_LOG, META_ENG, DATA_ENG, OPT1, VAL1, ...) 
 %
-%  [META, DATA] = SGLOGENGMERGE(META_LOG, DATA_LOG, META_ENG, DATA_ENG) merges 
-%  the data sets described by metadata structs META_LOG and META_ENG, and data 
-%  arrays or structs DATA_LOG and DATA_ENG into a single data set described by 
-%  metadata struct META and data array or struct DATA (see format option 
-%  described below). Input metadata and data should be in the format returned 
-%  by the functions SGLOGCAT and SGENGCAT. Log data referenced to the dive start
-%  time (GC, STATE and SM_CCo fields) is merged with eng data. See note on 
-%  merging process.
+%  Description:
+%    [META, DATA] = SGLOGENGMERGE(META_LOG, DATA_LOG, META_ENG, DATA_ENG) 
+%    merges the data sets described by metadata structs META_LOG and META_ENG,
+%    and data arrays or structs DATA_LOG and DATA_ENG into a single data set
+%    described by metadata struct META and data array or struct DATA 
+%    (see format option described below). Input metadata and data should be 
+%    in the format returned by the functions SGLOGCAT and SGENGCAT.
+%    Log data referenced to the dive start time (GC, STATE and SM_CCo fields)
+%    is merged with eng data. See note on merging.
 %
-%  META is a struct array combining the information in META_LOG and META_ENG,
-%  It has the following fields:
-%    LOGHEADERS: struct array of log headers.
-%      These are the log data headers in META_LOG. Entries corresponding to 
-%      unmatched eng headers have all fields empty.
-%    ENGHEADERS: struct array of eng headers.
-%      These are the eng data headers from META_ENG. Entries corresponding to
-%      unmatched log headers have all fields empty.
-%    START_SECS: number with the reference time for timestamped data lines. 
-%      This is the minimum of the START_SECS field in META_LOGG and META_ENG
-%      (start time of first dive as seconds since 1970 Janyuay 01 00:00:00 UTC).
-%    COLUMNS: string cell array with the names of the columns in output data.
-%      This are the column names in META_ENG. See note on data merging process.
-%    PARAMS: struct with the names of the fields of non-scalar parameters.
-%      This is the PARAMS field in META_LOG.
-%    GCHEAD: string cell array with the names of the fields for the GC lines.
-%      This is the GCHEAD field in META_LOG.
-%    DEVICES: string cell array with the names of the fields for device lines.
-%      This is the DEVICES field in META_LOG.
-%    SENSORS: string cell array with the names of the fields for sensor lines.
-%      This is the SENSORS field in META_LIST.
-%    SOURCES: string cell array with the name of the source files.
-%      This is the concatenation the SOURCES field in META_LOG and META_ENG.
+%    META is a struct array combining the information in META_LOG and META_ENG.
+%    It has the following fields:
+%      LOGHEADERS: struct array of log headers.
+%        These are the log data headers in META_LOG. Entries corresponding
+%        to unmatched eng headers have all fields empty.
+%      ENGHEADERS: struct array of eng headers.
+%        These are the eng data headers from META_ENG. Entries corresponding
+%        to unmatched log headers have all fields empty.
+%      START_SECS: number with the reference time for timestamped data lines. 
+%        This is the minimum of the START_SECS field in META_LOGG and META_ENG: 
+%        start time of first dive as seconds since 1970 Janyuay 01 00:00:00 UTC.
+%      COLUMNS: string cell array with the names of the columns in output data.
+%        This are the column names in META_ENG. See note on data merging.
+%      PARAMS: struct with the names of the fields of non-scalar parameters.
+%        This is the PARAMS field in META_LOG.
+%      GCHEAD: string cell array with the names of the fields for the GC lines.
+%        This is the GCHEAD field in META_LOG.
+%      DEVICES: string cell array with the names of the fields for device lines.
+%        This is the DEVICES field in META_LOG.
+%      SENSORS: string cell array with the names of the fields for sensor lines.
+%        This is the SENSORS field in META_LIST.
+%      SOURCES: string cell array with the name of the source files.
+%        This is the concatenation the SOURCES field in META_LOG and META_ENG.
 %
 %  [META, DATA] = SGLOGENGMERGE(META_LOG, DATA_LOG, META_ENG, DATA_ENG, OPTIONS) and
 %  [META, DATA] = SGLOGENGMERGE(META_LOG, DATA_LOG, META_ENG, DATA_ENG, OPT1, VAL1, ...) 
-%  accept the following options given in key-value pairs OPT1, VAL1... or in a
-%  struct OPTIONS with field names as option keys and field values as option 
-%  values:
+%  accept the following options given in key-value pairs OPT1, VAL1...
+%  or in a struct OPTIONS with field names as option keys and field values
+%  as option values:
 %    FORMAT: data output format.
 %      String setting the format of the output DATA. Valid values are:
 %        'array': DATA is a struct with the following fields:
 %          LOG: array with log parameters in the column order specified by
 %            PARAMS metadata field.
-%          ENG: array or cell array with the eng columns and GC and SM_CCo log
-%            parameter columns in the column order specified by COLUMNS metadata
-%            field.
+%          ENG: array or cell array with the eng columns and GC and SM_CCo
+%            log parameter columns in the column order specified by COLUMNS
+%            metadata field.
 %          GPSFIX: array or cell array with the GPS log columns in the order
 %            specified by the GPSFIX metadata field.
 %          See note on array format.
@@ -59,24 +60,25 @@ function [meta, data] = sglogengmerge(meta_log, data_log, meta_eng, data_eng, va
 %          parameter in log or gps data, and for each column in eng data.
 %        'struct': DATA is a struct with a column vector field for each column
 %          in eng data and gps data, and for each scalar parameter in log data; 
-%          and with a struct field for each non scalar parameter in log data.
+%          and with a struct field for each non-scalar parameter in log data.
 %      Default value: 'array'
 %    PARAMS: log parameter filtering list.
 %      String cell array with the names of the log parameters of interest. 
-%      If given, only parameters present in both the input data set and this
-%      list will be present in output. For non scalar parameters, the name of
-%      the identifier as it appears in the log line specifies including all of
-%      its fields. Individual parameter fields are selected with the identifier
-%      and the name of the field separated by underscore (e.g. 'FINISH_dens').
-%      The string 'all' may also be given, in which case parameter filtering is
-%      not performed and all parameters in input list will be present in output.
+%      If given, only parameters present in both the input data sets and this
+%      list will be present in output. For non-scalar parameters, the name
+%      of the identifier as it appears in the log line specifies including
+%      all of its fields. Individual parameter fields are selected 
+%      with the identifier and the name of the field separated by underscore
+%      (e.g. 'FINISH_dens'). The string 'all' may also be given, in which case
+%      parameter filtering is not performed and all parameters in input list
+%      will be present in output.
 %      Default value: 'all' (do not perform log parameter filtering).
 %    COLUMNS: eng column filtering list.
 %      String cell array with the names of the eng data columns of interest. 
-%      If given, only columns present in both the input data set and this 
-%      list will be present in output. The string 'all' may also be given, 
-%      in which case column filtering is not performed and all columns in input
-%      list will be present in output.
+%      If given, only columns present in both the input data sets and this list
+%      will be present in output. The string 'all' may also be given,
+%      in which case column filtering is not performed and all columns
+%      in the list will be present in output.
 %      Default value: 'all' (do not perform eng column filtering).
 %
 %  Notes:
@@ -109,11 +111,12 @@ function [meta, data] = sglogengmerge(meta_log, data_log, meta_eng, data_eng, va
 %    SGLOGCAT
 %    SGENGCAT
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

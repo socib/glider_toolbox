@@ -4,8 +4,9 @@ function t = posixtime()
 %  Syntax:
 %    T = POSIXTIME()
 %
-%  T = POSIXTIME() returns the current POSIX time: the number of seconds since
-%  1970-01-01 00:00:00 UTC, not counting the effects of leap seconds.
+%  Description:
+%    T = POSIXTIME() returns the current POSIX time: the number of seconds since
+%    1970-01-01 00:00:00 UTC, not counting the effects of leap seconds.
 %
 %  Notes:
 %    This function provides a compatibility interface for MATLAB and Octave,
@@ -22,11 +23,12 @@ function t = posixtime()
 %    POSIXTIME2UTC
 %    UTC2POSIXTIME
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

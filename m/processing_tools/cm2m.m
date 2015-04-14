@@ -1,22 +1,19 @@
-function pres = sgdepth2pres(depth)
-%SGDEPTH2PRES  Reverse Seaglider pressure to depth conversion.
+function m = cm2m(cm)
+%BAR2DBAR  Convert metric distance from centimeters to meters.
 %
 %  Syntax:
-%    PRES = SGDEPTH2PRES(DEPTH)
+%    M = CM2M(CM)
 %
 %  Description:
-%    PRES = SGDEPTH2PRES(DEPTH) converts depth estimates (cm) in array DEPTH to 
-%    pressure readings in engineering units (dbar) in array PRES, reversing the 
-%    on board conversion performed by a Seaglider glider (see note below).
+%    M = CM2M(CM) converts metric readings in array CM from centimeters to
+%    meters by multiplying by 0.01.
 %
 %  Notes:
-%    Seaglider gliders do not report pressure measurements. Instead, the 
-%    pressure readings are converted to approximate depth values using a 
-%    constant scale factor of 0.685 psig/m. This function reverses that
-%    conversion using that factor and 14.503774 psi/bar.
+%    This is simply a convenience function to call the conversion with an
+%    explicit name.
 %
 %  Examples:
-%    pres = sgdepth2pres(depth)
+%    m = cm2m(cm)
 %
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
@@ -38,8 +35,8 @@ function pres = sgdepth2pres(depth)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  psig2m = 0.685;
-  bar2psi = 14.503774;
-  pres = depth / (psig2m * bar2psi * 10);
+  error(nargchk(nargin, 1, 1, 'struct'));
+
+  m = cm * 0.01;
 
 end

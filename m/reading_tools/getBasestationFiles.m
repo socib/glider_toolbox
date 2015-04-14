@@ -6,13 +6,14 @@ function [engs, logs] = getBasestationFiles(basestation, glider, eng_dir, log_di
 %    [ENGS, LOGS] = GETBASESTATIONFILES(BASESTATION, GLIDER, ENG_DIR, LOG_DIR, OPTIONS)
 %    [ENGS, LOGS] = GETBASESTATIONFILES(BASESTATION, GLIDER, ENG_DIR, LOG_DIR, OPT1, VAL1, ...)
 %
-%  [ENGS, LOGS] = GETBASESTATIONFILES(BASESTATION, GLIDER, ENG_DIR, LOG_DIR)
-%  retrieves Seaglider dive data files (.eng) and dive log files (.log) from
-%  the glider with serial code GLIDER from the basestation defined by struct 
-%  BASESTATION to local directories ENG_DIR and LOG_DIR respectively,
-%  and returns the list of downloaded files in string cell arrays ENGS and LOGS.
-%  Existing files in the local directories are updated only if they are smaller 
-%  than remote ones.
+%  Description:
+%    [ENGS, LOGS] = GETBASESTATIONFILES(BASESTATION, GLIDER, ENG_DIR, LOG_DIR)
+%    retrieves Seaglider dive data files (.eng) and dive log files (.log) from
+%    the glider with serial code GLIDER from the basestation defined by struct 
+%    BASESTATION to local directories ENG_DIR and LOG_DIR respectively, and
+%    returns the list of downloaded files in string cell arrays ENGS and LOGS.
+%    Existing files in the local directories are updated only if they are 
+%    smaller than remote ones.
 %
 %  BASESTATION is a struct with the fields needed by functions FTP or SFTP:
 %    HOST: url as either fully qualified name or IP with optional port (string).
@@ -20,43 +21,43 @@ function [engs, logs] = getBasestationFiles(basestation, glider, eng_dir, log_di
 %    PASS: password of the basestation if needed (string).
 %    CONN: name or handle of connection type function, @FTP (default) or @SFTP.
 %
-%  [ENGS, LOGS] = GETBASESTATIONFILES(BASESTATION, GLIDER, ENG_DIR, LOG_DIR, OPTIONS) and 
-%  [ENGS, LOGS] = GETBASESTATIONFILES(BASESTATION, GLIDER, ENG_DIR, LOG_DIR, OPT1, VAL1, ...)
-%  accept the following options, given in key-value pairs OPT1, VAL1... or in a
-%  struct OPTIONS with field names as option keys and field values as option 
-%  values, allowing to restrict the set of files to download:
-%    ENG: engineering data file name pattern.
-%      Download engineering files matching given pattern only.
-%      Its value may be any valid regular expression string or empty.
-%      If empty, no engineering data files are downloaded.
-%      Default value: ['^p' GLIDER '\d+\.eng$']
-%    LOG: log file name pattern.
-%      Download log data files matching given pattern only.
-%      Its value may be any valid regular expression string.
-%      If empty, no log files are downloaded.
-%      Default value: ['^p' GLIDER '\d+\.log$']
-%    START: initial date of the period of interest.
-%      If given, do not download files before the given date.
-%      It may be any valid input compatible with ENG2DATE and LOG2DATE
-%      options below, usually a serial date number.
-%      Default value: -Inf
-%    FINAL: final date of the period of interest.
-%      If given, do not download files after the the given date.
-%      It may be any valid input compatible with ENG2DATE and LOG2DATE
-%      options below, usually a serial date number.
-%      Default value: +Inf
-%    ENG2DATE: date of binary file.
-%      If date filtering is enabled, use the given function
-%      to extract the date of an eng data file from its attributes.
-%      The function receives a struct in the format returned by function DIR
-%      and should return a date in a format comparable to START and FINAL.
-%      Default value: modification time (see note on date filtering)
-%    LOG2DATE: date of log file.
-%      If date filtering is enabled, use the given function
-%      to extract the date of a log file from its attribtues.
-%      The function receives a struct in the format returned by function DIR
-%      and should return a date in a format comparable to START and FINAL.
-%      Default value: modification time (see note on date filtering)
+%    [ENGS, LOGS] = GETBASESTATIONFILES(BASESTATION, GLIDER, ENG_DIR, LOG_DIR, OPTIONS) and 
+%    [ENGS, LOGS] = GETBASESTATIONFILES(BASESTATION, GLIDER, ENG_DIR, LOG_DIR, OPT1, VAL1, ...)
+%    accept the following options, given in key-value pairs OPT1, VAL1...
+%    or in a struct OPTIONS with field names as option keys and field values
+%    as option values, allowing to restrict the set of files to download:
+%      ENG: engineering data file name pattern.
+%        Download engineering files matching given pattern only.
+%        Its value may be any valid regular expression string or empty.
+%        If empty, no engineering data files are downloaded.
+%        Default value: ['^p' GLIDER '\d+\.eng$']
+%      LOG: log file name pattern.
+%        Download log data files matching given pattern only.
+%        Its value may be any valid regular expression string.
+%        If empty, no log files are downloaded.
+%        Default value: ['^p' GLIDER '\d+\.log$']
+%      START: initial date of the period of interest.
+%        If given, do not download files before the given date.
+%        It may be any valid input compatible with ENG2DATE and LOG2DATE
+%        options below, usually a serial date number.
+%        Default value: -Inf
+%      FINAL: final date of the period of interest.
+%        If given, do not download files after the the given date.
+%        It may be any valid input compatible with ENG2DATE and LOG2DATE
+%        options below, usually a serial date number.
+%        Default value: +Inf
+%      ENG2DATE: date of binary file.
+%        If date filtering is enabled, use the given function
+%        to extract the date of an eng data file from its attributes.
+%        The function receives a struct in the format returned by function DIR
+%        and should return a date in a format comparable to START and FINAL.
+%        Default value: modification time (see note on date filtering)
+%      LOG2DATE: date of log file.
+%        If date filtering is enabled, use the given function
+%        to extract the date of a log file from its attribtues.
+%        The function receives a struct in the format returned by function DIR
+%        and should return a date in a format comparable to START and FINAL.
+%        Default value: modification time (see note on date filtering)
 %
 %  Notes:
 %    By default, date filtering is done based on the modification time
@@ -66,26 +67,31 @@ function [engs, logs] = getBasestationFiles(basestation, glider, eng_dir, log_di
 %    START and FINAL.
 %
 %  Examples:
-%   basestation.host = 'ftp.mybasestation.org'
-%   basestation.user = 'myself'
-%   basestation.pass = 'top_secret'   
-%   glider = 'happyglider'
-%   eng_dir = 'funnymission/ascii'
-%   log_dir = 'funnymission/ascii'
-%   % Get all engineering data files and log data files.
-%   [engs, logs] = getBasestationFiles(basestation, glider, eng_dir, log_dir)
-%   % Get only eng files and no log files for even dives during last week:
-%   [engs, logs] = getBasestationFiles(basestation, glider, eng_dir, log_dir, ...
-%                                      'eng', '^p\d+[02468].eng$', 'log', [], ...
-%                                      'start', now()-7, 'final', now())
+%    basestation.host = 'ftp.mybasestation.org'
+%    basestation.user = 'myself'
+%    basestation.pass = 'top_secret'   
+%    glider = 'happyglider'
+%    eng_dir = 'funnymission/ascii'
+%    log_dir = 'funnymission/ascii'
+%    % Get all engineering data files and log data files.
+%    [engs, logs] = getBasestationFiles(basestation, glider, eng_dir, log_dir)
+%    % Get only eng files and no log files for even dives during last week:
+%    [engs, logs] = ...
+%      getBasestationFiles(basestation, glider, eng_dir, log_dir, ...
+%                          'eng', '^p\d+[02468].eng$', 'log', [], ...
+%                          'start', now()-7, 'final', now())
 %
 %  See also:
-%    
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%    FTP
+%    SFTP
+%    DIR
+%
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

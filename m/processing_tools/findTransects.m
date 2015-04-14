@@ -4,12 +4,13 @@ function transect_index = findTransects(waypoint_latitude, waypoint_longitude)
 %  Syntax:
 %    TRANSECT_INDEX = FINDTRANSECTS(WAYPOINT_LATITUDE, WAYPOINT_LONGITUDE)
 %
-%  TRANSECT_INDEX = FINDTRANSECTS(WAYPOINT_LATITUDE, WAYPOINT_LONGITUDE) 
-%  identifies transects (travels from one waypoint to the next one) from 
-%  waypoint coordinates in vectors WAYPOINT_LATITUDE and WAIPONT_LONGITUDE, 
-%  and flags each point with the index of the transect the point belongs to, 
-%  starting from 1. WAYPOINT_LATITUDE, WAYPOINT_LONGITUDE and TRANSECT_INDEX
-%  have the same length.
+%  Description:
+%    TRANSECT_INDEX = FINDTRANSECTS(WAYPOINT_LATITUDE, WAYPOINT_LONGITUDE) 
+%    identifies transects (travels from one waypoint to the next one) from 
+%    waypoint coordinates in vectors WAYPOINT_LATITUDE and WAIPONT_LONGITUDE, 
+%    and flags each point with the index of the transect the point belongs to, 
+%    starting from 1. WAYPOINT_LATITUDE, WAYPOINT_LONGITUDE and TRANSECT_INDEX
+%    have the same length.
 %
 %  Notes:
 %    A new transect starts whenever a change in latitude or longitude waypoint
@@ -29,13 +30,12 @@ function transect_index = findTransects(waypoint_latitude, waypoint_longitude)
 %    subplot(2,1,2)
 %    stairs(transect_index)
 %
-%  See also:
-%
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

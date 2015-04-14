@@ -4,11 +4,12 @@ function s = strc(c)
 %  Syntax:
 %    S = STRC(C)
 %
-%  S = STRC(C) converts the blank padded char array C to a new char array S
-%  with the same strings in its rows but as C strings (null terminated):
-%    - always add a null character at the end of the string, and
-%    - replace all trailing whitespace characters with null characters.
-%  C may also be a string cell array, which is converted to char array with CHAR.
+%  Description:
+%    S = STRC(C) converts the blank padded char array C to a new char array S
+%    with the same strings in its rows but as C strings (null terminated):
+%      - always add a null character at the end of the string, and
+%      - replace all trailing whitespace characters with null characters.
+%    C may also be a string cell array and is converted to char array with CHAR.
 %
 %  Notes:
 %    The output char array S is always one column bigger than the input one C
@@ -26,11 +27,12 @@ function s = strc(c)
 %    CHAR
 %    CELLSTR
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

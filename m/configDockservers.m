@@ -4,9 +4,10 @@ function dockservers = configDockservers()
 %  Syntax:
 %    DOCKSERVERS = CONFIGDOCKSERVERS()
 %
-%  DOCKSERVERS = CONFIGDOCKSERVERS() should return a struct array with the
-%  access parameters for the dockservers containing Slocum glider data, as
-%  needed by the function GETDOCKSERVERFILES.
+%  Description:
+%    DOCKSERVERS = CONFIGDOCKSERVERS() should return a struct array with the
+%    access parameters for the dockservers containing Slocum glider data, as
+%    needed by the function GETDOCKSERVERFILES.
 %
 %  Notes:
 %    Edit this file filling in the parameters of your dockservers.
@@ -19,11 +20,12 @@ function dockservers = configDockservers()
 %  See also:
 %    GETDOCKSERVERFILES
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

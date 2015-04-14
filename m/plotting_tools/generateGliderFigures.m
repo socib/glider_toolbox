@@ -6,51 +6,52 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
 %    FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST, OPTIONS)
 %    FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST, OPT1, VAL1, ...)
 %
-%  FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST) generate figures 
-%  specified in struct FIGURE_LIST from glider data in struct DATA, and
-%  returns information about generated image files in struct FIGURE_INFO.
-%  FIGURE_LIST is a struct where each field specifies a figure to be generated, 
-%  Field names are figure keys identifying each particular figure, and field 
-%  values are structs with the following fields:
-%    PLOTFUNC: plotting function.
-%      String or function handle specifying which function should be used to
-%      generate the figure plot.
-%    DATAOPTS: data options.
-%      Struct array with the mapping between data plot options (field names) 
-%      and variables in struct DATA (field values). Each field value may be
-%      either a string or a string cell array with a list of variable name 
-%      choices in order of preference. The first variable present in DATA 
-%      containing some valid value will be added to the plot options given in 
-%      option PLOTOPTS, using the same field name given in DATAOPTS.
-%    PLOTOPTS: plot style options.
-%      Struct array with extra plot options to pass to plotting function given
-%      in PLOTFUNC. It can also serve to specify default data option values.
-%      These values will be used when none of the choices specified in DATAOPTS 
-%      is present in DATA.
-%    PRNTOPTS: print options.
-%      Struct array with print options to pass to function PRINTFIGURE.
-%  FIGURE_INFO is a struct containing information about the generated figures.
-%  Fields are named after corresponding figure keys, and their value is the
-%  output of the call to PRINTFIGURE. Only figures whose data is available in 
-%  struct DATA are generated, other figures are silently omitted.
+%  Description:
+%    FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST) generate figures 
+%    specified in struct FIGURE_LIST from glider data in struct DATA, and
+%    returns information about generated image files in struct FIGURE_INFO.
+%    FIGURE_LIST is a struct where each field specifies a figure to generate.
+%    Field names are figure keys identifying each particular figure, and field 
+%    values are structs with the following fields:
+%      PLOTFUNC: plotting function.
+%        String or function handle specifying which function should be used to
+%        generate the figure plot.
+%      DATAOPTS: data options.
+%        Struct array with the mapping between data plot options (field names) 
+%        and variables in struct DATA (field values). Each field value may be
+%        either a string or a string cell array with a list of variable name 
+%        choices in order of preference. The first variable present in DATA 
+%        containing some valid value will be added to the plot options given in 
+%        option PLOTOPTS, using the same field name given in DATAOPTS.
+%      PLOTOPTS: plot style options.
+%        Struct array with extra plot options to pass to plotting function given
+%        in PLOTFUNC. It can also serve to specify default data option values.
+%        These values will be used when none of the choices specified in
+%         DATAOPTSis present in DATA.
+%      PRNTOPTS: print options.
+%        Struct array with print options to pass to function PRINTFIGURE.
+%    FIGURE_INFO is a struct containing information about the generated figures.
+%    Fields are named after corresponding figure keys, and their value is the
+%    output of the call to PRINTFIGURE. Only figures whose data is available in 
+%    struct DATA are generated, other figures are silently omitted.
 %
-%  FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST, OPT1, VAL1, ...) and
-%  FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST, OPTIONS) allows
-%  passing the following options of PRINTFIGURE in key-value pairs OPT1, VAL1...
-%  or in a struct OPTIONS with field names as option names and field values as 
-%  option values:
-%    DIRNAME: image file directory.
-%      Default value: '' (empty, use current directory)
-%    FORMAT: image file format (extension)
-%      Default value: 'eps'
-%    RESOLUTION: image resolution in dots per inch.
-%      Default value: 72
-%    DRIVER: driver to print intermediate vector image file.
-%      Default value: 'epsc2'
-%    RENDER: renderer to use when printing intermediate vector file.
-%      Default value: [] (renderer automatically selected)
-%    DATE: image generation timestamp.
-%      Default value: datestr(now(), 31)
+%    FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST, OPT1, VAL1, ...) and
+%    FIGURE_INFO = GENERATEGLIDERFIGURES(DATA, FIGURE_LIST, OPTIONS) allows
+%    passing the following options of PRINTFIGURE in key-value pairs OPT1, 
+%    VAL1... or in a struct OPTIONS with field names as option names and 
+%    field values as option values:
+%      DIRNAME: image file directory.
+%        Default value: '' (empty, use current directory)
+%      FORMAT: image file format (extension)
+%        Default value: 'eps'
+%      RESOLUTION: image resolution in dots per inch.
+%        Default value: 72
+%      DRIVER: driver to print intermediate vector image file.
+%        Default value: 'epsc2'
+%      RENDER: renderer to use when printing intermediate vector file.
+%        Default value: [] (renderer automatically selected)
+%      DATE: image generation timestamp.
+%        Default value: datestr(now(), 31)
 %
 %  Examples:
 %    % Assuming data is a processed glider data structure, 
@@ -120,11 +121,12 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
 %    DATESTR
 %    NOW
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

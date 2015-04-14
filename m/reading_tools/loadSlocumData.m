@@ -42,12 +42,12 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
 %      present in output.
 %      Default value: 'all' (do not perform sensor filtering).
 %    PERIOD: time filtering boundaries.
-%      Two element numeric array with the start and the end of the time interval 
-%      of interest (seconds since 1970-01-01 00:00:00.00 UTC). If given, only 
-%      sensor cycles with timestamps within this period will be present in
-%      output. The string 'all' may also be given, in which case time filtering 
-%      is not performed and all sensors cycles in input data sets will be 
-%      present in output.
+%      Two element numeric array with the start and the end of the period 
+%      of interest (seconds since 1970-01-01 00:00:00.00 UTC). If given,
+%      only sensor cycles with timestamps within this period will be 
+%      present in output. The string 'all' may also be given, in which case
+%      time filtering is not performed and all sensors cycles in input datsets
+%      will be present in output.
 %      Default value: 'all' (do not perform time filtering).
 %
 %  Notes:
@@ -72,11 +72,12 @@ function [meta, data] = loadSlocumData(ascii_dir, name_pattern_nav, name_pattern
 %    DBACAT
 %    DBAMERGE
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

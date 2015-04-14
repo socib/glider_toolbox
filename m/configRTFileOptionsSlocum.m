@@ -4,35 +4,36 @@ function slocum_options = configRTFileOptionsSlocum()
 %  Syntax:
 %    SLOCUM_OPTIONS = CONFIGRTFILEOPTIONSSLOCUM()
 %
-%  SLOCUM_OPTIONS = CONFIGRTFILEOPTIONSSLOCUM() should return a struct with the
-%  parameters that control the files to retrieve, how they will be converted,
-%  and which files and data should be used in real time mode. The returned 
-%  struct should have the following fields:
-%    LOG_NAME_PATTERN: string with the name pattern of surface log files as
-%      needed by function GETDOCKSERVERFILES. A remote log file should match 
-%      this should match to be downloaded.
-%    XBD_NAME_PATTERN: string with the name pattern of binary data files as
-%      needed by function GETDOCKSERVERFILES and LOADSLOCUMDATA. A remote 
-%      binary file should match this pattern to be downloaded, and the 
-%      conversion to ascii format renames it according to this pattern and the 
-%      replacement string in next field.
-%    DBA_NAME_REPLACEMENT: string with the name pattern replacement to use when
-%      converting binary files to ascii.
-%    DBA_NAME_PATTERN_NAV: string with the name pattern of navigation ascii 
-%      files to be loaded for processing by function LOADSLOCUMDATA. An ascii 
-%      file should match this pattern to be loaded as a navigation file.
-%    DBA_NAME_PATTERN_SCI: string with the name pattern of science ascii files
-%      to be loaded for processing by LOADSLOCUMDATA. An ascii file should match
-%      this pattern to be loaded as a science file by function LOADSLOCUMDATA.
-%    DBA_TIME_SENSOR_NAV: string with the name of the timestamp sensor to use in
-%      navigation files when combining data from different ascii files.
-%    DBA_TIME_SENSOR_SCI: string with the name of the timestamp sensor to use in
-%      science files when combining data from different ascii files.
-%    DBA_SENSORS: string cell array with the name of the sensors to be included
-%      in the processing. Restricting the list of sensors to load may reduce the
-%      memory footprint.
-%
-%  Notes:
+%  Description:
+%    SLOCUM_OPTIONS = CONFIGRTFILEOPTIONSSLOCUM() should return a struct
+%    with the parameters that control the files to retrieve, how they will 
+%    be converted, and which files and data should be used in real time mode.
+%    The returned struct should have the following fields:
+%      LOG_NAME_PATTERN: string with the name pattern of surface log files as
+%        needed by function GETDOCKSERVERFILES.
+%        The name of a log file should match this pattern to be downloaded.
+%      XBD_NAME_PATTERN: string with the name pattern of binary data files as
+%        needed by function GETDOCKSERVERFILES and LOADSLOCUMDATA.
+%        The name of a binary file should match this pattern to be downloaded,
+%        and the conversion to ascii format renames it according to
+%        this pattern and the replacement string in next field.
+%      DBA_NAME_REPLACEMENT: string with the name pattern replacement to use
+%        when converting binary files to ascii.
+%      DBA_NAME_PATTERN_NAV: string with the name pattern of navigation ascii 
+%        files to be loaded for processing by function LOADSLOCUMDATA.
+%        The name of an ascii file should match this pattern to be loaded 
+%        as a navigation file.
+%      DBA_NAME_PATTERN_SCI: string with the name pattern of science ascii
+%        files to be loaded for processing by function LOADSLOCUMDATA.
+%        The name of an ascii file should match this pattern to be loaded
+%        as a science file.
+%      DBA_TIME_SENSOR_NAV: string with the name of the timestamp sensor to use
+%        in navigation files when combining data from a set of ascii files.
+%      DBA_TIME_SENSOR_SCI: string with the name of the timestamp sensor to use
+%        in science files when combining data from a set of ascii files.
+%      DBA_SENSORS: string cell array with the name of the sensors to include
+%        in the processing. Restricting the list of sensors to load may reduce
+%        the memory footprint.
 %
 %  Examples:
 %    slocum_options = configRTFileOptionsSlocum()
@@ -41,11 +42,12 @@ function slocum_options = configRTFileOptionsSlocum()
 %    GETDOCKSERVERFILES
 %    LOADSLOCUMDATA
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

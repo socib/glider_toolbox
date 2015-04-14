@@ -6,9 +6,10 @@ function h = sftp(host, username, password)
 %    H = SFTP(HOST, USERNAME)
 %    H = SFTP(HOST, USERNAME, PASSWORD)
 %
-%  H = SFTP(HOST, USERNAME, PASSWORD) returns an SFTP object.
-%  If USERNAME is not specified, the default user for that host will be used.
-%  If PASSWORD is not specified, public key authentication will be used.
+%  Description:
+%    H = SFTP(HOST, USERNAME, PASSWORD) returns an SFTP object.
+%    If USERNAME is not specified, the default user for that host will be used.
+%    If PASSWORD is not specified, public key authentication will be used.
 %
 %  Examples:
 %    h = sftp(host)
@@ -26,11 +27,12 @@ function h = sftp(host, username, password)
 %    MKDIR
 %    RMDIR
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

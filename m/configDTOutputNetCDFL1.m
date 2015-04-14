@@ -4,30 +4,31 @@ function ncl1_info = configDTOutputNetCDFL1()
 %  Syntax:
 %    NCL1_INFO = CONFIGDTOUTPUTNETCDFL1()
 %
-%  NCL1_INFO = CONFIGDTOUTPUTNETCDFL1() should return a struct describing the
-%  structure of the NetCDF file for processed glider deployment data in delayed
-%  time (see the note about the file generation for more details).
-%  The returned struct should have the following fields:
-%    DIMENSIONS: struct array with fields 'NAME' and 'LENGTH' defining the 
-%      dimensions for variables in the file.
-%      A variable may have dimensions not listed here or with their length left
-%      undefined (empty field value), and they are inferred from the data during
-%      the generation of the file. However, it is useful to preset the length of
-%      a dimension for record or string size dimensions.
-%    ATTRIBUTES: struct array with fields 'NAME' and 'VALUE' defining global
-%      attributes of the file.
-%      Global attributes might be overwritten by deployment fields with the same
-%      name.
-%    VARIABLES: struct defining variable metadata. Field names are variable
-%      names and field values are structs as needed by function SAVENC.
-%      It should have the following fields:
-%        DIMENSIONS: string cell array with the names of the dimensions of the
-%          variable.
-%        ATTRIBUTES: struct array with fields 'NAME' and 'VALUE' defining the
-%          attributes of the variable.
-%      More variables than the ones present in one specific deployment may be
-%      described here. Only metadata corresponding variables in the deployment
-%      data will be used.
+%  Description:
+%    NCL1_INFO = CONFIGDTOUTPUTNETCDFL1() should return a struct
+%    describing the structure of the NetCDF file for processed glider
+%    deployment data in delayed time (see the note about the file generation).
+%    The returned struct should have the following fields:
+%      DIMENSIONS: struct array with fields 'NAME' and 'LENGTH' defining the 
+%        dimensions for variables in the file.
+%        A variable may have dimensions not listed here or with their length
+%        left undefined (empty field value), and they are inferred from the 
+%        data during the generation of the file. However, it is useful to preset
+%        the length of a dimension for record or string size dimensions.
+%      ATTRIBUTES: struct array with fields 'NAME' and 'VALUE' defining global
+%        attributes of the file.
+%        Global attributes might be overwritten by deployment fields
+%        with the same name.
+%      VARIABLES: struct defining variable metadata. Field names are variable
+%        names and field values are structs as needed by function SAVENC.
+%        It should have the following fields:
+%          DIMENSIONS: string cell array with the names of the dimensions
+%            of the variable.
+%          ATTRIBUTES: struct array with fields 'NAME' and 'VALUE' defining
+%            the attributes of the variable.
+%        More variables than the ones present in one specific deployment may be
+%        described here. Only metadata corresponding variables in the deployment
+%        data will be used.
 %
 %  Notes:
 %    The NetCDF file will be created by the function GENERATEOUTPUTNETCDF with
@@ -45,11 +46,12 @@ function ncl1_info = configDTOutputNetCDFL1()
 %    SAVENC
 %    PROCESSGLIDERDATA
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
@@ -190,19 +192,23 @@ function ncl1_info = configDTOutputNetCDFL1()
     'long_name'     'profile index'
     'standard_name' ''
     'units'         '1'
+    'comment'       'N = inside profile N, N + 0.5 = between profiles N and N + 1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'        []
-    'method'         []
-    'min_range'      []
-    'join_equal'     []
-    'source_filling' [] };
+    'sources'       []
+    'method'        []
+    'length'        []
+    'period'        []
+    'inversion'     []
+    'interrupt'     []
+    'stall'         []
+    'shake'         [] };
   
   var_attr_list.profile_direction = {
     'long_name'     'glider vertical speed direction'
     'standard_name' ''
     'units'         '1'
-    'comment'       '-1 = ascending, 0 = inflecting, 1 = descending'
+    'comment'       '-1 = ascending, 0 = inflecting or stalled, 1 = descending'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'       []

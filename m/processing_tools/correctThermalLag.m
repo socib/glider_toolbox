@@ -5,27 +5,28 @@ function [temp_inside, cond_outside] = correctThermalLag(varargin)
 %    [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, COND_INSIDE, TEMP_OUTSIDE, PARAMS)
 %    [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, COND_INSIDE, TEMP_OUTSIDE, FLOW_SPEED, PARAMS)
 %
-%  [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, COND_INSIDE, TEMP_OUTSIDE, PARAMS)
-%  corrects thermal lag in a CTD profile sequence with constant flow speed
-%  (pumped CTD) given by vectors TIMESTAMP (sampe timestamp), COND_INSIDE 
-%  (conductivity inside CTD cell) and TEMP_OUTSIDE (temperature outside CTD 
-%  cell), returning vectors COND_OUTSIDE (conductivity outside CTD cell) and 
-%  TEMP_INSIDE (temperature inside CTD cell). TIMESTAMP, COND_INSIDE, 
-%  TEMP_OUTSIDE, COND_OUTSIDE and TEMP_OUTSIDE all have the same dimensions. 
-%  The correction parameters are given in a two element vector PARAMS, 
-%  with the error magnitude (alpha), and the error time constant (tau). 
-%  A detailed description of these parameters may be found in the references 
-%  listed below (Lueck 1990).
+%  Description:
+%    [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, COND_INSIDE, TEMP_OUTSIDE, PARAMS)
+%    corrects thermal lag in a CTD profile sequence with constant flow speed
+%    (pumped CTD) given by vectors TIMESTAMP (sampe timestamp), COND_INSIDE 
+%    (conductivity inside CTD cell) and TEMP_OUTSIDE (temperature outside CTD 
+%    cell), returning vectors COND_OUTSIDE (conductivity outside CTD cell) and 
+%    TEMP_INSIDE (temperature inside CTD cell). TIMESTAMP, COND_INSIDE, 
+%    TEMP_OUTSIDE, COND_OUTSIDE and TEMP_OUTSIDE all have the same dimensions. 
+%    The correction parameters are given in a two element vector PARAMS, 
+%    with the error magnitude (alpha), and the error time constant (tau). 
+%    A detailed description of these parameters may be found in the references 
+%    listed below (Lueck 1990).
 %
-%  [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, DEPTH, PITCH, COND_INSIDE, TEMP_OUTSIDE, PARAMS)
-%  performs the same correction but for a CTD profile with variable flow speed
-%  (unpumped CTD), given by FLOW. FLOW should be a vector with the same
-%  dimensions as COND_INSIDE and TEMP_OUTSIDE, with the flow speed inside the 
-%  CTD cell in m/s. The correction parameters are given in a four 
-%  element vector PARAMS, with the offset and the slope of the error 
-%  magnitude (alpha_o and alpha_s), and the offset and the slope of the error 
-%  time constant (tau_o and tau_s). A detailed description of these parameters 
-%  may be found in the references listed below (Morison 1994).
+%    [TEMP_INSIDE, COND_OUTSIDE] = CORRECTTHERMALLAG(TIMESTAMP, DEPTH, PITCH, COND_INSIDE, TEMP_OUTSIDE, PARAMS)
+%    performs the same correction but for a CTD profile with variable flow 
+%    speed (unpumped CTD), given by FLOW. FLOW should be a vector with the 
+%    same dimensions as COND_INSIDE and TEMP_OUTSIDE, with the flow speed 
+%    inside the CTD cell in m/s. The correction parameters are given in a 
+%    four element vector PARAMS, with the offset and the slope of the error 
+%    magnitude (alpha_o and alpha_s), and the offset and the slope of the 
+%    error  time constant (tau_o and tau_s). A detailed description of these 
+%    parameters may be found in the references listed below (Morison 1994).
 %
 %  Notes:
 %    This function is a recoding of the function by Tomeu Garau with the same 
@@ -64,11 +65,12 @@ function [temp_inside, cond_outside] = correctThermalLag(varargin)
 %    FINDTHERMALLAGPARAMS
 %    COMPUTECTDFLOWSPEED
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

@@ -4,16 +4,17 @@ function setupMexPosixtime()
 %  Syntax:
 %    SETUPMEXPOSIXTIME()
 %
-%  SETUPMEXPOSIXTIME() builds a mex file implementing the function POSIXTIME,
-%  that gets the system current POSIX time from the standard C library.
-%    TARGET:
-%      /path/to/posixtime.mex(a64)
-%    SOURCES:
-%      /path/to/posixtime.c
-%    INCLUDES:
-%      none
-%    LIBRARIES:
-%      none
+%  Description:
+%    SETUPMEXPOSIXTIME() builds a mex file implementing the function POSIXTIME,
+%    that gets the system current POSIX time from the standard C library.
+%      TARGET:
+%        /path/to/posixtime.mex(a64)
+%      SOURCES:
+%        /path/to/posixtime.c
+%      INCLUDES:
+%        none
+%      LIBRARIES:
+%        none
 %
 %  Notes:
 %    The system time is get by the C function TIME.
@@ -44,11 +45,12 @@ function setupMexPosixtime()
 %  See also:
 %    POSIXTIME
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

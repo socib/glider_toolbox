@@ -6,63 +6,65 @@ function [meta, data] = sglog2mat(filename, varargin)
 %    [META, DATA] = SGLOG2MAT(FILENAME, OPTIONS)
 %    [META, DATA] = SGLOG2MAT(FILENAME, OPT1, VAL1, ...)
 %
-%  [META, DATA] = SGLOG2MAT(FILENAME, VARARGIN) reads the Seaglider log file 
-%  named by string FILENAME, loading its metadata in struct META and its data 
-%  in struct DATA.
+%  Description:
+%    [META, DATA] = SGLOG2MAT(FILENAME, VARARGIN) reads the Seaglider log file 
+%    named by string FILENAME, loading its metadata in struct META and its data 
+%    in struct DATA.
 %
-%  [META, DATA] = SGLOG2MAT(FILENAME, OPTIONS) and 
-%  [META, DATA] = SGLOG2MAT(FILENAME, OPT1, VAL1, ...) accept the following 
-%  options given in key-value pairs OPT1, VAL1... or in a struct OPTIONS with 
-%  field names as option keys and field values as option values:
-%    FORMAT: data output format.
-%      String setting the format of the output DATA. Valid values are:
-%        'array': DATA is a struct with a scalar field for each scalar parameter 
-%          and an array or cell array field for each non scalar parameter.
-%          Values of non scalar parameters are in the column order given by 
-%          the corresponding field of the COLUMNS metadata field.
-%        'merged': DATA is a struct with a scalar or column vector field for
-%          each scalar parameter or entry of a non-scalar parameter. For scalar
-%          parameters, the field is named after the parameter, while for non
-%          scalar parameters the field names are the parameter name and its
-%          field names, separated by underscore.
-%        'struct': DATA is a struct with a scalar field for each scalar 
-%          parameter and a struct array for each non scalar parameter. The
-%          fields of the non scalar parameters are given by the corresponding 
-%          field of the COLUMNS metadata field.
-%      Default value: 'array'
-%    PARAMS: parameter filtering list.
-%      String cell array with the names of the parameters of interest. If given,
-%      only parameters present in both the input data set and this list will be 
-%      present in output. For non scalar parameters, the name of the identifier
-%      as it appears in the log line specifies including all of its fields.
-%      Individual parameter fields are selected with the identifier and the name
-%      of the field separated by underscore (e.g. 'GC_st_secs'). The string 
-%      'all' may also be given, in which case parameter filtering is not 
-%      performed and all parameters in input list will be present in output.
-%      Default value: 'all' (do not perform parameter filtering).
+%    [META, DATA] = SGLOG2MAT(FILENAME, OPTIONS) and 
+%    [META, DATA] = SGLOG2MAT(FILENAME, OPT1, VAL1, ...) accept the following 
+%    options given in key-value pairs OPT1, VAL1... or in a struct OPTIONS
+%    with field names as option keys and field values as option values:
+%      FORMAT: data output format.
+%        String setting the format of the output DATA. Valid values are:
+%          'array': DATA is a struct with a scalar field for each scalar 
+%            parameter and an array or cell array field for each non-scalar
+%            parameter. Values of non-scalar parameters are in the column order
+%            given by the corresponding field of the COLUMNS metadata field.
+%          'merged': DATA is a struct with a scalar or column vector field 
+%            for each scalar parameter or entry of a non-scalar parameter.
+%            For scalar parameters, the field is named after the parameter,
+%            while for non-scalar parameters the field names are the parameter 
+%            name and its field names, separated by underscore.
+%          'struct': DATA is a struct with a scalar field for each scalar 
+%            parameter and a struct array for each non-scalar parameter.
+%            The fields of the non-scalar parameters are given by the 
+%            corresponding field of the COLUMNS metadata field.
+%        Default value: 'array'
+%      PARAMS: parameter filtering list.
+%        String cell array with the names of the parameters of interest. 
+%        If given, only parameters present in both the input file and this list
+%        will be present in output. For non-scalar parameters, the name 
+%        of the identifier as it appears in the log line specifies including
+%        all of its fields. Individual parameter fields are selected 
+%        with the identifier and the name of the field separated by underscore 
+%        (e.g. 'GC_st_secs'). The string 'all' may also be given, in which case
+%        parameter filtering is not performed and all parameters in input file
+%        will be present in output.
+%        Default value: 'all' (do not perform parameter filtering).
 %
-%  META has the following fields based on the tags of the header and the content
-%  of some metaparameters:
-%    HEADERS: a struct with the initial tags in the log file:
-%      VERSION: string with the version tag in log header.
-%      GLIDER : string with the glider id tag in log header.
-%      MISSION: mission number tag in log header.
-%      DIVE   : dive number tag in log header.
-%      START  : start date and time tag in log header (month, day of month, 
-%        year after 1900, hour, minute and second).
-%    START_SECS: dive start time from header tag in POSIX time 
-%      (seconds since 1970 Janyuay 01 00:00:00 UTC).
-%    PARAMS: struct with the names of the fields of non-scalar parameters.
-%      There is one field named after each parameter in data output, whose value
-%      is a string cell array with the names for the parameter fields, empty for 
-%      scalar parameters. See note below for some exceptions.
-%    GCHEAD: string cell array with the names of the fields for the GC lines
-%      (in the same column order as in the output data).
-%    DEVICES: string cell array with the names of the device fields for device
-%      lines (in the same column order as in the output data).
-%    SENSORS: string cell array with the names of the sensor fields for sensor
-%      lines (in the same column order as in the output data).
-%    SOURCES: string cell array containing FILENAME.
+%    META has the following fields based on the tags of the header
+%    and the content of some metaparameters:
+%      HEADERS: a struct with the initial tags in the log file:
+%        VERSION: string with the version tag in log header.
+%        GLIDER : string with the glider id tag in log header.
+%        MISSION: mission number tag in log header.
+%        DIVE   : dive number tag in log header.
+%        START  : start date and time tag in log header (month, day of month, 
+%          year after 1900, hour, minute and second).
+%      START_SECS: dive start time from header tag in POSIX time 
+%        (seconds since 1970 Janyuay 01 00:00:00 UTC).
+%      PARAMS: struct with the names of the fields of non-scalar parameters.
+%        There is one field named after each parameter in data output, whose
+%        value is a string cell array with the names for the parameter fields,
+%        empty for scalar parameters. See note below for some exceptions.
+%      GCHEAD: string cell array with the names of the fields for the GC lines
+%        (in the same column order as in the output data).
+%      DEVICES: string cell array with the names of the device fields 
+%        for device lines (in the same column order as in the output data).
+%      SENSORS: string cell array with the names of the sensor fields 
+%        for sensor lines (in the same column order as in the output data).
+%      SOURCES: string cell array containing FILENAME.
 %
 %  Notes:
 %    This parsing is based on the information about the log files provided by
@@ -105,11 +107,12 @@ function [meta, data] = sglog2mat(filename, varargin)
 %    SGENGCAT
 %    SGENGLOGMERGE
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
@@ -262,7 +265,7 @@ function [meta, data] = sglog2mat(filename, varargin)
     mulval_param_list = mulval_param_map(:,1);
     mulval_member_list = mulval_param_map(:,2);
   
-    % Non numeric parameters:
+    % Non-numeric parameters:
     nonum_param_map = {
       'TGT_NAME'     @cellstr
       'GPS1'         @(v)([{''} v(1) num2cell(str2double(v(2:end)))])

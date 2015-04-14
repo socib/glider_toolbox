@@ -4,15 +4,16 @@ function [figures_proc, figures_grid] = configFigures()
 %  Syntax:
 %    [FIGURES_PROC, FIGURES_GRID] = CONFIGFIGURES()
 %
-%  [FIGURES_PROC, FIGURES_GRID] = CONFIGFIGURES() should return structs
-%  FIGURES_PROC and FIGURES_GRID defining the figures to be generated from
-%  processed glider data and gridded glider data respectively in the format
-%  accepted by function GENERATEGLIDERFIGURES.
+%  Description:
+%    [FIGURES_PROC, FIGURES_GRID] = CONFIGFIGURES() should return structs
+%    FIGURES_PROC and FIGURES_GRID defining the figures to be generated from
+%    processed glider data and gridded glider data respectively in the format
+%    accepted by function GENERATEGLIDERFIGURES.
 %
-%  Additionally, default values of axis, figure and plot object properties for 
-%  glider figure plots might be set. This is usually done calling the function
-%  SET with the root object (0) and prepending figure property names with 
-%  'DefaultFigure...' and axis property names with 'DefaultAxes...'.
+%    Additionally, default values of axis, figure and plot object properties
+%    for glider figure plots might be set. This is usually done calling the
+%    function SET with the root object (0) and prepending figure property names
+%    with 'DefaultFigure...' and axis property names with 'DefaultAxes...'.
 %
 %  Notes:
 %    Edit this file defining the desired figures for processed and gridded data
@@ -30,11 +31,12 @@ function [figures_proc, figures_grid] = configFigures()
 %    PLOTPROFILESTATISTICS
 %    SET
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
@@ -251,6 +253,24 @@ function [figures_proc, figures_grid] = configFigures()
   figures_proc.turbidity.prntopts.title = 'Turbidity section';
   figures_proc.turbidity.prntopts.comment = 'Cross section of in situ measured turbidity.';
 
+  figures_proc.cdom = struct();
+  figures_proc.cdom.plotfunc = @plotTransectVerticalSection;
+  figures_proc.cdom.dataopts.xdata = 'distance_over_ground';
+  figures_proc.cdom.dataopts.ydata = {'depth' 'depth_ctd'};
+  figures_proc.cdom.dataopts.cdata = 'cdom';
+  figures_proc.cdom.plotopts.sdata = 2;
+  figures_proc.cdom.plotopts.logscale = false;
+  figures_proc.cdom.plotopts.xlabel = setfield(default_label, 'String', 'distance (km)');
+  figures_proc.cdom.plotopts.ylabel = setfield(default_label, 'String', 'depth (m)');
+  figures_proc.cdom.plotopts.clabel = setfield(default_label, 'String', 'CDOM (ppb)');
+  figures_proc.cdom.plotopts.title = setfield(default_title, 'String', 'In situ CDOM');
+  figures_proc.cdom.plotopts.axsprops = setfield(default_axes, 'Ydir', 'reverse');
+  figures_proc.cdom.plotopts.figprops = default_figure;
+  figures_proc.cdom.prntopts = default_prntopts;
+  figures_proc.cdom.prntopts.filename = 'cdom';
+  figures_proc.cdom.prntopts.title = 'CDOM section';
+  figures_proc.cdom.prntopts.comment = 'Cross section of in situ measured CDOM.';  
+
   figures_proc.oxygen_concentration = struct();
   figures_proc.oxygen_concentration.plotfunc = @plotTransectVerticalSection;
   figures_proc.oxygen_concentration.dataopts.xdata = 'distance_over_ground';
@@ -420,6 +440,23 @@ function [figures_proc, figures_grid] = configFigures()
   figures_grid.profiles_flntu.prntopts.filename = 'flntu_profiles';
   figures_grid.profiles_flntu.prntopts.title = 'Chlorohpyll and turbidity profiles';
   figures_grid.profiles_flntu.prntopts.comment = 'Profile statistics of chlorophyll and turbidity.';
+
+  figures_grid.profiles_bbfl2.plotfunc = @plotProfileStatistics;
+  figures_grid.profiles_bbfl2.dataopts(1).mdata = 'chlorophyll';
+  figures_grid.profiles_bbfl2.dataopts(1).ydata = 'depth';
+  figures_grid.profiles_bbfl2.plotopts.xlabel(1) = setfield(default_label, 'String', 'chlorophyll (ug l-1)');
+  figures_grid.profiles_bbfl2.plotopts.ylabel(1) = setfield(default_label, 'String', 'depth (m)');
+  figures_grid.profiles_bbfl2.plotopts.title(1) = setfield(default_title, 'String', 'Chlorophyll profiles');
+  figures_grid.profiles_bbfl2.dataopts(2).mdata = 'cdom';
+  figures_grid.profiles_bbfl2.dataopts(2).ydata = 'depth';
+  figures_grid.profiles_bbfl2.plotopts.xlabel(2) = setfield(default_label, 'String', 'CDOM (ppb)');
+  figures_grid.profiles_bbfl2.plotopts.ylabel(2) = setfield(default_label, 'String', 'depth (m)');
+  figures_grid.profiles_bbfl2.plotopts.title(2) = setfield(default_title, 'String', 'CDOM profiles');
+  figures_grid.profiles_bbfl2.plotopts.axsprops(1:2) = default_axes;
+  figures_grid.profiles_bbfl2.prntopts = default_prntopts;
+  figures_grid.profiles_bbfl2.prntopts.filename = 'bbfl2_profiles';
+  figures_grid.profiles_bbfl2.prntopts.title = 'Chlorohpyll and CDOM profiles';
+  figures_grid.profiles_bbfl2.prntopts.comment = 'Profile statistics of chlorophyll and CDOM.';
 
   figures_grid.profiles_oxygen.plotfunc = @plotProfileStatistics;
   figures_grid.profiles_oxygen.dataopts(1).mdata = 'oxygen_concentration';

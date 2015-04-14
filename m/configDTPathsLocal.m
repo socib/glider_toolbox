@@ -4,24 +4,25 @@ function local_paths = configDTPathsLocal()
 %  Syntax:
 %    LOCAL_PATHS = CONFIGDTPATHSLOCAL()
 %
-%  LOCAL_PATHS = CONFIGDTPATHSLOCAL() should return a struct with the path 
-%  patterns for the deployment files involved in the glider processing chain
-%  in delayed time mode. It should have the following fields:
-%    BINARY_PATH: path pattern of the directory of Slocum binary files (.Xbd).
-%    CACHE_PATH: path pattern of the directory of Slocum cache files (.cac).
-%    LOG_PATH: path pattern of the directory of Slocum surface log files (.log).
-%    ASCII_PATH: path pattern of the directory of converted Slocum text files
-%      (.dba) or Seglider text files (.log and .eng).
-%    FIGURE_PATH: path pattern of the directory for deployment figures.
-%    NETCDF_L0: path pattern of the NetCDF file for raw data
-%      (data provided by the glider without any meaningful modification).
-%    NETCDF_L1: path pattern of the NetCDF file for processed trajectory data
-%      (properly referenced data with conversions, corrections and derivations).
-%    NETCDF_L2: path pattern of the NetCDF file for processed grid data
-%      (already processed data interpolated on vertical instantaneous profiles).
-%    PROCESSING_LOG: path pattern of the processing log file.
-%  These path patterns are converted to true paths through the function
-%  STRFSTRUCT.
+%  Description:
+%    LOCAL_PATHS = CONFIGDTPATHSLOCAL() should return a struct with the path 
+%    patterns for the deployment files involved in the glider processing chain
+%    in delayed time mode. It should have the following fields:
+%      BINARY_PATH: path pattern of directory of Slocum binary files (.Xbd).
+%      CACHE_PATH: path pattern of directory of Slocum cache files (.cac).
+%      LOG_PATH: path pattern of directory of Slocum surface log files (.log).
+%      ASCII_PATH: path pattern of directory of converted Slocum text files
+%        (.dba) or Seglider text files (.log and .eng).
+%      FIGURE_PATH: path pattern of directory for deployment figures.
+%      NETCDF_L0: path pattern of NetCDF file for raw data
+%        (data provided by the glider without any meaningful modification).
+%      NETCDF_L1: path pattern of NetCDF file for processed trajectory data
+%        (well referenced data with conversions, corrections and derivations).
+%      NETCDF_L2: path pattern of NetCDF file for processed grid data
+%        (processed data interpolated on vertical instantaneous profiles).
+%      PROCESSING_LOG: path pattern of processing log file.
+%    These path patterns are converted to true paths through the function
+%    STRFSTRUCT.
 %
 %  Notes:
 %    Edit this file filling in the paths to reflect your desired file layout.
@@ -33,11 +34,12 @@ function local_paths = configDTPathsLocal()
 %    MAIN_GLIDER_DATA_PROCESSING_DT
 %    STRFSTRUCT
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

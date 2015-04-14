@@ -5,17 +5,18 @@ function cor = correctSensorLag(varargin)
 %    COR = CORRECTSENSORLAG(TIME, RAW, PARAMS)
 %    COR = CORRECTSENSORLAG(TIME, RAW, FLOW, PARAMS)
 %
-%  COR = CORRECTSENSORLAG(TIME, RAW, PARAMS) corrects the sequence in vector
-%  RAW with timestamp in vector TIME and constant flow speed from sensor lag 
-%  effects. The correction is done advancing the signal in time using linear
-%  interpolation. PARAMS should be a scalar with the number of time units the
-%  signal should be shifted.
+%  Description:
+%    COR = CORRECTSENSORLAG(TIME, RAW, PARAMS) corrects the sequence in vector
+%    RAW with timestamp in vector TIME and constant flow speed from sensor lag 
+%    effects. The correction is done advancing the signal in time using linear
+%    interpolation. PARAMS should be a scalar with the number of time units the
+%    signal should be shifted.
 %
-%  COR = CORRECTSENSORLAG(TIME, RAW, FLOW, PARAMS) performs the same correction
-%  but for a sequence with variable flow speed, given by FLOW. FLOW should be a
-%  vector with the same dimensions as TIME and RAW. PARAMS should be a two
-%  element vector with the offset and the slope of the time lag parameter with
-%  respect to the inverse flow speed.
+%    COR = CORRECTSENSORLAG(TIME, RAW, FLOW, PARAMS) performs the same 
+%    correction but for a sequence with variable flow speed, given by FLOW. 
+%    FLOW should be a vector with the same dimensions as TIME and RAW. 
+%    PARAMS should be a two element vector with the offset and the slope 
+%    of the time lag parameter with respect to the inverse flow speed.
 %
 %  Notes:
 %    This function is a recoding of a previous function by Tomeu Garau, called 
@@ -69,11 +70,12 @@ function cor = correctSensorLag(varargin)
 %    FINDSENSORLAGPARAMS
 %    INTERP1
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

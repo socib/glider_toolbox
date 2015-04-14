@@ -7,91 +7,95 @@ function imginfo = printfigure(varargin)
 %    IMGINFO = PRINTFIGURE(H, OPTIONS)
 %    IMGINFO = PRINTFIGURE(H, OPT1, VAL1, ...)
 %
-%  IMGINFO = PRINTFIGURE(OPTIONS) and IMGINFO = PRINTFIGURE(OPT1, VAL1, ...)
-%  print current figure to image file according to given options and return a
-%  struct IMGINFO with information about the generated image file.
-%  Options may be given in key-value pairs OPT1, VAL1... or in a struct OPTIONS 
-%  with field names as option keys and field values as option values.
-%  Recognized options are:
-%    DIRNAME: image file directory.
-%      String with the path of the directory of the resulting image file.
-%      It may be absolute or relative to the current directory reported by PWD.
-%      Default value: '' (empty, use current directory)
-%    FILENAME: image file name without extension.
-%      String with name of the resulting image file without path prefix nor
-%      extension.
-%      Default value: sprintf('figure%03d', h) where h is the figure handle
-%    FORMAT: image file format (extension)
-%      String with the extension of the resulting image file (no leading dot).
-%      It also specifies the image format. Any format recognized by the program 
-%      'convert' in the ImageMagick suite may be used. See note on format below.
-%      Default value: 'eps'
-%    RESOLUTION: image resolution in dots per inch.
-%      Positive integer with the resolution of the resulting image file in dpi.
-%      See note on image size below.
-%      Default value: 72
-%    DATE: image time stamp.
-%      String with the value of the 'date' property of the resulting image file.
-%      Some image formats might not support it. Usually it is the creation date.
-%      Default value: datestr(now(), 31)
-%    TITLE: image title label.
-%      String with the value of the 'title' property of the resulting image
-%      file. Some image formats might not support it.
-%      Default value: ''
-%    COMMENT: image description comment.
-%      String with the value of the 'comment' property of the resulting image
-%      file. Some image formats might not support it. It should describe the
-%      figure contents.
-%      Default value: ''
-%    DRIVER: driver to print intermediate vector image file.
-%      String setting whether the intermediate vector image file should be 
-%      printed using a mono or color driver. It should be one of:
-%        'eps'  : mono
-%        'eps2' : mono
-%        'epsc' : color
-%        'epsc2': color
-%      See note on format below.
-%      Default value: 'epsc2'
-%    RENDER: renderer to use when printing intermediate vector file.
-%      String setting which renderer should be used when printing the
-%      intermediate vector image file. Any renderer supported by function PRINT
-%      is allowed. If empty, no renderer option is set when calling PRINT, and
-%      the renderer is automatically selected either from figure properties or
-%      depending on figure contents.
-%      Default value: '' (renderer automatically selected)
-%    LOOSE: uncrop image when printing intermediate vector file.
-%      String setting the value of the loose option (MATLAB only) to produce
-%      an uncropped image when printing to the intermediate vector file.
-%      The only recognized value is 'loose', which prevents the figure being
-%      cropped. If empty, no option is set when calling PRINT.
-%      Default value: 'loose' (produce uncropped images).
-%    CONVERT: program to convert intermediate vector file to final format.
-%      String setting which program should be called to convert the intermediate
-%      vector image file to the final format using SYSTEM (see note on format
-%      conversion below). If empty, the conversion is omitted and the image file
-%      in the final format is produced by the built-in driver in option DRIVER.
-%      Default value: 'convert'
-%    KEEPEPS: preserve intermediate vector file after conversion.
-%      Boolean setting whether the intermediate vector file should be preserved
-%      after the conversion to the final format. If false, the intermediate file
-%      is deleted after a successful conversion.
-%      Default value: false
-%  Returned struct IMGINFO contains information about the figure and the 
-%  generated image. It has the following fields:
-%    TITLE: string with the image label (taken from options).
-%    COMMENT: string with the image comment (taken from options).
-%    DATE: string with the image timestamp (taken from options).
-%    FULLFILE: string with the absolute path of the generated image file.
-%    FILENAME: string with the image base file name (taken from options).
-%    DIRNAME: string with the image directory name (taken from options).
-%    FORMAT: string with the format extension (taken from options).
-%    RESOLUTION: scalar with the image resolution in dots per inch (taken from options).
-%    WIDTH: scalar with the image width (taken from the figure handle).
-%    HEIGHT: scalar with the image height (taken from the figure handle).
-%    UNITS: string with the image size units (taken from the figure handle).
+%  Description:
+%    IMGINFO = PRINTFIGURE(OPTIONS) and IMGINFO = PRINTFIGURE(OPT1, VAL1, ...)
+%    print current figure to image file according to given options and return a
+%    struct IMGINFO with information about the generated image file.
+%    Options may be given in key-value pairs OPT1, VAL1... or in a struct 
+%    OPTIONS with field names as option keys and field values as option values.
+%    Recognized options are:
+%      DIRNAME: image file directory.
+%        String with the path of the directory of the output image file.
+%        It may be absolute or relative to the current directory as reported
+%        by PWD.
+%        Default value: '' (empty, use current directory)
+%      FILENAME: image file name without extension.
+%        String with name of the output image file without path prefix nor
+%        extension.
+%        Default value: sprintf('figure%03d', h) where h is the figure handle
+%      FORMAT: image file format (extension)
+%        String with the extension of the output image file (no leading dot).
+%        It also specifies the image format. Any format recognized by the
+%        program 'convert' in the ImageMagick suite may be used. See note on 
+%        format below.
+%        Default value: 'eps'
+%      RESOLUTION: image resolution in dots per inch.
+%        Positive integer with the resolution of the output image file in dpi.
+%        See note on image size below.
+%        Default value: 72
+%      DATE: image time stamp.
+%        String with the value of the 'date' property of the output image file,
+%        usually the creation date. Some image formats might not support it.
+%        Default value: datestr(now(), 31)
+%      TITLE: image title label.
+%        String with the value of the 'title' property of the output image file.
+%        Some image formats might not support it.
+%        Default value: ''
+%      COMMENT: image description comment.
+%        String with the value of the 'comment' property of the output image
+%        file. Some image formats might not support it. It should describe the
+%        figure contents.
+%        Default value: ''
+%      DRIVER: driver to print intermediate vector image file.
+%        String setting whether the intermediate vector image file should be 
+%        printed using a mono or color driver. It should be one of:
+%          'eps'  : mono
+%          'eps2' : mono
+%          'epsc' : color
+%          'epsc2': color
+%        See note on format below.
+%        Default value: 'epsc2'
+%      RENDER: renderer to use when printing intermediate vector file.
+%        String setting which renderer should be used when printing the
+%        intermediate vector image file. Any renderer supported by function
+%        PRINT is allowed. If empty, the renderer options is not set when 
+%        calling PRINT, and the renderer is automatically selected either from
+%        figure properties or depending on the contents of the figure.
+%        Default value: '' (renderer automatically selected)
+%      LOOSE: uncrop image when printing intermediate vector file.
+%        String setting the value of the loose option (MATLAB only) to produce
+%        an uncropped image when printing to the intermediate vector file.
+%        The only recognized value is 'loose', which prevents the figure being
+%        cropped. If empty, no option is set when calling PRINT.
+%        Default value: 'loose' (produce uncropped images).
+%      CONVERT: program to convert intermediate vector file to final format.
+%        String setting which program should be called to convert the 
+%        intermediate vector image file to the final format using SYSTEM
+%        (see note on format conversion below). If empty, the conversion is 
+%        omitted and the image file in the final format is produced by the 
+%        built-in driver in option DRIVER.
+%        Default value: 'convert'
+%      KEEPEPS: preserve intermediate vector file after conversion.
+%        Boolean setting whether to preseve the intermediate vector file after
+%        the conversion to the final format. If false, the intermediate file
+%        is deleted after a successful conversion.
+%        Default value: false
+%    Returned struct IMGINFO contains information about the figure and the 
+%    generated image. It has the following fields:
+%      TITLE: string with the image label (taken from options).
+%      COMMENT: string with the image comment (taken from options).
+%      DATE: string with the image timestamp (taken from options).
+%      FULLFILE: string with the absolute path of the generated image file.
+%      FILENAME: string with the image base file name (taken from options).
+%      DIRNAME: string with the image directory name (taken from options).
+%      FORMAT: string with the format extension (taken from options).
+%      RESOLUTION: scalar with the image resolution (taken from options).
+%      WIDTH: scalar with the image width (taken from the figure handle).
+%      HEIGHT: scalar with the image height (taken from the figure handle).
+%      UNITS: string with the image size units (taken from the figure handle).
 %
-%  IMGINFO = PRINTFIGURE(H, ...) prints figure given by figure handle H instead
-%  of current figure.
+%    IMGINFO = PRINTFIGURE(H, ...) prints figure given by figure handle H
+%    instead of THE current figure.
 %
 %  Notes:
 %    This function is inspired by function PRINTIMAGE by Tomeu Garau. He is the
@@ -110,8 +114,8 @@ function imginfo = printfigure(varargin)
 %    the program is not invoked at all.
 %
 %    The 'convert' program is part of the GraphicsMagick and ImageMagick suites:
-%      http://www.imagemagick.org/script/convert.php
-%      http://www.graphicsmagick.org/convert.html
+%      <http://www.imagemagick.org/script/convert.php>
+%      <http://www.graphicsmagick.org/convert.html>
 %
 %    The resulting image size, either in pixel or metric units, is governed by 
 %    the resolution option and the figure position properties 'PaperPosition'
@@ -143,11 +147,12 @@ function imginfo = printfigure(varargin)
 %    DATESTR
 %    NOW
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

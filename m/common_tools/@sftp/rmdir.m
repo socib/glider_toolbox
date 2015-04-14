@@ -4,7 +4,8 @@ function rmdir(h, dirname)
 %  Syntax:
 %    RMDIR(H, DIRNAME)
 %
-%  RMDIR(H, DIRNAME) removes a directory on the server.
+%  Description:
+%    RMDIR(H, DIRNAME) removes a directory on the server.
 %
 %  Examples:
 %    rmdir(h, dirname)
@@ -12,11 +13,12 @@ function rmdir(h, dirname)
 %  See also:
 %    SFTP
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

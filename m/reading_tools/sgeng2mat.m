@@ -6,46 +6,47 @@ function [meta, data] = sgeng2mat(filename, varargin)
 %    [META, DATA] = sgeng2mat(FILENAME, OPTIONS)
 %    [META, DATA] = sgeng2mat(FILENAME, OPT1, VAL1, ...)
 %
-%  [META, DATA] = sgeng2mat(FILENAME, VARARGIN) reads the Seaglider eng file 
-%  named by string FILENAME, loading its metadata in struct META and its data 
-%  in struct DATA.
+%  Description:
+%    [META, DATA] = sgeng2mat(FILENAME, VARARGIN) reads the Seaglider eng file 
+%    named by string FILENAME, loading its metadata in struct META and its data 
+%    in struct DATA.
 %
-%  [META, DATA] = sgeng2mat(FILENAME, OPTIONS) and 
-%  [META, DATA] = sgeng2mat(FILENAME, OPT1, VAL1, ...) accept the following 
-%  options given in key-value pairs OPT1, VAL1... or in a struct OPTIONS with 
-%  field names as option keys and field values as option values:
-%    FORMAT: data output format.
-%      String setting the format of the output DATA. Valid values are:
-%        'array': DATA is a matrix with data readings as columns ordered as in
-%          the columns metadata field.
-%        'struct': DATA is a struct with column names as field names and column 
-%           vectors of data columns as field values.
-%      Default value: 'array'
-%    COLUMNS: data column filtering list.
-%      String cell array with the names of the data columns of interest as
-%      reported in the COLUMNS metadata field (see note on column renaming).
-%      If given, only parameters present in both the input dataset and this list
-%      will be present in output. The string 'all' may also be given, in which
-%      case column filtering is not performed and all data in input list will
-%      be present in output.
-%      Default value: 'all' (do not perform column filtering).
+%    [META, DATA] = sgeng2mat(FILENAME, OPTIONS) and 
+%    [META, DATA] = sgeng2mat(FILENAME, OPT1, VAL1, ...) accept the following 
+%    options given in key-value pairs OPT1, VAL1... or in a struct OPTIONS
+%    with field names as option keys and field values as option values:
+%      FORMAT: data output format.
+%        String setting the format of the output DATA. Valid values are:
+%          'array': DATA is a matrix with data readings as columns ordered
+%            as in the columns metadata field.
+%          'struct': DATA is a struct with column names as field names
+%            and column vectors of data columns as field values.
+%        Default value: 'array'
+%      COLUMNS: data column filtering list.
+%        String cell array with the names of the data columns of interest
+%        as reported in the COLUMNS metadata field (see note on column 
+%        renaming). If given, only parameters present in both the input
+%        file and this list will be present in output. The string 'all'
+%        may also be given, in which case column filtering is not performed
+%        and all columns in input list will be present in output.
+%        Default value: 'all' (do not perform column filtering).
 %
-%  META has the following fields based on the tags of the header and the content
-%  of some metaparameters:
-%    HEADERS: a struct with the initial tags in the eng file:
-%      VERSION: string with the version tag in eng header.
-%      GLIDER : string with the glider id tag in eng header.
-%      MISSION: mission number tag in eng header.
-%      DIVE   : dive number tag in eng header.
-%      BASESTATION_VERSION: string with the basestation tag in eng header.
-%      START  : start date and time tag in eng header (month, day of month, 
-%        year after 1900, hour, minute and second).
-%    START_SECS: dive start time from header tag in POSIX time 
-%      (seconds since 1970 Janyuay 01 00:00:00 UTC).
-%    COLUMNS: string cell array with the names of the columns in the returned 
-%      data array (in the same column order as the data). See note on column
-%      renaming.
-%    SOURCES: string cell array containing FILENAME.
+%    META has the following fields based on the tags of the header and the
+%    content of some metaparameters:
+%      HEADERS: a struct with the initial tags in the eng file:
+%        VERSION: string with the version tag in eng header.
+%        GLIDER : string with the glider id tag in eng header.
+%        MISSION: mission number tag in eng header.
+%        DIVE   : dive number tag in eng header.
+%        BASESTATION_VERSION: string with the basestation tag in eng header.
+%        START  : start date and time tag in eng header (month, day of month, 
+%          year after 1900, hour, minute and second).
+%      START_SECS: dive start time from header tag in POSIX time 
+%        (seconds since 1970 Janyuay 01 00:00:00 UTC).
+%      COLUMNS: string cell array with the names of the columns in the returned 
+%        data array (in the same column order as the data). See note on column
+%        renaming.
+%      SOURCES: string cell array containing FILENAME.
 %
 %  Notes:
 %    This parsing is based on the information about the eng files provided by
@@ -74,11 +75,12 @@ function [meta, data] = sgeng2mat(filename, varargin)
 %    SGENGCAT
 %    SGENGLOGMERGE
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

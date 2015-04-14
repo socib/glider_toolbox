@@ -4,8 +4,9 @@ function gridding_options = configDataGridding()
 %  Syntax:
 %    GRIDDING_OPTIONS = CONFIGDATAGRIDDING()
 %
-%  GRIDDING_OPTIONS = CONFIGDATAGRIDDING() should return a struct setting the 
-%  options for glider data gridding as needed by the function GRIDGLIDERDATA.
+%  Description:
+%    GRIDDING_OPTIONS = CONFIGDATAGRIDDING() should return a struct setting the 
+%    options for glider data gridding as needed by the function GRIDGLIDERDATA.
 %
 %  Examples:
 %    gridding_options = configDataGridding()
@@ -13,11 +14,12 @@ function gridding_options = configDataGridding()
 %  See also:
 %    GRIDGLIDERDATA
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
@@ -53,6 +55,7 @@ function gridding_options = configDataGridding()
     'pressure'
     'chlorophyll'
     'turbidity'
+    'cdom'
     'oxygen_concentration'
     'oxygen_saturation'
     'conductivity_corrected_thermal'

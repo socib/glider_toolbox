@@ -4,17 +4,19 @@ function data = alignSGDiveParams(data, meta, params)
 %  Syntax:
 %    DATA = ALIGNSGDIVEPARAMS(DATA, META, PARAMS)
 %
-%  DATA = ALIGNSGDIVEPARAMS(DATA, META, PARAMS) aligns the values of Seaglider 
-%  dive parameter fields in DATA selected by character array or string cell 
-%  array PARAMS with the data column fields. It assigns each parameter value 
-%  to the first record of the corresponding dive in the final data column, 
-%  and initializes all other entries as invalid (NaN).
+%  Description:
+%    DATA = ALIGNSGDIVEPARAMS(DATA, META, PARAMS) aligns the values of 
+%    Seaglider dive parameters in the fields of struct DATA selected by
+%    character array or string cell array PARAMS with the data column fields.
+%    It assigns each parameter value to the first record of the corresponding
+%    dive in the final data column, and initializes all other entries as 
+%    invalid (NaN).
 %
 %  Notes:
 %    Some parameters like the target waypoint or the currents estimates are
 %    provided by Seagliders only once per dive in the log file (.log), and they
 %    are not timestamped. This function aligns them with the data collected
-%    during the dive as if they way timestamped as the first dive record. For 
+%    during the dive as if they were timestamped as the first dive record. For
 %    some parameters (e.g. SENSOR_SECS) this might not be the nearest record.
 %
 %  Examples:
@@ -23,11 +25,12 @@ function data = alignSGDiveParams(data, meta, params)
 %  See also:
 %    LOADSEAGLIDERDATA
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

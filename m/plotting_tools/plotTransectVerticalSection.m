@@ -8,62 +8,66 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
 %    PLOTTRANSECTVERTICALSECTION(H, OPT1, VAL1, ...)
 %    [HFIG, HAXS, HCBA, HSCT] = PLOTTRANSECTVERTICALSECTION(...)
 %
-%  PLOTTRANSECTVERTICALSECTION(OPTIONS) and 
-%  PLOTTRANSECTVERTICALSECTION(OPT1, VAL1, ...) generate a new figure with a
-%  scatter plot of scalar data collected during a glider transect according to
-%  options in string key-value pairs OPT1, VAL1... or in struct OPTIONS with
-%  field names as option keys and field values as option values.
-%  The scatter plot is generated with the function SCATTER.
-%  Recognized options are:
-%    XDATA: horizontal coordinate data.
-%      Vector of data to be passed as x coordindate to function SCATTER, 
-%      usually distance or time.
-%      Default value: []
-%    YDATA: vertical coordinate data.
-%      Vector of data to be passed as y coordindate to function SCATTER,
-%      usually pressure or depth.
-%      Default value: []
-%    CDATA: measured variable data.
-%      Vector of data to be passed as color coordindate to function SCATTER.
-%      Default value: []
-%    SDATA: data marker size.
-%      Vector or scalar to be passed as size coordindate to function SCATTER.
-%      Default value: []
-%    XLABEL: horizontal axis label data.
-%      Struct defining x label properties. Label's text is in property 'String'.
-%      Default value: struct()
-%    YLABEL: vertical axis label data.
-%      Struct defining y label properties. Label's text is in property 'String'.
-%      Default value: struct()
-%    CLABEL: color bar label data.
-%      Struct defining color bar label properties. Label's text is in property 
-%      'String'. Actually this will be the colorbar's child object 'Title'.
-%      Default value: struct()
-%    TITLE: axes title data.
-%      Struct defining axes title properties. Title's text is in property 
-%      'String'.
-%      Default value: struct()
-%    LOGSCALE: use logarithmic color scale instead of linear scale.
-%      Boolean specifying whether color scale should be logarithmic instead of
-%      linear. See note on logarithmic color scaling.
-%      Default value: false
-%    DATETICKS: use date formatted tick labels for selected axes.
-%      Substring of 'xyz' specifying which axes should be labeled with date
-%      formatted ticks using function DATETICKS.
-%      Default value: ''
-%    AXSPROPS: extra axis properties.
-%      Struct of axis properties to be set for the plot axes with function SET.
-%      Default value: struct()
-%    FIGPROPS: extra figure properties.
-%      Struct of figure properties to be set for the figure with function SET.
-%      Default value: struct()
-%
-%  PLOTTRANSECTVERTICALSECTION(H, ...) does not create a new figure, but plots 
-%  to figure given by figure handle H.
+%  Description:
+%    PLOTTRANSECTVERTICALSECTION(OPTIONS) and 
+%    PLOTTRANSECTVERTICALSECTION(OPT1, VAL1, ...) generate a new figure with a
+%    scatter plot of scalar data collected during a glider transect according to
+%    options in string key-value pairs OPT1, VAL1... or in struct OPTIONS with
+%    field names as option keys and field values as option values.
+%    The scatter plot is generated with the function SCATTER.
+%    Recognized options are:
+%      XDATA: horizontal coordinate data.
+%        Vector of data to be passed as x coordindate to function SCATTER, 
+%        usually distance or time.
+%        Default value: []
+%      YDATA: vertical coordinate data.
+%        Vector of data to be passed as y coordindate to function SCATTER,
+%        usually pressure or depth.
+%        Default value: []
+%      CDATA: measured variable data.
+%        Vector of data to be passed as color coordindate to function SCATTER.
+%        Default value: []
+%      SDATA: data marker size.
+%        Vector or scalar to be passed as size coordindate to function SCATTER.
+%        Default value: []
+%      XLABEL: horizontal axis label data.
+%        Struct defining x label properties.
+%        The text of the label is in property 'String'.
+%        Default value: struct()
+%      YLABEL: vertical axis label data.
+%        Struct defining y label properties.
+%        The text of the label is in property 'String'.
+%        Default value: struct()
+%      CLABEL: color bar label data.
+%        Struct defining color bar label properties.
+%        The text of the label is in property 'String'.
+%        Actually this will be the colorbar's child object 'Title'.
+%        Default value: struct()
+%      TITLE: axes title data.
+%        Struct defining axes title properties.
+%        The text of the label is in property 'String'.
+%        Default value: struct()
+%      LOGSCALE: use logarithmic color scale instead of linear scale.
+%        Boolean specifying whether color scale should be logarithmic instead of
+%        linear. See note on logarithmic color scaling.
+%        Default value: false
+%      DATETICKS: use date formatted tick labels for selected axes.
+%        Substring of 'xyz' specifying which axes should be labeled with date
+%        formatted ticks using function DATETICKS.
+%        Default value: ''
+%      AXSPROPS: extra axis properties.
+%        Struct of axis properties to set for the plot axes with function SET.
+%        Default value: struct()
+%      FIGPROPS: extra figure properties.
+%        Struct of figure properties to set for the figure with function SET.
+%        Default value: struct()
 %  
-%  [HFIG, HAXS, HCBA, HSCT] = PLOTTRANSECTVERTICALSECTION(...) returns handles
-%  for the figure, axes, color bar, and scatter group in HFIG, HAXS, HSCT, and
-%  HCBA, respectively.
+%    PLOTTRANSECTVERTICALSECTION(H, ...) does not create a new figure,
+%    but plots  to figure given by figure handle H.
+%
+%    [HFIG, HAXS, HCBA, HSCT] = PLOTTRANSECTVERTICALSECTION(...) returns
+%    handles for the figure, axes, color bar, and scatter group in
+%    HFIG, HAXS, HSCT, and HCBA, respectively.
 %
 %  Notes:
 %    There is no built-in support for logarithmic color scaling. 
@@ -86,11 +90,12 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
 %    DATETICK
 %    SET
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
@@ -193,7 +198,7 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
     set(hsct, ...
         'XData', options.xdata(:), 'YData', options.ydata(:), ...
         'CData', log10(options.cdata(:)), 'SizeData', options.sdata(:));
-    % Force range to prevent error due to wrong non positive values.
+    % Force range to prevent error due to wrong non-positive values.
     % These values should not be there for logarithmic scale magnitudes
     % (e.g. chlorophyll concentration).
     if crange(2) <= 0

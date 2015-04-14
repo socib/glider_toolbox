@@ -9,39 +9,40 @@ function flow = computeCTDFlowSpeed(varargin)
 %    FLOW = COMPUTECTDFLOWSPEED(TIMESTAMP, DEPTH, PITCH, OPTIONS)
 %    FLOW = COMPUTECTDFLOWSPEED(TIMESTAMP, DEPTH, PITCH, OPT1, VAL1, ...)
 %
-%  FLOW = COMPUTECTDFLOWSPEED(TIMESTAMP, DEPTH) computes the flow speed through 
-%  the cell of a CTD in a vertical profile sequence given by vectors TIMESTAMP 
-%  (timestamp) and DEPTH (depth), and returns it in vector FLOW. All these 
-%  vectors should have the same dimensions.
+%  Description:
+%    FLOW = COMPUTECTDFLOWSPEED(TIMESTAMP, DEPTH) computes the flow speed 
+%    through the cell of a CTD in a vertical profile sequence given by vectors 
+%    TIMESTAMP (timestamp) and DEPTH (depth), and returns it in vector FLOW.
+%    All these vectors should have the same dimensions.
 %
-%  FLOW = COMPUTECTDFLOWSPEED(TIMESTAMP, DEPTH, PITCH) performs the same 
-%  correction but for a non vertical profile, with pitch angle given by PITCH 
-%  in radians. PITCH may be either a vector with the same dimensions as 
-%  TIMESTAMP and DEPTH, or a scalar taken to be the constant pitch across the 
-%  whole profile sequence.
+%    FLOW = COMPUTECTDFLOWSPEED(TIMESTAMP, DEPTH, PITCH) performs the same 
+%    correction but for a non-vertical profile, with pitch angle given by PITCH 
+%    in radians. PITCH may be either a vector with the same dimensions as 
+%    TIMESTAMP and DEPTH, or a scalar taken to be the constant pitch across the 
+%    whole profile sequence.
 %
-%  FLOW = COMPUTECTDFLOWSPEED(..., OPTIONS) and 
-%  FLOW = COMPUTECTDFLOWSPEED(..., OPT1, VAL1, ...) allow passing extra options
-%  given in key-value pairs OPT1, VAL1... or in a struct OPTIONS with field 
-%  names as option keys and field values as option values.
-%  Recognized options are:
-%    FACTORPOLY: flow speed factor polynomial.
-%      Vector with the coefficients of the polynomial that returns the flow
-%      speed factor whem evaluated by POLYVAL at each surge speed value.
-%      See note on flow speed computation below.
-%      Default value:  [0.00 0.03 1.15] (see note below).
-%    MINVEL: minimum vertical velocity threshold.
-%      Scalar with the minimum vertical velocity threshold below which the 
-%      aproximated surge speed value is supposed to be unreliable. On samples 
-%      with an absolute vertical velocity value less than given threshold 
-%      flow speed is invalid (NaN).
-%      Default value: 0 (all samples are valid)
-%    MINPITCH: minimum pitch threshold.
-%      Scalar with the minimum pitch threshold in radians below which the 
-%      aproximated surge speed value is supposed to be unreliable. On samples 
-%      with an absolute pitch value lesser than given threshold flow speed is 
-%      invalid (NaN).
-%      Default value: 0 (all samples are valid)
+%    FLOW = COMPUTECTDFLOWSPEED(..., OPTIONS) and 
+%    FLOW = COMPUTECTDFLOWSPEED(..., OPT1, VAL1, ...) allow passing extra 
+%    options given in key-value pairs OPT1, VAL1... or in a struct OPTIONS 
+%    with field names as option keys and field values as option values.
+%    Recognized options are:
+%      FACTORPOLY: flow speed factor polynomial.
+%        Vector with the coefficients of the polynomial that returns the flow
+%        speed factor whem evaluated by POLYVAL at each surge speed value.
+%        See note on flow speed computation below.
+%        Default value:  [0.00 0.03 1.15] (see note below).
+%      MINVEL: minimum vertical velocity threshold.
+%        Scalar with the minimum vertical velocity threshold below which the 
+%        aproximated surge speed value is supposed to be unreliable. On samples 
+%        with an absolute vertical velocity value less than given threshold 
+%        flow speed is invalid (NaN).
+%        Default value: 0 (all samples are valid)
+%      MINPITCH: minimum pitch threshold.
+%        Scalar with the minimum pitch threshold in radians below which the 
+%        aproximated surge speed value is supposed to be unreliable. On samples 
+%        with an absolute pitch value lesser than given threshold flow speed is 
+%        invalid (NaN).
+%        Default value: 0 (all samples are valid)
 %
 %  Notes:
 %    This function is based on the flow speed computation code by Tomeu Garau in
@@ -53,7 +54,7 @@ function flow = computeCTDFlowSpeed(varargin)
 %    The approximate flow speed is computed from the absolute value of the
 %    vertical velocity. The vertical velocity is approximated using central
 %    differences, but accounting for the possibly unevenly spaced samples.
-%    In non vertical profiles with given pitch, the vertical velocity is scaled
+%    In non-vertical profiles with given pitch, the vertical velocity is scaled
 %    by the sine of the pitch angle. The absolute value of this intermediate
 %    quantity is called surge speed. To obtain the flow speed, each surge speed
 %    value is scaled by a factor resulting from the evaluation of the given 
@@ -85,11 +86,12 @@ function flow = computeCTDFlowSpeed(varargin)
 %    % No flow speed factor scaling:
 %    flow = computeCTDFlowSpeed(timestamp, depth, pitch, 'factorpoly', [])
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
@@ -108,7 +110,7 @@ function flow = computeCTDFlowSpeed(varargin)
   
   
   %% Parse mandatory input arguments.
-  % Get numeric (non option) arguments.
+  % Get numeric (non-option) arguments.
   narginnum = find(~cellfun(@isnumeric, varargin), 1, 'first') - 1;
   if isempty(narginnum)
     narginnum = nargin;
@@ -139,16 +141,16 @@ function flow = computeCTDFlowSpeed(varargin)
   
   %% Parse option arguments.
   % Get option key-value pairs in any accepted call signature.
-  argopt = varargin(narginnum+1:end);
-  if isscalar(argopt) && isstruct(argopt{1})
+  argopts = varargin(narginnum+1:end);
+  if isscalar(argopts) && isstruct(argopts{1})
     % Options passed as a single option struct argument:
     % field names are option keys and field values are option values.
-    opt_key_list = fieldnames(argopt{1});
-    opt_val_list = struct2cell(argopt{1});
-  elseif mod(numel(argopt), 2) == 0
+    opt_key_list = fieldnames(argopts{1});
+    opt_val_list = struct2cell(argopts{1});
+  elseif mod(numel(argopts), 2) == 0
     % Options passed as key-value argument pairs.
-    opt_key_list = argopt(1:2:end);
-    opt_val_list = argopt(2:2:end);
+    opt_key_list = argopts(1:2:end);
+    opt_val_list = argopts(2:2:end);
   else
     error('glider_toolbox:findCTDFlowSpeed:InvalidOptions', ...
           'Invalid optional arguments (neither key-value pairs nor struct).');

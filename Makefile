@@ -1,7 +1,7 @@
 DOCDIR := doc
 #MFILES := $(wildcard m/*.m m/*_tools)
 MFILES := m
-IGNORE := private
+IGNORE := private @sftp
 M := matlab
 
 ifeq ($(M), matlab)

@@ -6,11 +6,12 @@ function pwd = cd(h, path)
 %    PWD = CD(H, PATH)
 %    PWD = CD(H)
 %
-%  CD(H, PATH) changes the current working directory to the one specified.
+%  Description:
+%    CD(H, PATH) changes the current working directory to the one specified.
 %
-%  PWD = CD(H, PATH) changes the working directory and returns the new one.
+%    PWD = CD(H, PATH) changes the working directory and returns the new one.
 %
-%  PWD = CD(H) returns the current working directory.
+%    PWD = CD(H) returns the current working directory.
 %
 %  Examples:
 %    % Get current directory:
@@ -23,11 +24,12 @@ function pwd = cd(h, path)
 %  See also:
 %    SFTP
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

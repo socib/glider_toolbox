@@ -4,7 +4,8 @@ function disp(h)
 %  Syntax:
 %    DISP(H)
 %
-%  DISP(H) displays an SFTP object as text.
+%  Description:
+%    DISP(H) displays an SFTP object as text.
 %
 %  Examples:
 %    disp(h)
@@ -12,8 +13,8 @@ function disp(h)
 %  See also:
 %    SFTP
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
 if length(h) ~= 1
     % FTP array; Should work for empty case as well.

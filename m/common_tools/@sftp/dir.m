@@ -6,18 +6,19 @@ function list = dir(h, path)
 %    DIR(H, PATH)
 %    LIST = DIR(H, ...)
 %
-%  DIR(H, PATH) lists the files in a path.
-%  If the path is a directory, the files in the directory are listed.
-%  If the path is a file, tha file itself is listed.
-%  Otherwise, the path is considered a glob which may contain wildcards 
-%  ('?' or '*'), and only files matching the glob are listed, if any.
+%  Description:
+%    DIR(H, PATH) lists the files in a path.
+%    If the path is a directory, the files in the directory are listed.
+%    If the path is a file, tha file itself is listed.
+%    Otherwise, the path is considered a glob which may contain wildcards 
+%    ('?' or '*'), and only files matching the glob are listed, if any.
 %
-%  LIST = DIR(H, ...) returns the files in an M-by-1 structure with the fields: 
-%    NAME:    file name
-%    BYTES:   number of bytes allocated to the file
-%    ISDIR:   whether file is a directory or not
-%    DATE:    modification time timestamp (string)
-%    DATENUM: modification time as a serial date number
+%    LIST = DIR(H, ...) returns the files in an M-by-1 structure with fields: 
+%      NAME:    file name
+%      BYTES:   number of bytes allocated to the file
+%      ISDIR:   whether file is a directory or not
+%      DATE:    modification time timestamp (string)
+%      DATENUM: modification time as a serial date number
 %
 %  Examples:
 %    % Print contents of current directory:
@@ -32,11 +33,12 @@ function list = dir(h, path)
 %  See also:
 %    SFTP
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2014-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

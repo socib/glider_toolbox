@@ -4,30 +4,31 @@ function ncl2_info = configDTOutputNetCDFL2()
 %  Syntax:
 %    NCL2_INFO = CONFIGDTOUTPUTNETCDFL2()
 %
-%  NCL2_INFO = CONFIGDTOUTPUTNETCDFL2() should return a struct describing the
-%  structure of the NetCDF file for gridded glider deployment data in delayed 
-%  time (see the note about the file generation for more details).
-%  The returned struct should have the following fields:
-%    DIMENSIONS: struct array with fields 'NAME' and 'LENGTH' defining the 
-%      dimensions for variables in the file.
-%      A variable may have dimensions not listed here or with their length left
-%      undefined (empty field value), and they are inferred from the data during
-%      the generation of the file. However, it is useful to preset the length of
-%      a dimension for record or string size dimensions.
-%    ATTRIBUTES: struct array with fields 'NAME' and 'VALUE' defining global
-%      attributes of the file.
-%      Global attributes might be overwritten by deployment fields with the same
-%      name.
-%    VARIABLES: struct defining variable metadata. Field names are variable
-%      names and field values are structs as needed by function SAVENC.
-%      It should have the following fields:
-%        DIMENSIONS: string cell array with the names of the dimensions of the
-%          variable.
-%        ATTRIBUTES: struct array with fields 'NAME' and 'VALUE' defining the
-%          attributes of the variable.
-%      More variables than the ones present in one specific deployment may be
-%      described here. Only metadata corresponding variables in the deployment
-%      data will be used.
+%  Description:
+%    NCL2_INFO = CONFIGDTOUTPUTNETCDFL2() should return a struct
+%    describing the structure of the NetCDF file for gridded glider
+%    deployment data in delayed time (see the note about the file generation).
+%    The returned struct should have the following fields:
+%      DIMENSIONS: struct array with fields 'NAME' and 'LENGTH' defining the 
+%        dimensions for variables in the file.
+%        A variable may have dimensions not listed here or with their length
+%        left undefined (empty field value), and they are inferred from the 
+%        data during the generation of the file. However, it is useful to preset
+%        the length of a dimension for record or string size dimensions.
+%      ATTRIBUTES: struct array with fields 'NAME' and 'VALUE' defining global
+%        attributes of the file.
+%        Global attributes might be overwritten by deployment fields
+%        with the same name.
+%      VARIABLES: struct defining variable metadata. Field names are variable
+%        names and field values are structs as needed by function SAVENC.
+%        It should have the following fields:
+%          DIMENSIONS: string cell array with the names of the dimensions
+%            of the variable.
+%          ATTRIBUTES: struct array with fields 'NAME' and 'VALUE' defining
+%            the attributes of the variable.
+%        More variables than the ones present in one specific deployment may be
+%        described here. Only metadata corresponding variables in the deployment
+%        data will be used.
 %
 %  Notes:
 %    The NetCDF file will be created by the function GENERATEOUTPUTNETCDF with
@@ -45,11 +46,12 @@ function ncl2_info = configDTOutputNetCDFL2()
 %    SAVENC
 %    GRIDGLIDERDATA
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
@@ -76,11 +78,10 @@ function ncl2_info = configDTOutputNetCDFL2()
   default_fill_value = realmax('double');
 
   var_attr_list.time = {
-    'long_name'     'navigation epoch time'
+    'long_name'     'profile grid time'
     'standard_name' 'time'
     'units'         'seconds since 1970-01-01 00:00:00 +00:00'
     'axis'          'T'
-    'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
     'grid_sources'     []
@@ -89,12 +90,11 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_max'         [] };
 
   var_attr_list.depth = {
-    'long_name'     'glider depth'
+    'long_name'     'profile grid depth'
     'standard_name' 'depth'
     'units'         'm'
     'positive'      'down'
     'axis'          'Z'
-    'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
     'conversion'       []
@@ -105,11 +105,11 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_max'         [] };
 
   var_attr_list.latitude = {
-    'long_name'     'latitude'
+    'long_name'     'profile grid latitude'
     'standard_name' 'latitude'
     'units'         'degree_north'
     'axis'          'Y'
-    'coordinates'   'time depth latitude longitude'
+    'coordinates'   'time'
     '_FillValue'    default_fill_value
     'sources'          []
     'conversion'       []
@@ -119,11 +119,11 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_method'      [] };
 
   var_attr_list.longitude = {
-    'long_name'     'longitude'
+    'long_name'     'profile grid longitude'
     'standard_name' 'longitude'
     'axis'          'X'
     'units'         'degree_east'
-    'coordinates'   'time depth latitude longitude'
+    'coordinates'   'time'
     '_FillValue'    default_fill_value
     'sources'          []
     'conversion'       []
@@ -175,7 +175,7 @@ function ncl2_info = configDTOutputNetCDFL2()
     'long_name'     'profile index'
     'standard_name' ''
     'units'         '1'
-    'coordinates'   'time depth latitude longitude'
+    'coordinates'   'time latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
     'method'           []

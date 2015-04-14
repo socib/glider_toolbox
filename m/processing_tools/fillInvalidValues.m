@@ -11,39 +11,40 @@ function [filled, invalid] = fillInvalidValues(varargin)
 %    FILLED = FILLINVALIDVALUES(Y)
 %    [FILLED, INVALID] = FILLINVALIDVALUES(...)
 %
-%  FILLED = FILLINVALIDVALUES(X0, Y0, X, Y, METHOD) fills invalid values (NaN) 
-%  in vector Y, using the method specified by string METHOD, which is one of:
-%    'none': do nothing, X0, Y0 and X are ignored and Y is returned.
-%    'previous': previous valid value found in X0 and Y0, if any.
-%    'next': next valid value found in X0 and Y0.
-%    'nearest', 'linear', 'spline', 'pchip' and 'cubic': interpolate values in
-%      X0 and Y0 over X using function INTERP1 with given method.
-%  FILLED is a a copy of vector Y but with invalid values filled.
+%  Description:
+%    FILLED = FILLINVALIDVALUES(X0, Y0, X, Y, METHOD) fills invalid values (NaN) 
+%    in vector Y, using the method specified by string METHOD, which is one of:
+%      'none': do nothing, X0, Y0 and X are ignored and Y is returned.
+%      'previous': previous valid value found in X0 and Y0, if any.
+%      'next': next valid value found in X0 and Y0.
+%      'nearest', 'linear', 'spline', 'pchip' and 'cubic': interpolate values 
+%        in X0 and Y0 over X using function INTERP1 with given method.
+%    FILLED is a copy of vector Y but with invalid values filled.
 %
-%  FILLED = FILLINVALIDVALUES(X, Y, METHOD) fills invalid values (NaN) in vector
-%  Y, using the method specified by string METHOD, which is one of:
-%    'none': do nothing, X is ignored and Y is returned.
-%    'previous': previous valid value found (if any), X is ignored.
-%    'next': next valid value found (if any), X is ignored.
-%    'nearest', 'linear', 'spline', 'pchip' and 'cubic': interpolate valid 
-%      values in Y over corresponding entries in independent variable vector X 
-%      using function INTERP1 with given method. X and Y should have the same 
-%      dimensions.
-%  FILLED is a copy of vector Y but with invalid values filled.
+%    FILLED = FILLINVALIDVALUES(X, Y, METHOD) fills invalid values (NaN) in 
+%    vector Y, using the method specified by string METHOD, which is one of:
+%      'none': do nothing, X is ignored and Y is returned.
+%      'previous': previous valid value found (if any), X is ignored.
+%      'next': next valid value found (if any), X is ignored.
+%      'nearest', 'linear', 'spline', 'pchip' and 'cubic': interpolate valid 
+%        values in Y over corresponding entries in independent variable 
+%        vector X  using function INTERP1 with given method.
+%        X and Y should have the same  dimensions.
+%    FILLED is a copy of vector Y but with invalid values filled.
 %
-%  FILLED = FILLINVALIDVALUES(X, Y, VALUE) fills invalid values in Y
-%  using number VALUE as fill value. X is ignored.
+%    FILLED = FILLINVALIDVALUES(X, Y, VALUE) fills invalid values in Y
+%    using number VALUE as fill value. X is ignored.
 %
-%  FILLED = FILLINVALIDVALUES(X, Y) fills invalid values in Y
-%  using 'linear' as default interpolation method.
+%    FILLED = FILLINVALIDVALUES(X, Y) fills invalid values in Y
+%    using 'linear' as default interpolation method.
 %
-%  FILLED = FILLINVALIDVALUES(Y, ...) assumes that X = 1:N, where N is the 
-%  length of Y. Please note that this is only relevant when used with
-%  interpolation methods: 'nearest', 'linear', 'spline', 'pchip' or 'cubic'.
+%    FILLED = FILLINVALIDVALUES(Y, ...) assumes that X = 1:N, where N is the 
+%    length of Y. Please note that this is only relevant when used with
+%    interpolation methods: 'nearest', 'linear', 'spline', 'pchip' or 'cubic'.
 %
-%  [FILLED, INVALID] = FILLINVALIDVALUES(...) also returns a logical vector
-%  INVALID with the same dimensions as Y, showing whether respective entries in
-%  Y are invalid values.
+%    [FILLED, INVALID] = FILLINVALIDVALUES(...) also returns a logical vector
+%    INVALID with the same dimensions as Y, showing whether respective entries
+%    in Y are invalid values.
 %
 %  Examples:
 %    x = [0 2 4 8 10 12 14 16 18 20]
@@ -70,11 +71,12 @@ function [filled, invalid] = fillInvalidValues(varargin)
 %    INTERP1
 %    ISNAN
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by

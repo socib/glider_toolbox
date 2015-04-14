@@ -7,41 +7,42 @@ function [var_data, var_meta, global_meta] = loadnc(url, var_names, field_names)
 %    VAR_DATA = LOADNC(URL, VAR_NAMES, FIELD_NAMES)
 %    [VAR_DATA, VAR_META, GLOBAL_META] = LOADNC(...)
 %
-%  VAR_DATA = LOADNC(URL) reads data from all variables in the NetCDF source 
-%  defined by string URL to struct VAR_DATA. For every variable there is a field
-%  with the variable name as field name and the variable data as value (see note
-%  on variable renaming. The URL might be the name of a local file or an 
-%  OPeNDAP url.
+%  Description:
+%    VAR_DATA = LOADNC(URL) reads data from all variables in the NetCDF source 
+%    defined by string URL to struct VAR_DATA. For every variable there is a 
+%    field with the variable name as field name and the variable data as value
+%    (see note on variable renaming). The URL might be the name of a local file
+%    or an OPeNDAP url.
 %
-%  VAR_DATA = LOADNC(URL, VAR_NAMES) retrieves only variables named in string 
-%  cell array VAR_NAMES.
+%    VAR_DATA = LOADNC(URL, VAR_NAMES) retrieves only variables named in string 
+%    cell array VAR_NAMES.
 %
-%  VAR_DATA = LOADNC(URL, VAR_NAMES, FIELD_NAMES) also retrieves variables named
-%  in string cell array VAR_NAMES but performs a renaming, storing them in 
-%  fields named by string cell array FIELD_NAMES, which must have the size of 
-%  VAR_NAMES.
+%    VAR_DATA = LOADNC(URL, VAR_NAMES, FIELD_NAMES) also retrieves variables 
+%    named in string cell array VAR_NAMES but performs a renaming, storing them
+%    in fields named by string cell array FIELD_NAMES, which must be the same 
+%    size as VAR_NAMES.
 %
-%  [VAR_DATA, VAR_META] = LOADNC(...) reads also variable metadata to struct 
-%  VAR_META. For every variable field in VAR_DATA there is a field in VAR_META 
-%  with the same name, containing the variable metadata in a struct with fields:
-%    NAME: string with the original variable name in the NetCDF source.
-%    DATATYPE: string with the original variable NetCDF data type.
-%    DIMENSIONS: cell array with the name of the dimensions of the variable.
-%    ATTRIBUTES: struct array with the attributes of the variable, with fields:
-%      NAME: string with the attribute name.
-%      VALUE: arbitrary typed value with the value of the attribute.
+%    [VAR_DATA, VAR_META] = LOADNC(...) reads also variable metadata to struct 
+%    VAR_META. For every variable field in VAR_DATA there is a field in VAR_META 
+%    with the same name, containing the metadata in a struct with fields:
+%      NAME: string with the original variable name in the NetCDF source.
+%      DATATYPE: string with the original variable NetCDF data type.
+%      DIMENSIONS: cell array with the name of the dimensions of the variable.
+%      ATTRIBUTES: struct array with the attributes of the variable with fields:
+%        NAME: string with the attribute name.
+%        VALUE: arbitrary typed value with the value of the attribute.
 %
-%  [VAR_DATA, VAR_META, GLOBAL_META] = LOADNC(...) reads also global attributes 
-%  and dimensions present in the NetCDF source to struct GLOBAL_META, which has 
-%  the following fields:
-%    NAME: string with the url of the NetCDF resource (same as URL).
-%    DIMENSIONS: struct array describing the dimensions with fields:
-%      NAME: string with the dimension name.
-%      LENGTH: number with the length of the dimension.
-%      UNLIMITED: 1 if this is a record dimension, 0 otherwise.
-%    ATTRIBUTES: struct array with global attributes with fields:
-%      NAME: string with the attribute name.
-%      VALUE: arbitrary typed value with the value of the attribute.
+%    [VAR_DATA, VAR_META, GLOBAL_META] = LOADNC(...) reads also global 
+%    attributes and dimensions present in the NetCDF source to struct 
+%    GLOBAL_META, which has the following fields:
+%      NAME: string with the url of the NetCDF resource (same as URL).
+%      DIMENSIONS: struct array describing the dimensions with fields:
+%        NAME: string with the dimension name.
+%        LENGTH: number with the length of the dimension.
+%        UNLIMITED: 1 if this is a record dimension, 0 otherwise.
+%      ATTRIBUTES: struct array with global attributes with fields:
+%        NAME: string with the attribute name.
+%        VALUE: arbitrary typed value with the value of the attribute.
 %
 %  Notes:
 %    Some variable names might not be valid field names. If field names are
@@ -73,11 +74,12 @@ function [var_data, var_meta, global_meta] = loadnc(url, var_names, field_names)
 %    SAVENC
 %    GENVARNAME
 %
-%  Author: Joan Pau Beltran
-%  Email: joanpau.beltran@socib.cat
+%  Authors:
+%    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2014
-%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  Copyright (C) 2013-2015
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
 %
 %  This program is free software: you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
