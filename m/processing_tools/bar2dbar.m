@@ -1,5 +1,5 @@
 function dbar = bar2dbar(bar)
-%BAR2DBAR  Convert pressure from bars to dbars.
+%BAR2DBAR  Convert pressure from bars to decibars.
 %
 %  Syntax:
 %    DBAR = BAR2DBAR(BAR)
@@ -36,7 +36,7 @@ function dbar = bar2dbar(bar)
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   error(nargchk(nargin, 1, 1, 'struct'));
-  
+
   dbar = bar * 10;
 
 end
