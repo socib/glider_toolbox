@@ -85,6 +85,14 @@ function preprocessing_options = configDataPreprocessingSeaglider()
   preprocessing_options.optics_list(1).cdom        = 'wl1_Cdomsig1';
   preprocessing_options.optics_list(1).scatter_650 = 'wl1_sig1';
   preprocessing_options.optics_list(1).calibration = 'calibrateWLECOBbFl2';
+  preprocessing_options.optics_list(2).chlorophyll = 'wlbbfl2vmt_Chlsig';
+  preprocessing_options.optics_list(2).cdom        = 'wlbbfl2vmt_Cdomsig';
+  preprocessing_options.optics_list(2).scatter_650 = 'wlbbfl2vmt_wl650sig';  
+  preprocessing_options.optics_list(2).calibration = 'calibrateWLECOBbFl2';
+  preprocessing_options.optics_list(3).chlorophyll = 'wlbbfl2vmt_Chlsig';
+  preprocessing_options.optics_list(3).cdom        = 'wlbbfl2vmt_Cdomsig';
+  preprocessing_options.optics_list(3).scatter_650 = 'wlbbfl2vmt_wl600sig';  
+  preprocessing_options.optics_list(3).calibration = 'calibrateWLECOBbFl2';
   
   preprocessing_options.extra_sensor_list = struct();
     

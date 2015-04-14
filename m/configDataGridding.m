@@ -55,6 +55,7 @@ function gridding_options = configDataGridding()
     'pressure'
     'chlorophyll'
     'turbidity'
+    'cdom'
     'oxygen_concentration'
     'oxygen_saturation'
     'conductivity_corrected_thermal'
