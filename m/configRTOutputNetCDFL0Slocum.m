@@ -582,7 +582,7 @@ function ncl0_info = configRTOutputNetCDFL0Slocum()
 
   %% Return global and variable metadata in the correct format.
   ncl0_info = struct();
-  % Set the dimension names.
+  % Set the dimensions.
   ncl0_info.dimensions = time_dimension;
   % Set the global attributes.
   ncl0_info.attributes = cell2struct(global_atts, {'name' 'value'}, 2);
