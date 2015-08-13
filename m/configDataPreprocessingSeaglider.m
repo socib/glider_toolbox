@@ -95,6 +95,6 @@ function preprocessing_options = configDataPreprocessingSeaglider()
   preprocessing_options.optics_list(3).calibration = 'calibrateWLECOBbFl2';
   
   preprocessing_options.extra_sensor_list = struct();
-    
+
 end
 

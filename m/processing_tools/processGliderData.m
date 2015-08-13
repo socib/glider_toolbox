@@ -579,7 +579,7 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
   end
   
   
-  %% Identify transect bounadaries, if waypoint coordinates available.
+  %% Identify transect boundaries, if waypoint coordinates available.
   if all(isfield(data_proc, {'waypoint_latitude' 'waypoint_longitude'}))
     fprintf('Computing transect index by transect boundary identification...\n');
     data_proc.transect_index = ...

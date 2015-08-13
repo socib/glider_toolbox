@@ -4,7 +4,7 @@ function [profile_index, profile_direction] = findProfiles(varargin)
 %  Syntax:
 %    [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(STAMP, DEPTH)
 %    [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(STAMP, DEPTH, OPTIONS)
-%    [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(STAMP, DEPTH, OPT1, VAL1)
+%    [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(STAMP, DEPTH, OPT1, VAL1, ...)
 %    [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(DEPTH, ...)
 %
 %  Description:
@@ -17,34 +17,34 @@ function [profile_index, profile_direction] = findProfiles(varargin)
 %    and if STAMP is not specified, it is assumed to be the sample index [1:N].
 %    PROFILE_DIRECTION entries may be 1 (down), 0 (flat), -1 (up).
 %    PROFILE_INDEX entries associate each sample with the number of the profile
-%    it belongs to. Samples in the middle of a profile are flagged with a whole 
+%    it belongs to. Samples in the middle of a profile are flagged with a whole
 %    number, starting at 1 and increased by 1 every time a new cast is detected,
 %    while samples between profiles are flagged with an offset of 0.5.
 %    See note on identification algorithm below.
 %
 %    [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(..., OPTIONS) and
 %    [PROFILE_INDEX, PROFILE_DIRECTION] = FINDPROFILES(..., OPT1, VAL1) accept
-%    the following options given in key-value pairs OPT1, VAL1... or in a struct 
+%    the following options given in key-value pairs OPT1, VAL1... or in a struct
 %    OPTIONS with field names as option keys and field values as option values:
 %      STALL: maximum range of a stalled segment (in the same units as DEPTH).
-%        Only strictly monotonic intervals of depth spanning a depth range
-%        not less than the given value are considered valid profile segments.
+%        Only intervals of constant vertical direction spanning a depth range
+%        not less than the given value are considered valid cast segments.
 %        Shorter intervals are considered stalled segments inside or between
-%        profiles.
+%        casts.
 %        Default value: 0 (all segments are valid cast segments)
 %      SHAKE: maximum duration of a shake segment (in the same units as STAMP).
-%        Only strictly monotonic intervals of depth with duration
-%        not less than the given value are considered valid profile segments.
-%        Shorter intervals are considered shake segments inside or between
-%        profiles.
+%        Only intervals of constant vertical direction with duration
+%        not less than the given value are considered valid cast segments.
+%        Briefer intervals are considered shake segments inside or between
+%        casts.
 %        Default value: 0 (all segments are valid cast segments)
 %      INVERSION: maximum depth inversion between cast segments of a profile.
-%        Consecutive valid cast segments with the same direction are joined 
-%        together in the same profile if the range of the introduced depth 
+%        Consecutive valid cast segments with the same direction are joined
+%        together in the same profile if the range of the introduced depth
 %        inversion, if any, is less than the given value.
 %        Default value: 0 (never join cast segments)
 %      INTERRUPT: maximum time separation between cast segments of a profile.
-%        Consecutive valid cast segments with the same direction are joined 
+%        Consecutive valid cast segments with the same direction are joined
 %        together in the same profile if the duration of the lapse (sequence of
 %        stalled segments or shakes between them) is less than the given value.
 %        When STAMP is not specified, the duration will be the number of samples
@@ -71,16 +71,15 @@ function [profile_index, profile_direction] = findProfiles(varargin)
 %           INVERSION = 0 and INTERRUPT = 0.
 %
 %  Notes:
-%    Direction is inferred from the sign of forward differences of vector DEPTH.
-%
 %    Profiles are identified as sequences of cast segments with the same
-%    vertical direction allowing for stalled or shake segmens in between.
-%    Vertical segments are intervals of strictly monotonic depth,
-%    and are delimited identifying changes of direction (depth extrema).
+%    vertical direction, allowing for stalled or shake segments in between.
+%    Vertical segments are intervals of constant vertical direction,
+%    and are delimited by the changes of vertical direction computed
+%    as the sign of forward differences of the depth sequence.
 %    A segment is considered stalled if it is to short in depth,
 %    or a shake if it is to short in time. Otherwise it is a cast segment.
 %    Consecutive cast segments with the same direction are joined together
-%    if the lapse between the segments and the introduced depth inversion
+%    if the introduced depth inversion and the lapse between the segments
 %    are not significant according to the specified thresholds.
 %
 %    Invalid samples (NaN) in input are ignored. In output, they are marked as 
@@ -91,13 +90,12 @@ function [profile_index, profile_direction] = findProfiles(varargin)
 %    depth = [4 4 3 2 3 4 4 5 6 6 6 5 4 4 5 3 2 3 1 1 0 4 4]
 %    [profile_index, profile_direction] = findProfiles(depth)
 %    figure
-%    subplot(3, 1, 1)
+%    subplot(3, 1, 1, 'XGrid','on','YGrid','on', 'NextPlot', 'add')
 %    stairs(profile_direction, '-g')
-%    subplot(3, 1, 2)
+%    subplot(3, 1, 2, 'XGrid','on','YGrid','on', 'NextPlot', 'add')
 %    plot(depth, '-db')
-%    subplot(3, 1, 3)
+%    subplot(3, 1, 3, 'XGrid','on','YGrid','on', 'NextPlot', 'add')
 %    stairs(profile_index, '-r')
-%    hold on
 %    [profile_index, profile_direction] = findProfiles(depth, 'stall', 1.5)
 %    stairs(profile_index, '-c')
 %    [profile_index, profile_direction] = ...
@@ -134,7 +132,7 @@ function [profile_index, profile_direction] = findProfiles(varargin)
   options.interrupt = 0;
   options.stall = 0;
   options.shake = 0;
-    
+  
   options.range = []; % Deprecated since v1.1.0.
   options.join = [];  % Deprecated since v1.1.0.
   
@@ -198,44 +196,47 @@ function [profile_index, profile_direction] = findProfiles(varargin)
   
   
   %% Identify the profiles.
-  profile_index = nan(size(depth));
+  valid_index = find(~(isnan(depth(:)) | isnan(stamp(:))));
+  sdy = sign(diff(depth(valid_index)));
+  depth_peak = true(size(valid_index));
+  depth_peak(2:end-1) = diff(sdy) ~= 0;
+  depth_peak_index = valid_index(depth_peak);
+  sgmt_frst = stamp(depth_peak_index(1:end-1));
+  sgmt_last = stamp(depth_peak_index(2:end));
+  sgmt_strt = depth(depth_peak_index(1:end-1));
+  sgmt_fnsh = depth(depth_peak_index(2:end));
+  sgmt_sinc = sgmt_last - sgmt_frst;
+  sgmt_vinc = sgmt_fnsh - sgmt_strt;
+  sgmt_vdir = sign(sgmt_vinc);
+  cast_sgmt_valid = ...
+    ~(abs(sgmt_vinc(:)) <= options.stall | sgmt_sinc(:) <= options.shake);
+  cast_sgmt_index = find(cast_sgmt_valid);
+  cast_sgmt_lapse = ...
+    (sgmt_frst(cast_sgmt_index(2:end)) - sgmt_last(cast_sgmt_index(1:end-1)));
+  cast_sgmt_space = -sgmt_vdir(cast_sgmt_index(1:end-1)) .* ...
+    (sgmt_strt(cast_sgmt_index(2:end)) - sgmt_fnsh(cast_sgmt_index(1:end-1)));
+  cast_sgmt_dirch = diff(sgmt_vdir(cast_sgmt_index));
+  cast_sgmt_bound = ~(cast_sgmt_dirch(:) == 0 & ...
+                      cast_sgmt_lapse(:) <= options.interrupt & ...
+                      cast_sgmt_space(:) <= options.inversion);
+  cast_sgmt_head_valid = true(size(cast_sgmt_index));
+  cast_sgmt_tail_valid = true(size(cast_sgmt_index));
+  cast_sgmt_head_valid(2:end) = cast_sgmt_bound;
+  cast_sgmt_tail_valid(1:end-1) = cast_sgmt_bound;
+  cast_head_index = depth_peak_index(cast_sgmt_index(cast_sgmt_head_valid));
+  cast_tail_index = depth_peak_index(cast_sgmt_index(cast_sgmt_tail_valid) + 1);
+  cast_length = abs(depth(cast_tail_index) - depth(cast_head_index));
+  cast_period = stamp(cast_tail_index) - stamp(cast_head_index);
+  cast_valid = ...
+    ~(cast_length(:) <= options.length | cast_period(:) <= options.period);
+  cast_head = zeros(size(depth));
+  cast_tail = zeros(size(depth));
+  cast_head(cast_head_index(cast_valid) + 1) = 0.5;
+  cast_tail(cast_tail_index(cast_valid)) = 0.5;
+  profile_index = 0.5 + cumsum(cast_head + cast_tail);
   profile_direction = nan(size(depth));
-  valid_ind = find(~(isnan(depth(:)) | isnan(stamp(:))));
-  if numel(valid_ind) >= 2
-    sdy = sign(diff(depth(valid_ind)));
-    depth_peak_ind = valid_ind(diff([0; sdy(:); 0]) ~= 0);
-    sgmt_frst = stamp(depth_peak_ind(1:end-1));
-    sgmt_last = stamp(depth_peak_ind(2:end));
-    sgmt_strt = depth(depth_peak_ind(1:end-1));
-    sgmt_fnsh = depth(depth_peak_ind(2:end));
-    sgmt_sinc = sgmt_last - sgmt_frst;
-    sgmt_vinc = sgmt_fnsh - sgmt_strt;
-    sgmt_vdir = sign(sgmt_vinc);
-    sgmt_valid = ...
-      ~(abs(sgmt_vinc(:)) < options.stall | sgmt_sinc(:) < options.shake);
-    sgmt_index = find(sgmt_valid);
-    sgmt_lapse = ...
-      (sgmt_frst(sgmt_index(2:end)) - sgmt_last(sgmt_index(1:end-1)));
-    sgmt_space = -sgmt_vdir(sgmt_index(1:end-1)) .* ...
-      (sgmt_strt(sgmt_index(2:end)) - sgmt_fnsh(sgmt_index(1:end-1)));
-    cast_oppos = diff(sgmt_vdir(sgmt_index)) ~= 0;
-    cast_break = ...
-      ~(sgmt_lapse(:) < options.interrupt & sgmt_space(:) < options.inversion);
-    cast_bound = cast_oppos(:) | cast_break(:);
-    cast_head_ind = depth_peak_ind(sgmt_index([true; cast_bound]));
-    cast_tail_ind = depth_peak_ind(sgmt_index([cast_bound; true]) + 1);
-    cast_length = abs(depth(cast_tail_ind) - depth(cast_head_ind));
-    cast_period = stamp(cast_tail_ind) - stamp(cast_head_ind);
-    cast_good = ~(cast_length < options.length | cast_period < options.period);
-    cast_head = zeros(size(depth));
-    cast_tail = zeros(size(depth));
-    cast_head(cast_head_ind(cast_good) + 1) = 0.5;
-    cast_tail(cast_tail_ind(cast_good)) = 0.5;
-    profile_index = 0.5 + cumsum(cast_head + cast_tail);
-    for i = 1:numel(valid_ind)-1
-      profile_direction(valid_ind(i):valid_ind(i+1)-1) = sdy(i);
-    end
-    profile_direction(valid_ind(end):end) = sdy(end);
+  for i = 1:numel(valid_index)-1
+    profile_direction(valid_index(i):valid_index(i+1)-1) = sdy(i);
   end
 
 end

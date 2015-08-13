@@ -979,8 +979,8 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
     extra_sensor_choice_list = options.extra_sensor_list.(extra_sensor_name);
     extra_sensor_variables = setdiff(fieldnames(extra_sensor_choice_list), ...
                                      {'calibration' 'conversion'});
-    for extra_sensor_choice_idx = 1:numel(extra_sensor_option_list)
-      extra_sensor_choice = extra_sensor_choice_list{extra_sensor_choice_idx};
+    for extra_sensor_choice_idx = 1:numel(extra_sensor_choice_list)
+      extra_sensor_choice = extra_sensor_choice_list(extra_sensor_choice_idx);
       extra_sensor_fields = ...
         cellfun(@(v)(extra_sensor_choice.(v)), extra_sensor_variables, ...
                 'UniformOutput', false);

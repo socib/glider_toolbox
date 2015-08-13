@@ -79,35 +79,35 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
   default_fill_value = realmax('double');
 
   % Navigation time.
-  var_attr_list.m_present_time = { 
+  var_attr_list.m_present_time = {
     'long_name'     'epoch time (navigation board)'
     'standard_name' 'time'
-    'units'         'seconds since 1970-01-01 00:00:00 +00:00'  
+    'units'         'seconds since 1970-01-01 00:00:00 +00:00'
     '_FillValue'    default_fill_value };
 
   % Navigation data.
   var_attr_list.m_lat = {
     'long_name'     'latitude (dead reckoned)'
     'standard_name' 'latitude'
-    'units'         'nmea_degree'  
+    'units'         'nmea_degree'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_lon = {
     'long_name'     'longitude (dead reckoned)'
     'standard_name' 'longitude'
-    'units'         'nmea_degree'  
+    'units'         'nmea_degree'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_lat = {
     'long_name'     'latitude (GPS fix)'
     'standard_name' 'latitude'
-    'units'         'nmea_degree'  
+    'units'         'nmea_degree'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_lon = {
     'long_name'     'longitude (GPS fix)'
     'standard_name' 'longitude'
-    'units'         'nmea_degree'  
+    'units'         'nmea_degree'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_status = {
@@ -119,13 +119,13 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
   var_attr_list.c_wpt_lat = {
     'long_name'     'next waypoint latitude'
     'standard_name' 'latitude'
-    'units'         'nmea_degree'  
+    'units'         'nmea_degree'
     '_FillValue'    default_fill_value };
 
   var_attr_list.c_wpt_lon = {
     'long_name'     'next waypoint longitude'
     'standard_name' 'longitude'
-    'units'         'nmea_degree'  
+    'units'         'nmea_degree'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_depth = {
@@ -135,178 +135,193 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
     'positive'      'down'
     '_FillValue'    default_fill_value };
 
+  var_attr_list.m_pressure = {
+    'long_name'     'glider measured pressure'
+    'standard_name' 'pressure'
+    'units'         'bar'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.m_roll = {
     'long_name'     'glider roll'
     'units'         'rad'
-    'comments'      'greater than 0 is port wing up'  
+    'comments'      'greater than 0 is port wing up'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_pitch = {
     'long_name'     'glider pitch'
-    'units'         'rad'  
+    'units'         'rad'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_heading = {
     'long_name'     'glider heading'
-    'units'         'rad'  
+    'units'         'rad'
     '_FillValue'    default_fill_value };
 
   var_attr_list.c_heading = {
     'long_name'     'glider commanded heading'
-    'units'         'rad'  
+    'units'         'rad'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_speed = {
     'long_name'     'glider speed through water'
-    'units'         'm s-1'  
+    'units'         'm s-1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_fin = {
     'long_name'     'glider rudder'
-    'units'         'rad'  
+    'units'         'rad'
     '_FillValue'    default_fill_value };
 
   var_attr_list.x_inflecting = {
     'long_name'     'glider inflecting marker'
-    'units'         '1'  
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_num_half_yos_in_segment = {
     'long_name'     'glider half yos number in segment'
-    'units'         '1'  
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_tot_num_inflections = {
     'long_name'     'total number of inflections'
-    'units'         '1'  
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_battery = {
     'long_name'     'battery voltage'
-    'units'         'V'  
+    'units'         'V'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_vacuum = {
     'long_name'     'vacuum'
-    'units'         'inHg'  
+    'units'         'inHg'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_leakdetect_voltage = {
     'long_name'     'leak detector'
     'units'         'V'
-    'comments'      '2.5V means no leak; voltage drops if leak detected'  
+    'comments'      '2.5V means no leak; voltage drops if leak detected'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_iridium_call_num = {
     'long_name'     'number of iridium calls'
-    'units'         '1'  
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_iridium_connected = {
     'long_name'     'iridium connected'
-    'units'         '1'  
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_iridium_dialed_num = {
     'long_name'     'number of iridium dials'
-    'units'         '1'  
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.x_dr_state = {
     'long_name'     'dead reckoning state'
     'units'         '1'
-    'comments'      '0 = mission_start, 1 = underwater, 2 = awaiting_fix, 3 = awaiting_postfix, 4 = awaiting_dive'  
+    'comments'      '0 = mission_start, 1 = underwater, 2 = awaiting_fix, 3 = awaiting_postfix, 4 = awaiting_dive'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_dr_fix_time = {
-    'long_name'     'dead reckoning fix time'
-    'standard_name' 'time'
-    'units'         'seconds since 1970-01-01 00:00:00 +00:00'  
+    'long_name'     'surface-to-fix elapsed time'
+    'standard_name' ''
+    'units'         'seconds'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_dr_postfix_time = {
-    'long_name'     'dead reckoning postfix time'
-    'standard_name' 'time'
-    'units'         'seconds since 1970-01-01 00:00:00 +00:00'  
+    'long_name'     'fix-to-postfix elapsed time'
+    'standard_name' ''
+    'units'         'seconds'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_fix_x_lmc = {
     'long_name'     'x gps fix in local mission coordinates'
-    'units'         'm'  
+    'units'         'm'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_fix_y_lmc = {
     'long_name'     'y gps fix in local mission coordinates'
-    'units'         'm'  
+    'units'         'm'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_postfix_x_lmc = {
     'long_name'     'x gps postfix in local mission coordinates'
-    'units'         'm'  
+    'units'         'm'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_postfix_y_lmc = {
     'long_name'     'y gps postfix in local mission coordinates'
-    'units'         'm'  
+    'units'         'm'
     '_FillValue'    default_fill_value };
 
-  % Navigation water information.
+  var_attr_list.m_dr_x_postfix_drift = {
+    'long_name'     'fix-to-postfix x drift in local mission coordinates'
+    'units'         'm'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_dr_y_postfix_drift = {
+    'long_name'     'fix-to-postfix y drift in local mission coordinates'
+    'units'         'm'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.m_water_vx = {
     'long_name'     'eastward water current'
     'standard_name' 'eastward_sea_water_velocity'
-    'units'         'm s-1'  
+    'units'         'm s-1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_water_vy = {
     'long_name'     'northward water current'
     'standard_name' 'northward_sea_water_velocity'
-    'units'         'm s-1'  
+    'units'         'm s-1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_initial_water_vx = {
     'long_name'     'initial eastward water current'
     'standard_name' 'eastward_sea_water_velocity'
-    'units'         'm s-1'  
+    'units'         'm s-1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_initial_water_vy = {
     'long_name'     'initial northward water current'
     'standard_name' 'northward_sea_water_velocity'
-    'units'         'm s-1'  
+    'units'         'm s-1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_final_water_vx = {
     'long_name'     'final eastward water current'
     'standard_name' 'eastward_sea_water_velocity'
-    'units'         'm s-1'  
+    'units'         'm s-1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_final_water_vy = {
     'long_name'     'final northward water current'
     'standard_name' 'northward_sea_water_velocity'
-    'units'         'm s-1'  
+    'units'         'm s-1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_water_delta_vx = {
     'long_name'     'delta eastward water current'
-    'units'         'm s-1'  
+    'units'         'm s-1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_water_delta_vy = {
     'long_name'     'delta northward water current'
-    'units'         'm s-1'  
+    'units'         'm s-1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.x_prior_seg_water_vx = {
     'long_name'     'prior segment eastward water current'
     'standard_name' 'eastward_sea_water_velocity'
-    'units'         'm s-1'  
+    'units'         'm s-1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.x_prior_seg_water_vy = {
     'long_name'     'prior segment northward water current'
     'standard_name' 'northward_sea_water_velocity'
-    'units'         'm s-1'  
+    'units'         'm s-1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_water_depth = {
@@ -320,44 +335,19 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
   var_attr_list.m_water_temp = {
     'long_name'     'water temperature'
     'standard_name' 'sea_water_temperature'
-    'units'         'Celsius'  
+    'units'         'Celsius'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_water_cond = {
     'long_name'     'water conductivity'
     'standard_name' 'sea_water_conductivity'
-    'units'         'S m-1'  
+    'units'         'S m-1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_water_pressure = {
     'long_name'     'water pressure'
     'standard_name' 'pressure'
     'units'         'bar'
-    '_FillValue'    default_fill_value };
-
-  % Navigation FLNTU.
-  var_attr_list.u_flntu_chlor_do = {
-    'long_name'     'chlorophyll dark water offset'
-    'standard_name' 'chlorophyll'
-    'units'         '1'  
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.u_flntu_turb_do = {
-    'long_name'     'turbidity dark water offset'
-    'standard_name' 'turbidity_dark_water_offset'
-    'units'         '1'  
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.u_flntu_chlor_sf = {
-    'long_name'     'chlorophyll scale factor'
-    'standard_name' 'chlorophyll_scale_factor'
-    'units'         'mg m-3'  
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.u_flntu_turb_sf = {
-    'long_name'     'turbidity scale factor'
-    'standard_name' 'turbidity_scale_factor'
-    'units'         'NTU'  
     '_FillValue'    default_fill_value };
 
   % Science time.
@@ -371,13 +361,13 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
   var_attr_list.sci_water_temp = {
     'long_name'     'water temperature'
     'standard_name' 'sea_water_temperature'
-    'units'         'Celsius'  
+    'units'         'Celsius'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_water_cond = {
     'long_name'     'water conductivity'
     'standard_name' 'sea_water_conductivity'
-    'units'         'S m-1'  
+    'units'         'S m-1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_water_pressure = {
@@ -395,52 +385,52 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
   % BB3SLO sensor.
   var_attr_list.sci_bb3slo_b470_scaled = {
     'long_name'     'blue backscatter'
-    'units'         '1'  
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_bb3slo_b532_scaled = {
     'long_name'     'green backscatter'
-    'units'         '1'  
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_bb3slo_b660_scaled = {
     'long_name'     'red backscatter'
-    'units'         '1'  
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   % BBFL2S sensor.
   var_attr_list.sci_bbfl2s_bb_scaled = {
     'long_name'     'backscatter'
-    'units'         '1'  
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_bbfl2s_cdom_scaled = {
     'long_name'     'cdom'
-    'units'         '1'  
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_bbfl2s_chlor_scaled = {
     'long_name'     'chlorophyll'
-    'units'         'mg Kg-3'  
+    'units'         'mg Kg-3'
     '_FillValue'    default_fill_value };
 
   % OCR504I sensor.
   var_attr_list.sci_ocr504I_irrad1 = {
     'long_name'     'irradiance at 412nm wavelength'
     'standard_name' 'downwelling_spectral_spherical_irradiance_in_sea_water'
-    'units'         'uW cm-2 nm-1'  
+    'units'         'uW cm-2 nm-1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_ocr504I_irrad2 = {
     'long_name'     'irradiance at 442nm wavelength'
     'standard_name' 'downwelling_spectral_spherical_irradiance_in_sea_water'
-    'units'         'uW cm-2 nm-1'  
+    'units'         'uW cm-2 nm-1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_ocr504I_irrad3 = {
     'long_name'     'irradiance at 491nm wavelength'
     'standard_name' 'downwelling_spectral_spherical_irradiance_in_sea_water'
-    'units'         'uW cm-2 nm-1'  
+    'units'         'uW cm-2 nm-1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_ocr504I_irrad4 = {
@@ -452,67 +442,91 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
   % FLNTU sensor.
   var_attr_list.sci_flntu_chlor_ref = {
     'long_name'     'chlorophyll reference'
-    'units'         '1'  
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_flntu_chlor_sig = {
     'long_name'     'chlorophyll signal'
-    'units'         '1'  
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_flntu_chlor_units = {
     'long_name'     'chlorophyll'
     'standard_name' 'concentration_of_chlorophyll_in_sea_water'
-    'units'         'mg m-3'  
+    'units'         'mg m-3'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_flntu_temp = {
     'long_name'     'temperature'
     'standard_name' 'sea_water_temperature'
-    'units'         'Celsius'  
+    'units'         'Celsius'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_flntu_turb_ref = {
     'long_name'     'turbidity reference'
-    'units'         '1'  
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_flntu_turb_sig = {
     'long_name'     'turbidity signal'
-    'units'         '1'  
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_flntu_turb_units = {
     'long_name'     'turbidity'
     'standard_name' 'turbidity'
-    'units'         'NTU' 
+    'units'         'NTU'
     '_FillValue'    default_fill_value };
-  
+
   var_attr_list.sci_flntu_timestamp = {
     'long_name'     'epoch time (FLNTU sensor)'
     'standard_name' 'time'
     'units'         'seconds since 1970-01-01 00:00:00 +00:00'
     '_FillValue'    default_fill_value };
 
+  var_attr_list.u_flntu_chlor_do = {
+    'long_name'     'chlorophyll dark water offset'
+    'standard_name' 'chlorophyll'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_flntu_turb_do = {
+    'long_name'     'turbidity dark water offset'
+    'standard_name' 'turbidity_dark_water_offset'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_flntu_chlor_sf = {
+    'long_name'     'chlorophyll scale factor'
+    'standard_name' 'chlorophyll_scale_factor'
+    'units'         'mg m-3'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_flntu_turb_sf = {
+    'long_name'     'turbidity scale factor'
+    'standard_name' 'turbidity_scale_factor'
+    'units'         'NTU'
+    '_FillValue'    default_fill_value };
+
   % OXY3835 sensor.
   var_attr_list.sci_oxy3835_oxygen = {
     'long_name'     'oxygen concentration'
     'standard_name' 'mole_concentration_of_dissolved_molecular_oxygen_in_sea_water'
-    'units'         'umol l-1'  
+    'units'         'umol l-1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_oxy3835_saturation = {
     'long_name'     'oxygen saturation'
     'standard_name' 'fractional_saturation_of_oxygen_in_sea_water'
-    'units'         '1'  
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_oxy3835_temp = {
     'long_name'     'temperature'
     'standard_name' 'temperature_of_sensor_for_oxygen_in_sea_water'
-    'units'         'Celsius'  
+    'units'         'Celsius'
     '_FillValue'    default_fill_value };
-  
+
   var_attr_list.sci_oxy3835_timestamp = {
     'long_name'     'epoch time (OXY3835 sensor)'
     'standard_name' 'time'
@@ -553,8 +567,8 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
     'institution'                  '' % institution_name
     'institution_references'       '' % institution_references
     'instrument'                   '' % instrument_name
-    'instrument_model'             '' % instrument_model
     'instrument_manufacturer'      '' % instrument_manufacturer
+    'instrument_model'             '' % instrument_model
     'license'                      'Approved for public release. Distribution Unlimited.' % deployment_distribution_statement
     'netcdf_version'               '4.0.1'
     'positioning_system'           'GPS and dead reckoning'
@@ -582,7 +596,7 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
 
   %% Return global and variable metadata in the correct format.
   ncl0_info = struct();
-  % Set the dimension names.
+  % Set the dimensions.
   ncl0_info.dimensions = time_dimension;
   % Set the global attributes.
   ncl0_info.attributes = cell2struct(global_atts, {'name' 'value'}, 2);
