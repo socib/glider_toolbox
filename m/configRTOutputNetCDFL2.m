@@ -664,7 +664,7 @@ function ncl2_info = configRTOutputNetCDFL2()
     'processing_level'             'L2 interpolated data at selected locations and instants'
     'project'                      '' % deployment_project
     'publisher'                    '' % deployment_publisher_name
-    'publisher_email               '' % deployment_publisher_email
+    'publisher_email'              '' % deployment_publisher_email
     'publisher_url'                '' % deployment_publisher_url
     'source'                       'glider'
     'source_files'                 'undefined' % source_files field set by processing script after loading data.

@@ -43,7 +43,7 @@ function ncl0_info = configRTOutputNetCDFL0Slocum()
 %    ncl0_info = configRTOutputNetCDFL0Slocum()
 %
 %  See also:
-%    GENERATENETCDF
+%    GENERATEOUTPUTNETCDF
 %    SAVENC
 %    LOADSLOCUMDATA
 %
@@ -135,6 +135,12 @@ function ncl0_info = configRTOutputNetCDFL0Slocum()
     'positive'      'down'
     '_FillValue'    default_fill_value };
 
+  var_attr_list.m_pressure = {
+    'long_name'     'glider measured pressure'
+    'standard_name' 'pressure'
+    'units'         'bar'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.m_roll = {
     'long_name'     'glider roll'
     'units'         'rad'
@@ -219,15 +225,15 @@ function ncl0_info = configRTOutputNetCDFL0Slocum()
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_dr_fix_time = {
-    'long_name'     'dead reckoning fix time'
-    'standard_name' 'time'
-    'units'         'seconds since 1970-01-01 00:00:00 +00:00'  
+    'long_name'     'surface-to-fix elapsed time'
+    'standard_name' ''
+    'units'         'seconds'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_dr_postfix_time = {
-    'long_name'     'dead reckoning postfix time'
-    'standard_name' 'time'
-    'units'         'seconds since 1970-01-01 00:00:00 +00:00'  
+    'long_name'     'fix-to-postfix elapsed time'
+    'standard_name' ''
+    'units'         'seconds'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_fix_x_lmc = {
@@ -250,7 +256,16 @@ function ncl0_info = configRTOutputNetCDFL0Slocum()
     'units'         'm'  
     '_FillValue'    default_fill_value };
 
-  % Navigation water information.
+  var_attr_list.m_dr_x_postfix_drift = {
+    'long_name'     'fix-to-postfix x drift in local mission coordinates'
+    'units'         'm'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_dr_y_postfix_drift = {
+    'long_name'     'fix-to-postfix y drift in local mission coordinates'
+    'units'         'm'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.m_water_vx = {
     'long_name'     'eastward water current'
     'standard_name' 'eastward_sea_water_velocity'
@@ -333,31 +348,6 @@ function ncl0_info = configRTOutputNetCDFL0Slocum()
     'long_name'     'water pressure'
     'standard_name' 'pressure'
     'units'         'bar'
-    '_FillValue'    default_fill_value };
-
-  % Navigation FLNTU.
-  var_attr_list.u_flntu_chlor_do = {
-    'long_name'     'chlorophyll dark water offset'
-    'standard_name' 'chlorophyll'
-    'units'         '1'  
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.u_flntu_turb_do = {
-    'long_name'     'turbidity dark water offset'
-    'standard_name' 'turbidity_dark_water_offset'
-    'units'         '1'  
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.u_flntu_chlor_sf = {
-    'long_name'     'chlorophyll scale factor'
-    'standard_name' 'chlorophyll_scale_factor'
-    'units'         'mg m-3'  
-    '_FillValue'    default_fill_value };
-
-  var_attr_list.u_flntu_turb_sf = {
-    'long_name'     'turbidity scale factor'
-    'standard_name' 'turbidity_scale_factor'
-    'units'         'NTU'  
     '_FillValue'    default_fill_value };
 
   % Science time.
@@ -494,6 +484,30 @@ function ncl0_info = configRTOutputNetCDFL0Slocum()
     'units'         'seconds since 1970-01-01 00:00:00 +00:00'
     '_FillValue'    default_fill_value };
 
+  var_attr_list.u_flntu_chlor_do = {
+    'long_name'     'chlorophyll dark water offset'
+    'standard_name' 'chlorophyll'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_flntu_turb_do = {
+    'long_name'     'turbidity dark water offset'
+    'standard_name' 'turbidity_dark_water_offset'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_flntu_chlor_sf = {
+    'long_name'     'chlorophyll scale factor'
+    'standard_name' 'chlorophyll_scale_factor'
+    'units'         'mg m-3'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_flntu_turb_sf = {
+    'long_name'     'turbidity scale factor'
+    'standard_name' 'turbidity_scale_factor'
+    'units'         'NTU'
+    '_FillValue'    default_fill_value };
+
   % OXY3835 sensor.
   var_attr_list.sci_oxy3835_oxygen = {
     'long_name'     'oxygen concentration'
@@ -553,8 +567,8 @@ function ncl0_info = configRTOutputNetCDFL0Slocum()
     'institution'                  '' % institution_name
     'institution_references'       '' % institution_references
     'instrument'                   '' % instrument_name
-    'instrument_model'             '' % instrument_model
     'instrument_manufacturer'      '' % instrument_manufacturer
+    'instrument_model'             '' % instrument_model
     'license'                      'Approved for public release. Distribution Unlimited.' % deployment_distribution_statement
     'netcdf_version'               '4.0.1'
     'positioning_system'           'GPS and dead reckoning'

@@ -79,7 +79,7 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
   default_fill_value = realmax('double');
 
   % Navigation time.
-  var_attr_list.m_present_time = { 
+  var_attr_list.m_present_time = {
     'long_name'     'epoch time (navigation board)'
     'standard_name' 'time'
     'units'         'seconds since 1970-01-01 00:00:00 +00:00'
@@ -475,7 +475,7 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
   var_attr_list.sci_flntu_turb_units = {
     'long_name'     'turbidity'
     'standard_name' 'turbidity'
-    'units'         'NTU' 
+    'units'         'NTU'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_flntu_timestamp = {
