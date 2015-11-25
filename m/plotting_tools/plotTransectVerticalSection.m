@@ -264,7 +264,7 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
   end
   axis(haxs, 'tight');
   set(haxs, options.axsprops);
-  % set the y lim to the max of all data (including nan indizes in cdata)
+  % set the y lim to the max of all data (including nan indizes in ydata)
   set(haxs, 'Ylim', [minY, maxY]);
   set(haxstit, options.title);
   set(haxsxlb, options.xlabel);
