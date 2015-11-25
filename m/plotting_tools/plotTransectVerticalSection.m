@@ -13,7 +13,8 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
 %    PLOTTRANSECTVERTICALSECTION(OPT1, VAL1, ...) generate a new figure with a
 %    scatter plot of scalar data collected during a glider transect according to
 %    options in string key-value pairs OPT1, VAL1... or in struct OPTIONS with
-%    field names as option keys and field values as option values.
+%    field names as option keys and field values as option values. Uses
+%    only non-nan data from the measured variable data (cdata).
 %    The scatter plot is generated with the function SCATTER.
 %    Recognized options are:
 %      XDATA: horizontal coordinate data.
@@ -184,6 +185,18 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
   % Equivalent way to compute quantile without using the function QUANTILE in
   % statistical toolbox. See documentation there for algorithm details.
   % crange = quantile(options.cdata(:), crange_quantiles);
+  
+  % find indizes of non nan data in cdata
+  % useful for faster plotting of logscale data (e.g. chlorophyll)
+  nonNanIdx = ~(isnan(options.cdata));
+  % find min / max of all ydata (to be set for axes ylim)
+  minY = min(options.ydata);
+  maxY = max(options.ydata);
+  % set to use only these indizes for data plotting
+  options.xdata = options.xdata(nonNanIdx);
+  options.ydata = options.ydata(nonNanIdx);
+  options.cdata = options.cdata(nonNanIdx);
+  
   crange_quantiles = [0.01 0.99];
   cdata_sorted = sort(options.cdata(isfinite(options.cdata)));
   if isempty(cdata_sorted)
@@ -251,6 +264,8 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
   end
   axis(haxs, 'tight');
   set(haxs, options.axsprops);
+  % set the y lim to the max of all data (including nan indizes in ydata)
+  set(haxs, 'Ylim', [minY, maxY]);
   set(haxstit, options.title);
   set(haxsxlb, options.xlabel);
   set(haxsylb, options.ylabel);
