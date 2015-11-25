@@ -184,6 +184,18 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
   % Equivalent way to compute quantile without using the function QUANTILE in
   % statistical toolbox. See documentation there for algorithm details.
   % crange = quantile(options.cdata(:), crange_quantiles);
+  
+  % find indizes of non nan data in cdata
+  % useful for faster plotting of logscale data (e.g. chlorophyll)
+  nonNanIdx = ~(isnan(options.cdata));
+  % find min / max of all ydata (to be set for axes ylim)
+  minY = min(options.ydata);
+  maxY = max(options.ydata);
+  % set to use only these indizes for data plotting
+  options.xdata = options.xdata(nonNanIdx);
+  options.ydata = options.ydata(nonNanIdx);
+  options.cdata = options.cdata(nonNanIdx);
+  
   crange_quantiles = [0.01 0.99];
   cdata_sorted = sort(options.cdata(isfinite(options.cdata)));
   if isempty(cdata_sorted)
@@ -251,6 +263,8 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
   end
   axis(haxs, 'tight');
   set(haxs, options.axsprops);
+  % set the y lim to the max of all data (including nan indizes in cdata)
+  set(haxs, 'Ylim', [minY, maxY]);
   set(haxstit, options.title);
   set(haxsxlb, options.xlabel);
   set(haxsylb, options.ylabel);
