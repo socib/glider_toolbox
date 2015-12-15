@@ -23,7 +23,7 @@ function data = getDeploymentInfoDB(query, dbname, varargin)
 %        Default value: '' (user name not required by database)
 %      SERVER: database server url.
 %        String with the URL of the database server.
-%        Default value: [] (do not specify a URL when connection to database)
+%        Default value: [] (do not specify a URL when connecting to database)
 %      DRIVER: database driver.
 %        String with the name of the driver to access the database.
 %        Default value: [] (do not specify a driver when connecting to database)
