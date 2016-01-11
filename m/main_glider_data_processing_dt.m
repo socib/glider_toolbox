@@ -535,6 +535,48 @@ for deployment_idx = 1:numel(deployment_list)
     end
   end
 
+  %% Configure Quality Control parameters for preprocessing data.
+  if ~isempty(fieldnames(data_preprocessed))
+      disp('Reading defined QC methods for preprocessed data...')
+      try
+          config.preprocessing_qc_options = configDataPreprocessingQC(data_preprocessed);
+      catch exception
+          disp('Error reading QC methods.');
+          disp(getReport(exception, 'extended'));
+      end
+  end
+  
+  %% Perform Quality Control methods upon preprocessing data.
+  if ~isempty(fieldnames(data_preprocessed)) && ~isempty(fieldnames(config.preprocessing_qc_options))
+      disp('Perform QC upon preprocessed data...')
+      try
+          qc_preprocessed = performQC(data_preprocessed, config.preprocessing_qc_options);
+      catch exception
+          disp('Error processing QC methods.');
+          disp(getReport(exception, 'extended'));
+      end
+  end
+  
+  %% Get good data (bad values are returned as NaNs) and write Quality Control log file.
+  if ~isempty(fieldnames(qc_preprocessed))
+      disp('Get good flagged data...');
+      try
+        filtered_data_preprocessed = filterGoodData(qc_preprocessed, data_preprocessed);
+        logQC(qc_preprocessed, data_preprocessed, config.preprocessing_qc_options.summaryFileName);
+      catch exception
+          disp('Error getting good flagged data:');
+          disp(getReport(exception, 'extended'));
+      end
+  end
+  
+  %% Replace Preprocessed with filtered Data?
+  if ~isempty(fieldnames(filtered_data_preprocessed))
+      if config.preprocessing_qc_options.replaceWithNans
+        disp('Replacing Bad values with NaNs...');
+        data_preprocessed_unfiltered = data_preprocessed;
+        data_preprocessed = filtered_data_preprocessed;
+      end
+  end
 
   %% Process preprocessed glider data.
   if ~isempty(fieldnames(data_preprocessed))
@@ -547,7 +589,28 @@ for deployment_idx = 1:numel(deployment_list)
       disp(getReport(exception, 'extended'));
     end
   end
+  
+  %% Configure Quality Control parameters for processing data.
+  if ~isempty(fieldnames(data_processed))
+      disp('Reading defined QC methods for processed data...')
+      try
+          config.processing_qc_options = configDataProcessingQC(data_processed);
+      catch exception
+          disp('Error reading QC methods.');
+          disp(getReport(exception, 'extended'));
+      end
+  end
 
+  %% Perform Quality Control methods upon processing data.
+  if ~isempty(fieldnames(data_processed)) && ~isempty(fieldnames(config.processing_qc_options))
+      disp('Perform QC upon processed data...')
+      try
+          qc_processed = performQC(data_processed, config.processing_qc_options);
+      catch exception
+          disp('Error processing QC methods.');
+          disp(getReport(exception, 'extended'));
+      end
+  end
 
   %% Generate L1 NetCDF file (processed data), if needed and possible.
   if ~isempty(fieldnames(data_processed)) && ~isempty(netcdf_l1_file)
