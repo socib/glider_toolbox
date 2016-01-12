@@ -79,11 +79,17 @@ else
     end
 end
 
+removeNames = {'checkAllForNan', 'summaryFileName', 'replaceWithNans'};
+removeFields = isfield(performQC_config, removeNames);
+removeNames = removeNames(removeFields);
+performQC_config = rmfield(performQC_config, removeNames);
+
+
 fields = fieldnames(performQC_config);
-for i=2:numel(fields)
+for i=1:numel(fields)
     for j=1:numel(performQC_config.(fields{i}).processOn)
         handle = performQC_config.(fields{i}).functionHandle;
-        qcOut = handle(performQC_config.(fields{i}).passingParameters{j}{:}); %!!!!
+        qcOut = handle(performQC_config.(fields{i}).passingParameters{j}{:});
         isCellFlag = false;
         if iscell(performQC_config.(fields{i}).processOn{j})
             isCellFlag = true;

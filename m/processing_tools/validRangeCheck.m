@@ -19,6 +19,9 @@ function qcFlaggedOutput = validRangeCheck(data, minRange, maxRange, qcFlag, var
 %       for details.
 %       -   Checks if the data is within the defined range in the defined
 %       depths. See also the example.
+%    Edit 12.01.2016: Changed >= and <= to > and < respectively. Probably
+%    a problem with zero measurements at optical sensors (since sensors can
+%    measure zero, if they are in deep water).
 %
 %  Notes:
 %    Care, that if 6 input arguments are used (specific validRange test),
@@ -69,8 +72,8 @@ function qcFlaggedOutput = validRangeCheck(data, minRange, maxRange, qcFlag, var
 narginchk(4,10)
 
 if nargin==4 
-    idxAboveThreshold = find(data >= maxRange);
-    idxBelowThreshold = find(data <= minRange);
+    idxAboveThreshold = find(data > maxRange);
+    idxBelowThreshold = find(data < minRange);
 
     idx = [idxAboveThreshold; idxBelowThreshold];
 

@@ -68,27 +68,29 @@ function processing_qc_options = configDataProcessingQC(data_processed)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-performQC_config.checkAllForNan.switch = true;
-performQC_config.checkAllForNan.functionHandle = str2func('nanCheck');
+processing_qc_options.replaceWithNans = true;
 
-performQC_config.impossibleDateCheck.functionHandle = str2func('impossibleDateCheck');
-performQC_config.impossibleDateCheck.processOn = {
+processing_qc_options.checkAllForNan.switch = true;
+processing_qc_options.checkAllForNan.functionHandle = str2func('nanCheck');
+
+processing_qc_options.impossibleDateCheck.functionHandle = str2func('impossibleDateCheck');
+processing_qc_options.impossibleDateCheck.processOn = {
     'time';
     {'time_ctd'; 'temperature'; 'conductivity'; 'salinity'; 'oxygen_concentration'; 'oxygen_saturation'; 'pressure'; 'chlorophyll'; 'turbidity'}
     };
-performQC_config.impossibleDateCheck.passingParameters = {
+processing_qc_options.impossibleDateCheck.passingParameters = {
         [{data_processed.time}; 4];
         [{data_processed.time_ctd}; 4]
     };
 
-performQC_config.impossibleLocationCheck.functionHandle = str2func('impossibleLocationCheck');
-performQC_config.impossibleLocationCheck.processOn = {{'longitude'; 'latitude'}};
-performQC_config.impossibleLocationCheck.passingParameters = {
+processing_qc_options.impossibleLocationCheck.functionHandle = str2func('impossibleLocationCheck');
+processing_qc_options.impossibleLocationCheck.processOn = {{'longitude'; 'latitude'}};
+processing_qc_options.impossibleLocationCheck.passingParameters = {
         [{data_processed.latitude}; {data_processed.longitude}; 4]
     };
 
-performQC_config.validRangeCheck.functionHandle = str2func('validRangeCheck');
-performQC_config.validRangeCheck.processOn = {
+processing_qc_options.validRangeCheck.functionHandle = str2func('validRangeCheck');
+processing_qc_options.validRangeCheck.processOn = {
     'temperature';
     'chlorophyll';
     'turbidity';
@@ -101,7 +103,7 @@ performQC_config.validRangeCheck.processOn = {
     'temperature';
     'salinity'
     };
-performQC_config.validRangeCheck.passingParameters = {
+processing_qc_options.validRangeCheck.passingParameters = {
         [{data_processed.temperature}; -2; 42; 4];
         [{data_processed.chlorophyll}; 0; 50; 4];
         [{data_processed.turbidity}; 0; 50; 4];
@@ -115,11 +117,11 @@ performQC_config.validRangeCheck.passingParameters = {
         [{data_processed.salinity}; {[0; 12; 31; 33]}; {[40; 40; 40; 40]}; 4; {data_processed.depth}; {[0, 30; 30, 75; 75, 600; 600, 1100]}]
     };
 
-performQC_config.spikeCheck.functionHandle = str2func('spikeCheck');
-performQC_config.spikeCheck.processOn = {'temperature';
+processing_qc_options.spikeCheck.functionHandle = str2func('spikeCheck');
+processing_qc_options.spikeCheck.processOn = {'temperature';
     'turbidity'
     };
-performQC_config.spikeCheck.passingParameters = {
+processing_qc_options.spikeCheck.passingParameters = {
         [{data_processed.temperature}; 6; {data_processed.pressure}; 500; 6; 2];
         [{data_processed.turbidity}; 6; 5]
     };
