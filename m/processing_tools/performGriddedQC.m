@@ -1,0 +1,179 @@
+function output_data_struct = performGriddedQC(gridded_data, grid_qc_config)
+%PERFORMGRIDDEDQC  One-line description here, please.
+%
+%  Syntax:
+%    OUTPUT_DATA_STRUCT = PERFORMGRIDDEDQC(GRIDDED_DATA, GRID_QC_CONFIG)
+%
+%  Description:
+%    OUTPUT_DATA_STRUCT = PERFORMGRIDDEDQC(GRIDDED_DATA, GRID_QC_CONFIG) Detailed description here, please.
+%
+%  Notes:
+%
+%  Examples:
+%    output_data_struct = performGriddedQC(gridded_data, grid_qc_config)
+%
+%  See also:
+%
+%  Authors:
+%    Andreas Krietemeyer  <akrietemeyer@socib.es>
+
+%  Copyright (C) 2016
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
+%  <http://www.socib.es>
+%
+%  This program is free software: you can redistribute it and/or modify
+%  it under the terms of the GNU General Public License as published by
+%  the Free Software Foundation, either version 3 of the License, or
+%  (at your option) any later version.
+%
+%  This program is distributed in the hope that it will be useful,
+%  but WITHOUT ANY WARRANTY; without even the implied warranty of
+%  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%  GNU General Public License for more details.
+%
+%  You should have received a copy of the GNU General Public License
+%  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+% add perform NaNs
+% add insertion of data into handles (isa 'char')
+% add handling of 1d / 2d data
+% add uniting single line 1d to 2d transformations
+
+%% Process NaN Check
+dataNames = fieldnames(gridded_data);
+if grid_qc_config.checkAllForNan.switch
+    for i=1:numel(dataNames)
+        dimensions = size(gridded_data.(dataNames{i}));
+        output_data_struct.(dataNames{i}).qcFlaggedOutput = ones(dimensions);
+        output_data_struct.(dataNames{i}).appliedQcIdentifiers = cell(dimensions);
+        
+        if dimensions(2)==1
+            qcOut = nanCheck(gridded_data.(dataNames{i}), 9);
+        elseif dimensions(2)>=2
+            qcOut = ones(dimensions);
+            for k=1:dimensions(1)
+                qcOut(k,:) = nanCheck(gridded_data.(dataNames{i})(k,:),9);
+            end
+        else
+            error('Unknown dimension...')
+        end
+        idx = output_data_struct.(dataNames{i}).qcFlaggedOutput < qcOut;
+        output_data_struct.(dataNames{i}).qcFlaggedOutput(idx) = qcOut(idx);
+        output_data_struct.(dataNames{i}).appliedQcIdentifiers(idx) = {char(grid_qc_config.checkAllForNan.functionHandle)};
+    end
+else 
+    for i=1:numel(dataNames)
+        output_data_struct.(dataNames{i}).qcFlaggedOutput = ones(dimensions);
+        output_data_struct.(dataNames{i}).appliedQcIdentifiers = cell(dimensions);
+    end
+end
+
+removeNames = {'checkAllForNan', 'summaryFileName', 'replaceWithNans'};
+removeFields = isfield(grid_qc_config, removeNames);
+removeNames = removeNames(removeFields);
+grid_qc_config = rmfield(grid_qc_config, removeNames);
+
+%% Process other QC Methods (retrieved from config).
+dimensions = 0;
+tests = fieldnames(grid_qc_config);
+for i=1:numel(tests)
+    for j=1:numel(grid_qc_config.(tests{i}).processOn)
+        handle = grid_qc_config.(tests{i}).functionHandle;
+        % check dimension of passingParameters
+        replacementIdx = [];
+        for k=1:length(grid_qc_config.(tests{i}).passingParameters{j})
+            if isa(grid_qc_config.(tests{i}).passingParameters{j}{k}, 'char')
+                replacementIdx = [replacementIdx; k];
+                grid_qc_config.(tests{i}).passingParameters{j}{k} = gridded_data.(grid_qc_config.(tests{i}).passingParameters{j}{k});
+            end
+        end
+        % all data has been inserted to the struct
+        % Check now for 2D or 1D input data
+        dimensions = size(grid_qc_config.(tests{i}).passingParameters{j}{1});
+        qcOut = ones(dimensions);
+        % build arguments to pass into functions as cell array
+        if dimensions(2)==1
+            arguments = {};
+            for n=1:length(grid_qc_config.(tests{i}).passingParameters{j})
+                % find replacementIdx, dann Q{end+1} = [] oder Q(end+1) = {[]}
+                if find(replacementIdx==n)
+                    tempDimension = size(grid_qc_config.(tests{i}).passingParameters{j}{n});
+                    if tempDimension(2)==1
+                        arguments{end+1} = grid_qc_config.(tests{i}).passingParameters{j}{n};
+                    elseif tempDimension(2)>=2    
+                        arguments{end+1} = grid_qc_config.(tests{i}).passingParameters{j}{n}(o,:);
+                    end
+                else
+                    arguments{end+1} = grid_qc_config.(tests{i}).passingParameters{j}{n};
+                end
+            end
+            qcOut = handle(arguments{:});
+        elseif dimensions(2)>=2
+            for o=1:dimensions(1)
+                arguments = {};
+                for n=1:length(grid_qc_config.(tests{i}).passingParameters{j})
+                    % find replacementIdx, dann Q{end+1} = [] oder Q(end+1) = {[]}
+                    if find(replacementIdx==n)
+                        tempDimension = size(grid_qc_config.(tests{i}).passingParameters{j}{n});
+                        if tempDimension(2)==1
+                            arguments{end+1} = grid_qc_config.(tests{i}).passingParameters{j}{n};
+                        elseif tempDimension(2)>=2    
+                            arguments{end+1} = grid_qc_config.(tests{i}).passingParameters{j}{n}(o,:);
+                        end
+                    else
+                        arguments{end+1} = grid_qc_config.(tests{i}).passingParameters{j}{n};
+                    end
+                end
+                if dimensions(2)==1
+                    qcOut = handle(arguments{:});
+                elseif dimensions(2)>=2
+                    qcOut(o,:) = handle(arguments{:});
+                end
+            end
+        else
+            error('Error in gridding QC. Unknown dimension...')
+        end
+        isCellFlag = false;
+        if iscell(grid_qc_config.(tests{i}).processOn{j})
+            isCellFlag = true;
+            var_name = grid_qc_config.(tests{i}).processOn{j}{1};
+        else
+            var_name = grid_qc_config.(tests{i}).processOn{j};
+        end
+        % qcOut = handle(grid_qc_config.(tests{i}).passingParameters{j}{:});
+        idx = output_data_struct.(var_name).qcFlaggedOutput < qcOut;
+        if isCellFlag
+            for k=1:length(grid_qc_config.(tests{i}).processOn{j})
+                var_name = grid_qc_config.(tests{i}).processOn{j}{k};
+                if checkForTwoDimensionalData(gridded_data.(var_name)) && ~checkForTwoDimensionalData(idx)
+                    %to process on is 2D data and the idx is only 1D
+                    tempidx = find(idx);
+                    for p=1:length(tempidx)
+                        output_data_struct.(var_name).qcFlaggedOutput(tempidx(p),:) = 4;
+                        output_data_struct.(var_name).appliedQcIdentifiers(tempidx(p),:) = {char(grid_qc_config.(tests{i}).functionHandle)};
+                    end
+                else
+                    %is uniformed 1D or 2D
+                    output_data_struct.(var_name).qcFlaggedOutput(idx) = qcOut(idx);
+                    output_data_struct.(var_name).appliedQcIdentifiers(idx) = {char(grid_qc_config.(tests{i}).functionHandle)};
+                end
+            end
+        else
+            if checkForTwoDimensionalData(gridded_data.(var_name)) && checkForTwoDimensionalData(idx)
+                %to process on is 2D data and the idx is only 1D
+                tempidx = find(idx);
+                for p=1:length(tempidx)
+                    output_data_struct.(var_name).qcFlaggedOutput(tempidx(p),:) = 4;
+                    output_data_struct.(var_name).appliedQcIdentifiers(tempidx(p),:) = {char(grid_qc_config.(tests{i}).functionHandle)};
+                end
+            else
+                %is uniformed 1D or 2D
+                output_data_struct.(var_name).qcFlaggedOutput(idx) = qcOut(idx);
+                output_data_struct.(var_name).appliedQcIdentifiers(idx) = {char(grid_qc_config.(tests{i}).functionHandle)};
+            end
+        end
+    end
+end
+
+end

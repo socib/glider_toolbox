@@ -25,7 +25,9 @@ function qcFlaggedOutput = calcSpike(data, limit, nonNanIndex, qcFlag, originalL
 %    Returns the flagged output array.
 %
 %  Notes:
-%    Care, if you use 6 input arguments, to define an array containing 
+%    Care, if you use 6 input arguments, to define the varargin{1} as an
+%    array containing the pressure data, devider and thresholds below and
+%    above.
 %
 %  Examples:
 %    qcFlaggedOutput = calcSpike(data, limit, nonNanIndex, qcFlag, originalLength, varargin)

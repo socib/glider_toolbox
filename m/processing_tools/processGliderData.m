@@ -822,7 +822,9 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
     meta_proc.flow_ctd.min_vel = options.flow_ctd_min_velocity;
   end
  
+  perform_lag = false;
   
+  if perform_lag
   %% Perform sensor lag estimation and correction, if needed.
   % Sensor, time and depth sequences must be present in already processed data.
   for sensor_lag_option_idx = 1:numel(options.sensor_lag_list)
@@ -1330,7 +1332,7 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
       end
     end
   end
-  
+  end
   
   %% Derive salinity from pressure, conductivity and temperature, if available.
   for salinity_option_idx = 1:numel(options.salinity_list)
