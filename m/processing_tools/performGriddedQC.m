@@ -1,18 +1,56 @@
 function output_data_struct = performGriddedQC(gridded_data, grid_qc_config)
-%PERFORMGRIDDEDQC  One-line description here, please.
+%PERFORMGRIDDEDQC  Performs the specified QC handles.
 %
 %  Syntax:
 %    OUTPUT_DATA_STRUCT = PERFORMGRIDDEDQC(GRIDDED_DATA, GRID_QC_CONFIG)
 %
 %  Description:
-%    OUTPUT_DATA_STRUCT = PERFORMGRIDDEDQC(GRIDDED_DATA, GRID_QC_CONFIG) Detailed description here, please.
+%    In the end, it behaves finally like the performQC function. 
+%    Performs the defined QC methods with the specified configurations.
+%    Returns a struct consisting of the entries qcFlaggedOutput and
+%    appliedQcIdentifiers. The first entry is the flagged QC output of the
+%    defined QC functions. The second one tells, if a data point has been
+%    flagged as bad, which QC method has been applied.
+%    In particular, the following actions are executed:
+%       - If the NaN switch is true:
+%         Create an output struct for all data variables consisting of the
+%         QC output (9s for all NaNs, remainder is 1) and another entry
+%         which marks the applied method with the name of the applied
+%         function.
+%         Run through all data variables and mark existing NaNs with 9 and
+%         also mark the entry as being flagged with the NaN check.
+%       - Else, only the raw struct entries qcFlaggedOutput and
+%         appliedQcIdentifiers will be created.
+%       - For each defined QC method (validRange, impossibleLocation etc),
+%         check, if the processOn contains more than one variable. If yes,
+%         use the defined passingParameters for the QC output and apply it 
+%         to all the processOn variables. Else, just perform the QC to the
+%         single defined variable.
+%       - Special handling for the two dimensional processing implemented.
+%         This includes especially the treatment of 1D data that can affect
+%         2D arrays (e.g. a wrong time measurement [really really unlikely
+%         to happen], will affect one row within the temperature, ...
+%         grid).
+%       - See also the the qc tests (validRange etc.) for the test
+%         implementation.
 %
 %  Notes:
+%    Take care to pass only the output of the configDataGriddingQC as
+%    grid_qc_config to this function, since the inserting of data is
+%    performed within this function (unlike the preprocessing and
+%    processing configurations).
 %
 %  Examples:
 %    output_data_struct = performGriddedQC(gridded_data, grid_qc_config)
 %
 %  See also:
+%    CONFIGDATAGRIDDINGQC
+%    PERFORMQC
+%    VALIDRANGECHECK
+%    SPIKECHECK
+%    IMPOSSIBLEDATECHECK
+%    IMPOSSIBLELOCATIONCHECK
+%    NANCHECK
 %
 %  Authors:
 %    Andreas Krietemeyer  <akrietemeyer@socib.es>
@@ -33,12 +71,6 @@ function output_data_struct = performGriddedQC(gridded_data, grid_qc_config)
 %
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
-% add perform NaNs
-% add insertion of data into handles (isa 'char')
-% add handling of 1d / 2d data
-% add uniting single line 1d to 2d transformations
 
 %% Process NaN Check
 dataNames = fieldnames(gridded_data);

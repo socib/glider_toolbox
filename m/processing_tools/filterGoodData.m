@@ -15,7 +15,9 @@ function data_struct_filtered = filterGoodData(qc_struct, data_struct)
 %    processing outputs.
 %
 %  Examples:
-%    data_filtered_preprocessed = filterGoodData(qc_preprocessed, data_preprocessed)
+%    qc_struct.temperature.qcFlaggedOutput = [1 1 4 4 1 1];
+%    data_struct.temperature = [15 16 99 99 16 16];
+%    data_filtered_preprocessed = filterGoodData(qc_struct, data_struct)
 %
 %  See also:
 %    PERFORMQC

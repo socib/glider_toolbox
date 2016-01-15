@@ -21,7 +21,12 @@ function qcFlaggedOutput = spikeCheck(data, qcFlag, varargin)
 %    Clear distinction between 3 and 6 input variables.
 %
 %  Examples:
-%    qcFlaggedOutput = spikeCheck(data, qcFlag, varargin)
+%    data = [1 10 3 4 5 6];
+%    qcFlag = 6;
+%    limit = 2;
+%    qcFlaggedOutput = spikeCheck(data, qcFlag, limit)
+%    limit = 1;
+%    qcFlaggedOutput = spikeCheck(data, qcFlag, limit)
 %
 %  See also:
 %    CALCSPIKE
@@ -30,7 +35,10 @@ function qcFlaggedOutput = spikeCheck(data, qcFlag, varargin)
 %    NANCHECK
 %    VALIDRANGECHECK
 %    PERFORMQC
+%    PERFORMGRIDDEDQC
 %    CONFIGDATAPREPROCESSINGQC
+%    CONFIGDATAPROCESSINGQC
+%    CONFIGDATAGRIDDEDQC
 %
 %  Authors:
 %    Andreas Krietemeyer  <akrietemeyer@socib.es>

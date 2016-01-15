@@ -26,7 +26,8 @@ function qcFlaggedOutput = validRangeCheck(data, minRange, maxRange, qcFlag, var
 %  Notes:
 %    Care, that if 6 input arguments are used (specific validRange test),
 %    the same dimensions for minRange, maxRange and depthRanges are used.
-%    See configDataPreprocessingQC for details.
+%    See configDataPreprocessingQC for details. Only valid for 1D data
+%    arrays.
 %
 %  Examples:
 %    qcFlaggedOutput = validRangeCheck(data, minRange, maxRange, qcFlag)
@@ -48,6 +49,11 @@ function qcFlaggedOutput = validRangeCheck(data, minRange, maxRange, qcFlag, var
 %    qcFlaggedOutput = validRangeCheck(data, minRange, maxRange, qcFlag, depth, depthRange)
 %
 %  See also:
+%    PERFORMQC
+%    PERFORMGRIDDEDQC
+%    CONFIGDATAPREPROCESSEDQC
+%    CONFIGDATAPROCESSEDQC
+%    CONFIGDATAGRIDDEDQC
 %
 %  Authors:
 %    Andreas Krietemeyer  <akrietemeyer@socib.es>

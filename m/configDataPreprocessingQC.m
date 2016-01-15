@@ -40,7 +40,7 @@ function preprocessing_qc_options = configDataPreprocessingQC(data_preprocessed)
 %    be flagged.
 %
 %  Notes:
-%       Requires preprocessed data as input.
+%       Requires the preprocessed data as input.
 %
 %  Examples:
 %    preprocessing_qc_options = configDataPreprocessingQC(data_preprocessed)

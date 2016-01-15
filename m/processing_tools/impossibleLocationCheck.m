@@ -5,6 +5,8 @@ function qcFlaggedOutput = impossibleLocationCheck(lat, lon, qcFlag)
 %    QCFLAGGEDOUTPUT = IMPOSSIBLELOCATIONCHECK(LAT, LON, QCFLAG)
 %
 %  Description:
+%    The arguments lat and lon must be two one dimensional data arrays. The
+%    qcFlag is expected to be a number.
 %    Checks, if latitude and longitude are between -90, 90 and -180, 180
 %    are. If the check fails for data entries, they are marked with the
 %    defined qcFlag. The remainder is flagged as good (one).

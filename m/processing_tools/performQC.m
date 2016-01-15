@@ -27,17 +27,22 @@ function output_data_struct = performQC(input_data_struct, performQC_config)
 %         single defined variable.
 %       - See also the the qc tests (validRange etc.) for the test
 %         implementation.
-%         
 %
 %  Notes: In general, it only calls the QC methods, assigns the output to
-%  the data and return a newly structured output.
+%  the data and returns the newly structured output.
 %
 %  Examples:
 %    output_data_struct = performQC(input_data_struct, performQC_config)
-%    
 %
 %  See also:
-%       CONFIGDATAPREPROCESSINGQC
+%    CONFIGDATAPREPROCESSINGQC
+%    CONFIGDATAPROCESSINGQC
+%    PERFORMGRIDDINGQC
+%    VALIDRANGECHECK
+%    SPIKECHECK
+%    IMPOSSIBLEDATECHECK
+%    IMPOSSIBLELOCATIONCHECK
+%    NANCHECK
 %
 %  Authors:
 %    Andreas Krietemeyer  <akrietemeyer@socib.es>

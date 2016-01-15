@@ -11,6 +11,8 @@ function qcFlaggedOutput = nanCheck(data, qcFlag)
 %  Notes:
 %
 %  Examples:
+%    data = [10 20 nan 40 50 nan];
+%    qcFlag = 9;
 %    qcFlaggedOutput = nanCheck(data, qcFlag)
 %
 %  See also:
@@ -42,6 +44,6 @@ function qcFlaggedOutput = nanCheck(data, qcFlag)
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 qcFlaggedOutput = ones(length(data),1);
-qcFlaggedOutput(isnan(data)) = 9;
+qcFlaggedOutput(isnan(data)) = qcFlag;
 
 end

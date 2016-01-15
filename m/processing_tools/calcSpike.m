@@ -30,7 +30,14 @@ function qcFlaggedOutput = calcSpike(data, limit, nonNanIndex, qcFlag, originalL
 %    above.
 %
 %  Examples:
-%    qcFlaggedOutput = calcSpike(data, limit, nonNanIndex, qcFlag, originalLength, varargin)
+%    data = [1 10 3 4 5 6];
+%    limit = 2;
+%    nonNanIndex = [1 2 3 4 5 6];
+%    qcFlag = 6;
+%    originalLength = 6;
+%    qcFlaggedOutput = calcSpike(data, limit, nonNanIndex, qcFlag, originalLength)
+%    limit = 1;
+%    qcFlaggedOutput = calcSpike(data, limit, nonNanIndex, qcFlag, originalLength)
 %
 %  See also:
 %    SPIKECHECK

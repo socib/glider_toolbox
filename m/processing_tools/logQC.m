@@ -1,19 +1,22 @@
-function output = logQC(qc_data, data, log_file_name)
+function logQC(qc_data, data, log_file_name)
 %LOGQC  Writes summary of applied QC to the file.
 %
 %  Syntax:
-%    OUTPUT = LOGQC(QC_DATA, DATA, LOG_FILE_NAME)
+%    LOGQC(QC_DATA, DATA, LOG_FILE_NAME)
 %
 %  Description:
-%    Writes a summary of the applied QC to the specified log fileby finding
-%    the amount of good, bad and NaNs within the QC dataset. 
+%    Writes a summary of the applied QC to the specified log file by
+%    finding the amount of good, bad and NaNs within the QC dataset.
 %
 %  Notes:
+%    Only interesting for debugging / logging purposes of the QC outputs.
 %
 %  Examples:
-%    output = logQC(qc_data, data, log_file_name)
+%    logQC(qc_data, data, log_file_name)
 %
 %  See also:
+%    CONFIGDATAPREPROCESSINGQC
+%    PERFORMQC
 %
 %  Authors:
 %    Andreas Krietemeyer  <akrietemeyer@socib.es>

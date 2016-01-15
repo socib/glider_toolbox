@@ -5,16 +5,19 @@ function qcFlaggedOutput = impossibleDateCheck(time, qcFlag)
 %    QCFLAGGEDOUTPUT = IMPOSSIBLEDATECHECK(TIME, QCFLAG)
 %
 %  Description:
-%    Compares the input time entries, if they are within range of the
+%    The function requires a 1D time array as input and a qcFlag number.
+%    It compares the input time entries, if they are within range of the
 %    defined lowerThresholdDate (actually 01.01.2007 - no gliders existed
 %    before) and the actual time.
 %    Returns an array filled with ones of same length like the input data
 %    and flags those entries that fail the test with the specified qcFlag.
 %
 %  Notes:
-%   posixtime required (as in whole socib glider toolbox)
+%  The posixtime mex file is required (as in the socib glider toolbox).
 %
 %  Examples:
+%    time= utc2posixtime([datenum([2005 1 1 0 0 00]), datenum([2015 1 1 0 0 00]), datenum([2025 1 1 0 0 00])]);
+%    qcFlag = 4;
 %    qcFlaggedOutput = impossibleDateCheck(time, qcFlag)
 %
 %  See also:

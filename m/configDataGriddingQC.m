@@ -13,6 +13,22 @@ function gridding_qc_config = configDataGriddingQC()
 %    First passing parameter in a passingParameter instance requires the
 %    name of a variable (will result in the inserted data, as required for
 %    the specific tests).
+%    
+%    Here, an example usage for a valid range check is shown. It shall be
+%    processed on the oxygen saturation and the oxygen concentration. This
+%    means, if it fails, both variable indices will be flagged:
+%    gridding_qc_config.validRangeCheck.functionHandle = str2func('validRangeCheck');
+%    gridding_qc_config.validRangeCheck.processOn = {
+%        {'oxygen_concentration'; 'oxygen_saturation'};
+%        {'oxygen_saturation'; 'oxygen_concentration'}
+%        };
+%    gridding_qc_config.validRangeCheck.passingParameters = {
+%            [{'oxygen_concentration'}; 0; 500; 4];
+%            [{'oxygen_saturation'}; 0; 200; 4]
+%        };
+%
+%    As described in the valid range check QC function, further parameters
+%    can be described (e.g. depth ranges that apply for specific depths).
 %
 %  Notes:
 %    No arguments required. Uses the names of variables for processing.

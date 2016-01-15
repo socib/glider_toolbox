@@ -15,7 +15,7 @@ function [data_raw, meta_raw] = readL0GliderData(Path)
 %    names as found in the searched netCDF document.
 %
 %  Notes:
-%    Usually used to read L0 glider data.
+%    Usually used to read L0 glider data from socib thredds.
 %
 %  Examples:
 %    [data_raw, meta_raw] = readL0GliderData(path)
