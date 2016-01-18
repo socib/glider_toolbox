@@ -547,7 +547,7 @@ for deployment_idx = 1:numel(deployment_list)
   end
   
   %% Perform Quality Control methods upon preprocessing data and log differences.
-  if ~isempty(fieldnames(data_preprocessed)) && ~isempty(fieldnames(config.preprocessing_qc_options))
+  if ~isempty(fieldnames(data_preprocessed)) && ~isempty(fieldnames(config.preprocessing_qc_options)) && config.preprocessing_qc_options.performQC
       disp('Perform QC upon preprocessed data...')
       try
           qc_preprocessed = performQC(data_preprocessed, config.preprocessing_qc_options);
@@ -595,7 +595,7 @@ for deployment_idx = 1:numel(deployment_list)
   end
 
   %% Perform Quality Control methods upon processing data.
-  if ~isempty(fieldnames(data_processed)) && ~isempty(fieldnames(config.processing_qc_options))
+  if ~isempty(fieldnames(data_processed)) && ~isempty(fieldnames(config.processing_qc_options)) && config.processing_qc_options.performQC
       disp('Perform QC upon processed data...')
       try
           qc_processed = performQC(data_processed, config.processing_qc_options);
@@ -675,7 +675,7 @@ for deployment_idx = 1:numel(deployment_list)
   end
   
   %% Perform Quality Control methods upon gridded data.
-  if ~isempty(fieldnames(data_gridded)) && ~isempty(fieldnames(config.gridding_qc_options))
+  if ~isempty(fieldnames(data_gridded)) && ~isempty(fieldnames(config.gridding_qc_options)) && config.gridding_qc_options.performQC
       disp('Perform QC upon gridded data...')
       try
           qc_gridded = performGriddedQC(data_gridded, config.gridding_qc_options);

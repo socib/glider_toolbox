@@ -68,6 +68,7 @@ function gridding_qc_config = configDataGriddingQC()
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 gridding_qc_config.replaceWithNans = true;
+gridding_qc_config.performQC = true;
 
 gridding_qc_config.checkAllForNan.switch = true;
 gridding_qc_config.checkAllForNan.functionHandle = str2func('nanCheck');

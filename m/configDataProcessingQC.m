@@ -69,6 +69,7 @@ function processing_qc_options = configDataProcessingQC(data_processed)
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 processing_qc_options.replaceWithNans = true;
+processing_qc_options.performQC = true;
 
 processing_qc_options.checkAllForNan.switch = true;
 processing_qc_options.checkAllForNan.functionHandle = str2func('nanCheck');

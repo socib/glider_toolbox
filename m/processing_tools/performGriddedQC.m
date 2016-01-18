@@ -101,7 +101,7 @@ else
     end
 end
 
-removeNames = {'checkAllForNan', 'summaryFileName', 'replaceWithNans'};
+removeNames = {'performQC', 'checkAllForNan', 'summaryFileName', 'replaceWithNans'};
 removeFields = isfield(grid_qc_config, removeNames);
 removeNames = removeNames(removeFields);
 grid_qc_config = rmfield(grid_qc_config, removeNames);

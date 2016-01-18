@@ -84,7 +84,7 @@ else
     end
 end
 
-removeNames = {'checkAllForNan', 'summaryFileName', 'replaceWithNans'};
+removeNames = {'performQC', 'checkAllForNan', 'summaryFileName', 'replaceWithNans'};
 removeFields = isfield(performQC_config, removeNames);
 removeNames = removeNames(removeFields);
 performQC_config = rmfield(performQC_config, removeNames);

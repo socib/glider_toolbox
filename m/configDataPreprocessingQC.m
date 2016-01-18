@@ -70,6 +70,8 @@ function preprocessing_qc_options = configDataPreprocessingQC(data_preprocessed)
 
 preprocessing_qc_options = struct();
 
+preprocessing_qc_options.performQC = true;
+
 preprocessing_qc_options.summaryFileName = 'qc_preprocessing.log';
 
 preprocessing_qc_options.replaceWithNans = true;
