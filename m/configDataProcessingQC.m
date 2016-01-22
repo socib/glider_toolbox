@@ -127,4 +127,11 @@ processing_qc_options.spikeCheck.passingParameters = {
         [{data_processed.turbidity}; 6; 5]
     };
 
+%processing_qc_options.performSpecialGradientCheck.functionHandle = str2func('performSpecialGradientCheck');
+%processing_qc_options.performSpecialGradientCheck.processOn = {{'conductivity'; 'density'; 'salinity'}
+%    };
+%processing_qc_options.performSpecialGradientCheck.passingParameters = {
+%        [{data_processed.conductivity}; {data_processed.depth}; {data_processed.profile_index}; 0.05; 0.05; 200; 4]
+%    };
+
 end

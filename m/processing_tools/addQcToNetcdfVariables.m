@@ -1,18 +1,29 @@
 function out_struct = addQcToNetcdfVariables(variable_list)
-%ADDQCTONETCDFVARIABLES  One-line description here, please.
+%ADDQCTONETCDFVARIABLES  Adds QC structs for netcdf generation.
 %
 %  Syntax:
 %    OUT_STRUCT = ADDQCTONETCDFVARIABLES(VARIABLE_LIST)
 %
 %  Description:
-%    OUT_STRUCT = ADDQCTONETCDFVARIABLES(VARIABLE_LIST) Detailed description here, please.
+%    Uses existing variable list from one configDTOutputNetCDF to add QC
+%    structs to use the QC outputs for the netcdf generation.
+%    Adds the string identifier _QC and _QC_Identifier to the variable
+%    structs. Uses the long_name and standard_name inputs from the linked
+%    variable list for clarification. 
 %
 %  Notes:
+%    Currently _QC_Identifier disabled, since writing of cell arrays
+%    (strings) into the netcdf document is actually not possible.
+%    
 %
 %  Examples:
 %    out_struct = addQcToNetcdfVariables(variable_list)
 %
 %  See also:
+%    CONFIGDTOUTPUTNETCDFL1
+%    CONFIGDTOUTPUTNETCDFL2
+%    GENERATEOUTPUTNETCDF
+%    COMBINEDATAANDQC
 %
 %  Authors:
 %    Andreas Krietemeyer  <akrietemeyer@socib.es>
@@ -49,12 +60,12 @@ for i=1:numel(names)
     out_struct.(strcat(names{i}, '_QC')).attributes(2,1).value = strcat('QC_of_', variable_list.(names{i}).attributes(2).value);
     
     %% Add _QC_Identifier
-    out_struct.(strcat(names{i}, '_QC_Identifier')).dimensions = variable_list.(names{i}).dimensions;
-    out_struct.(strcat(names{i}, '_QC_Identifier')).attributes = struct();
-    out_struct.(strcat(names{i}, '_QC_Identifier')).attributes(1,1).name = variable_list.(names{i}).attributes(1).name;
-    out_struct.(strcat(names{i}, '_QC_Identifier')).attributes(1,1).value = strcat('QC_Identifier', variable_list.(names{i}).attributes(1).value);
-    out_struct.(strcat(names{i}, '_QC_Identifier')).attributes(2,1).name = variable_list.(names{i}).attributes(2).name;
-    out_struct.(strcat(names{i}, '_QC_Identifier')).attributes(2,1).value = strcat('QC_Identifier', variable_list.(names{i}).attributes(2).value);
+%     out_struct.(strcat(names{i}, '_QC_Identifier')).dimensions = variable_list.(names{i}).dimensions;
+%     out_struct.(strcat(names{i}, '_QC_Identifier')).attributes = struct();
+%     out_struct.(strcat(names{i}, '_QC_Identifier')).attributes(1,1).name = variable_list.(names{i}).attributes(1).name;
+%     out_struct.(strcat(names{i}, '_QC_Identifier')).attributes(1,1).value = strcat('QC_Identifier', variable_list.(names{i}).attributes(1).value);
+%     out_struct.(strcat(names{i}, '_QC_Identifier')).attributes(2,1).name = variable_list.(names{i}).attributes(2).name;
+%     out_struct.(strcat(names{i}, '_QC_Identifier')).attributes(2,1).value = strcat('QC_Identifier', variable_list.(names{i}).attributes(2).value);
 end
 
 end

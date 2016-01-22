@@ -121,4 +121,12 @@ gridding_qc_config.spikeCheck.passingParameters = {
         [{'turbidity'}; 6; 5]
     };
 
+gridding_qc_config.specialGradientCheck.functionHandle = str2func('specialGradientCheck');
+gridding_qc_config.specialGradientCheck.processOn = {
+    {'conductivity', 'density', 'salinity'}
+    };
+gridding_qc_config.specialGradientCheck.passingParameters = {
+        [{'conductivity'}; {'depth'}; 0.05; 0.05; 200; 4]
+    };
+
 end
