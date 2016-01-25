@@ -301,10 +301,14 @@ for deployment_idx = 1:numel(deployment_list)
     preprocessing_options.calibration_parameter_list = deployment.calibrations;
   end
   gridding_options = config.gridding_options;
-  netcdf_l1_options = config.output_netcdf_l1;
-  netcdf_l2_options = config.output_netcdf_l2;
   figproc_options = config.figures_processed;
   figgrid_options = config.figures_gridded;
+  
+  %% Configure netCDF variables for QC variables.
+  netcdf_l1_options = config.output_netcdf_l1;
+  netcdf_l1_options.variables = addQcToNetcdfVariables(netcdf_l1_options.variables);
+  netcdf_l2_options = config.output_netcdf_l2;
+  netcdf_l2_options.variables = addQcToNetcdfVariables(netcdf_l2_options.variables);
 
 
   %% Start deployment processing logging.
@@ -621,12 +625,13 @@ for deployment_idx = 1:numel(deployment_list)
   %% Generate L1 NetCDF file (processed data), if needed and possible.
   if ~isempty(fieldnames(data_processed)) && ~isempty(netcdf_l1_file)
     disp('Generating NetCDF L1 output...');
+    data_processed_combined = combineDataAndQc(data_processed, qc_processed);
     try
       outputs.netcdf_l1 = generateOutputNetCDF( ...
-        netcdf_l1_file, data_processed, meta_processed, deployment, ...
+        netcdf_l1_file, data_processed_combined, meta_processed, deployment, ...
         netcdf_l1_options.variables, ...
         netcdf_l1_options.dimensions, ...
-        netcdf_l1_options.attributes);
+        netcdf_l1_options.attributes);      
       disp(['Output NetCDF L1 (processed data) generated: ' ...
             outputs.netcdf_l1 '.']);
     catch exception
@@ -701,9 +706,10 @@ for deployment_idx = 1:numel(deployment_list)
   %% Generate L2 (gridded data) netcdf file, if needed and possible.
   if ~isempty(fieldnames(data_gridded)) && ~isempty(netcdf_l2_file)
     disp('Generating NetCDF L2 output...');
+    data_gridded_combined = combineDataAndQc(data_gridded, qc_gridded);
     try
       outputs.netcdf_l2 = generateOutputNetCDF( ...
-        netcdf_l2_file, data_gridded, meta_gridded, deployment, ...
+        netcdf_l2_file, data_gridded_combined, meta_gridded, deployment, ...
         netcdf_l2_options.variables, ...
         netcdf_l2_options.dimensions, ...
         netcdf_l2_options.attributes);

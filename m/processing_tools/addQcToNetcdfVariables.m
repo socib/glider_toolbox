@@ -13,7 +13,7 @@ function out_struct = addQcToNetcdfVariables(variable_list)
 %
 %  Notes:
 %    Currently _QC_Identifier disabled, since writing of cell arrays
-%    (strings) into the netcdf document is actually not possible.
+%    (strings) into the netcdf variables is not possible.
 %    
 %
 %  Examples:
@@ -52,12 +52,13 @@ for i=1:numel(names)
     %% Add original variable data
     out_struct.(names{i}) = variable_list.(names{i});
     %% Add _QC
-    out_struct.(strcat(names{i}, '_QC')).dimensions = variable_list.(names{i}).dimensions;
-    out_struct.(strcat(names{i}, '_QC')).attributes = struct();
-    out_struct.(strcat(names{i}, '_QC')).attributes(1,1).name = variable_list.(names{i}).attributes(1).name;
-    out_struct.(strcat(names{i}, '_QC')).attributes(1,1).value = strcat('QC_of_', variable_list.(names{i}).attributes(1).value);
-    out_struct.(strcat(names{i}, '_QC')).attributes(2,1).name = variable_list.(names{i}).attributes(2).name;
-    out_struct.(strcat(names{i}, '_QC')).attributes(2,1).value = strcat('QC_of_', variable_list.(names{i}).attributes(2).value);
+    new_name = strcat('QC_', names{i});
+    out_struct.(new_name).dimensions = variable_list.(names{i}).dimensions;
+    out_struct.(new_name).attributes = struct();
+    out_struct.(new_name).attributes(1,1).name = variable_list.(names{i}).attributes(1).name;
+    out_struct.(new_name).attributes(1,1).value = strcat('QC of: ', variable_list.(names{i}).attributes(1).value);
+    out_struct.(new_name).attributes(2,1).name = variable_list.(names{i}).attributes(2).name;
+    out_struct.(new_name).attributes(2,1).value = strcat('QC of: ', variable_list.(names{i}).attributes(2).value);
     
     %% Add _QC_Identifier
 %     out_struct.(strcat(names{i}, '_QC_Identifier')).dimensions = variable_list.(names{i}).dimensions;

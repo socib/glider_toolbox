@@ -74,7 +74,7 @@ preprocessing_qc_options.performQC = true;
 
 preprocessing_qc_options.summaryFileName = 'qc_preprocessing.log';
 
-preprocessing_qc_options.replaceWithNans = true;
+preprocessing_qc_options.replaceWithNans = false;
 
 preprocessing_qc_options.checkAllForNan.switch = true;
 preprocessing_qc_options.checkAllForNan.functionHandle = str2func('nanCheck');

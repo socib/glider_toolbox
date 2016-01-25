@@ -8,10 +8,12 @@ function combined_struct = combineDataAndQc(data_struct, qc_struct)
 %    Returns one structure consisting the data and QC flagged output, as
 %    well as the QC identifiers. To add data to the COMBINED_STRUCT, the
 %    QC_STRUCT fieldnames should be the same as those in the DATA_STRUCT. 
-%
-%  Notes:
 %    Adds only qcFlaggedOutput and appliedQcIdentifiers to data fields that
 %    have the same fieldname than those in DATA_STRUCT.
+%
+%  Notes:
+%    Currently, the applied QC identifier is disabled, since strings cannot
+%    be stored within the netCDF variable data.
 %
 %  Examples:
 %    test_struct.time = [1 2 3 4 5];
@@ -50,8 +52,9 @@ combined_struct = struct();
 for i=1:numel(names_data)
     combined_struct.(names_data{i}) = data_struct.(names_data{i});
     if isfield(qc_struct, (names_data{i}))
-        combined_struct.(strcat(names_data{i}, '_QC')) = qc_struct.(names_data{i}).qcFlaggedOutput;
-        %combined_struct.(strcat(names_data{i}, '_QC_Identifier')) = qc_struct.(names_data{i}).appliedQcIdentifiers;
+        new_name = strcat('QC_', names_data{i});
+        combined_struct.(new_name) = qc_struct.(names_data{i}).qcFlaggedOutput;
+        %combined_struct.(new_name) = qc_struct.(names_data{i}).appliedQcIdentifiers;
     else
         disp('QC variable name not found')
     end
