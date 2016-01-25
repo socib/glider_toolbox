@@ -40,8 +40,7 @@ for o=1:floor(profile_index(end))
     idx = profile_index == o;
     temp_data = data(idx);
     temp_depth = depth(idx);
-    profile = [temp_data'; temp_depth'];
-    qcFlaggedOutput(idx) = specialGradientCheck(profile, gradient_threshold, diff_threshold, depth_threshold, qc_flag);
+    qcFlaggedOutput(idx) = specialGradientCheck(temp_data', temp_depth', gradient_threshold, diff_threshold, depth_threshold, qc_flag);
 end
 
 end
