@@ -7,8 +7,7 @@ function preprocessing_qc_options = configDataPreprocessingQC(data_preprocessed)
 %
 %  Description:
 %    Returns a struct setting the options for the quality controls applied
-%    to the preprocessed data. Defines the output file name for the logging
-%    step.
+%    to the preprocessed data.
 %    
 %    Each check must be defined as preprocessing_qc_options.PROCESSNAME and
 %    has to contain the struct entries functionHandle, processOn and
@@ -67,14 +66,6 @@ function preprocessing_qc_options = configDataPreprocessingQC(data_preprocessed)
 %
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-preprocessing_qc_options = struct();
-
-preprocessing_qc_options.performQC = true;
-
-preprocessing_qc_options.summaryFileName = 'qc_preprocessing.log';
-
-preprocessing_qc_options.replaceWithNans = false;
 
 preprocessing_qc_options.checkAllForNan.switch = true;
 preprocessing_qc_options.checkAllForNan.functionHandle = str2func('nanCheck');

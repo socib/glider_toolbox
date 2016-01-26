@@ -1,18 +1,26 @@
 function qcFlaggedOutput = performSpecialGradientCheck(data, depth, profile_index, gradient_threshold, diff_threshold, depth_threshold, qc_flag)
-%PERFORMSPECIALGRADIENTCHECK  One-line description here, please.
+%PERFORMSPECIALGRADIENTCHECK  Calls the specialGradientCheck.
 %
 %  Syntax:
 %    QCFLAGGEDOUTPUT = PERFORMSPECIALGRADIENTCHECK(DATA, DEPTH, PROFILE_INDEX, GRADIENT_THRESHOLD, DIFF_THRESHOLD, DEPTH_THRESHOLD, QC_FLAG)
 %
 %  Description:
-%    QCFLAGGEDOUTPUT = PERFORMSPECIALGRADIENTCHECK(DATA, DEPTH, PROFILE_INDEX, GRADIENT_THRESHOLD, DIFF_THRESHOLD, DEPTH_THRESHOLD, QC_FLAG) Detailed description here, please.
+%    Calls the specialGradientCheck for the specified profiles and returns
+%    the merged QC outputs.
 %
 %  Notes:
+%    Make sure that (especially) the gradient_threshold is wisely chosen,
+%    if you are using this test. 
 %
 %  Examples:
 %    qcFlaggedOutput = performSpecialGradientCheck(data, depth, profile_index, gradient_threshold, diff_threshold, depth_threshold, qc_flag)
 %
 %  See also:
+%    PERFORMQC
+%    PERFORMGRIDDEDQC
+%    CONFIGDATAPREPROCESSINGQC
+%    CONFIGDATAPROCESSINGQC
+%    CONFIGDATAGRIDDINGQC
 %
 %  Authors:
 %    Andreas Krietemeyer  <akrietemeyer@socib.es>

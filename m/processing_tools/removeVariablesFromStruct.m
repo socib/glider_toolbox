@@ -1,26 +1,23 @@
-function bool = checkForTwoDimensionalData(data)
-%CHECKFORTWODIMENSIONALDATA  Simple check, if the data has at least 2 dimensions.
+function data_struct_output = removeVariablesFromStruct(data_struct_input, remove_cell_strings, prefix)
+%REMOVEVARIABLESFROMSTRUCT  Removes variables from input data struct.
 %
 %  Syntax:
-%    BOOL = CHECKFORTWODIMENSIONALDATA(DATA)
+%    DATA_STRUCT_OUTPUT = REMOVEVARIABLESFROMSTRUCT(DATA_STRUCT_INPUT, REMOVE_CELL_STRINGS, PREFIX)
 %
 %  Description:
-%    Returns true (1) or false (0), if the column of the data array has
-%    more than one entry.
-%    Care, no cross-check validation, if it is really only 2D or multi
-%    dimensional. Also, if a 1D array is passed (and should correctly be
-%    identified as false), it must be a row-array.
-%    Function is used to determine, if the incoming data array is gridded
-%    data or just a one dimensional array.
+%    This function removes variables from the specified DATA_STRUCT_INPUT.
+%    A prefix can be added to the strings stored in the REMOVE_CELL_STRINGS
+%    cell.
 %
 %  Notes:
-%    Input data array should be a row x column array.
+%    Actually, if no prefix is desired, an empty string must be given to
+%    the function.
 %
 %  Examples:
-%    bool = checkForTwoDimensionalData(data)
+%    data_struct_output = removeVariablesFromStruct(data_struct_input, remove_cell_strings, prefix)
 %
 %  See also:
-%    SIZE
+%    COMBINEDATAANDQC
 %
 %  Authors:
 %    Andreas Krietemeyer  <akrietemeyer@socib.es>
@@ -42,13 +39,13 @@ function bool = checkForTwoDimensionalData(data)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-dataDimensions = size(data);
+data_struct_output = data_struct_input;
 
-if dataDimensions(2)>=2
-    bool=true;
-else
-    bool=false;
+for i=1:length(remove_cell_strings)
+    searched_field = strcat(prefix, remove_cell_strings{i});
+    if isfield(data_struct_input, searched_field)
+        data_struct_output = rmfield(data_struct_output, searched_field);
+    end
 end
-
 
 end

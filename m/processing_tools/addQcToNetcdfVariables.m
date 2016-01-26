@@ -1,20 +1,19 @@
 function out_struct = addQcToNetcdfVariables(variable_list)
-%ADDQCTONETCDFVARIABLES  Adds QC structs for netcdf generation.
+%ADDQCTONETCDFVARIABLES  Adds QC structs for NetCDF generation.
 %
 %  Syntax:
 %    OUT_STRUCT = ADDQCTONETCDFVARIABLES(VARIABLE_LIST)
 %
 %  Description:
-%    Uses existing variable list from one configDTOutputNetCDF to add QC
+%    Uses existing variable list from a configDTOutputNetCDF to add QC
 %    structs to use the QC outputs for the netcdf generation.
-%    Adds the string identifier _QC and _QC_Identifier to the variable
+%    Adds the string identifier QC_ and QC_Identifier_ to the variable
 %    structs. Uses the long_name and standard_name inputs from the linked
-%    variable list for clarification. 
+%    variable list for clearness.
 %
 %  Notes:
-%    Currently _QC_Identifier disabled, since writing of cell arrays
-%    (strings) into the netcdf variables is not possible.
-%    
+%    Currently QC_Identifier_ disabled, since writing of cell arrays
+%    (strings) into the NetCDF variables is not possible. 
 %
 %  Examples:
 %    out_struct = addQcToNetcdfVariables(variable_list)

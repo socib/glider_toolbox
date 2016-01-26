@@ -203,6 +203,9 @@ config.processing_options_seaglider = configDataProcessingSeaglider();
 config.processing_options_seaexplorer = configDataProcessingSeaExplorer();
 config.gridding_options = configDataGridding();
 
+%% Configure basic quality control options.
+config.basic_qc_config = configBasicQualityControl();
+config.basic_qc_config.ignore_qc_variables_for_netCDF = configDTOutputNetCDFIgnoreQcParameters();
 
 %% Configure file download and conversion and data loading.
 config.file_options_slocum = configDTFileOptionsSlocum();
@@ -551,11 +554,11 @@ for deployment_idx = 1:numel(deployment_list)
   end
   
   %% Perform Quality Control methods upon preprocessing data and log differences.
-  if ~isempty(fieldnames(data_preprocessed)) && ~isempty(fieldnames(config.preprocessing_qc_options)) && config.preprocessing_qc_options.performQC
+  if ~isempty(fieldnames(data_preprocessed)) && ~isempty(fieldnames(config.preprocessing_qc_options)) && config.basic_qc_config.preprocessing.performQC
       disp('Perform QC upon preprocessed data...')
       try
           qc_preprocessed = performQC(data_preprocessed, config.preprocessing_qc_options);
-          logQC(qc_preprocessed, data_preprocessed, config.preprocessing_qc_options.summaryFileName);
+          logQC(qc_preprocessed, data_preprocessed, config.basic_qc_config.preprocessing.summaryFileName);
       catch exception
           disp('Error processing QC methods.');
           disp(getReport(exception, 'extended'));
@@ -563,7 +566,7 @@ for deployment_idx = 1:numel(deployment_list)
   end
   
   %% Replace bad flagged preprocessed data with NaNs?
-  if config.preprocessing_qc_options.replaceWithNans
+  if config.basic_qc_config.preprocessing.useNanReplacementForProcessing
       if ~isempty(fieldnames(qc_preprocessed))
           disp('Replace bad flagged data with NaNs...');
           try
@@ -599,7 +602,7 @@ for deployment_idx = 1:numel(deployment_list)
   end
 
   %% Perform Quality Control methods upon processing data.
-  if ~isempty(fieldnames(data_processed)) && ~isempty(fieldnames(config.processing_qc_options)) && config.processing_qc_options.performQC
+  if ~isempty(fieldnames(data_processed)) && ~isempty(fieldnames(config.processing_qc_options)) && config.basic_qc_config.processing.performQC
       disp('Perform QC upon processed data...')
       try
           qc_processed = performQC(data_processed, config.processing_qc_options);
@@ -608,24 +611,13 @@ for deployment_idx = 1:numel(deployment_list)
           disp(getReport(exception, 'extended'));
       end
   end
-
-  %% Replace bad flagged processed data with NaNs?
-  if config.processing_qc_options.replaceWithNans
-      if ~isempty(fieldnames(qc_processed))
-          disp('Replace bad flagged data with NaNs...');
-          try
-            data_processed = filterGoodData(qc_processed, data_processed);
-          catch exception
-              disp('Error replacing bad flagged data:');
-              disp(getReport(exception, 'extended'));
-          end
-      end
-  end
-
+  
+  
   %% Generate L1 NetCDF file (processed data), if needed and possible.
   if ~isempty(fieldnames(data_processed)) && ~isempty(netcdf_l1_file)
     disp('Generating NetCDF L1 output...');
     data_processed_combined = combineDataAndQc(data_processed, qc_processed);
+    data_processed_combined = removeVariablesFromStruct(data_processed_combined, config.basic_qc_config.ignore_qc_variables_for_netCDF, 'QC_');
     try
       outputs.netcdf_l1 = generateOutputNetCDF( ...
         netcdf_l1_file, data_processed_combined, meta_processed, deployment, ...
@@ -641,6 +633,18 @@ for deployment_idx = 1:numel(deployment_list)
     end
   end
 
+  %% Replace bad flagged processed data with NaNs?
+  if config.basic_qc_config.processing.useNanReplacementForGridding
+      if ~isempty(fieldnames(qc_processed))
+          disp('Replace bad flagged data with NaNs...');
+          try
+            data_processed = filterGoodData(qc_processed, data_processed);
+          catch exception
+              disp('Error replacing bad flagged data:');
+              disp(getReport(exception, 'extended'));
+          end
+      end
+  end
 
   %% Generate processed data figures.
   if ~isempty(fieldnames(data_processed)) && ~isempty(figure_dir)
@@ -689,24 +693,12 @@ for deployment_idx = 1:numel(deployment_list)
           disp(getReport(exception, 'extended'));
       end
   end
-  
-  %% Replace bad flagged gridded data with NaNs?
-  if config.gridding_qc_options.replaceWithNans
-      if ~isempty(fieldnames(qc_gridded))
-          disp('Replace bad flagged data with NaNs...');
-          try
-            data_gridded = filterGoodData(qc_gridded, data_gridded);
-          catch exception
-              disp('Error replacing bad flagged data:');
-              disp(getReport(exception, 'extended'));
-          end
-      end
-  end
 
   %% Generate L2 (gridded data) netcdf file, if needed and possible.
   if ~isempty(fieldnames(data_gridded)) && ~isempty(netcdf_l2_file)
     disp('Generating NetCDF L2 output...');
     data_gridded_combined = combineDataAndQc(data_gridded, qc_gridded);
+    data_gridded_combined = removeVariablesFromStruct(data_gridded_combined, config.basic_qc_config.ignore_qc_variables_for_netCDF, 'QC_');
     try
       outputs.netcdf_l2 = generateOutputNetCDF( ...
         netcdf_l2_file, data_gridded_combined, meta_gridded, deployment, ...
@@ -720,6 +712,19 @@ for deployment_idx = 1:numel(deployment_list)
             netcdf_l2_file ':']);
       disp(getReport(exception, 'extended'));
     end
+  end
+  
+  %% Replace bad flagged gridded data with NaNs?
+  if config.basic_qc_config.gridding.useNanReplacementForPlotting
+      if ~isempty(fieldnames(qc_gridded))
+          disp('Replace bad flagged data with NaNs...');
+          try
+            data_gridded = filterGoodData(qc_gridded, data_gridded);
+          catch exception
+              disp('Error replacing bad flagged data:');
+              disp(getReport(exception, 'extended'));
+          end
+      end
   end
 
   %% Generate gridded data figures.

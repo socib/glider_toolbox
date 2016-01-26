@@ -24,6 +24,7 @@ function data_struct_filtered = filterGoodData(qc_struct, data_struct)
 %    PERFORMGRIDDEDQC
 %    PREPROCESSGLIDERDATA
 %    PROCESSGLIDERDATA
+%    FILLINVALIDVALUES
 %
 %  Authors:
 %    Andreas Krietemeyer  <akrietemeyer@socib.es>

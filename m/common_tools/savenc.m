@@ -50,6 +50,9 @@ function savenc(var_data, var_meta, global_meta, filename)
 %    cause trouble with attributes like '_FillValue' (because it is not a valid
 %    field name).
 %
+%    AK: Added 'stable' to intersect call to prevent a confusing sort of QC
+%    and non-QC variables.
+%
 %  Examples:
 %    global_meta = struct()
 %    global_meta.name = 'random.nc'
@@ -206,7 +209,7 @@ function savenc(var_data, var_meta, global_meta, filename)
         end
       end
       % Set variable dimensions and attributes, and variable data.
-      field_name_list = intersect(fieldnames(var_data), fieldnames(var_meta));
+      field_name_list = intersect(fieldnames(var_data), fieldnames(var_meta), 'stable');
       for var_idx = 1:numel(field_name_list)
         field_name = field_name_list{var_idx};
         if isfield(var_meta.(field_name), 'name')

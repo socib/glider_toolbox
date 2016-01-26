@@ -12,10 +12,16 @@ function qc_out = specialGradientCheck(input_data, input_depth, gradient_thresho
 %    specified DEPTH_THRESHOLD. The test does not consider the differences
 %    in depth, but assumes a sampling that adequately reproduces the
 %    changes with depth.
+%    If a gradient according to the specified gradient_threshold is
+%    identified, all measurements after this gradient will be flagged,
+%    until the diff_threshold is reached. The diff_threshold is the valid
+%    range from the point where the gradient appeared. This is particularly
+%    useful for CTD conductivity data, where we assume, that the data from
+%    a specific depth (depth_threshold), behaves almost like a flat line.
 %
 %  Notes:
-%    This function peroforms only a specific gradient check. We assume 
-%    fixed depth steps.
+%    This function performs a gradient with including flat line test.
+%    We also assume fixed depth steps.
 %
 %  Examples:
 %    qc_out = gradientCheck(profile, threshold, depth_threshold)
@@ -55,8 +61,6 @@ end
 
 all_data = input_data;
 all_depth = input_depth;
-
-
 
 data = input_data(depth_idx:end);
 non_nan_idx = find(~isnan(data));

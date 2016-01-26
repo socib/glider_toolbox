@@ -84,10 +84,8 @@ else
     end
 end
 
-removeNames = {'performQC', 'checkAllForNan', 'summaryFileName', 'replaceWithNans'};
-removeFields = isfield(performQC_config, removeNames);
-removeNames = removeNames(removeFields);
-performQC_config = rmfield(performQC_config, removeNames);
+removeNames = {'checkAllForNan'};
+performQC_config = removeVariablesFromStruct(performQC_config, removeNames, '');
 
 
 fields = fieldnames(performQC_config);

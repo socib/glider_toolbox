@@ -10,6 +10,8 @@ function logQC(qc_data, data, log_file_name)
 %
 %  Notes:
 %    Only interesting for debugging / logging purposes of the QC outputs.
+%    Data struct generally not needed - in this case just added for
+%    debugging purposes. 
 %
 %  Examples:
 %    logQC(qc_data, data, log_file_name)
@@ -17,6 +19,7 @@ function logQC(qc_data, data, log_file_name)
 %  See also:
 %    CONFIGDATAPREPROCESSINGQC
 %    PERFORMQC
+%    FILTERGOODDATA
 %
 %  Authors:
 %    Andreas Krietemeyer  <akrietemeyer@socib.es>

@@ -7,6 +7,9 @@ function output_data_struct = performGriddedQC(gridded_data, grid_qc_config)
 %  Description:
 %    In the end, it behaves finally like the performQC function. 
 %    Performs the defined QC methods with the specified configurations.
+%    In general, this function gives each available (and specified) profile
+%    to the determined QC method and merges the output to conform with the
+%    designated processOn variables.
 %    Returns a struct consisting of the entries qcFlaggedOutput and
 %    appliedQcIdentifiers. The first entry is the flagged QC output of the
 %    defined QC functions. The second one tells, if a data point has been
@@ -38,7 +41,9 @@ function output_data_struct = performGriddedQC(gridded_data, grid_qc_config)
 %    Take care to pass only the output of the configDataGriddingQC as
 %    grid_qc_config to this function, since the inserting of data is
 %    performed within this function (unlike the preprocessing and
-%    processing configurations).
+%    processing configurations). Most steps executed in this function are
+%    to correctly handle the argument passing and the effection of 1D QC
+%    output to 2D data and vice versa.
 %
 %  Examples:
 %    output_data_struct = performGriddedQC(gridded_data, grid_qc_config)
@@ -101,10 +106,8 @@ else
     end
 end
 
-removeNames = {'performQC', 'checkAllForNan', 'summaryFileName', 'replaceWithNans'};
-removeFields = isfield(grid_qc_config, removeNames);
-removeNames = removeNames(removeFields);
-grid_qc_config = rmfield(grid_qc_config, removeNames);
+removeNames = {'checkAllForNan'};
+grid_qc_config = removeVariablesFromStruct(grid_qc_config, removeNames, '');
 
 %% Process other QC Methods (retrieved from config).
 dimensions = 0;
