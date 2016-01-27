@@ -684,7 +684,7 @@ for deployment_idx = 1:numel(deployment_list)
   end
   
   %% Perform Quality Control methods upon gridded data.
-  if ~isempty(fieldnames(data_gridded)) && ~isempty(fieldnames(config.gridding_qc_options)) && config.gridding_qc_options.performQC
+  if ~isempty(fieldnames(data_gridded)) && ~isempty(fieldnames(config.gridding_qc_options)) && config.basic_qc_config.gridding.performQC
       disp('Perform QC upon gridded data...')
       try
           qc_gridded = performGriddedQC(data_gridded, config.gridding_qc_options);

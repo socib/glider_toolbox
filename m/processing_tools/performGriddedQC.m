@@ -185,7 +185,7 @@ for i=1:numel(tests)
                     %to process on is 2D data and the idx is only 1D
                     tempidx = find(idx);
                     for p=1:length(tempidx)
-                        output_data_struct.(var_name).qcFlaggedOutput(tempidx(p),:) = qcOut(tempidx);
+                        output_data_struct.(var_name).qcFlaggedOutput(tempidx(p),:) = qcOut(tempidx(p));
                         output_data_struct.(var_name).appliedQcIdentifiers(tempidx(p),:) = {char(grid_qc_config.(tests{i}).functionHandle)};
                     end
                 else
