@@ -42,6 +42,15 @@ function qcFlaggedOutput = performSpecialGradientCheck(data, depth, profile_inde
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%% Check input.
+validateattributes(data, {'numeric'}, {'nonempty'})
+validateattributes(depth, {'numeric'}, {'nonempty'})
+validateattributes(profile_index, {'numeric'}, {'nonempty'})
+validateattributes(gradient_threshold, {'numeric'}, {'nonempty'})
+validateattributes(depth_threshold, {'numeric'}, {'nonempty'})
+validateattributes(qc_flag, {'numeric'}, {'nonempty'})
+
+%% Begin processing.
 qcFlaggedOutput=ones(length(data),1);
 
 for o=1:floor(profile_index(end))

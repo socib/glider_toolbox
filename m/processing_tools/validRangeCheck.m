@@ -75,8 +75,14 @@ function qcFlaggedOutput = validRangeCheck(data, minRange, maxRange, qcFlag, var
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%% Check input.
 narginchk(4,10)
+validateattributes(data, {'numeric'}, {'nonempty'})
+validateattributes(minRange, {'numeric'}, {'nonempty'})
+validateattributes(maxRange, {'numeric'}, {'nonempty'})
+validateattributes(qcFlag, {'numeric'}, {'nonempty'})
 
+%% Begin processing.
 if nargin==4 
     idxAboveThreshold = find(data > maxRange);
     idxBelowThreshold = find(data < minRange);

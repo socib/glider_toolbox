@@ -39,6 +39,12 @@ function data_struct_output = removeVariablesFromStruct(data_struct_input, remov
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%% Check input.
+validateattributes(data_struct_input, {'struct'}, {'nonempty'})
+validateattributes(remove_cell_strings, {'cell'}, {'nonempty'})
+validateattributes(prefix, {'char'}, {})
+
+%% Begin assembly.
 data_struct_output = data_struct_input;
 
 for i=1:length(remove_cell_strings)

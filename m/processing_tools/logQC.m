@@ -41,6 +41,13 @@ function logQC(qc_data, data, log_file_name)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%% Check input.
+narginchk(3,3)
+validateattributes(qc_data, {'struct'}, {'nonempty'})
+validateattributes(data, {'struct'}, {'nonempty'})
+validateattributes(log_file_name, {'char'}, {'nonempty'})
+
+%% Begin processing.
 dataLengthBeforeQc = length(data.time);
 fprintf('Starting log file QC output...\r\n')
 

@@ -50,8 +50,8 @@ function savenc(var_data, var_meta, global_meta, filename)
 %    cause trouble with attributes like '_FillValue' (because it is not a valid
 %    field name).
 %
-%    AK: Added 'stable' to intersect call to prevent a confusing sort of QC
-%    and non-QC variables.
+%    AK: Added 'stable' to intersect call to prevent alphabetical sorting 
+%    of QC and non-QC variables.
 %
 %  Examples:
 %    global_meta = struct()

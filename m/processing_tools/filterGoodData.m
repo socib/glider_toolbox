@@ -46,6 +46,12 @@ function data_struct_filtered = filterGoodData(qc_struct, data_struct)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%% Check input.
+narginchk(2,2)
+validateattributes(qc_struct, {'struct'}, {'nonempty'})
+validateattributes(data_struct, {'struct'}, {'nonempty'})
+
+%% Begin Processing.
 data_struct_filtered = data_struct;
 badIdx = struct();
 fields = fieldnames(data_struct);

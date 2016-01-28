@@ -77,7 +77,11 @@ function output_data_struct = performGriddedQC(gridded_data, grid_qc_config)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-%% Process NaN Check
+%% Check input.
+validateattributes(gridded_data, {'struct'}, {'nonempty'})
+validateattributes(grid_qc_config, {'struct'}, {'nonempty'})
+
+%% Process NaN Check.
 dataNames = fieldnames(gridded_data);
 if grid_qc_config.checkAllForNan.switch
     for i=1:numel(dataNames)

@@ -64,6 +64,11 @@ function output_data_struct = performQC(input_data_struct, performQC_config)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%% Check input.
+validateattributes(input_data_struct, {'struct'}, {'nonempty'})
+validateattributes(performQC_config, {'struct'}, {'nonempty'})
+
+%% Begin processing.
 qcInputLength=length(input_data_struct.time);
 output_data_struct = struct();
 

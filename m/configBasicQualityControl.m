@@ -52,4 +52,7 @@ basic_qc_configuration.processing.useNanReplacementForGridding = true;
 basic_qc_configuration.gridding.performQC = true;
 basic_qc_configuration.gridding.useNanReplacementForPlotting = true;
 
+basic_qc_configuration.applied_QC_LuT.QC_method_names = 'impossibleDateCheck impossibleLocationCheck validRangeCheck spikeCheck specialGradientCheck nanCheck';
+basic_qc_configuration.applied_QC_LuT.QC_method_IDs = [1, 2, 3, 4, 5, 9];
+
 end

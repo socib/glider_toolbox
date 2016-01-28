@@ -48,6 +48,15 @@ function qc_out = specialGradientCheck(input_data, input_depth, gradient_thresho
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%% Check input.
+validateattributes(input_data, {'numeric'}, {'nonempty'})
+validateattributes(input_depth, {'numeric'}, {'nonempty'})
+validateattributes(gradient_threshold, {'numeric'}, {'nonempty'})
+validateattributes(diff_threshold, {'numeric'}, {'nonempty'})
+validateattributes(depth_threshold, {'numeric'}, {'nonempty'})
+validateattributes(qc_flag, {'numeric'}, {'nonempty'})
+
+%% Begin processing.
 qc_out = ones(length(input_data),1);
 
 [temp, I] = sort(input_depth);

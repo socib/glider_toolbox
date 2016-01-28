@@ -68,6 +68,15 @@ function qcFlaggedOutput = calcSpike(data, limit, nonNanIndex, qcFlag, originalL
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%% Check input
+narginchk(5,6)
+validateattributes(data, {'numeric'}, {'nonempty'})
+validateattributes(limit, {'numeric'}, {'nonempty'})
+validateattributes(nonNanIndex, {'numeric'}, {'nonempty'})
+validateattributes(qcFlag, {'numeric'}, {'nonempty'})
+validateattributes(originalLength, {'numeric'}, {'nonempty'})
+
+%% Begin processing.
 qcFlaggedOutput = ones(originalLength, 1);
 
 if nargin == 5

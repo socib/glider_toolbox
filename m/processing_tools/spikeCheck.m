@@ -60,7 +60,11 @@ function qcFlaggedOutput = spikeCheck(data, qcFlag, varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%% Check input.
 narginchk(3,6)
+validateattributes(data, {'numeric'}, {'nonempty'})
+validateattributes(qcFlag, {'numeric'}, {'nonempty'})
+
 originalLength = length(data);
 
 %% Store indizes of non-nan values.
