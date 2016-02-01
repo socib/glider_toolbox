@@ -70,11 +70,8 @@ function qcFlaggedOutput = calcSpike(data, limit, nonNanIndex, qcFlag, originalL
 
 %% Check input
 narginchk(5,6)
-validateattributes(data, {'numeric'}, {'nonempty'})
 validateattributes(limit, {'numeric'}, {'nonempty'})
-validateattributes(nonNanIndex, {'numeric'}, {'nonempty'})
 validateattributes(qcFlag, {'numeric'}, {'nonempty'})
-validateattributes(originalLength, {'numeric'}, {'nonempty'})
 
 %% Begin processing.
 qcFlaggedOutput = ones(originalLength, 1);
