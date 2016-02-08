@@ -46,12 +46,12 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %        Unit conversions and manufacturer calibrations may be applied,
 %        if needed.
 %
-%      DATA_RAW should be a struct in the format returned by LOADSLOCUMDATA or
-%      LOADSEAGLIDERDATA, where each field is a vector sequence from the sensor 
-%      or variable with the same name. META_RAW should be the struct with the
-%      metadata required for the preprocessing. Currently it is only used for
-%      the following actions:
-%        - Seaglider log parameter alignment (see option SG_DIVE_PARAMS below).
+%    DATA_RAW should be a struct in the format returned by LOADSLOCUMDATA or
+%    LOADSEAGLIDERDATA, where each field is a vector sequence from the sensor
+%    or variable with the same name. META_RAW should be the struct with the
+%    metadata required for the preprocessing. Currently it is only used for
+%    the following actions:
+%      - Seaglider log parameter alignment (see option SG_DIVE_PARAMS below).
 %
 %    Preprocessed data is returned in struct DATA_PRE, where each field is a
 %    sequence of readings selected and preprocessed according to given options
@@ -239,7 +239,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %    BAR2DBAR
 %    SGDEPTH2PRES
 %    CALIBRATESBECT
-%    CALIBRATEWLECBBFL2
+%    CALIBRATEWLECOBBFL2
 %    
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
