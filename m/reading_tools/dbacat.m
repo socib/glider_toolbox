@@ -109,8 +109,8 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   error(nargchk(3, 9, nargin, 'struct'));
-  
-  
+
+
   %% Set options and default values.
   options.format = 'array';
   options.sensors = 'all';
@@ -145,7 +145,7 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
     end
   end
 
-  
+
   %% Set option flags and values.
   output_format = options.format;
   sensor_filtering = true;
@@ -158,8 +158,8 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
   if ischar(options.period) && strcmp(options.period, 'all')
     time_filtering = false;
   end
-  
-  
+
+
   %% Check for trivial empty input.
   if isempty(meta_list)
     meta_struct = struct();
@@ -177,8 +177,8 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
   else
     meta_struct = [meta_list{:}];
   end
-  
-  
+
+
   %% Cat metadata.
   all_sources = vertcat(meta_struct.sources);
   all_headers = vertcat(meta_struct.headers);
@@ -221,15 +221,15 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
     data_old(data_old_nan) = data_new(data_old_nan);
     data(row_indices, col_indices) = data_old;
   end
-  
-  
+
+
   %% Perform time filtering if needed.
   if time_filtering
     ts_select = ~(ts_unique < time_range(1) | ts_unique > time_range(2));
-    data = data(ts_select,:);
+    data = data(ts_select, :);
   end
-  
-  
+
+
   %% Perform sensor filtering if needed.
   if sensor_filtering
     [sensor_select, ~] = ismember(meta.sensors, sensor_list);
@@ -238,13 +238,13 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
     meta.bytes = meta.bytes(sensor_select);
     data = data(:,sensor_select);
   end
-  
-  
+
+
   %% Convert output data to struct format if needed.
   switch output_format
     case 'array'
     case 'struct'
-      data = cell2struct(num2cell(data,1), meta.sensors, 2);
+      data = cell2struct(num2cell(data, 1), meta.sensors, 2);
     otherwise
       error('glider_toolbox:dbacat:InvalidFormat', ...
             'Invalid output format: %s.', output_format)

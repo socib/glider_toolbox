@@ -105,16 +105,16 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   error(nargchk(4, 14, nargin, 'struct'));
-  
-  
+
+
   %% Set options and default values.
   options.format = 'array';
   options.timenav = 'm_present_time';
   options.timesci = 'sci_m_present_time';
   options.sensors = 'all';
   options.period = 'all';
-  
-  
+
+
   %% Parse optional arguments.
   % Get option key-value pairs in any accepted call signature.
   argopts = varargin;
@@ -143,7 +143,7 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
     end
   end
 
-  
+
   %% Set option flags and values.
   output_format = options.format;
   timestamp_nav = options.timenav;
@@ -158,8 +158,8 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
   if ischar(options.period) && strcmp(options.period, 'all')
     time_filtering = false;
   end
-  
-  
+
+
   %% Merge data and metadata checking for empty input cases.
   if isempty(meta_sci.sources) && isempty(meta_nav.sources)
     % No input data.
@@ -249,18 +249,8 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
     % Unique timestamp to be used for time filtering.
     timestamp_merged = timestamp_nav;
   end
-  
-  
-  %% Perform sensor filtering if needed.
-  if sensor_filtering
-    [sensor_select, ~] = ismember(meta.sensors, sensor_list);
-    meta.sensors = meta.sensors(sensor_select);
-    meta.units = meta.units(sensor_select);
-    meta.bytes = meta.bytes(sensor_select);
-    data = data(:,sensor_select);
-  end
-  
-  
+
+
   %% Perform time filtering if needed.
   if time_filtering
     [ts_merged_present, ts_merged_col] = ...
@@ -274,8 +264,18 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
     ts_select = ~(ts_merged < time_range(1) | ts_merged > time_range(2));
     data = data(ts_select, :);
   end
-  
-  
+
+
+  %% Perform sensor filtering if needed.
+  if sensor_filtering
+    [sensor_select, ~] = ismember(meta.sensors, sensor_list);
+    meta.sensors = meta.sensors(sensor_select);
+    meta.units = meta.units(sensor_select);
+    meta.bytes = meta.bytes(sensor_select);
+    data = data(:,sensor_select);
+  end
+
+
   %% Convert output data to struct format if needed.
   switch output_format
     case 'array'
