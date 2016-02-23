@@ -641,7 +641,7 @@ function ncl2_info = configDTOutputNetCDFL2()
     'creator_url'                  '' % deployment_author_url
     'data_center'                  '' % deployment_data_center
     'data_center_email'            '' % deployment_data_center_email
-    'data_mode'                    delayed time'
+    'data_mode'                    'delayed time'
     'date_modified'                'undefined'
     'featureType'                  'trajectoryProfile'
     'geospatial_lat_max'           'undefined'
