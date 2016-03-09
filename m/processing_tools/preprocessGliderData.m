@@ -83,9 +83,9 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %          LONGITUDE: longitude sequence name.
 %          LATITUDE: latitude sequence name.
 %        It may have the following optional fields (empty or missing):
-%          STATUS: position status sequence name.
-%          STATUS_GOOD: position status good values or filter.
-%          STATUS_BAD:  position status bad values or filter.
+%          POSITION_STATUS: position status sequence name.
+%          POSITION_GOOD: position status good values or filter.
+%          POSITION_BAD:  position status bad values or filter.
 %          CONVERSION: position coordinate conversion.
 %            Handle or name of the position coordinate conversion function.
 %            If present and not empty, the selected longitude and latitude 
