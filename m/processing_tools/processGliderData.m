@@ -817,9 +817,9 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
         {flow_ctd_time flow_ctd_depth 'profile_index'};
       meta_proc.flow_ctd.pitch_value = options.flow_ctd_pitch_value;
     end
-    meta_proc.method = 'computeCTDFlowSpeed';
-    meta_proc.min_pitch = options.flow_ctd_min_pitch;
-    meta_proc.min_vel = options.flow_ctd_min_velocity;
+    meta_proc.flow_ctd.method = 'computeCTDFlowSpeed';
+    meta_proc.flow_ctd.min_pitch = options.flow_ctd_min_pitch;
+    meta_proc.flow_ctd.min_vel = options.flow_ctd_min_velocity;
   end
  
   
