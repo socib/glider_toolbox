@@ -5,14 +5,14 @@ function ncl0_info = configRTOutputNetCDFL0Seaglider()
 %    NCL0_INFO = CONFIGRTOUTPUTNETCDFL0SEAGLIDER()
 %
 %  Description:
-%    NCL0_INFO = CONFIGRTOUTPUTNETCDFL0SEAGLIDER() should return a struct 
-%    describing the structure of the NetCDF file for raw Seaglider glider 
+%    NCL0_INFO = CONFIGRTOUTPUTNETCDFL0SEAGLIDER() should return a struct
+%    describing the structure of the NetCDF file for raw Seaglider glider
 %    deployment data in real time (see the note about the file generation).
 %    The returned struct should have the following fields:
-%      DIMENSIONS: struct array with fields 'NAME' and 'LENGTH' defining the 
+%      DIMENSIONS: struct array with fields 'NAME' and 'LENGTH' defining the
 %        dimensions for variables in the file.
 %        A variable may have dimensions not listed here or with their length
-%        left undefined (empty field value), and they are inferred from the 
+%        left undefined (empty field value), and they are inferred from the
 %        data during the generation of the file. However, it is useful to preset
 %        the length of a dimension for record or string size dimensions.
 %      ATTRIBUTES: struct array with fields 'NAME' and 'VALUE' defining global
@@ -32,7 +32,7 @@ function ncl0_info = configRTOutputNetCDFL0Seaglider()
 %
 %  Notes:
 %    The NetCDF file will be created by the function GENERATEOUTPUTNETCDF with
-%    the structure provided here and the metadata and data returned by 
+%    the structure provided here and the metadata and data returned by
 %    LOADSEAGLIDERDATA.
 %
 %    Please note that global attributes described here may be overwritten by
@@ -71,7 +71,7 @@ function ncl0_info = configRTOutputNetCDFL0Seaglider()
 
   %% Define variable information.
   % To define the variable attributes easily and readably, add the corresponding
-  % variable field to the struct defined below, with its attributes defined in 
+  % variable field to the struct defined below, with its attributes defined in
   % a cell array (attribute name in first column and attribute value in second).
   % This cell array will be converted at the end of the function to the proper
   % representation needed by SAVENC.
@@ -675,7 +675,7 @@ function ncl0_info = configRTOutputNetCDFL0Seaglider()
     'long_name'     'boost depth'
     'standard_name' 'depth'
     'units'         'm'
-    'positive'      'down'    
+    'positive'      'down'
     'comments'      'Depth above which only boost pump runs.'
     '_FillValue'    default_fill_value };
 
@@ -909,7 +909,7 @@ function ncl0_info = configRTOutputNetCDFL0Seaglider()
     'units'         'kg l-1'
     'comments'      'Density of water at the first sample taken after reaching D_SURF (or D_FINISH, if enabled).'
     '_FillValue'    default_fill_value };
-  
+
   var_attr_list.FINISH_dpth = {
     'long_name'     'finish depth'
     'standard_name' 'depth'
@@ -923,13 +923,13 @@ function ncl0_info = configRTOutputNetCDFL0Seaglider()
     'units'         ''
     'comments'      ''
     '_FillValue'    default_fill_value };
-  
+
   var_attr_list.FINISH1_field02 = {
     'long_name'     ''
     'units'         ''
     'comments'      ''
     '_FillValue'    default_fill_value };
-  
+
   var_attr_list.FINISH1_field03 = {
     'long_name'     ''
     'units'         ''
@@ -2396,7 +2396,7 @@ function ncl0_info = configRTOutputNetCDFL0Seaglider()
     'units'         'Celsius'
     'comments'      'Temperature-compensated phase from Aanderaa oxygen optode.'
     '_FillValue'    default_fill_value };
-  
+
   var_attr_list.wl1_Chlref1 = {
     'long_name'     'chlorophyll reference'
     'units'         'counts'
@@ -2438,7 +2438,7 @@ function ncl0_info = configRTOutputNetCDFL0Seaglider()
     'units'         'Celsius'
     'comments'      'WETLabs ECO triplet puck temperature.'
     '_FillValue'    default_fill_value };
-  
+
   var_attr_list.wlbbfl2vmt_Chlref = {
     'long_name'     'chlorophyll reference'
     'units'         'counts'
@@ -2450,7 +2450,7 @@ function ncl0_info = configRTOutputNetCDFL0Seaglider()
     'units'         'counts'
     'comments'      'WETLabs ECO triplet puck chlorophyll signal output backscatter.'
     '_FillValue'    default_fill_value };
-    
+
   var_attr_list.wlbbfl2vmt_Cdomref = {
     'long_name'     'CDOM reference'
     'units'         'counts'
@@ -2578,7 +2578,7 @@ function ncl0_info = configRTOutputNetCDFL0Seaglider()
       var_dims = {dimension_gpsfix.name};
     elseif regexp(var_name, '^STATE_', 'once')
       var_dims = {dimension_time.name dimension_string32.name};
-    elseif any(regexp(var_name, '^(GC|SM_CCo)_', 'once')) ... 
+    elseif any(regexp(var_name, '^(GC|SM_CCo)_', 'once')) ...
         || any(regexp(var_name, '^(sbect)_', 'once')) ...
         || any(regexp(var_name, '^(wl1|wlbbfl2vmt)_', 'once')) ...
         || any(regexp(var_name, '^(aa1|aa4330)_', 'once')) ...

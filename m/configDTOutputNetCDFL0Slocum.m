@@ -5,14 +5,14 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
 %    NCL0_INFO = CONFIGDTOUTPUTNETCDFL0SLOCUM()
 %
 %  Description:
-%    NCL0_INFO = CONFIGDTOUTPUTNETCDFL0SLOCUM() should return a struct 
-%    describing the structure of the NetCDF file for raw Slocum glider 
+%    NCL0_INFO = CONFIGDTOUTPUTNETCDFL0SLOCUM() should return a struct
+%    describing the structure of the NetCDF file for raw Slocum glider
 %    deployment data in delayed time (see the note about the file generation).
 %    The returned struct should have the following fields:
-%      DIMENSIONS: struct array with fields 'NAME' and 'LENGTH' defining the 
+%      DIMENSIONS: struct array with fields 'NAME' and 'LENGTH' defining the
 %        dimensions for variables in the file.
 %        A variable may have dimensions not listed here or with their length
-%        left undefined (empty field value), and they are inferred from the 
+%        left undefined (empty field value), and they are inferred from the
 %        data during the generation of the file. However, it is useful to preset
 %        the length of a dimension for record or string size dimensions.
 %      ATTRIBUTES: struct array with fields 'NAME' and 'VALUE' defining global
@@ -32,7 +32,7 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
 %
 %  Notes:
 %    The NetCDF file will be created by the function GENERATEOUTPUTNETCDF with
-%    the structure provided here and the metadata and data returned by 
+%    the structure provided here and the metadata and data returned by
 %    LOADSLOCUMDATA.
 %
 %    Please note that global attributes described here may be overwritten by
@@ -71,7 +71,7 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
 
   %% Define variable information.
   % To define the variable attributes easily and readably, add the corresponding
-  % variable field to the struct defined below, with its attributes defined in 
+  % variable field to the struct defined below, with its attributes defined in
   % a cell array (attribute name in first column and attribute value in second).
   % This cell array will be converted at the end of the function to the proper
   % representation needed by SAVENC.
@@ -384,23 +384,23 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
 
   % BB3SLO sensor.
   var_attr_list.sci_bb3slo_b470_scaled = {
-    'long_name'     'blue backscatter'
+    'long_name'     'blue backscattering'
     'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_bb3slo_b532_scaled = {
-    'long_name'     'green backscatter'
+    'long_name'     'green backscattering'
     'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_bb3slo_b660_scaled = {
-    'long_name'     'red backscatter'
+    'long_name'     'red backscattering'
     'units'         '1'
     '_FillValue'    default_fill_value };
 
   % BBFL2S sensor.
   var_attr_list.sci_bbfl2s_bb_scaled = {
-    'long_name'     'backscatter'
+    'long_name'     'backscattering'
     'units'         '1'
     '_FillValue'    default_fill_value };
 
@@ -436,7 +436,7 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
   var_attr_list.sci_ocr504I_irrad4 = {
     'long_name'     'irradiance at 664nm wavelength'
     'standard_name' 'downwelling_spectral_spherical_irradiance_in_sea_water'
-    'units'         'uW cm-2 nm-1' 
+    'units'         'uW cm-2 nm-1'
     '_FillValue'    default_fill_value };
 
   % FLNTU sensor.

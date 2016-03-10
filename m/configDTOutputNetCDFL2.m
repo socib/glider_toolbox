@@ -9,10 +9,10 @@ function ncl2_info = configDTOutputNetCDFL2()
 %    describing the structure of the NetCDF file for gridded glider
 %    deployment data in delayed time (see the note about the file generation).
 %    The returned struct should have the following fields:
-%      DIMENSIONS: struct array with fields 'NAME' and 'LENGTH' defining the 
+%      DIMENSIONS: struct array with fields 'NAME' and 'LENGTH' defining the
 %        dimensions for variables in the file.
 %        A variable may have dimensions not listed here or with their length
-%        left undefined (empty field value), and they are inferred from the 
+%        left undefined (empty field value), and they are inferred from the
 %        data during the generation of the file. However, it is useful to preset
 %        the length of a dimension for record or string size dimensions.
 %      ATTRIBUTES: struct array with fields 'NAME' and 'VALUE' defining global
@@ -70,7 +70,7 @@ function ncl2_info = configDTOutputNetCDFL2()
 
   %% Define variable information.
   % To define the variable attributes easily and readably, add the corresponding
-  % variable field to the struct defined below, with its attributes defined in 
+  % variable field to the struct defined below, with its attributes defined in
   % a cell array (attribute name in first column and attribute value in second).
   % This cell array will be converted at the end of the function to the proper
   % representation needed by SAVENC.
@@ -412,8 +412,8 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_method'      [] };
 
   var_attr_list.backscatter_470 = {
-    'long_name'     'blue backscatter'
-    'standard_name' 'blue_backscatter'
+    'long_name'     'blue backscattering'
+    'standard_name' 'blue_backscattering'
     'units'         '1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
@@ -423,8 +423,8 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_method'      [] };
 
   var_attr_list.backscatter_532 = {
-    'long_name'     'green backscatter'
-    'standard_name' 'green_backscatter'
+    'long_name'     'green backscattering'
+    'standard_name' 'green_backscattering'
     'units'         '1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
@@ -434,8 +434,8 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_method'      [] };
 
   var_attr_list.backscatter_660 = {
-    'long_name'     'red backscatter'
-    'standard_name' 'red_backscatter'
+    'long_name'     'red backscattering'
+    'standard_name' 'red_backscattering'
     'units'         '1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
@@ -445,8 +445,8 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_method'      [] };
 
   var_attr_list.backscatter = {
-    'long_name'     'backscatter'
-    'standard_name' 'backscatter'
+    'long_name'     'backscattering'
+    'standard_name' 'backscattering'
     'units'         '1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
@@ -595,11 +595,11 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_sources'     []
     'grid_coordinates' []
     'grid_method'      [] };
-  
+
   var_attr_list.water_velocity_eastward = {
     'long_name'     'mean eastward water velocity in segment'
     'standard_name' 'eastward_water_velocity'
-    'units'         'm s-1'  
+    'units'         'm s-1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
@@ -611,7 +611,7 @@ function ncl2_info = configDTOutputNetCDFL2()
   var_attr_list.water_velocity_northward = {
     'long_name'     'mean northward water velocity in segment'
     'standard_name' 'northward_water_velocity'
-    'units'         'm s-1'  
+    'units'         'm s-1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
