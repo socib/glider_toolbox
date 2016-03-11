@@ -176,8 +176,8 @@ function [meta, data] = dba2mat(filename, varargin)
     else
       num_segments_values = ...
         textscan(fid, 'num_segments: %d\n', 1, 'ReturnOnError', false);
-      segment_format = ...
-        sprintf('segment_filename_%d: %%s\n', 0:num_segments_values{1}-1);
+      segment_format = repmat(sprintf('segment_filename_%%*u: %%s\n'), ...
+                              1, num_segments_values{1});
       segment_values = textscan(fid, segment_format, 1, 'ReturnOnError', false);
       header_struct.num_segments = num_segments_values{1};
       header_struct.segment_filenames = vertcat(segment_values{:});
