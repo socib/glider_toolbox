@@ -221,6 +221,11 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %        battery_nominal_capacity and battery_total_consumption) and field 
 %        values are the original sequence name choices (fields in struct 
 %        DATA_RAW, e.g. f_coulomb_battery_capacity and m_coulomb_amphr_total).
+%        Optionally, each sensor choice may include a special field named
+%        CALIBRATION with the handle or name of the extra sensor factory
+%        calibration function. If present and not empty, the selected raw
+%        sequences are passed to this function to get the calibrated
+%        extra sensor measurements.
 %        Default value: struct()
 %      CALIBRATION_PARAMETER_LIST: calibration parameters for each variable.
 %        Struct with the calibration parameters of each uncalibrated variable.
@@ -1077,7 +1082,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
               meta_pre.(extra_sensor_var).calibration_parameter_names = ...
                 extra_sensor_var_calib_param_names;
             end
-            for optics_var_calib_param_idx = 1:numel(extra_sensor_var_calib_param_names)
+            for extra_sensor_var_calib_param_idx = 1:numel(extra_sensor_var_calib_param_names)
               fprintf('  %-12s calibration parameter %-8s: %f\n', ...
                       extra_sensor_var, ...
                       extra_sensor_var_calib_param_names{extra_sensor_var_calib_param_idx}, ...
