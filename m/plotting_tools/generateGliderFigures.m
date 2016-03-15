@@ -244,7 +244,7 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
           if isfield(data, data_option_value) ...
               && ~all(isnan(data.(data_option_value)(:)))
             data_options(data_option_idx).(data_option_field) = data_option_value;
-            break;
+            break
           end
         end
       end

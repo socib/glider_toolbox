@@ -394,7 +394,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         meta_pre.time.conversion = func2str(time_conversion_func);
         fprintf('  conversion: %s\n', func2str(time_conversion_func));
       end
-      break;
+      break
     end
   end
   if ~isfield(data_pre, 'time')
@@ -542,7 +542,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         fprintf('  time conversion : %s\n', ...
                 func2str(position_time_conversion_func));
       end
-      break;
+      break
     end
   end
   if ~all(isfield(data_pre, {'longitude' 'latitude'}))
@@ -576,7 +576,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         meta_pre.depth.conversion = func2str(depth_conversion_func);
         fprintf('  conversion : %s\n', func2str(depth_conversion_func));
       end
-      break;
+      break
     end
   end
   
@@ -613,7 +613,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         meta_pre.pitch.conversion = func2str(attitude_conversion);
         fprintf('  conversion : %s\n', func2str(attitude_conversion));
       end
-      break;
+      break
     end
   end
   
@@ -642,7 +642,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         meta_pre.heading.conversion = func2str(heading_conversion_func);
         fprintf('  conversion : %s\n', func2str(heading_conversion_func));
       end
-      break;
+      break
     end
   end
   
@@ -682,7 +682,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         meta_pre.waypoint_latitude.conversion = func2str(wpt_conversion_func);
         fprintf('  conversion : %s\n', func2str(wpt_conversion_func));
       end
-      break;
+      break
     end
   end
   
@@ -725,7 +725,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
           func2str(wat_vel_conversion_func);
         fprintf('  conversion : %s\n', func2str(wat_vel_conversion_func));
       end
-      break;
+      break
     end
   end
   
@@ -837,7 +837,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
                   cond_calib_param_values(cond_calib_param_idx));
         end
       end
-      break;
+      break
     end
   end
   
@@ -889,7 +889,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         meta_pre.temperature_oxygen.sources = temperature_oxygen_field;
         fprintf('  temperature oxygen  : %s\n', temperature_oxygen_field);
       end
-      break;
+      break
     end
   end
   
@@ -977,7 +977,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
           end
         end
       end
-      break;
+      break
     end
   end
   

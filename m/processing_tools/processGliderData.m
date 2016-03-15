@@ -690,12 +690,12 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
       if isempty(profiling_time)
         profiling_vars = {data_proc.(profiling_depth)};
         profiling_avail = true;
-        break;
+        break
       elseif profiling_time_avail
         profiling_vars = ...
           {data_proc.(profiling_time) data_proc.(profiling_depth)};
         profiling_avail = true;
-        break;
+        break
       end
     end
   end
@@ -1152,7 +1152,7 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
       if isfield(data_proc, thermal_lag_time) ...
           && any(data_proc.(thermal_lag_time) > 0)
         thermal_lag_time_avail = true;
-        break;
+        break
       end
     end
     for thermal_lag_depth_idx = 1:numel(thermal_lag_depth_list)
