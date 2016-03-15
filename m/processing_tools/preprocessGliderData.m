@@ -184,7 +184,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %                 'pressure_conversion', {@bar2dbar        @bar2dbar})
 %      OXYGEN_LIST: oxygen sensor set choices.
 %        Struct array selecting the oxygen sensor sets, in order of preference.
-%        It should have the following fields:
+%        It may have the following optional fields:
 %          OXYGEN_CONCENTRATION: concentration of oxygen sequence name.
 %          OXYGEN_SATURATION: saturation of oxygen sequence name.
 %        It may have the following optional fields (empty or missing):
@@ -841,10 +841,15 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
   % Find preferred valid oxygen sensor availbale in list of sensor fields, 
   % if any.
   oxygen_choice_list = options.oxygen_list;
+  oxygen_variables = {'oxygen_concentration' 'oxygen_saturation'};
   for oxygen_choice_idx = 1:numel(oxygen_choice_list)
     oxygen_choice = oxygen_choice_list(oxygen_choice_idx);
-    oxy_con_field = oxygen_choice.oxygen_concentration;
-    oxy_sat_field = oxygen_choice.oxygen_saturation;
+    oxygen_variables_select = ...
+      cellfun(@(v)(isfield(oxygen_choice_list, v) && ~isempty(oxygen_choice.(v))), ...
+              oxygen_variables);
+    oxygen_var_list = oxygen_variables(oxygen_variables_select);
+    oxygen_field_list = cellfun(@(v)(oxygen_choice.(v)), ...
+                                oxygen_var_list, 'UniformOutput', false);
     time_oxygen_field = [];
     temperature_oxygen_field = [];
     if isfield(oxygen_choice_list, 'time')
@@ -853,16 +858,18 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
     if isfield(oxygen_choice_list, 'temperature')
       temperature_oxygen_field = oxygen_choice.temperature;
     end
-    if all(ismember({oxy_con_field oxy_sat_field}, field_list)) ...
-        && any(data_raw.(oxy_con_field) > 0) ...
-        && any(data_raw.(oxy_sat_field) > 0)
-      data_pre.oxygen_concentration = data_raw.(oxy_con_field);
-      data_pre.oxygen_saturation = data_raw.(oxy_sat_field);
-      meta_pre.oxygen_concentration.sources = oxy_con_field;
-      meta_pre.oxygen_saturation.sources = oxy_sat_field;
+    oxygen_available = ...
+      all(ismember(oxygen_field_list, field_list)) && ...
+      all(cellfun(@(f)(any(data_raw.(f)) > 0), oxygen_field_list));
+    if oxygen_available
       fprintf('Selected oxygen sensor %d:\n', oxygen_choice_idx);
-      fprintf('  oxygen concentration: %s\n', oxy_con_field);
-      fprintf('  oxygen saturation   : %s\n', oxy_sat_field);
+      for oxygen_var_idx = 1:numel(oxygen_var_list);
+        oxygen_var = oxygen_var_list{oxygen_var_idx};
+        oxygen_field = oxygen_field_list{oxygen_var_idx};
+        data_pre.(oxygen_var) = data_raw.(oxygen_field);
+        meta_pre.(oxygen_var).sources = oxygen_field;
+        fprintf('  %-20s: %s\n', oxygen_var, oxygen_field);
+      end
       if ~isempty(time_oxygen_field) ...
           && ismember(time_oxygen_field, field_list) ...
           && any(data_raw.(time_oxygen_field) > 0)
