@@ -49,7 +49,7 @@ function gridding_options = configDataGridding()
 
   gridding_options.depth_step = 1;
 
-  gridding_options.variable_list = { 
+  gridding_options.variable_list = {
     'conductivity'
     'temperature'
     'pressure'
@@ -64,7 +64,16 @@ function gridding_options = configDataGridding()
     'density'
     'salinity_corrected_thermal'
     'density_corrected_thermal'
+    'fluorescence_255_360'
+    'fluorescence_260_315'
+    'fluorescence_270_340'
+    'fluorescence_270_376'
+    'fluorescence_monitoring_255'
+    'fluorescence_monitoring_260'
+    'fluorescence_monitoring_270'
+    'methane_concentration'
+    'backscatter_700'
+    'oxygen_frequency'                  
   };
 
 end
-

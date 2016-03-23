@@ -445,6 +445,14 @@ function ncl1_info = configDTOutputNetCDFL1()
     '_FillValue'    default_fill_value
     'sources'       []};
 
+  var_attr_list.backscatter_700 = {
+    'long_name'     '700 nm wavelength backscatter'
+    'standard_name' '700nm_backscatter'
+    'units'         '1'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value
+    'sources'       []};
+  
   var_attr_list.backscatter = {
     'long_name'     'backscatter'
     'standard_name' 'backscatter'
@@ -526,6 +534,17 @@ function ncl1_info = configDTOutputNetCDFL1()
     'sources'                []
     'conversion'             []
     'calibration'            []
+    'calibration_parameters' [] };  
+  
+  var_attr_list.oxygen_frequency = {
+    'long_name'     'oxygen frequency'
+    'standard_name' 'oxygen_frequency_from_GPCTD'
+    'units'         'Hz'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value
+    'sources'                []
+    'conversion'             []
+    'calibration'            []
     'calibration_parameters' [] };
 
   var_attr_list.time_oxygen = {
@@ -599,7 +618,53 @@ function ncl1_info = configDTOutputNetCDFL1()
     'sources'       []
     'conversion'    [] };
 
+  %% Variables specific to SeaExplorer
+  var_attr_list.fluorescence_270_340 = {
+      'long_name'     'Minifluo-UV1 fluorescence Ex./Em. = 270/340nm'
+      'standard_name' 'fluorescence_excitation_270nm_emission_340nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      '_FillValue'    default_fill_value
+      'comment1'      'Tryptophan-like or Naphtalene-like measurements'
+      'comment2'      '270nm is excitation wavelength of the LED'
+      'sources'       []};
 
+  var_attr_list.fluorescence_255_360 = {
+      'long_name'     'Minifluo-UV1 fluorescence Ex./Em. = 255/360nm'
+      'standard_name' 'fluorescence_excitation_255nm_emission_360nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      '_FillValue'    default_fill_value
+      'comment1'      'Phenanthren-like measurements'
+      'comment2'      '255nm is excitation wavelength of the LED'
+      'sources'       []};
+    
+  var_attr_list.fluorescence_monitoring_270 = {
+      'long_name'     'Minifluo-UV1 fluorescence monitoring of excitation 270nm LED'
+      'standard_name' 'fluorescence_excitation_monitoring_270nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      '_FillValue'    default_fill_value
+      'sources'       []};
+
+  var_attr_list.fluorescence_monitoring_255 = {
+      'long_name'     'Minifluo-UV1 fluorescence monitoring of excitation 255nm LED'
+      'standard_name' 'fluorescence_excitation_monitoring_255nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      '_FillValue'    default_fill_value
+      'sources'       []};
+    
+    var_attr_list.methane_concentration = {
+      'long_name'     'Methane concentration (scaled)'
+      'standard_name' 'methane_concentration'
+      'units'         'ug/L'
+      'coordinates'   'time depth latitude longitude'
+      '_FillValue'    default_fill_value
+      'sources'       []};  
+    
+    
+    
   %% Define global attributes (they may be overwritten with deployment values).
   % To define the global attributes easily and readably, add them to this
   % cell array (attribute name in first column and attribute value in second).
