@@ -566,8 +566,7 @@ function ncl0_info = configDTOutputNetCDFL0Seaexplorer()
             'instrument'                   '' % instrument_name
             'instrument_manufacturer'      '' % instrument_manufacturer
             'instrument_model'             '' % instrument_model
-            'license'                      'Testing phase. Distribution Limited' ...
-    % deployment_distribution_statement
+            'license'                      'Testing phase. Distribution Limited' % deployment_distribution_statement
             'netcdf_version'               '4.0.1'
             'positioning_system'           'GPS'
             'principal_investigator'       '' % deployment_principal_investigator
