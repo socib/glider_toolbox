@@ -57,13 +57,7 @@ function seaexplorer_options = configDTFileOptionsSeaexplorer()
   seaexplorer_options.sci_name_pattern = '^.*.dat.*$';
   
   % Variables to load.
-  seaexplorer_options.variables = 'all';
-
-  % Config File to load. **Specific to SeaExplorer**
-  seaexplorer_options.config_file = 'seapayload.cfg';
-
-  % Config Deployment File. **Specific to SeaExplorer**
-  seaexplorer_options.deployment_file = 'Info.dpl';  
+  seaexplorer_options.variables = 'all';  
   
   % Time sensor column in navigation files:
   seaexplorer_options.time_sensor_nav = 'Posixtime_nav';
