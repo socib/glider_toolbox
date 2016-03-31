@@ -39,21 +39,21 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 %    as option values:
 %      FORMAT: data output format.
 %        String setting the format of the output DATA. Valid values are:
-%          'array': DATA is a matrix with sensor readings as columns 
-%            ordered as in the 'sensors' metadata field.
+%          'array': DATA is a matrix with sensor readings in the column order
+%            specified by the SENSORS metadata field.
 %          'struct': DATA is a struct with sensor names as field names
 %            and column vectors of sensor readings as field values.
 %        Default value: 'array'
 %      SENSORS: sensor filtering list.
 %        String cell array with the names of the sensors of interest. If given,
-%        only sensors present in both the input data sets and this list
+%        only the sensors present in both the input data sets and this list
 %        will be present in output. The string 'all' may also be given,
 %        in which case sensor filtering is not performed and all sensors
 %        in the input list will be present in output.
 %        Default value: 'all' (do not perform sensor filtering).
 %      PERIOD: time filtering boundaries.
 %        Two element numeric array with the start and the end of the period
-%        of interest (seconds since 1970-01-01 00:0:00.00 UTC). If given, 
+%        of interest (seconds since 1970-01-01 00:0:00.00 UTC). If given,
 %        only sensor cycles with timestamps within this period will be present
 %        in output. The string 'all' may also be given, in which case time 
 %        filtering is not performed and all sensors cycles in the input list
@@ -69,7 +69,7 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 %    in several data sets (e.g. when combining data from sbd and mbd files),
 %    the function checks that data in those sensor cycles is consistent.
 %    If the same sensor is present in sensor cycles from different data sets 
-%    with the same timestamp and different valid values (not nan), an error is
+%    with the same timestamp and different valid values (not NaN), an error is
 %    thrown. Otherwise the values are merged into a single sensor cycle.
 %
 %    However, note that sensor cycles with the same timestamp in the same data
@@ -78,7 +78,7 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 %    with the option -o (the initial sensor cycle values may be omited if the
 %    timestamp in the following sensor cycle is the same).
 %
-%    All values in timestamp columns should be valid (not nan).
+%    All values in timestamp columns should be valid (not NaN).
 %
 %  Examples:
 %    [meta, data] = dbacat(meta_list, data_list, timestamp)
@@ -109,14 +109,14 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   error(nargchk(3, 9, nargin, 'struct'));
-
-
+  
+  
   %% Set options and default values.
   options.format = 'array';
   options.sensors = 'all';
   options.period = 'all';
-
-
+  
+  
   %% Parse optional arguments.
   % Get option key-value pairs in any accepted call signature.
   argopts = varargin;
@@ -144,12 +144,12 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
             'Invalid option: %s.', opt);
     end
   end
-
-
+  
+  
   %% Set option flags and values.
-  output_format = options.format;
+  output_format = lower(options.format);
   sensor_filtering = true;
-  sensor_list = options.sensors;
+  sensor_list = cellstr(options.sensors);
   time_filtering = true;
   time_range = options.period;
   if ischar(options.sensors) && strcmp(options.sensors, 'all')
@@ -158,8 +158,8 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
   if ischar(options.period) && strcmp(options.period, 'all')
     time_filtering = false;
   end
-
-
+  
+  
   %% Check for trivial empty input.
   if isempty(meta_list)
     meta_struct = struct();
@@ -177,8 +177,8 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
   else
     meta_struct = [meta_list{:}];
   end
-
-
+  
+  
   %% Cat metadata.
   all_sources = vertcat(meta_struct.sources);
   all_headers = vertcat(meta_struct.headers);
@@ -221,25 +221,25 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
     data_old(data_old_nan) = data_new(data_old_nan);
     data(row_indices, col_indices) = data_old;
   end
-
-
+  
+  
   %% Perform time filtering if needed.
   if time_filtering
     ts_select = ~(ts_unique < time_range(1) | ts_unique > time_range(2));
     data = data(ts_select, :);
   end
-
-
+  
+  
   %% Perform sensor filtering if needed.
   if sensor_filtering
     [sensor_select, ~] = ismember(meta.sensors, sensor_list);
     meta.sensors = meta.sensors(sensor_select);
     meta.units = meta.units(sensor_select);
     meta.bytes = meta.bytes(sensor_select);
-    data = data(:,sensor_select);
+    data = data(:, sensor_select);
   end
-
-
+  
+  
   %% Convert output data to struct format if needed.
   switch output_format
     case 'array'

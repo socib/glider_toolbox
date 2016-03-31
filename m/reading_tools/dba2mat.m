@@ -7,7 +7,7 @@ function [meta, data] = dba2mat(filename, varargin)
 %    [META, DATA] = DBA2MAT(FILENAME, OPT1, VAL1, ...)
 %
 %  Description:
-%    [META, DATA] = DBA2MAT(FILENAME) reads the dba file named by string 
+%    [META, DATA] = DBA2MAT(FILENAME) reads the dba file named by string
 %    FILENAME, loading its metadata in struct META and its data in array DATA.
 %
 %    [META, DATA] = DBA2MAT(FILENAME, OPTIONS) and 
@@ -16,10 +16,10 @@ function [meta, data] = dba2mat(filename, varargin)
 %    field names as option keys and field values as option values:
 %      FORMAT: data output format.
 %        String setting the format of the output DATA. Valid values are:
-%          'array': DATA is a matrix with sensor readings as columns ordered
-%            as in the 'sensors' metadata field.
-%          'struct': DATA is a struct with sensor names as field names and
-%            column vectors of sensor readings as field values.
+%          'array': DATA is a matrix with sensor readings in the column order
+%            specified by the SENSORS metadata field.
+%          'struct': DATA is a struct with sensor names as field names
+%            and column vectors of sensor readings as field values.
 %        Default value: 'array'
 %      SENSORS: sensor filtering list.
 %        String cell array with the names of the sensors of interest. If given,
@@ -64,8 +64,8 @@ function [meta, data] = dba2mat(filename, varargin)
 %    % Retrieve data from all sensors as struct:
 %    [meta, data] = dba2mat('test.dba', 'format', 'struct')
 %    % Retrieve data from time sensors as struct:
-%    time_sensors = {'m_present_time' 'sci_m_present_time'}
-%    [meta, data] = dba2mat('test.dba', 'sensors', time_sensors)
+%    [meta, data] = dba2mat('test.dba', 'format', 'struct', ...
+%                           'sensors', {'m_present_time' 'sci_m_present_time'})
 %
 %  See also:
 %    XBD2DBA
@@ -127,7 +127,7 @@ function [meta, data] = dba2mat(filename, varargin)
             'Invalid option: %s.', opt);
     end
   end
-
+  
   
   %% Set option flags and values.
   output_format = lower(options.format);
@@ -167,7 +167,7 @@ function [meta, data] = dba2mat(filename, varargin)
     header_values = textscan(fid, header_fmtstr, 1, 'ReturnOnError', false);
     header_struct = {header_fields{:}; header_values{:}};
     header_struct = struct(header_struct{:});
-
+    
     % Read optional tags (number of segment files and segment file names).
     num_ascii_tags = header_values{3};
     if num_ascii_tags == num_mandatory_ascii_tags
@@ -182,19 +182,21 @@ function [meta, data] = dba2mat(filename, varargin)
       header_struct.num_segments = num_segments_values{1};
       header_struct.segment_filenames = vertcat(segment_values{:});
     end
+    
     % Read label lines (sensor names, sensor units and bytes per sensor).
     num_sensors = header_struct.sensors_per_cycle;
     sensor_values = textscan(fid, '%s', num_sensors, 'ReturnOnError', false);
     unit_values   = textscan(fid, '%s', num_sensors, 'ReturnOnError', false);
     byte_values   = textscan(fid, '%d', num_sensors, 'ReturnOnError', false);
-    % Build metadata structure;
+    
+    % Build metadata structure.
     [~, name, ext] = fileparts(filename);
     meta.sources = {[name ext]};
     meta.headers = header_struct;
     meta.sensors = sensor_values{1};
     meta.units = unit_values{1};
     meta.bytes = byte_values{1};
-
+    
     % Read sensor data filtering selected sensors if needed.
     sensor_format = repmat({'%f'}, meta.headers.sensors_per_cycle, 1);
     if sensor_filtering
@@ -206,6 +208,8 @@ function [meta, data] = dba2mat(filename, varargin)
     end
     fmt_str = [sprintf('%s ', sensor_format{1:end-1}) sensor_format{end} '\n'];
     data_values = textscan(fid, fmt_str, 'ReturnOnError', false);
+    
+    % Convert data to desired output format.
     switch output_format
       case 'array'
         data = [data_values{:}];
