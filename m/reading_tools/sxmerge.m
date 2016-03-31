@@ -1,60 +1,60 @@
-function [meta, data] = sxmerge(meta_nav, data_nav, meta_sci, data_sci, varargin)
-%SXMERGE  Merge data from combined navigation and science data sets into a single data set.
+function [meta, data] = sxmerge(meta_gli, data_gli, meta_dat, data_dat, varargin)
+%SXMERGE  Merge data from combined SeaExplorer .gli and .dat data sets into a single data set.
 %
 %  Syntax:
-%    [META, DATA] = SXMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI)
-%    [META, DATA] = SXMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI, OPTIONS)
-%    [META, DATA] = SXMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI, OPT1, VAL1, ...) 
+%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_DAT, DATA_DAT)
+%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_DAT, DATA_DAT, OPTIONS)
+%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_DAT, DATA_DAT, OPT1, VAL1, ...)
 %
 %  Description:
-%    [META, DATA] = SXMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI) merges the
-%    navigation and science data sets described by metadata structs META_NAV and
-%    META_SCI, and data arrays DATA_NAV and DATA_SCI into a single data set
-%    described by metadata struct META and data array or struct DATA 
+%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_DAT, DATA_DAT) merges the
+%    navigation and science data sets described by metadata structs META_GLI and
+%    META_DAT, and data arrays DATA_GLI and DATA_DAT into a single data set
+%    described by metadata struct META and data array or struct DATA
 %    (see format option described below). Input metadata and data should be
-%    in the format returned by the function SXCAT. Sensor cycles from both 
+%    in the format returned by the function SXCAT. Data rows from both
 %    data sets are merged based on the order of the respective timestamps.
 %    See note on merging process.
 %
-%    [META, DATA] = SXMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI, OPTIONS) and
-%    [META, DATA] = SXMERGE(META_NAV, DATA_NAV, META_SCI, DATA_SCI, OPT1, VAL1, ...) 
+%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_DAT, DATA_DAT, OPTIONS) and
+%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_DAT, DATA_DAT, OPT1, VAL1, ...)
 %    accept the following options given in key-value pairs OPT1, VAL1...
 %    or in a struct OPTIONS with field names as option keys and field values
 %    as option values:
 %      FORMAT: data output format.
 %        String setting the format of the output DATA. Valid values are:
-%          'array': DATA is a matrix with sensor readings as columns 
-%            ordered as in the 'variables' metadata field.
+%          'array': DATA is a matrix with variable readings in the column order
+%            specified by the VARIABLES metadata field.
 %          'struct': DATA is a struct with sensor names as field names
 %            and column vectors of sensor readings as field values.
 %        Default value: 'array'
-%      TIMENAV: navigation data time stamp.
-%        String setting the navigation data time sensor for merging and sorting 
-%        sensor cycles.
-%        Default value: 'm_present_time'
-%      TIMESCI: scientific data time stamp.
-%        String setting the scientific data time sensor for merging and sorting 
-%        sensor cycles.
-%        Default value: 'sci_m_present_time'
-%      VARIABLES: sensor filtering list.
+%      TIMEGLI: navigation data (.gli) time stamp.
+%        String setting the name of the variable to use as timestamp for
+%        merging and sorting data row readings from SeaExplorer .gli data set.
+%        Default value: 'Timestamp'
+%      TIMEDAT: science data (.dat) time stamp.
+%        String setting the name of the variable to use as timestamp for
+%        merging and sorting data row readings from SeaExplorer .dat data set.
+%        Default value: 'PLD_REALTIMECLOCK'
+%      VARIABLES: variable filtering list.
 %        String cell array with the names of the variables of interest. If given,
 %        only variables present in both the input data sets and this list
 %        will be present in output. The string 'all' may also be given,
 %        in which case sensor filtering is not performed and all variables
 %        in input data sets will be present in output.
-%        Default value: 'all' (do not perform sensor filtering).
+%        Default value: 'all' (do not perform variable filtering).
 %      PERIOD: time filtering boundaries.
 %        Two element numeric array with the start and the end of the period
 %        of interest (seconds since 1970-01-01 00:0:00.00 UTC). If given, 
-%        only sensor cycles with timestamps within this period will be
-%        present in output. The string 'all' may also be given, in which case
-%        time filtering is not performed and all variables cycles in the input 
-%        data sets will be present in output.
+%        only row readings with timestamps within this period will be present
+%        in output. The string 'all' may also be given, in which case time 
+%        filtering is not performed and all row readings in the input data sets
+%        will be present in output.
 %        Default value: 'all' (do not perform time filtering).
 %
 %  Notes:
-%    This function should be used to merge data from navigation and science data
-%    sets, not from data sets coming from the same bay (use SXCAT instead).
+%    This function should be used to merge data from .gli and .dat data sets,
+%    not from data sets coming from the same type of files (use SXCAT instead).
 %
 %    The function is inpired from dbamerge.m, although the
 %    algorithm is slightly different. In the merging process, we
@@ -79,7 +79,7 @@ function [meta, data] = sxmerge(meta_nav, data_nav, meta_sci, data_sci, varargin
 %    were ignored). 
 %
 %  Examples:
-%    [meta, data] = sxmerge(meta_nav, data_nav, meta_sci, data_sci)
+%    [meta, data] = sxmerge(meta_gli, data_gli, meta_dat, data_dat)
 %
 %  See also:
 %    SX2MAT
@@ -89,7 +89,7 @@ function [meta, data] = sxmerge(meta_nav, data_nav, meta_sci, data_sci, varargin
 %    Frederic Cyr  <Frederic.Cyr@mio.osupytheas.fr>
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -111,10 +111,11 @@ function [meta, data] = sxmerge(meta_nav, data_nav, meta_sci, data_sci, varargin
   
   %% Set options and default values.
   options.format = 'array';
-  options.timenav = 'Posixtime_nav';
-  options.timesci = 'Posixtime_sci';
+  options.timegli = 'Timestamp';
+  options.timedat = 'PLD_REALTIMECLOCK';
   options.variables = 'all';
   options.period = 'all';
+  
   
   %% Parse optional arguments.
   % Get option key-value pairs in any accepted call signature.
@@ -143,18 +144,18 @@ function [meta, data] = sxmerge(meta_nav, data_nav, meta_sci, data_sci, varargin
             'Invalid option: %s.', opt);
     end
   end
-
+  
   
   %% Set option flags and values.
-  output_format = options.format;
-  timestamp_nav = options.timenav;
-  timestamp_sci = options.timesci;
-  sensor_filtering = true;
-  sensor_list = options.variables;
+  output_format = lower(options.format);
+  timestamp_gli = options.timegli;
+  timestamp_dat = options.timedat;
+  variable_filtering = true;
+  variable_list = cellstr(options.variables);
   time_filtering = true;
   time_range = options.period;
   if ischar(options.variables) && strcmp(options.variables, 'all')
-    sensor_filtering = false;
+    variable_filtering = false;
   end
   if ischar(options.period) && strcmp(options.period, 'all')
     time_filtering = false;
@@ -162,115 +163,95 @@ function [meta, data] = sxmerge(meta_nav, data_nav, meta_sci, data_sci, varargin
   
   
   %% Merge data and metadata checking for empty input cases.
-  if isempty(meta_sci.sources) && isempty(meta_nav.sources)
+  if isempty(meta_gli.sources) && isempty(meta_dat.sources)
     % No input data.
-    % Both META_NAV and DATA_NAV, and META_SCI and DATA_SCI
+    % Both META_GLI and DATA_GLI, and META_DAT and DATA_DAT
     % are equal to the trivial output of SXCAT.
     % Disable filtering.
-    meta = meta_nav; 
-    data = data_nav;
-    sensor_filtering = false;
+    meta = meta_gli; 
+    data = data_gli;
+    variable_filtering = false;
     time_filtering = false;
-  elseif isempty(meta_sci.sources)
+  elseif isempty(meta_dat.sources)
     % Only navigation data.
-    meta = meta_nav;
-    data = data_nav;
-    timestamp_merged = timestamp_nav; % Unique timestamp to be used for time filtering.
-  elseif isempty(meta_nav.sources)
+    meta = meta_gli;
+    data = data_gli;
+    timestamp_merged = timestamp_gli; % Unique timestamp to be used for time filtering.
+  elseif isempty(meta_gli.sources)
     % Only science data.
-    meta = meta_sci;
-    data = data_sci;
-    timestamp_merged = timestamp_sci; % Unique timestamp to be used for time filtering.
+    meta = meta_dat;
+    data = data_dat;
+    timestamp_merged = timestamp_dat; % Unique timestamp to be used for time filtering.
   else
-    % Merge metadata performing sensor renaming if needed.
-    % Sensor renaming is done to mimic the behaviour of WRC program 'sx_merge'.
-    sources_nav = meta_nav.sources;
-    headers_nav = meta_nav.headers;
-    variables_nav_list = meta_nav.variables;
-    units_nav_list = meta_nav.units;
-    bytes_nav_list = meta_nav.bytes;
-    sources_sci = meta_sci.sources;
-    headers_sci = meta_sci.headers;
-    variables_sci_list = meta_sci.variables;
-    units_sci_list = meta_sci.units;
-    bytes_sci_list = meta_sci.bytes;
-    
-    % Find duplication in variable names and rename
-    [variables_dup_list, variables_dup_index_nav, variables_dup_index_sci] = ...
-      intersect(variables_nav_list, variables_sci_list);    
+    % Merge metadata performing variable renaming if needed.
+    sources_gli = meta_gli.sources;
+    variables_gli_list = meta_gli.variables;
+    sources_dat = meta_dat.sources;
+    variables_dat_list = meta_dat.variables;
+    [variables_dup_list, variables_dup_index_gli, variables_dup_index_dat] = ...
+      intersect(variables_gli_list, variables_dat_list);    
     for i = 1:numel(variables_dup_list)
         sensorName = variables_dup_list{i};
-        variables_nav_list{variables_dup_index_nav} = sprintf('%s_nav', sensorName);
-        variables_sci_list{variables_dup_index_sci} = sprintf('%s_sci', sensorName);
+        variables_gli_list{variables_dup_index_gli} = sprintf('%s_gli', sensorName);
+        variables_dat_list{variables_dup_index_dat} = sprintf('%s_dat', sensorName);
     end
-        
-    meta.sources = vertcat(sources_nav, sources_sci);
-    meta.headers = vertcat(headers_nav, headers_sci);
-    meta.variables = vertcat(variables_nav_list, variables_sci_list);
-    meta.units = vertcat(units_nav_list, units_sci_list);
-    meta.bytes = vertcat(bytes_nav_list, bytes_sci_list);
-
-    % No need to duplicate here
-    if isfield(meta_nav, 'configuration_file')
-        meta.configuration_file = meta_nav.configuration_file;
-    end
+    meta.sources = vertcat(sources_gli, sources_dat);
+    meta.variables = vertcat(variables_gli_list, variables_dat_list);
     
     % Merge data.
-    % Check that both data sets have their own timestamp sensor.
-    [ts_nav_present, ts_nav_col] = ismember(timestamp_nav, variables_nav_list);
-    if ~ts_nav_present
+    % Check that both data sets have their own timestamp variable.
+    [ts_gli_present, ts_gli_col] = ismember(timestamp_gli, variables_gli_list);
+    if ~ts_gli_present
       error('glider_toolbox:sxmerge:MissingTimestamp', ...
-            'Missing timestamp sensor in navigation data set: %s.', ...
-            timestamp_nav);
+            'Missing timestamp variable in navigation (.gli) data set: %s.', ...
+            timestamp_gli);
     end
-    [ts_sci_present, ts_sci_col] = ismember(timestamp_sci, variables_sci_list);
-
-    if ~ts_sci_present
+    [ts_dat_present, ts_dat_col] = ismember(timestamp_dat, variables_dat_list);
+    if ~ts_dat_present
       error('glider_toolbox:sxmerge:MissingTimestamp', ...
-            'Missing timestamp sensor in science data set: %s.', timestamp_sci);
+            'Missing timestamp variable in science (.dat) data set: %s.', ...
+            timestamp_dat);
     end
-
-    %% SeaExplorer version %
-    ts_nav = data_nav(:,ts_nav_col);
-    ts_sci = data_sci(:,ts_sci_col);
-    num_rows_nav = numel(ts_nav);
-    num_rows_sci = numel(ts_sci);
-    num_cols_nav = numel(variables_nav_list);
-    num_cols_sci = numel(variables_sci_list);
-
-    row_range_nav = (1:num_rows_nav);
-    row_range_sci = num_rows_nav + (1:num_rows_sci);
-    col_range_nav = (1:num_cols_nav);
-    col_range_sci = num_cols_nav + (1:num_cols_sci);
     
-    data = nan(num_rows_nav+num_rows_sci, num_cols_nav+num_cols_sci);
-    data(row_range_nav, col_range_nav) = data_nav;
-    data(row_range_sci, col_range_sci) = data_sci;
+    %% SeaExplorer version %
+    ts_gli = data_gli(:,ts_gli_col);
+    ts_dat = data_dat(:,ts_dat_col);
+    num_rows_gli = numel(ts_gli);
+    num_rows_dat = numel(ts_dat);
+    num_cols_gli = numel(variables_gli_list);
+    num_cols_dat = numel(variables_dat_list);
 
+    row_range_gli = (1:num_rows_gli);
+    row_range_dat = num_rows_gli + (1:num_rows_dat);
+    col_range_gli = (1:num_cols_gli);
+    col_range_dat = num_cols_gli + (1:num_cols_dat);
+    
+    data = nan(num_rows_gli+num_rows_dat, num_cols_gli+num_cols_dat);
+    data(row_range_gli, col_range_gli) = data_gli;
+    data(row_range_dat, col_range_dat) = data_dat;
+    
     % Merge timeSci with timeNav 
-    data(row_range_sci, ts_nav_col) = ts_sci;    
+    data(row_range_dat, ts_gli_col) = ts_dat;    
     
     % Sort + Remove repetition (should not be a lot with a 1/1000sec precision)
-    [ts_unique, ts_unique_idx, ~] = unique(data(:,ts_nav_col));
+    [ts_unique, ts_unique_idx, ~] = unique(data(:,ts_gli_col));
     data = data(ts_unique_idx,:);
         
-    % replace time_sci by time_nav (now merged)
-    [ts_nav_present, ts_nav_var_idx] = ismember(timestamp_nav, meta.variables);
-    [ts_sci_present, ts_sci_var_idx] = ismember(timestamp_sci, meta.variables);
-    data(:,ts_sci_var_idx) = data(:,ts_nav_var_idx);
+    % replace time_dat by time_gli (now merged)
+    [ts_gli_present, ts_gli_var_idx] = ismember(timestamp_gli, meta.variables);
+    [ts_dat_present, ts_dat_var_idx] = ismember(timestamp_dat, meta.variables);
+    data(:,ts_dat_var_idx) = data(:, ts_gli_var_idx);
     
     % Unique timestamp to be used for time filtering (both are the same anyways).
-    timestamp_merged = timestamp_nav;
+    timestamp_merged = timestamp_gli;
   end
-
- 
-  %% Perform sensor filtering if needed.
-  if sensor_filtering
-    [sensor_select, ~] = ismember(meta.variables, sensor_list);
-    meta.variables = meta.variables(sensor_select);
-    meta.units = meta.units(sensor_select);
-    meta.bytes = meta.bytes(sensor_select);
-    data = data(:,sensor_select);
+  
+  
+  %% Perform variable filtering if needed.
+  if variable_filtering
+    [variable_select, ~] = ismember(meta.variables, variable_list);
+    meta.variables = meta.variables(variable_select);
+    data = data(:, variable_select);
   end
   
   
@@ -280,7 +261,7 @@ function [meta, data] = sxmerge(meta_nav, data_nav, meta_sci, data_sci, varargin
       ismember(timestamp_merged, meta.variables);
     if ~ts_merged_present
       error('glider_toolbox:sxmerge:MissingTimestamp', ...
-            'Missing timestamp sensor in merged data set: %s.', ...
+            'Missing timestamp variable in merged data set: %s.', ...
             timestamp_merged);
     end
     ts_merged = data(:, ts_merged_col);

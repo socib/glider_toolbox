@@ -1,4 +1,4 @@
-function processing_options = configDataProcessingSeaexplorer()
+function processing_options = configDataProcessingSeaExplorer()
 %CONFIGDATAPROCESSINGSEAEXPLORER  Configure SeaExplorer glider data processing.
 %
 %  Syntax:
@@ -10,7 +10,7 @@ function processing_options = configDataProcessingSeaexplorer()
 %    function PROCESSGLIDERDATA.
 %
 %  Examples:
-%    processing_options = configDataProcessingSeaexplorer()
+%    processing_options = configDataProcessingSeaExplorer()
 %
 %  See also:
 %    PROCESSGLIDERDATA
@@ -19,7 +19,7 @@ function processing_options = configDataProcessingSeaexplorer()
 %    Frederic Cyr  <Frederic.Cyr@mio.osupytheas.fr>
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -35,8 +35,7 @@ function processing_options = configDataProcessingSeaexplorer()
 %
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
-%% Greatly inspired from SlocumG2 who also has a GPCTD    
+
   error(nargchk(0, 0, nargin, 'struct'));
 
   processing_options = struct();
@@ -57,29 +56,25 @@ function processing_options = configDataProcessingSeaexplorer()
   processing_options.profiling_list(2).depth = 'depth';
   processing_options.profiling_list(2).time = 'time';
 
-  
   processing_options.profile_min_range = 10;
   processing_options.profile_max_gap_ratio = 0.6;
-  
-  
+
   processing_options.sensor_lag_list = ...
-      struct('corrected', {}, 'original', {}, 'parameters', {});
+    struct('corrected', {}, 'original', {}, 'parameters', {});
 
   processing_options.thermal_lag_list = ...
-      struct('conductivity_corrected', {}, 'temperature_corrected', {}, ...
-             'conductivity_original', {}, 'temperature_original', {}, ...
+    struct('conductivity_corrected', {}, 'temperature_corrected', {}, ...
+           'conductivity_original', {}, 'temperature_original', {}, ...
            'pressure_original', {}, 'parameters', {});
- 
-  
+
   processing_options.salinity_list(1).salinity     = 'salinity';
   processing_options.salinity_list(1).conductivity = 'conductivity';
   processing_options.salinity_list(1).temperature  = 'temperature';
   processing_options.salinity_list(1).pressure     = 'pressure';
-  
+
   processing_options.density_list(1).density     = 'density';
   processing_options.density_list(1).salinity    = 'salinity';
   processing_options.density_list(1).temperature = 'temperature';
   processing_options.density_list(1).pressure    = 'pressure';
-    
 
 end

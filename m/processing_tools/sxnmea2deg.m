@@ -1,8 +1,5 @@
 function varargout = sxnmea2deg(varargin)
-% SXNMEA2DEG  Convert NMEA latitude and/or longitude degrees to
-% decimal degrees. This function also check Lat/Lon integrity for
-% SeaExplorer gliders. The function is thus a slight modification of
-% the original nmea2deg.m in the original glider_toolbox
+%SXNMEA2DEG  Convert SeaExplorer NMEA latitude and/or longitude degrees to decimal degrees.
 %
 %  Syntax:
 %    DEG = SXNMEA2DEG(NMEA)
@@ -13,24 +10,23 @@ function varargout = sxnmea2deg(varargin)
 %    or longitude degrees to decimal degrees applying the transformation:
 %      DEG = FIX(NMEA/100) + REM(NMEA,100)/60;
 %
-%    [DEGLAT, DEGLON] = SXNMEA2DEG(NMEALAT, NMEALON) performs the same conversion
-%    to each of its input arguments separately.
-% 
-%  For each case, geographical coordinates where lat=0 AND lon=0
-%  are replaced by NaNs. 
+%    [DEGLAT, DEGLON] = SXNMEA2DEG(NMEALAT, NMEALON) performs the same
+%    conversion on each of its input arguments separately. In addition,
+%    it returns invalid values (nan, nan) for each position exactly equal to
+%    (0, 0), and emmits a warning.
 %
 %  Examples:
 %    sxnmea2deg(3330.00)
 %    nmea = [36015.00 -445.25]
 %    deg = sxnmea2deg(nmea)
-%    nmealat = 3900.61662
-%    nmealon = 257.99996
+%    nmealat = [3900.61662 3900.61662   0       0]
+%    nmealon = [ 257.99996    0       257.99996 0]
 %    [deglat, deglon] = sxnmea2deg(nmealat, nmealon)
 %
 %  Notes:
-%    The input values are not checked to be valid NMEA coordinate values.
-%    So no warning is produced if the degree digits are out of [0,180] or
-%    the integral part of de minute digits are out of [00,59].
+%    Null positions (0, 0) may appear in SeaExplorer glider data files without
+%    any flag to distinguish them as bad measurements, so this function assumes
+%    that all such positions are invalid, even though the values are plausible.
 %  
 %  See also:
 %    FIX
@@ -40,7 +36,7 @@ function varargout = sxnmea2deg(varargin)
 %    Frederic Cyr  <Frederic.Cyr@mio.osupytheas.fr>
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -65,19 +61,16 @@ function varargout = sxnmea2deg(varargin)
     varargout{varargidx} = deg;
   end
   
-  % Check integrity if lat and lon are provided
-  if numel(varargout) == 2
-    deg1 = varargout{1};
-    deg2 = varargout{2};
-
-    I = find(deg1 == 0 & deg2 == 0);
-    if ~isempty(I)
-      deg1(I) = NaN;
-      deg2(I) = NaN;      
-      disp('[WARNING] coordinates (lat,lon) = (0.0,0.0) were flagged as NaNs')          
-      varargout{1} = deg1;
-      varargout{2} = deg2;
+  % Report null values as invalid SeaExplorer locations.
+  if numel(varargin) > 1
+    invalid = (varargin{1}(:) == 0) & (varargin{2}(:) == 0);
+    if ~isempty(invalid)
+      varargout{1}(invalid) = nan;
+      varargout{2}(invalid) = nan;
+      warning('glider_toolbox:sxnmeadeg:InvalidPosition', ...
+              '%d invalid positions [0, 0] replaced by [NaN, NaN].', ...
+              sum(invalid));
     end
-  end      
-    
+  end
+
 end

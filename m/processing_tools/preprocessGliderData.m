@@ -770,7 +770,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         meta_pre.time_ctd.sources = time_ctd_field;
         fprintf('  time CTD    : %s\n', time_ctd_field);
       end
-      % Seaexplorer glider has GPCTD_DOF
+      % SeaExplorer glider has GPCTD_DOF
       if ~isempty(oxygen_ctd_field)
           data_pre.oxygen_frequency = data_raw.(oxygen_ctd_field);
           meta_pre.oxygen_frequency.sources = oxygen_ctd_field;

@@ -15,71 +15,56 @@ function [meta, data] = sxcat(meta_list, data_list, timestamp, varargin)
 %    set of variables. Outputs META and DATA have the same format, too.
 %    META is a struct array combining the information in elements of META_LIST.
 %    It has following fields:
-%      HEADERS: struct array built concatenating the HEADERS field of all 
-%        elements in META_LIST.
-%      VARIABLES: string cell array with the names of the variables present in the
-%        returned data array (in the same column order), built merging 
+%      VARIABLES: string cell array with the names of the variables present
+%        in the returned data array (in the same column order), built merging
 %        the VARIABLES field of all elements in META_LIST.
-%      UNITS: string cell array with the units of the variables present in the
-%        returned data array (in the same column order), built merging 
-%        the UNITS field of all elements in META_LIST.
-%      BYTES: array with the number of bytes of each sensor present in the 
-%        returned data array, (in the same column order), built merging 
-%        the BYTES field of all elements in META_LIST.
 %      SOURCES: string cell array built concatenating the SOURCES field
 %        of all elements in META_LIST.
-%      CONFIGURATION_FILE: Cell array with the content of the
-%        SeaExplorer glider deployment configuration file (the name
-%        is usually 'seapayload.cfg')
 %    DATA is a numeric array combining the rows of arrays in DATA_LIST,
-%    reordering the sensor columns if needed, and sorting the resulting rows
-%    according to a timestamp from sensor named by string TIMESTAMP.
+%    reordering the variable columns if needed, and sorting the resulting rows
+%    according to a timestamp from variable named by string TIMESTAMP.
 %
-%    [META, DATA] = SXCAT(META_LIST, DATA_LIST, TIMESTAMP, OPTIONS) and 
-%    [META, DATA] = SXCAT(META_LIST, DATA_LIST, TIMESTAMP, OPT1, VAL1, ...) 
+%    [META, DATA] = SXCAT(META_LIST, DATA_LIST, TIMESTAMP, OPTIONS) and
+%    [META, DATA] = SXCAT(META_LIST, DATA_LIST, TIMESTAMP, OPT1, VAL1, ...)
 %    accept the following options given in key-value pairs OPT1, VAL1...
 %    or in a struct OPTIONS with field names as option keys and field values
 %    as option values:
 %      FORMAT: data output format.
 %        String setting the format of the output DATA. Valid values are:
-%          'array': DATA is a matrix with sensor readings as columns 
-%            ordered as in the 'variables' metadata field.
+%          'array': DATA is a matrix with variable readings in the column order
+%            specified by the VARIABLES metadata field.
 %          'struct': DATA is a struct with sensor names as field names
 %            and column vectors of sensor readings as field values.
 %        Default value: 'array'
-%      VARIABLES: sensor filtering list.
+%      VARIABLES: variable filtering list.
 %        String cell array with the names of the variables of interest. If given,
 %        only variables present in both the input data sets and this list
 %        will be present in output. The string 'all' may also be given,
 %        in which case sensor filtering is not performed and all variables
-%        in the input list will be present in output.
-%        Default value: 'all' (do not perform sensor filtering).
+%        in input data sets will be present in output.
+%        Default value: 'all' (do not perform variable filtering).
 %      PERIOD: time filtering boundaries.
 %        Two element numeric array with the start and the end of the period
 %        of interest (seconds since 1970-01-01 00:0:00.00 UTC). If given, 
-%        only sensor cycles with timestamps within this period will be present
+%        only row readings with timestamps within this period will be present
 %        in output. The string 'all' may also be given, in which case time 
-%        filtering is not performed and all variables cycles in the input list
+%        filtering is not performed and all row readings in the input list
 %        will be present in output.
 %        Default value: 'all' (do not perform time filtering).
 %
 %  Notes:
-%    This function should be used to combine data from several navigation files,
-%    or from several science files, but not from both navigation and science
-%    files (use SXMERGE instead).
+%    This function should be used to combine data from several .gli files,
+%    or from several .dat files, but not from both .gli and .dat files
+%    (use SXMERGE instead).
 %
-%    Since sensor cycles (data rows) with the same timestamp may be present 
-%    in several data sets (e.g. when combining data from sbd and mbd files),
-%    the function checks that data in those sensor cycles is consistent.
-%    If the same sensor is present in sensor cycles from different data sets 
+%    If data rows with the same timestamp are present in several data sets,
+%    the function checks that data in those row readings is consistent.
+%    If the same variable is present in row readings from different data sets
 %    with the same timestamp and different valid values (not nan), an error is
-%    thrown. Otherwise the values are merged into a single sensor cycle.
-%
-%    However, note that sensor cycles with the same timestamp in the same data
-%    set are not merged, and the values in the latest sensor cycle will be used.
-%    This may be relevant when binary data files are converted to ascii format 
-%    with the option -o (the initial sensor cycle values may be omited if the
-%    timestamp in the following sensor cycle is the same).
+%    thrown. Otherwise the values are merged into a single data row.
+%    However, note that in the odd case of data rows with the same timestamp
+%    in the same data set, they would not be merged and the values
+%    in the latest one would be used.
 %
 %    All values in timestamp columns should be valid (not nan).
 %
@@ -94,7 +79,7 @@ function [meta, data] = sxcat(meta_list, data_list, timestamp, varargin)
 %    Frederic Cyr  <Frederic.Cyr@mio.osupytheas.fr>
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -118,8 +103,8 @@ function [meta, data] = sxcat(meta_list, data_list, timestamp, varargin)
   options.format = 'array';
   options.variables = 'all';
   options.period = 'all';
-
-
+  
+  
   %% Parse optional arguments.
   % Get option key-value pairs in any accepted call signature.
   argopts = varargin;
@@ -147,31 +132,27 @@ function [meta, data] = sxcat(meta_list, data_list, timestamp, varargin)
             'Invalid option: %s.', opt);
     end
   end
-
+  
   
   %% Set option flags and values.
-  output_format = options.format;
-  sensor_filtering = true;
-  sensor_list = options.variables;
+  output_format = lower(options.format);
+  variable_filtering = true;
+  variable_list = cellstr(options.variables);
   time_filtering = true;
   time_range = options.period;
   if ischar(options.variables) && strcmp(options.variables, 'all')
-    sensor_filtering = false;
+    variable_filtering = false;
   end
   if ischar(options.period) && strcmp(options.period, 'all')
     time_filtering = false;
   end
   
   
-  %% Check for trivial empty input. %% SHOULD MODIFIY THIS <--------------
+  %% Check for trivial empty input.
   if isempty(meta_list)
     meta_struct = struct();
     meta_struct.sources = {};
-    meta_struct.headers = ...
-      struct('all_variables', {}, 'filename', 'variables_per_cycle');    
     meta_struct.variables = {};
-    meta_struct.units = {};
-    meta_struct.bytes = [];       
   else
     meta_struct = [meta_list{:}];
   end
@@ -179,24 +160,13 @@ function [meta, data] = sxcat(meta_list, data_list, timestamp, varargin)
   
   %% Cat metadata.
   all_sources = vertcat(meta_struct.sources);
-  all_headers = vertcat(meta_struct.headers);
   all_variables = vertcat(meta_struct.variables);
-  all_units = vertcat(meta_struct.units);
-  all_bytes = vertcat(meta_struct.bytes);
-  
   [variables_list, variables_idx] = unique(all_variables);
   meta.sources = all_sources;
-  meta.headers = all_headers;
   meta.variables = all_variables(variables_idx);
-  meta.units   = all_units(variables_idx);
-  meta.bytes   = all_bytes(variables_idx);
-
-  % If exist, get config field
-  if isfield(meta_struct(1), 'configuration_file')
-      meta.configuration_file = meta_struct(1).configuration_file;
-  end
-    
-  %% Cat data (by unique timestamp).
+  
+  
+  %% Cat data.
   [~, sensor_index_list] = cellfun(@(m) ismember(m.variables, variables_list), ...
                                    meta_list, 'UniformOutput', false);
   ts_list = cellfun(@(d,m) d(:,strcmp(timestamp, m.variables)), ...
@@ -225,28 +195,26 @@ function [meta, data] = sxcat(meta_list, data_list, timestamp, varargin)
   end
   
   
-  %% Perform time filtering if needed. (check if works! -FC)
+  %% Perform time filtering if needed.
   if time_filtering
     ts_select = ~(ts_unique < time_range(1) | ts_unique > time_range(2));
     data = data(ts_select,:);
   end
   
   
-  %% Perform sensor filtering if needed. (check if works! -FC)
-  if sensor_filtering
-    [sensor_select, ~] = ismember(meta.variables, sensor_list);
-    meta.variables = meta.variables(sensor_select);
-    meta.units = meta.units(sensor_select);
-    meta.bytes = meta.bytes(sensor_select);
-    data = data(:,sensor_select);
+  %% Perform variable filtering if needed.
+  if variable_filtering
+    [variable_select, ~] = ismember(meta.variables, variable_list);
+    meta.variables = meta.variables(variable_select);
+    data = data(:, variable_select);
   end
   
   
-  %% Convert output data to struct format if needed. (check if works! -FC)
+  %% Convert output data to struct format if needed.
   switch output_format
     case 'array'
     case 'struct'
-      data = cell2struct(num2cell(data,1), meta.variables, 2);
+      data = cell2struct(num2cell(data, 1), meta.variables, 2);
     otherwise
       error('glider_toolbox:sxcat:InvalidFormat', ...
             'Invalid output format: %s.', output_format)
