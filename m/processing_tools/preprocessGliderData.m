@@ -297,6 +297,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
     struct('conductivity',        {'sci_water_cond'        'm_water_cond'}, ...
            'temperature',         {'sci_water_temp'        'm_water_temp'}, ...
            'pressure',            {'sci_water_pressure'    'm_water_pressure'}, ...
+           'oxygen',              {'GPCTD_DOF'    'SBD_DOF'}, ...
            'time',                {'sci_ctd41cp_timestamp' []}, ...
            'pressure_conversion', {@bar2dbar               @bar2dbar});
   options.oxygen_list = ...
@@ -739,6 +740,9 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
     if isfield(ctd_choice_list, 'time')
       time_ctd_field = ctd_choice.time;
     end
+    if isfield(ctd_choice_list, 'oxygen')
+      oxygen_ctd_field = ctd_choice.oxygen;
+    end    
     if isfield(ctd_choice_list, 'pressure_conversion')
       pressure_conversion_func = ctd_choice.pressure_conversion;
     end
@@ -765,6 +769,12 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         data_pre.time_ctd = data_raw.(time_ctd_field);
         meta_pre.time_ctd.sources = time_ctd_field;
         fprintf('  time CTD    : %s\n', time_ctd_field);
+      end
+      % Seaexplorer glider has GPCTD_DOF
+      if ~isempty(oxygen_ctd_field)
+          data_pre.oxygen_frequency = data_raw.(oxygen_ctd_field);
+          meta_pre.oxygen_frequency.sources = oxygen_ctd_field;
+          fprintf('  oxygen frequency (gpctd)    : %s\n', oxygen_ctd_field);
       end
       if ~isempty(pressure_conversion_func)
         if ischar(pressure_conversion_func)
@@ -886,7 +896,8 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
   % Find preferred valid fluorescence and turbidity sensor available in list of 
   % sensor fields, if any.
   optics_choice_list = options.optics_list;
-  optics_variables = {'chlorophyll' 'turbidity' 'cdom' 'scatter_650'};
+  optics_variables = {'chlorophyll' 'turbidity' 'cdom' 'scatter_650' ...
+                      'backscatter_700'};
   for optics_choice_idx = 1:numel(optics_choice_list)
     optics_choice = optics_choice_list(optics_choice_idx);
     optics_variables_select = ...
