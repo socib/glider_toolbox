@@ -33,15 +33,15 @@ function [meta, data] = sxcat(meta_list, data_list, timestamp, varargin)
 %        String setting the format of the output DATA. Valid values are:
 %          'array': DATA is a matrix with variable readings in the column order
 %            specified by the VARIABLES metadata field.
-%          'struct': DATA is a struct with sensor names as field names
-%            and column vectors of sensor readings as field values.
+%          'struct': DATA is a struct with variable names as field names
+%            and column vectors of variable readings as field values.
 %        Default value: 'array'
 %      VARIABLES: variable filtering list.
-%        String cell array with the names of the variables of interest. If given,
-%        only variables present in both the input data sets and this list
-%        will be present in output. The string 'all' may also be given,
-%        in which case sensor filtering is not performed and all variables
-%        in input data sets will be present in output.
+%        String cell array with the names of the variables of interest.
+%        If given, only variables present in both the input data sets and this
+%        list will be present in output. The string 'all' may also be given,
+%        in which case variable filtering is not performed and all variables
+%        in the input list will be present in output.
 %        Default value: 'all' (do not perform variable filtering).
 %      PERIOD: time filtering boundaries.
 %        Two element numeric array with the start and the end of the period
@@ -60,13 +60,13 @@ function [meta, data] = sxcat(meta_list, data_list, timestamp, varargin)
 %    If data rows with the same timestamp are present in several data sets,
 %    the function checks that data in those row readings is consistent.
 %    If the same variable is present in row readings from different data sets
-%    with the same timestamp and different valid values (not nan), an error is
+%    with the same timestamp and different valid values (not NaN), an error is
 %    thrown. Otherwise the values are merged into a single data row.
 %    However, note that in the odd case of data rows with the same timestamp
 %    in the same data set, they would not be merged and the values
 %    in the latest one would be used.
 %
-%    All values in timestamp columns should be valid (not nan).
+%    All values in timestamp columns should be valid (not NaN).
 %
 %  Examples:
 %    [meta, data] = sxcat(meta_list, data_list, timestamp)
@@ -148,57 +148,76 @@ function [meta, data] = sxcat(meta_list, data_list, timestamp, varargin)
   end
   
   
-  %% Check for trivial empty input.
+  %% Cat data and metadata checkin for trivial empty input.
+  % Check for trivial empty input.
   if isempty(meta_list)
-    meta_struct = struct();
-    meta_struct.sources = {};
-    meta_struct.variables = {};
+    sources_cat_list = cell(0, 1);
+    variables_cat_list = cell(0, 1);
   else
     meta_struct = [meta_list{:}];
+    sources_cat_list = {meta_struct.sources}';
+    variables_cat_list = {meta_struct.variables}';
   end
   
+  % Build list of sources and variables for concatenated data and metadata.
+  sources_cat = vertcat(sources_cat_list{:});
+  [variables_cat, ~, variables_cat_indices_to] = ...
+    unique(vertcat(variables_cat_list{:}));
   
-  %% Cat metadata.
-  all_sources = vertcat(meta_struct.sources);
-  all_variables = vertcat(meta_struct.variables);
-  [variables_list, variables_idx] = unique(all_variables);
-  meta.sources = all_sources;
-  meta.variables = all_variables(variables_idx);
+  % Build list of unique timestamps and the output index of each data row.
+  stamp_cat_list = cellfun(@(d, m) d(:, strcmp(timestamp, m.variables)), ...
+                           data_list(:), meta_list(:), 'UniformOutput', false);
+  [stamp_cat, ~, stamp_cat_indices_to] = unique(vertcat(stamp_cat_list{:}));
   
-  
-  %% Cat data.
-  [~, sensor_index_list] = cellfun(@(m) ismember(m.variables, variables_list), ...
-                                   meta_list, 'UniformOutput', false);
-  ts_list = cellfun(@(d,m) d(:,strcmp(timestamp, m.variables)), ...
-                    data_list(:), meta_list(:), 'UniformOutput', false);
-  [ts_unique, ~, ts_indices_to] = unique(vertcat(ts_list{:}));
-  total_rows = numel(ts_unique);
-  total_cols = numel(variables_list);
-  data = nan(total_rows, total_cols);
-  num_rows_list = cellfun(@numel, ts_list);
-  row_end_list = cumsum(num_rows_list);
+  % Build list of indices of input data entries in concatenated data output.
+  total_rows = numel(stamp_cat);
+  row_num_list = cellfun(@numel, stamp_cat_list(:));
+  row_end_list = cumsum(row_num_list);
   row_start_list = 1 + [0; row_end_list(1:end-1)];
+  total_cols = numel(variables_cat);
+  col_num_list = cellfun(@numel, variables_cat_list(:));
+  col_end_list = cumsum(col_num_list);
+  col_start_list = 1 + [0; col_end_list(1:end-1)];
+  
+  % Set output concatenated data checking for consistency of overlapped data.
+  data = nan(total_rows, total_cols);
   for data_idx = 1:numel(data_list)
     row_range = row_start_list(data_idx):row_end_list(data_idx);
-    row_indices = ts_indices_to(row_range);
-    col_indices = sensor_index_list{data_idx};
+    row_indices = stamp_cat_indices_to(row_range);
+    col_range = col_start_list(data_idx):col_end_list(data_idx);
+    col_indices = variables_cat_indices_to(col_range);
     data_old = data(row_indices, col_indices);
     data_new = data_list{data_idx};
-    data_old_nan = isnan(data_old);
-    data_new_nan = isnan(data_new);
-    data_compare = ~(data_old_nan | data_new_nan);
-    if any(data_old(data_compare) ~= data_new(data_compare))
-      error('glider_toolbox:sxcat:InconsistentData', 'Inconsistent data.');
+    data_old_valid = ~isnan(data_old);
+    data_new_valid = ~isnan(data_new);
+    data_inconsistent = ...
+      (data_old ~= data_new) & data_old_valid & data_new_valid;
+    if any(data_inconsistent(:))
+      [row_inconsistent, col_inconsistent] = find(data_inconsistent);
+      err_msg_arg_list = cell(4, numel(row_inconsistent));
+      err_msg_arg_list(1, :) = variables_cat(col_indices(col_inconsistent));
+      err_msg_arg_list(2, :) = cellstr( ...
+        datestr(posixtime2utc(stamp_cat(row_indices(row_inconsistent))), ...
+                'dd/mm/yyyy HH:MM:SS.FFF'));
+      err_msg_arg_list(3, :) = num2cell(data_old(data_inconsistent));
+      err_msg_arg_list(4, :) = num2cell(data_new(data_inconsistent));
+      err_msg_fmt = '\nInconsistent value of %s at %s: %12f %12f';
+      error('glider_toolbox:sxcat:InconsistentData', ...
+            'Inconsistent data:%s', sprintf(err_msg_fmt, err_msg_arg_list{:}));
     end
-    data_old(data_old_nan) = data_new(data_old_nan);
+    data_old(data_new_valid) = data_new(data_new_valid);
     data(row_indices, col_indices) = data_old;
   end
+  
+  % Set metadata fields.
+  meta.sources = sources_cat;
+  meta.variables = variables_cat;
   
   
   %% Perform time filtering if needed.
   if time_filtering
-    ts_select = ~(ts_unique < time_range(1) | ts_unique > time_range(2));
-    data = data(ts_select,:);
+    stamp_select = ~(stamp_cat < time_range(1) | stamp_cat > time_range(2));
+    data = data(stamp_select, :);
   end
   
   

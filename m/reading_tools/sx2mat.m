@@ -18,18 +18,18 @@ function [meta, data] = sx2mat(filename, varargin)
 %        String setting the format of the output DATA. Valid values are:
 %          'array': DATA is a matrix with variable readings in the column order
 %            specified by the VARIABLES metadata field.
-%          'struct': DATA is a struct with sensor names as field names
-%            and column vectors of sensor readings as field values.
+%          'struct': DATA is a struct with variable names as field names
+%            and column vectors of variable readings as field values.
 %        Default value: 'array'
 %      VARIABLES: variable filtering list.
-%        String cell array with the names of the variables of interest. If given,
-%        only variables present in both the input file and this list
+%        String cell array with the names of the variables of interest.
+%        If given, only variables present in both the input file and this list
 %        will be present in output. The string 'all' may also be given,
-%        in which case sensor filtering is not performed and all variables
+%        in which case variable filtering is not performed and all variables
 %        in the input file will be present in output.
 %        Default value: 'all' (do not perform variable filtering).
-%      TIMESTAMPS: timestamp variable list.
-%        String cell array with the names of the timestamp variables.
+%      TIME: timestamp variable list.
+%        String cell array with the names of the time variables.
 %        Variables in this list and also present in the data file are assumed
 %        to be UTC timestamps in the format 'DD/MM/YYYY HH:MM:SS' or
 %        'DD/MM/YYYY HH:MM:SS.FFF', and are converted to numeric values
@@ -43,9 +43,9 @@ function [meta, data] = sx2mat(filename, varargin)
 %      SOURCES: string cell array containing FILENAME.
 %
 %  Examples:
-%    % Retrieve data from all sensors as array:
+%    % Retrieve data from all variables as array:
 %    [meta, data] = sx2mat('test.dat.0001')
-%    % Retrieve data from all sensors as struct:
+%    % Retrieve data from all variables as struct:
 %    [meta, data] = sx2mat('test.gli.0001', 'format', 'struct')
 %    % Retrieve attitude data as struct:
 %    [meta, data] = sx2mat('test.gli.0001', 'format', 'struct', ...
@@ -84,7 +84,7 @@ function [meta, data] = sx2mat(filename, varargin)
   %% Set options and default values.
   options.format = 'array';
   options.variables = 'all';
-  options.timestamps = {'Timestamp' 'PLD_REALTIMECLOCK'};
+  options.time = {'Timestamp' 'PLD_REALTIMECLOCK'};
   
   
   %% Parse optional arguments.
@@ -123,7 +123,7 @@ function [meta, data] = sx2mat(filename, varargin)
     variable_filtering = false;
   end
   variable_list = cellstr(options.variables);
-  timestamp_list = cellstr(options.timestamps);
+  time_variable_list = cellstr(options.time);
   
   
   %% Open the file.
@@ -147,21 +147,21 @@ function [meta, data] = sx2mat(filename, varargin)
     
     % Read variable data filtering selected variables if needed.
     variable_format = repmat({'%f'}, length(meta.variables), 1);
-    select_timestamps = ismember(meta.variables, timestamp_list);
-    variable_format(select_timestamps) = {'%s'};
+    time_variable_select = ismember(meta.variables, time_variable_list);
+    variable_format(time_variable_select) = {'%s'};
     if variable_filtering
-      select_variables = ismember(meta.variables, variable_list);
-      variable_format( select_timestamps & ~select_variables) = {'%*f'};
-      variable_format(~select_timestamps & ~select_variables) = {'%*s'};
-      meta.variables = variables(select_variables);
-      select_timestamps = select_timestamps(select_variables);
+      variable_select = ismember(meta.variables, variable_list);
+      variable_format( time_variable_select & ~variable_select) = {'%*f'};
+      variable_format(~time_variable_select & ~variable_select) = {'%*s'};
+      meta.variables = variables(variable_select);
+      time_variable_select = time_variable_select(variable_select);
     end
     data_values = textscan(fid, [variable_format{:} '%*s'], ...
                            'Delimiter', ';', 'ReturnOnError', false);
     
     % Convert timestamp variables to numeric format.
-    for timestamp_idx = find(select_timestamps)
-      data_timestamp = data_values{timestamp_idx};
+    for time_variable_idx = find(time_variable_select)
+      data_timestamp = data_values{time_variable_idx};
       switch size(char(data_timestamp), 2)
         case 19
           timestamp_format = 'dd/mm/yyyy HH:MM:SS';
@@ -172,7 +172,7 @@ function [meta, data] = sx2mat(filename, varargin)
                 'Unknown timestamp format');
       end
       data_datenum = datenum(data_timestamp, timestamp_format);
-      data_values{timestamp_idx} = utc2posixtime(data_datenum);
+      data_values{time_variable_idx} = utc2posixtime(data_datenum);
     end
     
     % Convert data to desired output format:

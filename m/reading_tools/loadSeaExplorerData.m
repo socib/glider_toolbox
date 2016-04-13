@@ -24,8 +24,8 @@ function [meta, data] = loadSeaExplorerData(sxdir, gliregexp, datregexp, varargi
 %        String setting the format of the output DATA. Valid values are:
 %          'array': DATA is a matrix with variable readings in the column order
 %            specified by the VARIABLES metadata field.
-%          'struct': DATA is a struct with sensor names as field names
-%            and column vectors of sensor readings as field values.
+%          'struct': DATA is a struct with variable names as field names
+%            and column vectors of variable readings as field values.
 %        Default value: 'array'
 %      TIMEGLI: navigation data (.gli) time stamp.
 %        String setting the name of the variable to use as timestamp for
@@ -36,10 +36,10 @@ function [meta, data] = loadSeaExplorerData(sxdir, gliregexp, datregexp, varargi
 %        merging and sorting data row readings from SeaExplorer .dat data set.
 %        Default value: 'PLD_REALTIMECLOCK'
 %      VARIABLES: variable filtering list.
-%        String cell array with the names of the variables of interest. If given,
-%        only variables present in both the input data sets and this list
-%        will be present in output. The string 'all' may also be given,
-%        in which case sensor filtering is not performed and all variables
+%        String cell array with the names of the variables of interest.
+%        If given, only variables present in both the input data sets and this
+%        list will be present in output. The string 'all' may also be given,
+%        in which case variable filtering is not performed and all variables
 %        in input data sets will be present in output.
 %        Default value: 'all' (do not perform variable filtering).
 %      PERIOD: time filtering boundaries.
@@ -163,7 +163,8 @@ function [meta, data] = loadSeaExplorerData(sxdir, gliregexp, datregexp, varargi
     try
       gli_files{gli_idx} = fullfile(sxdir, gli_names{gli_idx});
       [meta_gli{gli_idx}, data_gli{gli_idx}] = ...
-        sx2mat(gli_files{gli_idx}, 'variables', options.variables);
+        sx2mat(gli_files{gli_idx}, ...
+               'time', options.timegli, 'variables', options.variables);
       gli_success(gli_idx) = true;
     catch exception
       disp(['Error loading SeaExplorer .gli file ' gli_files{gli_idx} ':']);
@@ -187,7 +188,8 @@ function [meta, data] = loadSeaExplorerData(sxdir, gliregexp, datregexp, varargi
       dat_files{dat_idx} = ...
         fullfile(sxdir, dat_names{dat_idx});
       [meta_dat{dat_idx}, data_dat{dat_idx}] = ...
-        sx2mat(dat_files{dat_idx}, 'variables', options.variables);     
+        sx2mat(dat_files{dat_idx}, ...
+               'time', options.timedat, 'variables', options.variables);
       dat_success(dat_idx) = true;
     catch exception
       disp(['Error loading SeaExplorer .dat file ' dat_files{dat_idx} ':']);
