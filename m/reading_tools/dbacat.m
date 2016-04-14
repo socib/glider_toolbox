@@ -45,9 +45,9 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 %            and column vectors of sensor readings as field values.
 %        Default value: 'array'
 %      SENSORS: sensor filtering list.
-%        String cell array with the names of the sensors of interest. If given,
-%        only the sensors present in both the input data sets and this list
-%        will be present in output. The string 'all' may also be given,
+%        String cell array with the names of the sensors of interest.
+%        If given, only sensors present in both the input data sets and this
+%        list will be present in output. The string 'all' may also be given,
 %        in which case sensor filtering is not performed and all sensors
 %        in the input list will be present in output.
 %        Default value: 'all' (do not perform sensor filtering).
@@ -67,8 +67,8 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 %
 %    Since sensor cycles (data rows) with the same timestamp may be present 
 %    in several data sets (e.g. when combining data from sbd and mbd files),
-%    the function checks that data in those sensor cycles is consistent.
-%    If the same sensor is present in sensor cycles from different data sets 
+%    the function checks that data in those sensor cycles are consistent.
+%    If the same sensor is present in sensor cycles from different data sets
 %    with the same timestamp and different valid values (not NaN), an error is
 %    thrown. Otherwise the values are merged into a single sensor cycle.
 %
@@ -78,7 +78,7 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
 %    with the option -o (the initial sensor cycle values may be omited if the
 %    timestamp in the following sensor cycle is the same).
 %
-%    All values in timestamp columns should be valid (not NaN).
+%    All values in the timestamp columns should be valid (not NaN).
 %
 %  Examples:
 %    [meta, data] = dbacat(meta_list, data_list, timestamp)
@@ -160,73 +160,92 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
   end
   
   
-  %% Check for trivial empty input.
+  %% Cat data and metadata checkin for trivial empty input.
+  % Check for trivial empty input.
   if isempty(meta_list)
-    meta_struct = struct();
-    meta_struct.sources = {};
-    meta_struct.headers = ...
+    sources_cat = cell(0, 1);
+    headers_cat = ...
       struct('dbd_label', {}, 'encoding_ver', {}, 'num_ascii_tags', {}, ...
              'all_sensors', {}, 'filename', {}, 'the8x3_filename', {}, ...
              'filename_extension', {}, 'filename_label', {}, ...
              'mission_name', {}, 'fileopen_time', {}, ...
              'sensors_per_cycle', {}, 'num_label_lines', {}, ...
              'num_segments', {}, 'segment_filenames', {});
-    meta_struct.sensors = {};
-    meta_struct.units = {};
-    meta_struct.bytes = [];
+    sensors_cat_list = cell(0, 1);
+    units_cat_list = cell(0, 1);
+    bytes_cat_list = zeros(0, 1, 'int32');
   else
     meta_struct = [meta_list{:}];
+    sources_cat = vertcat(meta_struct.sources);
+    headers_cat = vertcat(meta_struct.headers);
+    sensors_cat_list = {meta_struct.sensors}';
+    units_cat_list = {meta_struct.units}';
+    bytes_cat_list = {meta_struct.bytes}';
   end
   
+  % Build list of sensor information for concatenated data and metadata.
+  [sensors_cat, ~, sensors_cat_indices_to] = ...
+    unique(vertcat(sensors_cat_list{:}));
+  units_cat = cell(size(sensors_cat));
+  bytes_cat = zeros(size(sensors_cat), 'int32');
+  units_cat(sensors_cat_indices_to) = vertcat(units_cat_list{:});
+  bytes_cat(sensors_cat_indices_to) = vertcat(bytes_cat_list{:});
+
+  % Build list of indices of input data entries in concatenated data output.
+  stamp_cat_list = cellfun(@(d, m) d(:, strcmp(timestamp, m.sensors)), ...
+                           data_list(:), meta_list(:), 'UniformOutput', false);
+  [stamp_cat, ~, stamp_cat_indices_to] = unique(vertcat(stamp_cat_list{:}));
   
-  %% Cat metadata.
-  all_sources = vertcat(meta_struct.sources);
-  all_headers = vertcat(meta_struct.headers);
-  all_sensors = vertcat(meta_struct.sensors);
-  all_units = vertcat(meta_struct.units);
-  all_bytes = vertcat(meta_struct.bytes);
-  
-  [sensors_list, sensors_idx] = unique(all_sensors);
-  meta.sources = all_sources;
-  meta.headers = all_headers;
-  meta.sensors = all_sensors(sensors_idx);
-  meta.units   = all_units(sensors_idx);
-  meta.bytes   = all_bytes(sensors_idx);
-  
-  
-  %% Cat data.
-  [~, sensor_index_list] = cellfun(@(m) ismember(m.sensors, sensors_list), ...
-                                   meta_list, 'UniformOutput', false);
-  ts_list = cellfun(@(d,m) d(:,strcmp(timestamp, m.sensors)), ...
-                    data_list(:), meta_list(:), 'UniformOutput', false);
-  [ts_unique, ~, ts_indices_to] = unique(vertcat(ts_list{:}));
-  total_rows = numel(ts_unique);
-  total_cols = numel(sensors_list);
-  data = nan(total_rows, total_cols);
-  num_rows_list = cellfun(@numel, ts_list);
-  row_end_list = cumsum(num_rows_list);
+  % Build list of indices of input data entries in concatenated data output.
+  row_num_total = numel(stamp_cat);
+  row_num_list = cellfun(@numel, stamp_cat_list(:));
+  row_end_list = cumsum(row_num_list);
   row_start_list = 1 + [0; row_end_list(1:end-1)];
+  col_num_total = numel(sensors_cat);
+  col_num_list = cellfun(@numel, sensors_cat_list(:));
+  col_end_list = cumsum(col_num_list);
+  col_start_list = 1 + [0; col_end_list(1:end-1)];
+  
+  % Set output concatenated data checking for consistency of overlapped data.
+  data = nan(row_num_total, col_num_total);
   for data_idx = 1:numel(data_list)
     row_range = row_start_list(data_idx):row_end_list(data_idx);
-    row_indices = ts_indices_to(row_range);
-    col_indices = sensor_index_list{data_idx};
+    row_indices = stamp_cat_indices_to(row_range);
+    col_range = col_start_list(data_idx):col_end_list(data_idx);
+    col_indices = sensors_cat_indices_to(col_range);
     data_old = data(row_indices, col_indices);
     data_new = data_list{data_idx};
-    data_old_nan = isnan(data_old);
-    data_new_nan = isnan(data_new);
-    data_compare = ~(data_old_nan | data_new_nan);
-    if any(data_old(data_compare) ~= data_new(data_compare))
-      error('glider_toolbox:dbacat:InconsistentData', 'Inconsistent data.');
+    data_old_valid = ~isnan(data_old);
+    data_new_valid = ~isnan(data_new);
+    data_inconsistent = ...
+      (data_old ~= data_new) & data_old_valid & data_new_valid;
+    if any(data_inconsistent(:))
+      [row_inconsistent, col_inconsistent] = find(data_inconsistent);
+      err_msg_arg_list = cell(4, numel(row_inconsistent));
+      err_msg_arg_list(1, :) = sensors_cat(col_indices(col_inconsistent));
+      err_msg_arg_list(2, :) = num2cell(stamp_cat(row_indices(row_inconsistent)));
+      err_msg_arg_list(3, :) = num2cell(data_old(data_inconsistent));
+      err_msg_arg_list(4, :) = num2cell(data_new(data_inconsistent));
+      err_msg_fmt = '\nInconsistent value of %s at %12f: %12f %12f';
+      error('glider_toolbox:dbacat:InconsistentData', ...
+            'Inconsistent data:%s', sprintf(err_msg_fmt, err_msg_arg_list{:}));
     end
-    data_old(data_old_nan) = data_new(data_old_nan);
+    data_old(data_new_valid) = data_new(data_new_valid);
     data(row_indices, col_indices) = data_old;
   end
+  
+  % Set metadata fields.
+  meta.sources = sources_cat;
+  meta.headers = headers_cat;
+  meta.sensors = sensors_cat;
+  meta.units = units_cat;
+  meta.bytes = bytes_cat;
   
   
   %% Perform time filtering if needed.
   if time_filtering
-    ts_select = ~(ts_unique < time_range(1) | ts_unique > time_range(2));
-    data = data(ts_select, :);
+    stamp_select = ~(stamp_cat < time_range(1) | stamp_cat > time_range(2));
+    data = data(stamp_select, :);
   end
   
   

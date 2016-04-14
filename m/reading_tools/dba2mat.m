@@ -22,9 +22,9 @@ function [meta, data] = dba2mat(filename, varargin)
 %            and column vectors of sensor readings as field values.
 %        Default value: 'array'
 %      SENSORS: sensor filtering list.
-%        String cell array with the names of the sensors of interest. If given,
-%        only the sensors present in both the input data file and this list
-%        will be present in output. The string 'all' may also be given,
+%        String cell array with the names of the sensors of interest.
+%        If given, only the sensors present in both the input data file and this
+%        list will be present in output. The string 'all' may also be given,
 %        in which case sensor filtering is not performed and all sensors
 %        in the input data file will be present in output.
 %        Default value: 'all' (do not perform sensor filtering).
