@@ -171,7 +171,7 @@ function [temp_inside, cond_outside] = correctThermalLag(varargin)
       - coefb(n) * cond_correction(n) + coefa(n) * dcond_dtemp(n) * dtemp(n);
     temp_correction(n+1) = ...
       - coefb(n) * temp_correction(n) + coefa(n) * dtemp(n);
-  end;
+  end
 
   % Apply corrections to valid values in original sequences, 
   % preserving invalid values in the output.
