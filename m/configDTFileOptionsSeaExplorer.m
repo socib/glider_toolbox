@@ -52,11 +52,11 @@ function seaexplorer_options = configDTFileOptionsSeaExplorer()
   error(nargchk(0, 0, nargin, 'struct'));
   
   % Glider (.gli) files to use:
-  seaexplorer_options.gli_name_pattern = '^.*.gli.*$';
+  seaexplorer_options.gli_name_pattern = '^.*\.gli(\..*)?$';
   
   % Payload (.pld) files to use:
   % They used to have the suffix '.dat' during the SeaExplorer development.
-  seaexplorer_options.pld_name_pattern = '^.*.(pld|dat).*$';
+  seaexplorer_options.pld_name_pattern = '^.*\.(pld|dat)(\d*)?(\..*)?$';
   
   % Time variable column in glider files:
   seaexplorer_options.gli_time = 'Timestamp';
