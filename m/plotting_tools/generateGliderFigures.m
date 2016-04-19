@@ -50,6 +50,12 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
 %        Default value: 'epsc2'
 %      RENDER: renderer to use when printing intermediate vector file.
 %        Default value: [] (renderer automatically selected)
+%      LOOSE: uncrop image when printing intermediate vector file.
+%        Default value: 'loose' (produce uncropped images).
+%      CONVERT: program to convert intermediate vector file to final format.
+%        Default value: 'convert'
+%      KEEPEPS: preserve intermediate vector file after conversion.
+%        Default value: false
 %      DATE: image generation timestamp.
 %        Default value: datestr(now(), 31)
 %
@@ -141,7 +147,7 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(2, 12, nargin, 'struct'));
+  error(nargchk(2, 20, nargin, 'struct'));
   
   
   %% Set plot options and default values.
@@ -150,6 +156,9 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
   options.resolution = 72;
   options.driver = 'epsc2';
   options.render = [];
+  options.loose = 'loose';
+  options.convert = 'convert';
+  options.keepeps = false;
   options.date = datestr(now(), 31);
   
   
@@ -197,23 +206,12 @@ function figure_info = generateGliderFigures(data, figure_list, varargin)
     else
       print_options = struct();  
     end
-    if ~isfield(print_options, 'dirname')
-      print_options.dirname = options.dirname;
-    end
-    if ~isfield(print_options, 'format')
-      print_options.format = options.format;
-    end
-    if ~isfield(print_options, 'resolution')
-      print_options.resolution = options.resolution;
-    end
-    if ~isfield(print_options, 'driver')
-      print_options.driver = options.driver;
-    end
-    if ~isfield(print_options, 'render')
-      print_options.render = options.render;
-    end
-    if ~isfield(print_options, 'date')
-      print_options.date = options.date;
+    print_option_field_list = fieldnames(options);
+    for print_option_field_idx = 1:numel(print_option_field_list)
+      print_option_field = print_option_field_list{print_option_field_idx};
+      if ~isfield(print_options, print_option_field)
+        print_options.(print_option_field) = options.(print_option_field);
+      end
     end
     % Get plot function as function handle.
     plot_function = figure_plot.plotfunc;
