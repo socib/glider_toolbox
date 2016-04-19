@@ -9,17 +9,17 @@ function seaexplorer_options = configDTFileOptionsSeaExplorer()
 %    a struct with the parameters that control which are the deployment files,
 %    whether they need to be converted, and which files and data should be used
 %    in delayed time mode. The returned struct should have the following fields:
-%      GLI_NAME_PATTERN: string with the name pattern of SeaExplorer .gli files
-%        to be loaded by LOADSEAEXPLORERDATA for processing.
-%      DAT_NAME_PATTERN: string with the name pattern of SeaExplorer .dat files.
-%        to be loaded by LOADSEAEXPLORERDATA for processing.
+%      GLI_NAME_PATTERN: string with the name pattern of SeaExplorer glider
+%        files to be loaded by LOADSEAEXPLORERDATA for processing.
+%      PLD_NAME_PATTERN: string with the name pattern of SeaExplorer payload
+%        files to be loaded by LOADSEAEXPLORERDATA for processing.
 %      GLI_TIME: string with the name of the variable to use as timestamp
-%        in .gli files when combining data from a set of SeaExplorer files.
-%      DAT_TIME: string with the name of the variable to use as timestamp
-%        in .dat files when combining data from a set of SeaExplorer files.
+%        in glider files when combining data from a set of SeaExplorer files.
+%      PLD_TIME: string with the name of the variable to use as timestamp
+%        in payload files when combining data from a set of SeaExplorer files.
 %      VARIABLES: string cell array with the name of the variables to load
-%        from .gli and dat files by LOADSEAEXPLORERDATA. Restricting the list
-%        of variables to load may reduce the memory footprint.
+%        from glider and payload files by LOADSEAEXPLORERDATA. Restricting
+%        the list of variables to load may reduce the memory footprint.
 %
 %  Examples:
 %    seaexplorer_options = configDTFileOptionsSeaExplorer()
@@ -51,17 +51,18 @@ function seaexplorer_options = configDTFileOptionsSeaExplorer()
 
   error(nargchk(0, 0, nargin, 'struct'));
   
-  % Navigation (.gli) files to use:
+  % Glider (.gli) files to use:
   seaexplorer_options.gli_name_pattern = '^.*.gli.*$';
   
-  % Science (.dat) files to use:
-  seaexplorer_options.dat_name_pattern = '^.*.dat.*$';
+  % Payload (.pld) files to use:
+  % They used to have the suffix '.dat' during the SeaExplorer development.
+  seaexplorer_options.pld_name_pattern = '^.*.(pld|dat).*$';
   
-  % Time variable column in navigation (.gli) files:
+  % Time variable column in glider files:
   seaexplorer_options.gli_time = 'Timestamp';
   
-  % Time variable column in science (.dat) files:
-  seaexplorer_options.dat_time = 'PLD_REALTIMECLOCK';
+  % Time variable column in payload files:
+  seaexplorer_options.pld_time = 'PLD_REALTIMECLOCK';
   
   % Variables to load.
   seaexplorer_options.variables = 'all';  

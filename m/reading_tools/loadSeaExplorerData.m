@@ -1,21 +1,21 @@
-function [meta, data] = loadSeaExplorerData(sxdir, gliregexp, datregexp, varargin)
-%LOADSEAEXPLORERDATA  Load SeaExplorer data from .gli and .dat files in directory.
+function [meta, data] = loadSeaExplorerData(sxdir, gliregexp, pldregexp, varargin)
+%LOADSEAEXPLORERDATA  Load SeaExplorer data from SeaExplorer glider and payload files in directory.
 %
 %  Syntax:
-%    [META, DATA] = LOADSEAEXPLORERDATA(SXDIR, GLIREGEXP, DATREGEXP)
-%    [META, DATA] = LOADSEAEXPLORERDATA(SXDIR, GLIREGEXP, DATREGEXP, OPTIONS)
-%    [META, DATA] = LOADSEAEXPLORERDATA(SXDIR, GLIREGEXP, DATREGEXP, OPT1, VAL1, ...)
+%    [META, DATA] = LOADSEAEXPLORERDATA(SXDIR, GLIREGEXP, PLDREGEXP)
+%    [META, DATA] = LOADSEAEXPLORERDATA(SXDIR, GLIREGEXP, PLDREGEXP, OPTIONS)
+%    [META, DATA] = LOADSEAEXPLORERDATA(SXDIR, GLIREGEXP, PLDREGEXP, OPT1, VAL1, ...)
 %
 %  Description:
-%    [META, DATA] = LOADSEAEXPLORERDATA(SXDIR, GLIREGEXP, DATREGEXP)
-%    loads data and metadata from SeaExplorer files in ascii text format
-%    (.gli or .dat) contained in directory named by string SXDIR and whose
-%    name matches regular expression in string GLIREGEXP (navigation files)
-%    or in string DATREGEXP (science files). META and DATA contain loaded
+%    [META, DATA] = LOADSEAEXPLORERDATA(SXDIR, GLIREGEXP, PLDREGEXP)
+%    loads data and metadata from SeaExplorer glider or payload files
+%    in ascii text format contained in directory named by string SXDIR and
+%    whose name matches regular expression in string GLIREGEXP (glider files)
+%    or in string PLDREGEXP (payload files). META and DATA contain loaded
 %    metadata and data in the format returned by functions SXCAT and SXMERGE.
 %
-%    [META, DATA] = LOADSEAEXPLORERDATA(SXDIR, GLIREGEXP, DATREGEXP, OPTIONS) and
-%    [META, DATA] = LOADSEAEXPLORERDATA(SXDIR, GLIREGEXP, DATREGEXP, OPT1, VAL1, ...) 
+%    [META, DATA] = LOADSEAEXPLORERDATA(SXDIR, GLIREGEXP, PLDREGEXP, OPTIONS) and
+%    [META, DATA] = LOADSEAEXPLORERDATA(SXDIR, GLIREGEXP, PLDREGEXP, OPT1, VAL1, ...)
 %    accept the following options, given in key-value pairs OPT1, VAL1...
 %    or in a struct OPTIONS with field names as option keys and field values
 %    as option values, allowing to restrict the time range or the set of
@@ -27,13 +27,13 @@ function [meta, data] = loadSeaExplorerData(sxdir, gliregexp, datregexp, varargi
 %          'struct': DATA is a struct with variable names as field names
 %            and column vectors of variable readings as field values.
 %        Default value: 'array'
-%      TIMEGLI: navigation data (.gli) time stamp.
-%        String setting the name of the variable to use as timestamp for
-%        merging and sorting data row readings from SeaExplorer .gli data set.
+%      TIMEGLI: glider data timestamp.
+%        String setting the name of the variable to use as timestamp for merging
+%        and sorting data row readings from SeaExplorer glider data set.
 %        Default value: 'Timestamp'
-%      TIMEDAT: science data (.dat) time stamp.
-%        String setting the name of the variable to use as timestamp for
-%        merging and sorting data row readings from SeaExplorer .dat data set.
+%      TIMEPLD: payload data timestamp.
+%        String setting the name of the variable to use as timestamp for merging
+%        and sorting data row readings from SeaExplorer payload data set.
 %        Default value: 'PLD_REALTIMECLOCK'
 %      VARIABLES: variable filtering list.
 %        String cell array with the names of the variables of interest.
@@ -59,11 +59,11 @@ function [meta, data] = loadSeaExplorerData(sxdir, gliregexp, datregexp, varargi
 %
 %  Examples:
 %    [meta, data] = ...
-%      loadSeaExplorerData(ascii_dir, gliregexp, datregexp)
+%      loadSeaExplorerData(ascii_dir, gliregexp, pldregexp)
 %    [meta, data] = ...
-%      loadSeaExplorerData(ascii_dir, '^.*.gli.*$', '^.*.dat.*$', ...
+%      loadSeaExplorerData(ascii_dir, '^.*.gli.*$', '^.*.pld.*$', ...
 %                          'timegli', 'Timestamp', ...
-%                          'timedat', 'PLD_REALTIMECLOCK', ...
+%                          'timepld', 'PLD_REALTIMECLOCK', ...
 %                          'variables', variables_of_interest, ...
 %                          'period', period_of_interest, ...
 %                          'format', 'struct');
@@ -102,7 +102,7 @@ function [meta, data] = loadSeaExplorerData(sxdir, gliregexp, datregexp, varargi
   %% Set options and default values.
   options.format = 'array';
   options.timegli = 'Timestamp';
-  options.timedat = 'PLD_REALTIMECLOCK';
+  options.timepld = 'PLD_REALTIMECLOCK';
   options.variables = 'all';
   options.period = 'all';
   
@@ -141,20 +141,20 @@ function [meta, data] = loadSeaExplorerData(sxdir, gliregexp, datregexp, varargi
   sxdir_contents = dir(sxdir);
   gli_sel = ~[sxdir_contents.isdir] ...
     & ~cellfun(@isempty, regexp({sxdir_contents.name}, gliregexp));
-  dat_sel = ~[sxdir_contents.isdir] ...
-    & ~cellfun(@isempty, regexp({sxdir_contents.name}, datregexp));
+  pld_sel = ~[sxdir_contents.isdir] ...
+    & ~cellfun(@isempty, regexp({sxdir_contents.name}, pldregexp));
   gli_names = {sxdir_contents(gli_sel).name};
   gli_sizes = [sxdir_contents(gli_sel).bytes];
-  dat_names = {sxdir_contents(dat_sel).name};
-  dat_sizes = [sxdir_contents(dat_sel).bytes];
-  disp(['SeaExplorer .gli files found: ' num2str(numel(gli_names)) ...
+  pld_names = {sxdir_contents(pld_sel).name};
+  pld_sizes = [sxdir_contents(pld_sel).bytes];
+  disp(['SeaExplorer glider files found: ' num2str(numel(gli_names)) ...
         ' (' num2str(sum(gli_sizes)*2^-10) ' kB).']);
-  disp(['SeaExplorer .dat files found: ' num2str(numel(dat_names)) ...
-        ' (' num2str(sum(dat_sizes)*2^-10) ' kB).']);
+  disp(['SeaExplorer payload files found: ' num2str(numel(pld_names)) ...
+        ' (' num2str(sum(pld_sizes)*2^-10) ' kB).']);
   
   
-  %% Load .gli files.
-  disp('Loading SeaExplorer .gli files...');
+  %% Load glider files.
+  disp('Loading SeaExplorer glider files...');
   gli_files = cell(size(gli_names));
   gli_success = false(size(gli_names));
   meta_gli = cell(size(gli_names));
@@ -167,49 +167,49 @@ function [meta, data] = loadSeaExplorerData(sxdir, gliregexp, datregexp, varargi
                'time', options.timegli, 'variables', options.variables);
       gli_success(gli_idx) = true;
     catch exception
-      disp(['Error loading SeaExplorer .gli file ' gli_files{gli_idx} ':']);
+      disp(['Error loading SeaExplorer glider file ' gli_files{gli_idx} ':']);
       disp(getReport(exception, 'extended'));
     end
   end
   meta_gli = meta_gli(gli_success);
   data_gli = data_gli(gli_success);
-  disp(['SeaExplorer .gli files loaded: ' ...
+  disp(['SeaExplorer glider files loaded: ' ...
         num2str(numel(data_gli)) ' of ' num2str(numel(gli_names)) '.']);
   
   
-  %% Load .dat files.
-  disp('Loading SeaExplorer .dat files...');
-  dat_files = cell(size(dat_names));
-  dat_success = false(size(dat_names));
-  meta_dat = cell(size(dat_names));
-  data_dat = cell(size(dat_names));
-  for dat_idx = 1:numel(dat_names)
+  %% Load payload files.
+  disp('Loading SeaExplorer payload files...');
+  pld_files = cell(size(pld_names));
+  pld_success = false(size(pld_names));
+  meta_pld = cell(size(pld_names));
+  data_pld = cell(size(pld_names));
+  for pld_idx = 1:numel(pld_names)
     try
-      dat_files{dat_idx} = ...
-        fullfile(sxdir, dat_names{dat_idx});
-      [meta_dat{dat_idx}, data_dat{dat_idx}] = ...
-        sx2mat(dat_files{dat_idx}, ...
-               'time', options.timedat, 'variables', options.variables);
-      dat_success(dat_idx) = true;
+      pld_files{pld_idx} = fullfile(sxdir, pld_names{pld_idx});
+      [meta_pld{pld_idx}, data_pld{pld_idx}] = ...
+        sx2mat(pld_files{pld_idx}, ...
+               'time', options.timepld, 'variables', options.variables);
+      pld_success(pld_idx) = true;
     catch exception
-      disp(['Error loading SeaExplorer .dat file ' dat_files{dat_idx} ':']);
+      disp(['Error loading SeaExplorer payload file ' pld_files{pld_idx} ':']);
       disp(getReport(exception, 'extended'));
     end
   end
-  meta_dat = meta_dat(dat_success);
-  data_dat = data_dat(dat_success);
-  disp(['SeaExplorer .dat files loaded: ' ...
-        num2str(numel(data_dat)) ' of ' num2str(numel(dat_names)) '.']);
+  meta_pld = meta_pld(pld_success);
+  data_pld = data_pld(pld_success);
+  disp(['SeaExplorer pld files loaded: ' ...
+        num2str(numel(data_pld)) ' of ' num2str(numel(pld_names)) '.']);
   
   
-  %% Combine data from .gli and .dat files.
+  %% Combine data from either glider or payload files.
   [meta_gli, data_gli] = sxcat(meta_gli, data_gli, options.timegli);
-  [meta_dat, data_dat] = sxcat(meta_dat, data_dat, options.timedat);
+  [meta_pld, data_pld] = sxcat(meta_pld, data_pld, options.timepld);
   
   
-  %% Merge data from both bays.
+  %% Merge data from glider and payload files.
   [meta, data] = ...
-    sxmerge(meta_gli, data_gli, meta_dat, data_dat, ...
+    sxmerge(meta_gli, data_gli, meta_pld, data_pld, ...
+            'timegli', options.timegli, 'timepld', options.timepld, ...
             'variables', options.variables, 'period', options.period, ...
             'format', options.format);
 

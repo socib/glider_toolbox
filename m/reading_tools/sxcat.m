@@ -1,5 +1,5 @@
 function [meta, data] = sxcat(meta_list, data_list, timestamp, varargin)
-%SXCAT  Combine data from several SeaExplorer data sets into a single data set.
+%SXCAT  Combine data from several SeaExplorer data sets of the same type into a single data set.
 %
 %  Syntax:
 %    [META, DATA] = SXCAT(META_LIST, DATA_LIST, TIMESTAMP)
@@ -53,8 +53,8 @@ function [meta, data] = sxcat(meta_list, data_list, timestamp, varargin)
 %        Default value: 'all' (do not perform time filtering).
 %
 %  Notes:
-%    This function should be used to combine data from several .gli files,
-%    or from several .dat files, but not from both .gli and .dat files
+%    This function should be used to combine data from several glider files,
+%    or from several payload files, but not from both glider and payload files
 %    (use SXMERGE instead).
 %
 %    If data rows with the same timestamp are present in several data sets,

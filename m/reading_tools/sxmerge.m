@@ -1,23 +1,23 @@
-function [meta, data] = sxmerge(meta_gli, data_gli, meta_dat, data_dat, varargin)
-%SXMERGE  Merge data from combined SeaExplorer .gli and .dat data sets into a single data set.
+function [meta, data] = sxmerge(meta_gli, data_gli, meta_pld, data_pld, varargin)
+%SXMERGE  Merge data from combined SeaExplorer glider and payload data sets into a single data set.
 %
 %  Syntax:
-%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_DAT, DATA_DAT)
-%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_DAT, DATA_DAT, OPTIONS)
-%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_DAT, DATA_DAT, OPT1, VAL1, ...)
+%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_PLD, DATA_PLD)
+%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_PLD, DATA_PLD, OPTIONS)
+%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_PLD, DATA_PLD, OPT1, VAL1, ...)
 %
 %  Description:
-%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_DAT, DATA_DAT) merges the
-%    navigation and science data sets described by metadata structs META_GLI and
-%    META_DAT, and data arrays DATA_GLI and DATA_DAT into a single data set
+%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_PLD, DATA_PLD) merges the
+%    glider and payload data sets described by metadata structs META_GLI and
+%    META_PLD, and data arrays DATA_GLI and DATA_PLD into a single data set
 %    described by metadata struct META and data array or struct DATA
 %    (see format option described below). Input metadata and data should be
 %    in the format returned by the function SXCAT. Data rows from both
 %    data sets are merged based on the order of the respective timestamps.
 %    See note on merging process.
 %
-%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_DAT, DATA_DAT, OPTIONS) and
-%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_DAT, DATA_DAT, OPT1, VAL1, ...)
+%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_PLD, DATA_PLD, OPTIONS) and
+%    [META, DATA] = SXMERGE(META_GLI, DATA_GLI, META_PLD, DATA_PLD, OPT1, VAL1, ...)
 %    accept the following options given in key-value pairs OPT1, VAL1...
 %    or in a struct OPTIONS with field names as option keys and field values
 %    as option values:
@@ -28,13 +28,13 @@ function [meta, data] = sxmerge(meta_gli, data_gli, meta_dat, data_dat, varargin
 %          'struct': DATA is a struct with variable names as field names
 %            and column vectors of variable readings as field values.
 %        Default value: 'array'
-%      TIMEGLI: navigation data (.gli) timestamp.
+%      TIMEGLI: glider timestamp.
 %        String setting the name of the time variable for merging and sorting
 %        data row readings from SeaExplorer .gli data set.
 %        Default value: 'Timestamp'
-%      TIMEDAT: science data (.dat) timestamp.
+%      TIMEPLD: payload timestamp.
 %        String setting the name of the time variable for merging and sorting
-%        data row readings from SeaExplorer .dat data set.
+%        data row readings from SeaExplorer payload data set.
 %        Default value: 'PLD_REALTIMECLOCK'
 %      VARIABLES: variable filtering list.
 %        String cell array with the names of the variables of interest.
@@ -53,27 +53,28 @@ function [meta, data] = sxmerge(meta_gli, data_gli, meta_dat, data_dat, varargin
 %        Default value: 'all' (do not perform time filtering).
 %
 %  Notes:
-%    This function should be used to merge data from .gli and .dat data sets,
-%    not from data sets coming from the same type of files (use SXCAT instead).
+%    This function should be used to merge data from SeaExplorer glider and
+%    payload data sets, not from data sets coming from the same type of files
+%    (use SXCAT instead).
 %
-%    The merging process sorts row variable readings from .gli and .dat data
-%    sets comparing the respective timestamp values. Row variable readings
-%    coming from .gli and .dat data arrays with equal timestamp values are
+%    The merging process sorts row variable readings from glider and  payload
+%    data sets comparing the respective timestamp values. Row variable readings
+%    coming from glider and payload data arrays with equal timestamp values are
 %    merged into a single row, otherwise the missing variable values are filled
-%    with invalid values (NaN). Variables in .gli and .dat data sets are all
-%    different, but if there were duplicated variables, the values from each
+%    with invalid values (NaN). Variables in glider and payload data sets are
+%    all different, but if there were duplicated variables, the values from each
 %    data set would be merged in a common column according to the timestamp,
 %    and an error would be raised if there were inconsistent valid data entries
 %    (not NaN) for the same timestamp value.
 %
 %    All values in timestamp columns should be valid (not NaN).
-%    In output, the .gli timestamp column contains the merged .gli and .dat
+%    In output, the .gli timestamp column contains the merged glider and payload
 %    timestamps to provide a consistent comprehensive timestamp variable
-%    for the merged data set. The .dat timestamp contains only the timestamps
-%    of the .dat dataset.
+%    for the merged data set. The payload timestamp contains only the timestamps
+%    of the payload data set.
 %
 %  Examples:
-%    [meta, data] = sxmerge(meta_gli, data_gli, meta_dat, data_dat)
+%    [meta, data] = sxmerge(meta_gli, data_gli, meta_pld, data_pld)
 %
 %  See also:
 %    SX2MAT
@@ -106,7 +107,7 @@ function [meta, data] = sxmerge(meta_gli, data_gli, meta_dat, data_dat, varargin
   %% Set options and default values.
   options.format = 'array';
   options.timegli = 'Timestamp';
-  options.timedat = 'PLD_REALTIMECLOCK';
+  options.timepld = 'PLD_REALTIMECLOCK';
   options.variables = 'all';
   options.period = 'all';
   
@@ -143,7 +144,7 @@ function [meta, data] = sxmerge(meta_gli, data_gli, meta_dat, data_dat, varargin
   %% Set option flags and values.
   output_format = lower(options.format);
   time_variable_gli = options.timegli;
-  time_variable_dat = options.timedat;
+  time_variable_pld = options.timepld;
   variable_filtering = true;
   variable_list = cellstr(options.variables);
   time_filtering = true;
@@ -157,85 +158,85 @@ function [meta, data] = sxmerge(meta_gli, data_gli, meta_dat, data_dat, varargin
   
   
   %% Merge data and metadata checking for empty input cases.
-  if isempty(meta_gli.sources) && isempty(meta_dat.sources)
+  if isempty(meta_gli.sources) && isempty(meta_pld.sources)
     % No input data.
-    % Both META_GLI and DATA_GLI, and META_DAT and DATA_DAT
+    % Both META_GLI and DATA_GLI, and META_PLD and DATA_PLD
     % are equal to the trivial output of SXCAT.
     % Disable filtering.
     meta = meta_gli; 
     data = data_gli;
     variable_filtering = false;
     time_filtering = false;
-  elseif isempty(meta_dat.sources)
-    % Only .gli (navigation) data.
+  elseif isempty(meta_pld.sources)
+    % Only glider data.
     meta = meta_gli;
     data = data_gli;
     time_variable_merged = time_variable_gli; % Time variable for filtering.
   elseif isempty(meta_gli.sources)
-    % Only .dat (science) data.
-    meta = meta_dat;
-    data = data_dat;
-    time_variable_merged = time_variable_dat; % Time variable for filtering.
+    % Only payload data.
+    meta = meta_pld;
+    data = data_pld;
+    time_variable_merged = time_variable_pld; % Time variable for filtering.
   else
     % Build list of sources and variables for merged data and metadata.
     sources_gli = meta_gli.sources;
-    sources_dat = meta_dat.sources;
-    sources_merged = vertcat(sources_gli, sources_dat);
+    sources_pld = meta_pld.sources;
+    sources_merged = vertcat(sources_gli, sources_pld);
     variables_gli = meta_gli.variables;
-    variables_dat = meta_dat.variables;
+    variables_pld = meta_pld.variables;
     [variables_merged, ~, variables_merged_indices_to] = ...
-      unique(vertcat(variables_gli, variables_dat));
+      unique(vertcat(variables_gli, variables_pld));
     
     % Check that both data sets have their own timestamp variable.
     [time_variable_gli_present, time_variable_gli_col] = ...
       ismember(time_variable_gli, variables_gli);
     if ~time_variable_gli_present
       error('glider_toolbox:sxmerge:MissingTimestamp', ...
-            'Missing timestamp variable in navigation (.gli) data set: %s.', ...
+            'Missing timestamp variable in glider data set: %s.', ...
             time_variable_gli);
     end
-    [time_variable_dat_present, time_variable_dat_col] = ...
-      ismember(time_variable_dat, variables_dat);
-    if ~time_variable_dat_present
+    [time_variable_pld_present, time_variable_pld_col] = ...
+      ismember(time_variable_pld, variables_pld);
+    if ~time_variable_pld_present
       error('glider_toolbox:sxmerge:MissingTimestamp', ...
-            'Missing timestamp variable in science (.dat) data set: %s.', ...
-            time_variable_dat);
+            'Missing timestamp variable in payload data set: %s.', ...
+            time_variable_pld);
     end
     
     % Build list of unique timestamps and the output index of each data row. 
     stamp_gli = data_gli(:, time_variable_gli_col);
-    stamp_dat = data_dat(:, time_variable_dat_col);
+    stamp_pld = data_pld(:, time_variable_pld_col);
     [stamp_merged, ~, stamp_merged_indices_to] = ...
-      unique(vertcat(stamp_gli, stamp_dat));
+      unique(vertcat(stamp_gli, stamp_pld));
     
-    % Build indices of .gli and .dat entries in merged data output.
+    % Build indices of glider and payload entries in merged data output.
     row_num_gli = numel(stamp_gli);
     row_range_gli = 1:row_num_gli;
     row_indices_gli = stamp_merged_indices_to(row_range_gli);
-    row_num_dat = numel(stamp_dat);
-    row_range_dat = row_num_gli + (1:row_num_dat);
-    row_indices_dat = stamp_merged_indices_to(row_range_dat);
+    row_num_pld = numel(stamp_pld);
+    row_range_pld = row_num_gli + (1:row_num_pld);
+    row_indices_pld = stamp_merged_indices_to(row_range_pld);
     row_num_merged = numel(stamp_merged);
     col_num_gli = numel(variables_gli);
     col_range_gli = 1:col_num_gli;
     col_indices_gli = variables_merged_indices_to(col_range_gli);
-    col_num_dat = numel(variables_dat);
-    col_range_dat = col_num_gli + (1:col_num_dat);
-    col_indices_dat = variables_merged_indices_to(col_range_dat);
+    col_num_pld = numel(variables_pld);
+    col_range_pld = col_num_gli + (1:col_num_pld);
+    col_indices_pld = variables_merged_indices_to(col_range_pld);
     col_num_merged = numel(variables_merged);
     
-    % Check for consistency of overlapped .gli and .dat data.
-    [row_overlap_merged, row_overlap_gli, row_overlap_dat] = ...
-      intersect(row_indices_gli, row_indices_dat);
-    [col_overlap_merged, col_overlap_gli, col_overlap_dat] = ...
-      intersect(col_indices_gli, col_indices_dat);
+    % Check for consistency of overlapped glider and payload data.
+    [row_overlap_merged, row_overlap_gli, row_overlap_pld] = ...
+      intersect(row_indices_gli, row_indices_pld);
+    [col_overlap_merged, col_overlap_gli, col_overlap_pld] = ...
+      intersect(col_indices_gli, col_indices_pld);
     data_overlap_gli = data_gli(row_overlap_gli, col_overlap_gli);
-    data_overlap_dat = data_dat(row_overlap_dat, col_overlap_dat);
+    data_overlap_pld = data_pld(row_overlap_pld, col_overlap_pld);
     data_overlap_gli_valid = ~isnan(data_overlap_gli);
-    data_overlap_dat_valid = ~isnan(data_overlap_dat);
-    data_overlap_inconsistent = (data_overlap_gli ~= data_overlap_dat) ...
+    data_overlap_pld_valid = ~isnan(data_overlap_pld);
+    data_overlap_inconsistent = (data_overlap_gli ~= data_overlap_pld) ...
                               & data_overlap_gli_valid ...
-                              & data_overlap_dat_valid;
+                              & data_overlap_pld_valid;
     if any(data_overlap_inconsistent(:))
       [row_inconsistent, col_inconsistent] = find(data_overlap_inconsistent);
       err_msg_arg_list = cell(4, numel(row_inconsistent));
@@ -247,8 +248,8 @@ function [meta, data] = sxmerge(meta_gli, data_gli, meta_dat, data_dat, varargin
       err_msg_arg_list(3, :) = ...
         num2cell(data_overlap_gli(data_overlap_inconsistent));
       err_msg_arg_list(4, :) = ...
-        num2cell(data_overlap_dat(data_overlap_inconsistent));
-      err_msg_fmt = '\nInconsistent gli and dat value of %s at %s: %12f %12f';
+        num2cell(data_overlap_pld(data_overlap_inconsistent));
+      err_msg_fmt = '\nInconsistent glider and payload value of %s at %s: %12f %12f';
       error('glider_toolbox:sxmerge:InconsistentData', ...
             'Inconsistent data:%s', sprintf(err_msg_fmt, err_msg_arg_list{:}));
     end
@@ -256,14 +257,14 @@ function [meta, data] = sxmerge(meta_gli, data_gli, meta_dat, data_dat, varargin
     % Set output merged data.
     data = nan(row_num_merged, col_num_merged);
     data(row_indices_gli, col_indices_gli) = data_gli;
-    data(row_indices_dat, col_indices_dat) = data_dat;
+    data(row_indices_pld, col_indices_pld) = data_pld;
     data_overlap_merged = data_overlap_gli;
-    data_overlap_merged(data_overlap_dat_valid) = ...
-      data_overlap_dat(data_overlap_dat_valid);
+    data_overlap_merged(data_overlap_pld_valid) = ...
+      data_overlap_pld(data_overlap_pld_valid);
     data(row_overlap_merged, col_overlap_merged) = data_overlap_merged;
     
-    % Copy .dat timestamps to .gli timestamp entries.
-    data(row_indices_dat, col_indices_gli(time_variable_gli_col)) = stamp_dat;
+    % Copy payload timestamp entries to glider timestamp entries.
+    data(row_indices_pld, col_indices_gli(time_variable_gli_col)) = stamp_pld;
     time_variable_merged = time_variable_gli;
     
     % Set metadata fields.

@@ -79,7 +79,7 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
 
   default_fill_value = realmax('double');
 
-  %% From navigation files.
+  %% From glider files.
 
   % Navigation time.
   var_attr_list.Timestamp = {
@@ -184,9 +184,9 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
     '_FillValue'    default_fill_value };
 
 
-  %% From science files.
+  %% From payload files.
 
-  % Science time.
+  % Payload time.
   var_attr_list.PLD_REALTIMECLOCK = { 
     'long_name'     'epoch time (science bay)'
     'standard_name' 'time'
