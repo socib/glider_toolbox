@@ -79,7 +79,7 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
 
   default_fill_value = realmax('double');
 
-  %% From glider files.
+  %% From navigation files.
 
   % Navigation time.
   var_attr_list.Timestamp = {
@@ -184,9 +184,9 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
     '_FillValue'    default_fill_value };
 
 
-  %% From payload files.
+  %% From science files.
 
-  % Payload time.
+  % Science time.
   var_attr_list.PLD_REALTIMECLOCK = { 
     'long_name'     'epoch time (science bay)'
     'standard_name' 'time'
@@ -416,7 +416,95 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
     'comments'      'Alseamar methane sensor'
     '_FillValue'    default_fill_value };    
 
-  % MFL sensor (actual variable names).
+  % MFL sensor (variable names new software April 2016).
+  % ---- MiniFluo1 : M1FL --- %
+  var_attr_list.M1FL_TMPD = {
+    'long_name'     'Minifluo-UV1 detection circuit temperature'
+    'standard_name' 'temperature_of_MiniFluo_detection_circuit'
+    'units'         'Celsius'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.M1FL_TMPE = {
+    'long_name'     'Minifluo-UV1 emission circuit temperature'
+    'standard_name' 'temperature_of_MiniFluo_emission_circuit'
+    'units'         'Celsius'
+    '_FillValue'    default_fill_value };
+  
+  var_attr_list.M1FL_PHD1 = {
+    'long_name'     'Minifluo-UV1 fluorescence Ex./Em. = 270/340nm'
+    'standard_name' 'fluorescence_excitation_270nm_emission_340nm'
+    'units'         'counts'
+    'comment1'      'Tryptophan-like or Naphtalene-like measurements'
+    'comment2'      '270nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.M1FL_PHD2 = {
+    'long_name'     'Minifluo-UV1 fluorescence Ex./Em. = 255/360nm'
+    'standard_name' 'fluorescence_excitation_255nm_emission_360nm'
+    'units'         'counts'
+    'comment1'      'Phenanthren-like measurements or water-soluble fraction of petroleum'
+    'comment2'      '255nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.M1FL_MON1 = {
+    'long_name'     'Minifluo-UV1 monitoring channel of the 270nm LED'
+    'standard_name' 'fluorescence_monitoring_270_340nm'
+    'units'         'counts'
+    'comment1'      '270nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.M1FL_MON2 = {
+    'long_name'     'Minifluo-UV1 monitoring channel of the 255nm LED'
+    'standard_name' 'fluorescence_monitoring_255_360nm'
+    'units'         'counts'
+    'comment1'      '255nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value };
+  
+  % ---- MiniFluo2 : M2FL --- %
+  var_attr_list.M2FL_TMPD = {
+    'long_name'     'Minifluo-UV2 detection circuit temperature'
+    'standard_name' 'temperature_of_MiniFluo_detection_circuit'
+    'units'         'Celsius'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.M2FL_TMPE = {
+    'long_name'     'Minifluo-UV2 emission circuit temperature'
+    'standard_name' 'temperature_of_MiniFluo_emission_circuit'
+    'units'         'Celsius'
+    '_FillValue'    default_fill_value };
+  
+  var_attr_list.M2FL_PHD1 = {
+    'long_name'     'Minifluo-UV2 fluorescence Ex./Em. = 260/315nm'
+    'standard_name' 'fluorescence_excitation_260nm_emission_315nm'
+    'units'         'counts'
+    'comment1'      'Fluorene-like measurements'
+    'comment2'      '260nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.M2FL_PHD2 = {
+    'long_name'     'Minifluo-UV2 fluorescence Ex./Em. = 270/376nm'
+    'standard_name' 'fluorescence_excitation_270nm_emission_376nm'
+    'units'         'counts'
+    'comment1'      'Pyrene-like measurements'
+    'comment2'      '270nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.M2FL_MON1 = {
+    'long_name'     'Minifluo-UV2 monitoring channel of the 260nm LED'
+    'standard_name' 'fluorescence_monitoring_260_315nm'
+    'units'         'counts'
+    'comment1'      '260nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.M2FL_MON2 = {
+    'long_name'     'Minifluo-UV2 monitoring channel of the 270nm LED'
+    'standard_name' 'fluorescence_monitoring_270_376nm'
+    'units'         'counts'
+    'comment1'      '270nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value };  
+  
+  
+  % MFL sensor (variable names prior April 2016).
   var_attr_list.MFL_TMPD = {
     'long_name'     'Minifluo-UV1 detection circuit temperature'
     'standard_name' 'temperature_of_MiniFluo_detection_circuit'
@@ -434,7 +522,7 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
     'standard_name' 'fluorescence_excitation_270nm_emission_340nm'
     'units'         'counts'
     'comment1'      'Tryptophan-like or Naphtalene-like measurements'
-    'comment2'      '270nm is excitation wavelength of the LED'
+    'comment2'      '270nm is the nominal wavelength of the LED'
     '_FillValue'    default_fill_value };
 
   var_attr_list.MFL_V2 = {
@@ -442,19 +530,21 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
     'standard_name' 'fluorescence_excitation_255nm_emission_360nm'
     'units'         'counts'
     'comment1'      'Phenanthren-like measurements'
-    'comment2'      '255nm is excitation wavelength of the LED'
+    'comment2'      '255nm is the nominal wavelength of the LED'
     '_FillValue'    default_fill_value };
 
   var_attr_list.MFL_V3 = {
-    'long_name'     'Minifluo-UV1 fluorescence monitoring of excitation 270nm LED'
-    'standard_name' 'fluorescence_excitation_monitoring_270nm'
+    'long_name'     'Minifluo-UV1 monitoring channel of the 270nm LED'
+    'standard_name' 'fluorescence_monitoring_270_340nm'
     'units'         'counts'
+    'comment1'      '270nm is the nominal wavelength of the LED'
     '_FillValue'    default_fill_value };
 
   var_attr_list.MFL_V4 = {
-    'long_name'     'Minifluo-UV1 fluorescence monitoring of excitation 255nm LED'
+    'long_name'     'Minifluo-UV1 monitoring channel of the 255nm LED'
     'standard_name' 'fluorescence_excitation_monitoring_255nm'
     'units'         'counts'
+    'comment1'      '255nm is the nominal wavelength of the LED'
     '_FillValue'    default_fill_value };
 
   % MFL sensor (earlier variable names).
@@ -475,7 +565,7 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
     'standard_name' 'fluorescence_excitation_270nm_emission_340nm'
     'units'         'counts'
     'comment1'      'Tryptophan-like or Naphtalene-like measurements'
-    'comment2'      '270nm is excitation wavelength of the LED'
+    'comment2'      '270nm is the nominal wavelength of the LED'
     '_FillValue'    default_fill_value };
 
   var_attr_list.UV1_V2 = {
@@ -483,19 +573,21 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
     'standard_name' 'fluorescence_excitation_255nm_emission_360nm'
     'units'         'counts'
     'comment1'      'Phenanthren-like measurements'
-    'comment2'      '255nm is excitation wavelength of the LED'
+    'comment2'      '255nm is the nominal wavelength of the LED'
     '_FillValue'    default_fill_value };
 
   var_attr_list.UV1_V3 = {
-    'long_name'     'Minifluo-UV1 fluorescence monitoring of excitation 270nm LED'
+    'long_name'     'Minifluo-UV1 monitoring channel of the 270nm LED'
     'standard_name' 'fluorescence_excitation_monitoring_270nm'
     'units'         'counts'
+    'comment1'      '270nm is the nominal wavelength of the LED'
     '_FillValue'    default_fill_value };
 
   var_attr_list.UV1_V4 = {
-    'long_name'     'Minifluo-UV1 fluorescence monitoring of excitation 255nm LED'
+    'long_name'     'Minifluo-UV1 monitoring channel of the 255nm LED'
     'standard_name' 'fluorescence_excitation_monitoring_255nm'
     'units'         'counts'
+    'comment1'      '255nm is the nominal wavelength of the LED'
     '_FillValue'    default_fill_value };
 
   % another earlier version:
@@ -504,7 +596,7 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
     'standard_name' 'fluorescence_excitation_270nm_emission_340nm'
     'units'         'counts'
     'comment1'      'Tryptophan-like or Naphtalene-like measurements'
-    'comment2'      '270nm is excitation wavelength of the LED'
+    'comment2'      '270nm is the nominal wavelength of the LED'
     '_FillValue'    default_fill_value };
 
   var_attr_list.UV1_PHE = {
@@ -512,19 +604,21 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
     'standard_name' 'fluorescence_excitation_255nm_emission_360nm'
     'units'         'counts'
     'comment1'      'Phenanthren-like measurements'
-    'comment2'      '255nm is excitation wavelength of the LED'
+    'comment2'      '255nm is the nominal wavelength of the LED'
     '_FillValue'    default_fill_value };
 
   var_attr_list.UV1_LD1 = {
-    'long_name'     'Minifluo-UV1 fluorescence monitoring of excitation 270nm LED'
+    'long_name'     'Minifluo-UV1 monitoring channel of the 270nm LED'
     'standard_name' 'fluorescence_excitation_monitoring_270nm'
     'units'         'counts'
+    'comment1'      '270nm is the nominal wavelength of the LED'
     '_FillValue'    default_fill_value };
 
   var_attr_list.UV1_LD2 = {
-    'long_name'     'Minifluo-UV1 fluorescence monitoring of excitation 255nm LED'
+    'long_name'     'Minifluo-UV1 monitoring channel of the 255nm LED'
     'standard_name' 'fluorescence_excitation_monitoring_255nm'
     'units'         'counts'
+    'comment1'      '255nm is the nominal wavelength of the LED'
     '_FillValue'    default_fill_value };
 
 

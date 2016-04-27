@@ -89,28 +89,44 @@ function preprocessing_options = configDataPreprocessingSeaExplorer()
   preprocessing_options.optics_list(3).turbidity = 'FLNTU_NTU_SCALED';  
 
   %% Extra sensors
-  % Minifluo sensor choices:
-  preprocessing_options.extra_sensor_list.minifluo(1).fluorescence_270_340 = 'MFL_V1';
-  preprocessing_options.extra_sensor_list.minifluo(1).fluorescence_255_360 = 'MFL_V2';
-  preprocessing_options.extra_sensor_list.minifluo(1).fluorescence_monitoring_270 = 'MFL_V3';
-  preprocessing_options.extra_sensor_list.minifluo(1).fluorescence_monitoring_255 = 'MFL_V4';
-  preprocessing_options.extra_sensor_list.minifluo(1).fluorescence_emission_temperature = 'MFL_TMPE';
-  preprocessing_options.extra_sensor_list.minifluo(1).fluorescence_detection_temperature = 'MFL_TMPD';  
+  % Minifluo1-UV1 choices:
+  preprocessing_options.extra_sensor_list.minifluo1(1).fluorescence_270_340 = 'M1FL_PHD1';
+  preprocessing_options.extra_sensor_list.minifluo1(1).fluorescence_255_360 = 'M1FL_PHD2';
+  preprocessing_options.extra_sensor_list.minifluo1(1).fluorescence_monitoring_270_340 = 'M1FL_MON1';
+  preprocessing_options.extra_sensor_list.minifluo1(1).fluorescence_monitoring_255_360 = 'M1FL_MON2';
+  preprocessing_options.extra_sensor_list.minifluo1(1).fluorescence_emission_temperature = 'M1FL_TMPE';
+  preprocessing_options.extra_sensor_list.minifluo1(1).fluorescence_detection_temperature = 'M1FL_TMPD'; 
+  
+  preprocessing_options.extra_sensor_list.minifluo1(2).fluorescence_270_340 = 'MFL_V1';
+  preprocessing_options.extra_sensor_list.minifluo1(2).fluorescence_255_360 = 'MFL_V2';
+  preprocessing_options.extra_sensor_list.minifluo1(2).fluorescence_monitoring_270_340 = 'MFL_V3';
+  preprocessing_options.extra_sensor_list.minifluo1(2).fluorescence_monitoring_255_360 = 'MFL_V4';
+  preprocessing_options.extra_sensor_list.minifluo1(2).fluorescence_emission_temperature = 'MFL_TMPE';
+  preprocessing_options.extra_sensor_list.minifluo1(2).fluorescence_detection_temperature = 'MFL_TMPD';  
 
-  preprocessing_options.extra_sensor_list.minifluo(2).fluorescence_270_340 = 'UV1_V1';
-  preprocessing_options.extra_sensor_list.minifluo(2).fluorescence_255_360 = 'UV1_V2';
-  preprocessing_options.extra_sensor_list.minifluo(2).fluorescence_monitoring_270 = 'UV1_V3';
-  preprocessing_options.extra_sensor_list.minifluo(2).fluorescence_monitoring_255 = 'UV1_V4';  
-  preprocessing_options.extra_sensor_list.minifluo(2).fluorescence_emission_temperature = 'UV1_TMP1';
-  preprocessing_options.extra_sensor_list.minifluo(2).fluorescence_detection_temperature = 'UV1_TMP2';  
+  preprocessing_options.extra_sensor_list.minifluo1(3).fluorescence_270_340 = 'UV1_V1';
+  preprocessing_options.extra_sensor_list.minifluo1(3).fluorescence_255_360 = 'UV1_V2';
+  preprocessing_options.extra_sensor_list.minifluo1(3).fluorescence_monitoring_270_340 = 'UV1_V3';
+  preprocessing_options.extra_sensor_list.minifluo1(3).fluorescence_monitoring_255_360 = 'UV1_V4';  
+  preprocessing_options.extra_sensor_list.minifluo1(3).fluorescence_emission_temperature = 'UV1_TMP1';
+  preprocessing_options.extra_sensor_list.minifluo1(3).fluorescence_detection_temperature = 'UV1_TMP2';  
 
-  preprocessing_options.extra_sensor_list.minifluo(3).fluorescence_270_340 = 'UV1_PHE';
-  preprocessing_options.extra_sensor_list.minifluo(3).fluorescence_255_360 = 'UV1_TRY';
-  preprocessing_options.extra_sensor_list.minifluo(3).fluorescence_monitoring_270 = 'UV1_LD1';
-  preprocessing_options.extra_sensor_list.minifluo(3).fluorescence_monitoring_255 = 'UV1_LD2';
-  preprocessing_options.extra_sensor_list.minifluo(3).fluorescence_emission_temperature = 'UV1_TMP1';
-  preprocessing_options.extra_sensor_list.minifluo(3).fluorescence_detection_temperature = 'UV1_TMP2';  
+  preprocessing_options.extra_sensor_list.minifluo1(4).fluorescence_270_340 = 'UV1_PHE';
+  preprocessing_options.extra_sensor_list.minifluo1(4).fluorescence_255_360 = 'UV1_TRY';
+  preprocessing_options.extra_sensor_list.minifluo1(4).fluorescence_monitoring_270_340 = 'UV1_LD1';
+  preprocessing_options.extra_sensor_list.minifluo1(4).fluorescence_monitoring_255_360 = 'UV1_LD2';
+  preprocessing_options.extra_sensor_list.minifluo1(4).fluorescence_emission_temperature = 'UV1_TMP1';
+  preprocessing_options.extra_sensor_list.minifluo1(4).fluorescence_detection_temperature = 'UV1_TMP2';  
 
+  % Minifluo-UV2
+  preprocessing_options.extra_sensor_list.minifluo2(1).fluorescence_260_315 = 'M2FL_PHD1';
+  preprocessing_options.extra_sensor_list.minifluo2(1).fluorescence_270_376 = 'M2FL_PHD2';
+  preprocessing_options.extra_sensor_list.minifluo2(1).fluorescence_monitoring_260_315 = 'M2FL_MON1';
+  preprocessing_options.extra_sensor_list.minifluo2(1).fluorescence_monitoring_270_376 = 'M2FL_MON2';
+  preprocessing_options.extra_sensor_list.minifluo2(1).fluorescence_emission_temperature = 'M2FL_TMPE';
+  preprocessing_options.extra_sensor_list.minifluo2(1).fluorescence_detection_temperature = 'M2FL_TMPD';   
+  
+  
   % Methane sensor choices:
   preprocessing_options.extra_sensor_list.methane(1).methane_volt = 'METS_METHANE_VOLT';
   preprocessing_options.extra_sensor_list.methane(1).methane_concentration = 'METS_METHANE_SCALED';
