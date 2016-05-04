@@ -444,6 +444,17 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_coordinates' []
     'grid_method'      [] };
 
+    var_attr_list.backscatter_700 = {
+    'long_name'     '700 nm wavelength backscatter'
+    'standard_name' '700nm_backscatter'
+    'units'         '1'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value
+    'sources'       [] 
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
   var_attr_list.backscatter = {
     'long_name'     'backscattering'
     'standard_name' 'backscattering'
@@ -538,6 +549,21 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_coordinates'       []
     'grid_method'            [] };
 
+    var_attr_list.oxygen_frequency = {
+    'long_name'     'oxygen frequency'
+    'standard_name' 'oxygen_frequency_from_GPCTD'
+    'units'         'Hz'
+    'coordinates'   'time depth latitude longitude'
+    'comments'      'from Seabird GPCTD with SBE 43F oxygen sensor'                  
+    '_FillValue'    default_fill_value
+    'sources'                []
+    'conversion'             []
+    'calibration'            []
+    'calibration_parameters' [] 
+    'grid_sources'           []
+    'grid_coordinates'       []
+    'grid_method'            [] };
+
   var_attr_list.temperature_oxygen = {
     'long_name'     'oxygen sensor temperature'
     'standard_name' 'temperature_of_sensor_for_oxygen_in_sea_water'
@@ -620,7 +646,130 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_coordinates' []
     'grid_method'      [] };
 
+  var_attr_list.fluorescence_270_340 = {
+      'long_name'     'Minifluo-UV1 fluorescence Ex./Em. = 270/340nm'
+      'standard_name' 'fluorescence_excitation_270nm_emission_340nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      'comment1'      'Tryptophan-like or Naphtalene-like measurements'
+      'comment2'      '270nm is the nominal wavelength of the LED'
+      '_FillValue'    default_fill_value
+      'sources'       []
+      'conversion'       []
+      'grid_sources'     []
+      'grid_coordinates' []
+      'grid_method'      [] };
 
+  var_attr_list.fluorescence_255_360 = {
+      'long_name'     'Minifluo-UV1 fluorescence Ex./Em. = 255/360nm'
+      'standard_name' 'fluorescence_excitation_255nm_emission_360nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      'comment1'      'Phenanthren-like measurements or water-soluble fraction of petroleum'
+      'comment2'      '255nm is the nominal wavelength of the LED'
+      '_FillValue'    default_fill_value
+      'sources'       []
+      'conversion'       []
+      'grid_sources'     []
+      'grid_coordinates' []
+      'grid_method'      [] };
+
+  var_attr_list.fluorescence_monitoring_270_340 = {
+      'long_name'     'Minifluo-UV1 monitoring channel of the 270nm LED'
+      'standard_name' 'fluorescence_monitoring_270_340nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      'comment1'      'Measures variations in LED excitation wavelength'
+      'comment2'      '270nm is the nominal wavelength of the LED'
+      '_FillValue'    default_fill_value
+      'sources'       []
+      'conversion'       []
+      'grid_sources'     []
+      'grid_coordinates' []
+      'grid_method'      [] };
+
+  var_attr_list.fluorescence_monitoring_255_360 = {
+      'long_name'     'Minifluo-UV1 monitoring channel of the 255nm LED'
+      'standard_name' 'fluorescence_monitoring_255_360nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      'comment1'      'Measures variations in LED excitation wavelength'
+      'comment2'      '255nm is the nominal wavelength of the LED'
+      'sources'       []
+      'conversion'       []
+      'grid_sources'     []
+      'grid_coordinates' []
+      'grid_method'      [] };
+
+  var_attr_list.fluorescence_260_315 = {
+      'long_name'     'Minifluo-UV2 fluorescence Ex./Em. = 260/315nm'
+      'standard_name' 'fluorescence_excitation_260nm_emission_315nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      'comment1'      'Fluorene-like measurements'
+      'comment2'      '260nm is the nominal wavelength of the LED'
+      '_FillValue'    default_fill_value
+      'sources'       []
+      'conversion'       []
+      'grid_sources'     []
+      'grid_coordinates' []
+      'grid_method'      [] };
+
+  var_attr_list.fluorescence_270_376 = {
+      'long_name'     'Minifluo-UV2 fluorescence Ex./Em. = 270/376nm'
+      'standard_name' 'fluorescence_excitation_270nm_emission_376nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      'comment1'      'Pyrene-like measurements'
+      'comment2'      '270nm is the nominal wavelength of the LED'
+      '_FillValue'    default_fill_value
+       'sources'       []
+      'conversion'       []
+      'grid_sources'     []
+      'grid_coordinates' []
+      'grid_method'      [] };
+
+  var_attr_list.fluorescence_monitoring_260_315 = {
+      'long_name'     'Minifluo-UV2 monitoring channel of the 260nm LED'
+      'standard_name' 'fluorescence_monitoring_260_315nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'
+      'comment1'      'Measures variations in LED excitation wavelength'
+      'comment2'      '260nm is the nominal wavelength of the LED'
+      '_FillValue'    default_fill_value
+      'sources'       []
+      'conversion'       []
+      'grid_sources'     []
+      'grid_coordinates' []
+      'grid_method'      [] };
+
+  var_attr_list.fluorescence_monitoring_270_376 = {
+      'long_name'     'Minifluo-UV2 monitoring channel of the 270nm LED'
+      'standard_name' 'fluorescence_monitoring_270_376nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'
+      'comment1'      'Measures variations in LED excitation wavelength'
+      'comment2'      '270nm is the nominal wavelength of the LED'
+      '_FillValue'    default_fill_value
+      'sources'       []
+      'conversion'       []
+      'grid_sources'     []
+      'grid_coordinates' []
+      'grid_method'      [] };
+
+    var_attr_list.methane_concentration = {
+      'long_name'     'Methane concentration (scaled)'
+      'standard_name' 'methane_concentration'
+      'units'         'ug/L'
+      'coordinates'   'time depth latitude longitude'
+      '_FillValue'    default_fill_value
+      'sources'       []
+      'conversion'       []
+      'grid_sources'     []
+      'grid_coordinates' []
+      'grid_method'      [] };
+  
+  
   %% Define global attributes (they may be overwritten with deployment values).
   % To define the global attributes easily and readably, add them to this
   % cell array (attribute name in first column and attribute value in second).
