@@ -166,7 +166,7 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
   var_attr_list.LinPos = {
     'long_name'     'Linear position returned by potentiometer'
     'units'         'mm'
-    '_FillValue'    default_fill_value };   
+    '_FillValue'    default_fill_value };
 
   var_attr_list.AngCmd = {
     'long_name'     'Rotational position commanded for batteries'
@@ -176,7 +176,7 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
   var_attr_list.AngPos = {
     'long_name'     'Rotational position returned by potentiometer'
     'units'         'rad'
-    '_FillValue'    default_fill_value };   
+    '_FillValue'    default_fill_value };
 
   var_attr_list.Altitude = {
     'long_name'     'Measured distance to seabed'
@@ -214,13 +214,12 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
   var_attr_list.NAV_MISSIONID = {
     'long_name'     'Mission reference ID (from glider)'
     'units'         '1'
-    '_FillValue'    default_fill_value };    
+    '_FillValue'    default_fill_value };
 
    var_attr_list.NAV_RESSOURCE = {
-    'long_name'     ['Number describing navigation state (same ' ...
-                     'as NavState from glider)']
+    'long_name'     'Number describing navigation state (same as NavState from glider)'
     'units'         'N/A'
-    '_FillValue'    default_fill_value };       
+    '_FillValue'    default_fill_value };
 
   % Science CTD (legacy)
   var_attr_list.SBD_TEMPERATURE = {
@@ -459,7 +458,6 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
     'comment1'      '255nm is the nominal wavelength of the LED'
     '_FillValue'    default_fill_value };
 
-  % ---- MiniFluo2 : M2FL --- %
   var_attr_list.M2FL_TMPD = {
     'long_name'     'Minifluo-UV2 detection circuit temperature'
     'standard_name' 'temperature_of_MiniFluo_detection_circuit'
@@ -501,7 +499,6 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
     'units'         'counts'
     'comment1'      '270nm is the nominal wavelength of the LED'
     '_FillValue'    default_fill_value };  
-
 
   % MFL sensor (variable names prior April 2016).
   var_attr_list.MFL_TMPD = {
@@ -589,7 +586,6 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
     'comment1'      '255nm is the nominal wavelength of the LED'
     '_FillValue'    default_fill_value };
 
-  % another earlier version:
   var_attr_list.UV1_TRY = {
     'long_name'     'Minifluo-UV1 fluorescence Ex./Em. = 270/340nm'
     'standard_name' 'fluorescence_excitation_270nm_emission_340nm'

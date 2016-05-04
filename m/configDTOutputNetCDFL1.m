@@ -534,7 +534,7 @@ function ncl1_info = configDTOutputNetCDFL1()
     'sources'                []
     'conversion'             []
     'calibration'            []
-    'calibration_parameters' [] };  
+    'calibration_parameters' [] };
   
   var_attr_list.oxygen_frequency = {
     'long_name'     'oxygen frequency'
@@ -599,7 +599,7 @@ function ncl1_info = configDTOutputNetCDFL1()
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'       []};
-  
+
   var_attr_list.water_velocity_eastward = {
     'long_name'     'mean eastward water velocity in segment'
     'standard_name' 'eastward_water_velocity'
@@ -618,7 +618,6 @@ function ncl1_info = configDTOutputNetCDFL1()
     'sources'       []
     'conversion'    [] };
 
-  %% Variables specific to SeaExplorer
   var_attr_list.fluorescence_270_340 = {
       'long_name'     'Minifluo-UV1 fluorescence Ex./Em. = 270/340nm'
       'standard_name' 'fluorescence_excitation_270nm_emission_340nm'

@@ -646,7 +646,6 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_coordinates' []
     'grid_method'      [] };
 
-  %% Variables specific to SeaExplorer
   var_attr_list.fluorescence_270_340 = {
       'long_name'     'Minifluo-UV1 fluorescence Ex./Em. = 270/340nm'
       'standard_name' 'fluorescence_excitation_270nm_emission_340nm'

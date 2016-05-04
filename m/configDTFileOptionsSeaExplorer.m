@@ -64,7 +64,7 @@ function seaexplorer_options = configDTFileOptionsSeaExplorer()
   % Time variable column in payload files:
   seaexplorer_options.pld_time = 'PLD_REALTIMECLOCK';
   
-  % Variables to load.
+  % Variables to load:
   seaexplorer_options.variables = 'all';  
   
 end

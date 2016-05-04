@@ -85,7 +85,7 @@
 %    all useful data in a single place. Hence, the structure of the resulting
 %    NetCDF file varies with each type of glider, and may be configured
 %    in CONFIGDTOUTPUTNETCDFL0SLOCUM, CONFIGDTOUTPUTNETCDFL0SEAGLIDER and
-%    CONFIGDTOUTPUTNETCDFL0SEAEXPOLORER. Processed and gridded data sets are
+%    CONFIGDTOUTPUTNETCDFL0SEAEXPLORER. Processed and gridded data sets are
 %    stored in NetCDF format as level 1 and level 2 output products
 %    respectively. The structure of these files does not depend on the type
 %    of glider the data comes from, and may be configured in
