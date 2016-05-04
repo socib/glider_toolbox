@@ -203,7 +203,7 @@ function ncl1_info = configRTOutputNetCDFL1()
     'interrupt'     []
     'stall'         []
     'shake'         [] };
-  
+
   var_attr_list.profile_direction = {
     'long_name'     'glider vertical speed direction'
     'standard_name' ''
@@ -248,7 +248,7 @@ function ncl1_info = configRTOutputNetCDFL1()
     'calibration_parameters' []
     'filter_method'          []
     'filter_parameters'      [] };
-  
+
   var_attr_list.time_ctd = {
     'long_name'     'CTD epoch time'
     'standard_name' 'time'
@@ -445,6 +445,14 @@ function ncl1_info = configRTOutputNetCDFL1()
     '_FillValue'    default_fill_value
     'sources'       []};
 
+  var_attr_list.backscatter_700 = {
+    'long_name'     '700 nm wavelength backscatter'
+    'standard_name' '700nm_backscatter'
+    'units'         '1'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value
+    'sources'       []};
+
   var_attr_list.backscatter = {
     'long_name'     'backscatter'
     'standard_name' 'backscatter'
@@ -527,6 +535,17 @@ function ncl1_info = configRTOutputNetCDFL1()
     'conversion'             []
     'calibration'            []
     'calibration_parameters' [] };
+  
+  var_attr_list.oxygen_frequency = {
+    'long_name'     'oxygen frequency'
+    'standard_name' 'oxygen_frequency_from_GPCTD'
+    'units'         'Hz'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value
+    'sources'                []
+    'conversion'             []
+    'calibration'            []
+    'calibration_parameters' [] };
 
   var_attr_list.time_oxygen = {
     'long_name'     'oxygen sensor epoch time'
@@ -580,7 +599,7 @@ function ncl1_info = configRTOutputNetCDFL1()
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'       []};
-  
+
   var_attr_list.water_velocity_eastward = {
     'long_name'     'mean eastward water velocity in segment'
     'standard_name' 'eastward_water_velocity'
@@ -598,6 +617,94 @@ function ncl1_info = configRTOutputNetCDFL1()
     '_FillValue'    default_fill_value
     'sources'       []
     'conversion'    [] };
+
+  var_attr_list.fluorescence_270_340 = {
+      'long_name'     'Minifluo-UV1 fluorescence Ex./Em. = 270/340nm'
+      'standard_name' 'fluorescence_excitation_270nm_emission_340nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      '_FillValue'    default_fill_value
+      'comment1'      'Tryptophan-like or Naphtalene-like measurements'
+      'comment2'      '270nm is the nominal wavelength of the LED'
+      'sources'       []};
+
+  var_attr_list.fluorescence_255_360 = {
+      'long_name'     'Minifluo-UV1 fluorescence Ex./Em. = 255/360nm'
+      'standard_name' 'fluorescence_excitation_255nm_emission_360nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      '_FillValue'    default_fill_value
+      'comment1'      'Phenanthren-like measurements or water-soluble fraction of petroleum'
+      'comment2'      '255nm is the nominal wavelength of the LED'
+      'sources'       []};
+
+  var_attr_list.fluorescence_monitoring_270_340 = {
+      'long_name'     'Minifluo-UV1 monitoring channel of the 270nm LED'
+      'standard_name' 'fluorescence_monitoring_270_340nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      'comment1'      'Measures variations in LED excitation wavelength'
+      'comment2'      '270nm is the nominal wavelength of the LED'
+      '_FillValue'    default_fill_value
+      'sources'       []};
+
+  var_attr_list.fluorescence_monitoring_255_360 = {
+      'long_name'     'Minifluo-UV1 monitoring channel of the 255nm LED'
+      'standard_name' 'fluorescence_monitoring_255_360nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      'comment1'      'Measures variations in LED excitation wavelength'
+      'comment2'      '255nm is the nominal wavelength of the LED'
+      '_FillValue'    default_fill_value
+      'sources'       []};
+
+  var_attr_list.fluorescence_260_315 = {
+      'long_name'     'Minifluo-UV2 fluorescence Ex./Em. = 260/315nm'
+      'standard_name' 'fluorescence_excitation_260nm_emission_315nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      '_FillValue'    default_fill_value
+      'comment1'      'Fluorene-like measurements'
+      'comment2'      '260nm is the nominal wavelength of the LED'
+      'sources'       []};
+
+  var_attr_list.fluorescence_270_376 = {
+      'long_name'     'Minifluo-UV2 fluorescence Ex./Em. = 270/376nm'
+      'standard_name' 'fluorescence_excitation_270nm_emission_376nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      '_FillValue'    default_fill_value
+      'comment1'      'Pyrene-like measurements'
+      'comment2'      '270nm is the nominal wavelength of the LED'
+      'sources'       []};
+
+  var_attr_list.fluorescence_monitoring_260_315 = {
+      'long_name'     'Minifluo-UV2 monitoring channel of the 260nm LED'
+      'standard_name' 'fluorescence_monitoring_260_315nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      'comment1'      'Measures variations in LED excitation wavelength'
+      'comment2'      '260nm is the nominal wavelength of the LED'
+      '_FillValue'    default_fill_value
+      'sources'       []};
+
+  var_attr_list.fluorescence_monitoring_270_376 = {
+      'long_name'     'Minifluo-UV2 monitoring channel of the 270nm LED'
+      'standard_name' 'fluorescence_monitoring_270_376nm'
+      'units'         'counts'
+      'coordinates'   'time depth latitude longitude'      
+      'comment1'      'Measures variations in LED excitation wavelength'
+      'comment2'      '270nm is the nominal wavelength of the LED'
+      '_FillValue'    default_fill_value
+      'sources'       []};
+
+    var_attr_list.methane_concentration = {
+      'long_name'     'Methane concentration (scaled)'
+      'standard_name' 'methane_concentration'
+      'units'         'ug/L'
+      'coordinates'   'time depth latitude longitude'
+      '_FillValue'    default_fill_value
+      'sources'       []};  
 
 
   %% Define global attributes (they may be overwritten with deployment values).
