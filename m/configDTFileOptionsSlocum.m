@@ -115,6 +115,7 @@ function slocum_options = configDTFileOptionsSlocum()
     'sci_flntu_timestamp'
     'sci_oxy3835_oxygen'
     'sci_oxy3835_saturation'
+    'sci_oxy3835_temp'
     'sci_oxy3835_timestamp'
   };
   
