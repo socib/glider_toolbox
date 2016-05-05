@@ -340,7 +340,7 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %

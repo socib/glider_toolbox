@@ -79,7 +79,7 @@ function setupMexSFTP()
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014-2015
+%  Copyright (C) 2014-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
