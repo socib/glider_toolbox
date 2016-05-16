@@ -508,7 +508,7 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
     'units'         'NTU'
     '_FillValue'    default_fill_value };
 
-  % OXY3835 sensor.
+  % OXY3835 sensor (Aanderaa Oxygen Optode 3835).
   var_attr_list.sci_oxy3835_oxygen = {
     'long_name'     'oxygen concentration'
     'standard_name' 'mole_concentration_of_dissolved_molecular_oxygen_in_sea_water'
@@ -522,13 +522,38 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_oxy3835_temp = {
-    'long_name'     'temperature'
+    'long_name'     'temperature (OXY3835 sensor)'
     'standard_name' 'temperature_of_sensor_for_oxygen_in_sea_water'
     'units'         'Celsius'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_oxy3835_timestamp = {
     'long_name'     'epoch time (OXY3835 sensor)'
+    'standard_name' 'time'
+    'units'         'seconds since 1970-01-01 00:00:00 +00:00'
+    '_FillValue'    default_fill_value };
+
+  % OXY4 sensor (Aanderaa Oxygen Optode 4330F or 4831).
+  var_attr_list.sci_oxy4_oxygen = {
+    'long_name'     'oxygen concentration'
+    'standard_name' 'mole_concentration_of_dissolved_molecular_oxygen_in_sea_water'
+    'units'         'umol l-1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_oxy4_saturation = {
+    'long_name'     'oxygen saturation'
+    'standard_name' 'fractional_saturation_of_oxygen_in_sea_water'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_oxy4_temp = {
+    'long_name'     'temperature (OXY4 sensor)'
+    'standard_name' 'temperature_of_sensor_for_oxygen_in_sea_water'
+    'units'         'Celsius'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_oxy4_timestamp = {
+    'long_name'     'epoch time (OXY4 sensor)'
     'standard_name' 'time'
     'units'         'seconds since 1970-01-01 00:00:00 +00:00'
     '_FillValue'    default_fill_value };
