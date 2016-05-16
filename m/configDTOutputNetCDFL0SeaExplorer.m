@@ -110,7 +110,7 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
   var_attr_list.Roll = {
     'long_name'     'glider roll'
     'units'         'Degrees'
-    'comments'      'greater than 0 is port wing up'
+    'comment'       'greater than 0 is port wing up'
     '_FillValue'    default_fill_value };
 
   var_attr_list.Pitch = {
@@ -276,42 +276,42 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
     'long_name'     'Chlorophyll raw'
     'standard_name' 'Chlorophyll_raw_counts'
     'units'         'counts'
-    'comments'      'WETLabs ECO puck FLBBCD'
+    'comment'       'WETLabs ECO puck FLBBCD'
     '_FillValue'    default_fill_value };
 
   var_attr_list.TRI_CHL_SCALED = {
     'long_name'     'Chlorophyll concentration'
     'standard_name' 'Chlorophyll_concentration'
     'units'         'ug L-1'
-    'comments'      'WETLabs ECO puck FLBBCD'
+    'comment'       'WETLabs ECO puck FLBBCD'
     '_FillValue'    default_fill_value };
 
   var_attr_list.TRI_CDOM_COUNT = {
     'long_name'     'Coloured dissolved organic matter raw'
     'standard_name' 'CDOM_raw_counts'
     'units'         'counts'
-    'comments'      'WETLabs ECO puck FLBBCD'
+    'comment'       'WETLabs ECO puck FLBBCD'
     '_FillValue'    default_fill_value };
 
   var_attr_list.TRI_CDOM_SCALED = {
     'long_name'     'Coloured dissolved organic matter concentration'
     'standard_name' 'CDOM_concentration'
     'units'         'ug L-1'
-    'comments'      'WETLabs ECO puck FLBBCD'
+    'comment'       'WETLabs ECO puck FLBBCD'
     '_FillValue'    default_fill_value };
 
   var_attr_list.TRI_BB_700_COUNT = {
     'long_name'     'Backscattering raw'
     'standard_name' 'Backscattering_raw_counts'
     'units'         'counts'
-    'comments'      'WETLabs ECO puck FLBBCD'
+    'comment'       'WETLabs ECO puck FLBBCD'
     '_FillValue'    default_fill_value };
 
   var_attr_list.TRI_BB_700_SCALED = {
     'long_name'     'Backscattering scaled'
     'standard_name' 'Backscattering_scaled'
     'units'         'm-1 (sr-1)-1'
-    'comments'      'WETLabs ECO puck FLBBCD'
+    'comment'       'WETLabs ECO puck FLBBCD'
     '_FillValue'    default_fill_value };
 
   % FLBBCD sensor (same, different var names)
@@ -319,42 +319,42 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
     'long_name'     'Chlorophyll raw'
     'standard_name' 'Chlorophyll_raw_counts'
     'units'         'counts'
-    'comments'      'WETLabs ECO puck FLBBCD'
+    'comment'       'WETLabs ECO puck FLBBCD'
     '_FillValue'    default_fill_value };
 
   var_attr_list.FLBBCD_CHL_SCALED = {
     'long_name'     'Chlorophyll concentration'
     'standard_name' 'Chlorophyll_concentration'
     'units'         'ug L-1'
-    'comments'      'WETLabs ECO puck FLBBCD'
+    'comment'       'WETLabs ECO puck FLBBCD'
     '_FillValue'    default_fill_value };
 
   var_attr_list.FLBBCD_CDOM_COUNT = {
     'long_name'     'Coloured dissolved organic matter raw'
     'standard_name' 'CDOM_raw_counts'
     'units'         'counts'
-    'comments'      'WETLabs ECO puck FLBBCD'
+    'comment'       'WETLabs ECO puck FLBBCD'
     '_FillValue'    default_fill_value };
 
   var_attr_list.FLBBCD_CDOM_SCALED = {
     'long_name'     'Coloured dissolved organic matter concentration'
     'standard_name' 'CDOM_scaled'
     'units'         'ug L-1'
-    'comments'      'WETLabs ECO puck FLBBCD'
+    'comment'       'WETLabs ECO puck FLBBCD'
     '_FillValue'    default_fill_value };
 
   var_attr_list.FLBBCD_BB_700_COUNT = {
     'long_name'     'Backscattering raw'
     'standard_name' 'Backscattering_raw_counts'
     'units'         'counts'
-    'comments'      'WETLabs ECO puck FLBBCD'
+    'comment'       'WETLabs ECO puck FLBBCD'
     '_FillValue'    default_fill_value };
 
   var_attr_list.FLBBCD_BB_700_SCALED = {
     'long_name'     'Backscattering scaled'
     'standard_name' 'Backscattering_scaled'
     'units'         'm-1 (sr-1)-1'
-    'comments'      'WETLabs ECO puck FLBBCD'
+    'comment'       'WETLabs ECO puck FLBBCD'
     '_FillValue'    default_fill_value };
 
   % FLNTU sensor
@@ -362,28 +362,28 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
     'long_name'     'Chlorophyll raw'
     'standard_name' 'Chlorophyll_raw_counts'
     'units'         'counts'
-    'comments'      'WETLabs ECO puck FLNTU'
+    'comment'       'WETLabs ECO puck FLNTU'
     '_FillValue'    default_fill_value };
 
   var_attr_list.FLNTU_CHL_SCALED = {
     'long_name'     'Chlorophyll concentration'
     'standard_name' 'Chlorophyll_concentration'
     'units'         'ug L-1'
-    'comments'      'WETLabs ECO puck FLNTU'
+    'comment'       'WETLabs ECO puck FLNTU'
     '_FillValue'    default_fill_value };
 
   var_attr_list.FLNTU_CDOM_COUNT = {
     'long_name'     'Turbidity raw'
     'standard_name' 'Turbidity_raw_counts'
     'units'         'counts'
-    'comments'      'WETLabs ECO puck FLNTU'
+    'comment'       'WETLabs ECO puck FLNTU'
     '_FillValue'    default_fill_value };
 
   var_attr_list.FLNTU_CDOM_SCALED = {
     'long_name'     'Turbidity scaled'
     'standard_name' 'Turbidity_scaled'
     'units'         'NTU'
-    'comments'      'WETLabs ECO puck FLNTU'
+    'comment'       'WETLabs ECO puck FLNTU'
     '_FillValue'    default_fill_value };    
 
   % METS sensor
@@ -391,28 +391,28 @@ function ncl0_info = configDTOutputNetCDFL0SeaExplorer()
     'long_name'     'Methane concentration raw'
     'standard_name' 'methane_concentration_raw'
     'units'         'Volts'
-    'comments'      'Alseamar methane sensor'
+    'comment'       'Alseamar methane sensor'
     '_FillValue'    default_fill_value };
 
   var_attr_list.METS_METHANE_SCALED = {
     'long_name'     'Methane concentration scaled'
     'standard_name' 'methane_concentration'
     'units'         'ug L-1'
-    'comments'      'Alseamar methane sensor'
+    'comment'       'Alseamar methane sensor'
     '_FillValue'    default_fill_value };
   
   var_attr_list.TEMP_METHANE_VOLT = {
     'long_name'     'Methane sensor temperature raw'
     'standard_name' 'Methane_sensor_temperature_raw'
     'units'         'Volts'
-    'comments'      'Alseamar methane sensor'
+    'comment'       'Alseamar methane sensor'
     '_FillValue'    default_fill_value };
 
   var_attr_list.TEMP_METHANE_SCALED = {
     'long_name'     'Methane sensor temperature'
     'standard_name' 'Methane_sensor_temperature'
     'units'         'Celsius'
-    'comments'      'Alseamar methane sensor'
+    'comment'       'Alseamar methane sensor'
     '_FillValue'    default_fill_value };    
 
   % MFL sensor (variable names new software April 2016).

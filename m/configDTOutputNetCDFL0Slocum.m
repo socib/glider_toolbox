@@ -113,7 +113,7 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
   var_attr_list.m_gps_status = {
     'long_name'     'GPS status'
     'units'         '1'
-    'comments'      '0 = good fix, >0 = no fix'
+    'comment'       '0 = good fix, >0 = no fix'
     '_FillValue'    default_fill_value };
 
   var_attr_list.c_wpt_lat = {
@@ -144,7 +144,7 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
   var_attr_list.m_roll = {
     'long_name'     'glider roll'
     'units'         'rad'
-    'comments'      'greater than 0 is port wing up'
+    'comment'       'greater than 0 is port wing up'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_pitch = {
@@ -200,7 +200,7 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
   var_attr_list.m_leakdetect_voltage = {
     'long_name'     'leak detector'
     'units'         'V'
-    'comments'      '2.5V means no leak; voltage drops if leak detected'
+    'comment'       '2.5V means no leak; voltage drops if leak detected'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_iridium_call_num = {
@@ -221,7 +221,7 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
   var_attr_list.x_dr_state = {
     'long_name'     'dead reckoning state'
     'units'         '1'
-    'comments'      '0 = mission_start, 1 = underwater, 2 = awaiting_fix, 3 = awaiting_postfix, 4 = awaiting_dive'
+    'comment'       '0 = mission_start, 1 = underwater, 2 = awaiting_fix, 3 = awaiting_postfix, 4 = awaiting_dive'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_dr_fix_time = {

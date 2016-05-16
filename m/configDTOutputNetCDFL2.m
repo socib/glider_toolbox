@@ -554,7 +554,7 @@ function ncl2_info = configDTOutputNetCDFL2()
     'standard_name' 'oxygen_frequency_from_GPCTD'
     'units'         'Hz'
     'coordinates'   'time depth latitude longitude'
-    'comments'      'from Seabird GPCTD with SBE 43F oxygen sensor'                  
+    'comment'       'from Seabird GPCTD with SBE 43F oxygen sensor'                  
     '_FillValue'    default_fill_value
     'sources'                []
     'conversion'             []
