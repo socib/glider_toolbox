@@ -558,6 +558,543 @@ function ncl0_info = configRTOutputNetCDFL0Slocum()
     'units'         'seconds since 1970-01-01 00:00:00 +00:00'
     '_FillValue'    default_fill_value };
 
+  % Other sensors of technical interest:
+  var_attr_list.c_air_pump = {
+    'long_name'     'air pump bladder'
+    'units'         '1'
+    'comment'       '<0 turns it off regardless, 0 turns it off unless thermal or deep electric engine needs it, >0 turns it on'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_alt_time = {
+    'long_name'     'altimeter intersample time'
+    'units'         's'
+    'comment'       '<0 is off, =0 as fast as possible, >0 that many seconds betweens measurements'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_battpos = {
+    'long_name'     'battery position'
+    'units'         'in'
+    'comment'       '>0 vehicle dives (nose down)'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_climb_target_depth = {
+    'long_name'     'climb target depth'
+    'units'         'm'
+    'comment'       'value of b_arg for climb target depth'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_de_oil_vol = {
+    'long_name'     'commanded oil'
+    'units'         'cc'
+    'comment'       '>0, goes up'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_dive_target_depth = {
+    'long_name'     'dive target depth'
+    'units'         'm'
+    'comment'       'value of b_arg for dive target depth'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_fin = {
+    'long_name'     'commanded fin position'
+    'units'         'rad'
+    'comment'       '>0 vehicle turns right'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_flntu_on = {
+    'long_name'     'optical Sensor flntu toggle'
+    'units'         's'
+    'comment'       'commanded seconds between measurements: <0 stopped, 0 as fast as possible, >0 that many secons'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_iridium_current_num = {
+    'long_name'     'current Iridium phone number'
+    'units'         '1'
+    'comment'       '0 = primary 1 = secondary'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_iridium_on = {
+    'long_name'     'Iridium phone toggle'
+    'units'         '1'
+    'comment'       '<=0 turns it off, 1 turns it on, becomes 2nd console when connected, 2 turns it on, no 2nd console, 3 turns it on in "send data" mode, 4 turns it on in "echo data" mode'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_iridium_phone_num = {
+    'long_name'     'primary Iridium phone number'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_iridium_phone_num_alt = {
+    'long_name'     'alternative Iridium phone number'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_oxy3835_on = {
+    'long_name'     'optical OXY3835 sensor toggle'
+    'units'         's'
+    'comment'       'commanded seconds between measurements: <0 stopped, 0 as fast as possible, >0 that many seconds'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_pitch = {
+    'long_name'     'commanded pitch'
+    'units'         'rad'
+    'comment'       '<0 to dive'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_profile_on = {
+    'long_name'     'intersample time cycles'
+    'units'         's'
+    'comment'       '<0 is off, =0 as fast as possible, >0 that many seconds between measurements'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_science_on = {
+    'long_name'     'science board toggle'
+    'units'         '1'
+    'comment'       'nonzero turns on science uart'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_thermal_valve = {
+    'long_name'     'commanded oil pump valve'
+    'units'         '1'
+    'comment'       '1=valve up, 2=valve charge, 3=valve down'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_weight_drop = {
+    'long_name'     'weight drop toggle (Jettison)'
+    'units'         '1'
+    'comment'       '!=0 drop the weight'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.f_fin_safety_max = {
+    'long_name'     'digifin range'
+    'units'         'rad'
+    'comment'       '>0.47 damage to glider'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_air_fill = {
+    'long_name'     'measured air fill status'
+    'units'         '1'
+    'comment'       '1=air pump solenoid in fill position'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_altimeter_status = {
+    'long_name'     'measured altimeter status'
+    'units'         '1'
+    'comment'       '0 good reading, otherwise rejected'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_altimeter_voltage = {
+    'long_name'     'measured altimeter voltage'
+    'units'         'V'
+    'comment'       'voltage read from the A/D'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_altitude = {
+    'long_name'     'measured altitude'
+    'units'         'm'
+    'comment'       'height above the bottom'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_appear_to_be_at_surface = {
+    'long_name'     'glider at surface guess'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_argos_is_xmitting = {
+    'long_name'     'measured Argos transmission status'
+    'units'         '1'
+    'comment'       '>0 = PTT is radiating'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_argos_on = {
+    'long_name'     'measured Argos toggle status'
+    'units'         '1'
+    'comment'       '>0 means Argos is actually turned on'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_argos_sent_data = {
+    'long_name'     'measured Argos sent data status'
+    'units'         '1'
+    'comment'       '> 0 means data was sent to PTT'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_avg_downward_inflection_time = {
+    'long_name'     'downward inflection time'
+    'units'         's'
+    'comment'       'exponential average of inflections (start with reasonable guess)'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_avg_speed = {
+    'long_name'     'measured horizontal average speed'
+    'units'         'm s-1'
+    'comment'       'average vehicle horizontal speed through water, used only when computing commanded heading to waypoint'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_avg_upward_inflection_time = {
+    'long_name'     'upward inflection time'
+    'units'         's'
+    'comment'       'exponential average of inflections (start with reasonable guess)'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_battery_inst = {
+    'long_name'     'measured battery instantaneous voltage'
+    'units'         'V'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_battpos = {
+    'long_name'     'measured battery position'
+    'units'         'in'
+    'comment'       '>0 vehicle dives (nose down)'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_certainly_at_surface = {
+    'long_name'     'glider at surface certain guess'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_cop_tickle = {
+    'long_name'     'COP tickle watchdog'
+    'units'         '1'
+    'comment'       '1=COP tickled'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_coulomb_amphr = {
+    'long_name'     'measured integrated current'
+    'units'         'A h-1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_coulomb_amphr_total = {
+    'long_name'     'persistant measured integrated current'
+    'units'         'A h-1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_coulomb_current = {
+    'long_name'     'measured instantaneous current'
+    'units'         'A'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_cycle_number = {
+    'long_name'     'cycle number'
+    'units'         '1'
+    'comment'       'cycle number since mission started'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_de_oil_vol = {
+    'long_name'     'measured oil pump volume'
+    'units'         'cm3'
+    'comment'       'calibrated from m_de_oil_vol_pot_voltage'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_device_error = {
+    'long_name'     'glider error number'
+    'units'         '1'
+    'comment'       'device number of offending device whenever it generates error'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_device_oddity = {
+    'long_name'     'glider oddity number'
+    'units'         '1'
+    'comment'       'number of offending device whenever it generates oddity'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_device_warning = {
+    'long_name'     'glider warning number'
+    'units'         '1'
+    'comment'       'device number of offending device whenever it generates warning'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_disk_free = {
+    'long_name'     'navigation disk free space'
+    'units'         'MiB'
+    'comment'       'disk space currently free on navigation disk'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_disk_usage = {
+    'long_name'     'navigation disk used space'
+    'units'         'MiB'
+    'comment'       'disk space currently used on navigation disk'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_dist_to_wpt = {
+    'long_name'     'distance to next waypoint'
+    'units'         'm'
+    'comment'       'distance to (c_wpt_x_lmc, c_wpt_y_lmc)'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_free_heap = {
+    'long_name'     'free heap space'
+    'units'         'B'
+    'comment'       'amount of heap space currently free'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_gps_dist_from_dr = {
+    'long_name'     'distance from calculated position (dead reckoning distance)'
+    'units'         'm'
+    'comment'       'distance to fix from dead reckoned position'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_gps_on = {
+    'long_name'     'measured GPS toggle status'
+    'units'         '1'
+    'comment'       '>0 GPS actually enabled'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_iridium_attempt_num = {
+    'long_name'     'Iridium phone call number'
+    'units'         '1'
+    'comment'       'number of retries for the current Iridium phone number (should be initialized to 1)'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_iridium_on = {
+    'long_name'     'Iridium toggle status'
+    'units'         '1'
+    'comment'       '0=off, 1=on'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_iridium_signal_strength = {
+    'long_name'     'Iridium quality signal'
+    'units'         '1'
+    'comment'       'Iridium received signal strength indication (RSSI)'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_iridium_status = {
+    'long_name'     'Iridium status'
+    'units'         '1'
+    'comment'       '0 = MODEM_NO_CARRIER, 1 = MODEM_OK, 2 = MODEM_CONNECT, 3 = MODEM_ERROR , 4 = MODEM_NO_ANSWER , 5 = MODEM_BUSY , 6 = MODEM_NO_DIALTONE , 7 = LOGGING_IN , 8 = LOGGED_ON , 10 = MODEM_AWAITING_OK , 11 = MODEM_AWAITING_CONNECTION , 12 = MODEM_TIMEOUT , 99 = MODEM_UNKNOWN , 100 = NO_CHARS_TIMEOUT'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_is_battpos_moving = {
+    'long_name'     'measured battery in motion status'
+    'units'         '1'
+    'comment'       '1 = motor is moving'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_is_de_pump_moving = {
+    'long_name'     'measured oil pump in motion status'
+    'units'         '1'
+    'comment'       '1 = motor is moving'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_leak = {
+    'long_name'     'leak detection'
+    'units'         '1'
+    'comment'       'whether m_leakdetect_voltage_aft < f_leakdetect_threshold'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_mission_avg_speed_climbing = {
+    'long_name'     'average climbing speed'
+    'units'         'm s-1'
+    'comment'       'running average of computed m_speed since start of mission'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_mission_avg_speed_diving = {
+    'long_name'     'average diving speed'
+    'units'         'm s-1'
+    'comment'       'running average of computed m_speed since start of mission'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_mission_start_time = {
+    'long_name'     'mission start epoch time'
+    'units'         'seconds since 1970-01-01 00:00:00 +00:00'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_present_secs_into_mission = {
+    'long_name'     'seconds in mission'
+    'units'         's'
+    'comment'       'time elapsed since mission started'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_science_clothesline_lag = {
+    'long_name'     'science time lag'
+    'units'         's'
+    'comment'       'How far behind science is M_PRESENT_TIME - SCI_M_PRESENT_TIME'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_science_on = {
+    'long_name'     'science board toggle status'
+    'units'         '1'
+    'comment'       'actual power state of science uart'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_science_sent_some_data = {
+    'long_name'     'science board sent data status'
+    'units'         '1'
+    'comment'       'incremented when the glider pulls a character out of the clothesline buffer where chars received from science processor are stored.'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_spare_heap = {
+    'long_name'     'measured spare heap space'
+    'units'         'B'
+    'comment'       'projected amount of heap space if every big consumer is activated'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_stable_comms = {
+    'long_name'     'stable communications status'
+    'units'         '1'
+    'comment'       '1 = communications are stable (had m_console_cd for reqd number of secs in a row)'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_thermal_valve = {
+    'long_name'     'measured oil pump valve status'
+    'units'         '1'
+    'comment'       '-3=moving to down, -2=moving to charge, -1=moving to up, 0=unknown, 1=valve up, 2=valve charge, 3=valve down'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_tot_horz_dist = {
+    'long_name'     'total horizontal distance'
+    'units'         'km'
+    'comment'       'distance coverted underwater'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_vacuum_air_pump_on = {
+    'long_name'     'air pump toggle initial pressure'
+    'units'         'inHg'
+    'comment'       'initial value of m_vacuum when air pump is turned on AND depth < u_max_depth_for_air_pump_est'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_why_started = {
+    'long_name'     'glider start event'
+    'units'         '1'
+    'comment'       '128 = External (the reset button), 64 = Power-On, 32 = Software Watchdog, 16 = Dbl Bus Fault, 4 = Loss of Clock, 2 = RESET instruction, 1 = Test Submodule, 255 = Uninitialized'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_m_disk_free = {
+    'long_name'     'science disk free space'
+    'units'         'MiB'
+    'comment'       'disk space currently free on science disk'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_m_disk_usage = {
+    'long_name'     'science disk used space'
+    'units'         'MiB'
+    'comment'       'disk space currently used on science disk'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_m_free_heap = {
+    'long_name'     'science free heap space'
+    'units'         'bytes'
+    'comment'       'amount of heap space currently free'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_m_spare_heap = {
+    'long_name'     'science measured spare heap space'
+    'units'         'B'
+    'comment'       'projected amount of heap space if every big consumer is activated'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_alt_min_depth = {
+    'long_name'     'altimeter depth trigger'
+    'units'         'm'
+    'comment'       'minimum depth glider must be to use altitude'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_max_altimeter = {
+    'long_name'     'altimeter maximum range'
+    'units'         'm'
+    'comment'       'altimeter reading must be between u_min_altimeter and u_max_altimeter'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_min_altimeter = {
+    'long_name'     'altimeter minimum range'
+    'units'         'm'
+    'comment'       'altimeter reading must be between u_min_altimeter and u_max_altimeter'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_pressure_autocal_min_time_between = {
+    'long_name'     'minimum time between automatic pressure calibrations'
+    'units'         'seconds'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_pressure_autocal_enabled = {
+    'long_name'     'automatic pressure calibration switch'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_pressure_autocal_deadband = {
+    'long_name'     'automatic pressure calibration threshold'
+    'units'         'bar'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_pressure_autocal_max_allowed = {
+    'long_name'     'automatic pressure calibration oddity threshold'
+    'units'         'bar'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_pressure_autocal_performed = {
+    'long_name'     'automatic pressure calibration flag'
+    'units'         '1'
+    'comment'       '1 = auto calibration done, 2 = manual calibration done, -1 = excessive pressure drift (calibration not done)'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_stable_comms_reqd_secs = {
+    'long_name'     'stable communications required threshold'
+    'units'         's'
+    'comment'       'continuous seconds of carrier detect required to have stable communications'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_use_current_correction = {
+    'long_name'     'use current correction toggle'
+    'units'         '1'
+    'comment'       '0 = calculate but do not use m_water_vx/y, 1 = use m_water_vx/y to navigate and aim'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.x_alt_time = {
+    'long_name'     'altimeter intersample time'
+    'units'         's'
+    'comment'       'calculated c_alt_time value <0 altimeter off, =0 as fast as possible, >0 that many seconds between measurements'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.x_cycle_time = {
+    'long_name'     'calculated cycle time'
+    'units'         's'
+    'comment'       'either u_cycle_time or u_low_power_cycle_time'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.x_hardware_cop_timeout = {
+    'long_name'     'hardware cop timeout'
+    'units'         'h'
+    'comment'       'state of jumper: -1 = can not tell, >=RevE will be 2 or 16'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.x_hit_a_waypoint = {
+    'long_name'     'waypoint hit event'
+    'units'         '1'
+    'comment'       'set by behavior when reach a waypoint'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.x_last_wpt_lat = {
+    'long_name'     'latitude coordinate of last achieved waypoint'
+    'units'         'nmea_degree'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.x_last_wpt_lon = {
+    'long_name'     'longitude coordinate of last achieved waypoint'
+    'units'         'nmea_degree'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.x_low_power_status = {
+    'long_name'     'low power status'
+    'units'         '1'
+    'comment'       ''
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.x_mission_num = {
+    'long_name'     'last mission number'
+    'units'         '1'
+    'comment'       'YYDDxx the current or last mission number, old style before switch to DBD scheme kept for Argos'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.x_pressure_manual_cal_now = {
+    'long_name'     'manual pressure calibration trigger'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.x_surface_active = {
+    'long_name'     'active surface behavior status'
+    'units'         '1'
+    'comment'       'id of active surface behavior (>0 = active)'
+    '_FillValue'    default_fill_value };
+
 
   %% Define global attributes (they may be overwritten with deployment values).
   % To define the global attributes easily and readably, add them to this
