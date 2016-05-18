@@ -197,7 +197,7 @@ function [meta, data] = loadSeaExplorerData(sxdir, gliregexp, pldregexp, varargi
   end
   meta_pld = meta_pld(pld_success);
   data_pld = data_pld(pld_success);
-  disp(['SeaExplorer pld files loaded: ' ...
+  disp(['SeaExplorer payload files loaded: ' ...
         num2str(numel(data_pld)) ' of ' num2str(numel(pld_names)) '.']);
   
   
