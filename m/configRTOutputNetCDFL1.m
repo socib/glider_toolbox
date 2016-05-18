@@ -106,6 +106,8 @@ function ncl1_info = configRTOutputNetCDFL1()
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'       []
+    'position_good' []
+    'position_bad'  []
     'conversion'    []
     'filling'       [] };
 
@@ -117,6 +119,8 @@ function ncl1_info = configRTOutputNetCDFL1()
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'       []
+    'position_good' []
+    'position_bad'  []
     'conversion'    []
     'filling'       [] };
 

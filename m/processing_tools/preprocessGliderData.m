@@ -445,7 +445,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
     if isfield(position_choice_list, 'time_conversion')
       position_time_conversion_func = position_choice.time_conversion;
     end
-    if all(ismember({lat_field lon_field}, field_list)) ...
+    if all(ismember({lon_field lat_field}, field_list)) ...
         && ~all(isnan(data_raw.(lon_field))) ...
         && ~all(isnan(data_raw.(lat_field)))
       data_pre.longitude = data_raw.(lon_field);
@@ -504,8 +504,24 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
             fprintf('  position bad   : %s\n', num2str(position_bad));
           end
         end
-        data_pre.latitude(position_invalid) = nan;
         data_pre.longitude(position_invalid) = nan;
+        data_pre.latitude(position_invalid) = nan;
+        meta_pre.longitude.sources = ...
+          {lon_field lat_field position_status_field}';
+        meta_pre.latitude.sources = ...
+          {lon_field lat_field position_status_field}';
+        if isfield(meta_pre.position_status, 'position_good')
+          meta_pre.longitude.position_good = ...
+            meta_pre.position_status.position_good;
+          meta_pre.latitude.position_good = ...
+            meta_pre.position_status.position_good;
+        end
+        if isfield(meta_pre.position_status, 'position_bad')
+          meta_pre.longitude.position_bad = ...
+            meta_pre.position_status.position_bad;
+          meta_pre.latitude.position_bad = ...
+            meta_pre.position_status.position_bad;
+        end
       end
       if ~isempty(position_conversion_func)
         if ischar(position_conversion_func)
@@ -513,9 +529,11 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         end
         [data_pre.longitude, data_pre.latitude] = ...
           position_conversion_func(data_pre.longitude, data_pre.latitude);
-        meta_pre.longitude.sources = {lon_field lat_field}';
+        meta_pre.longitude.sources = ...
+          union(cellstr(meta_pre.longitude.sources), {lon_field lat_field}');
         meta_pre.longitude.conversion = func2str(position_conversion_func);
-        meta_pre.latitude.sources = {lon_field lat_field}';
+        meta_pre.latitude.sources = ...
+          union(cellstr(meta_pre.latitude.sources), {lon_field lat_field}');
         meta_pre.latitude.conversion = func2str(position_conversion_func);
         fprintf('  conversion : %s\n', func2str(position_conversion_func));
       end

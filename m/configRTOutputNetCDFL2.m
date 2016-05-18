@@ -112,6 +112,8 @@ function ncl2_info = configRTOutputNetCDFL2()
     'coordinates'   'time'
     '_FillValue'    default_fill_value
     'sources'          []
+    'position_good'    []
+    'position_bad'     []
     'conversion'       []
     'filling'          []
     'grid_sources'     []
@@ -126,6 +128,8 @@ function ncl2_info = configRTOutputNetCDFL2()
     'coordinates'   'time'
     '_FillValue'    default_fill_value
     'sources'          []
+    'position_good'    []
+    'position_bad'     []
     'conversion'       []
     'filling'          []
     'grid_sources'     []
