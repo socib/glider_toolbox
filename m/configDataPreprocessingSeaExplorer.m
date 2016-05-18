@@ -45,11 +45,15 @@ function preprocessing_options = configDataPreprocessingSeaExplorer()
 
   preprocessing_options.position_list(1).longitude = 'NAV_LONGITUDE';
   preprocessing_options.position_list(1).latitude  = 'NAV_LATITUDE';
-  preprocessing_options.position_list(1).conversion = @sxnmea2deg;
+  preprocessing_options.position_list(1).position_status = 'NAV_RESOURCE';
+  preprocessing_options.position_list(1).position_good = @sxgoodfix;
+  preprocessing_options.position_list(1).conversion = @nmea2deg;
   preprocessing_options.position_list(2).longitude = 'Lon';
   preprocessing_options.position_list(2).latitude  = 'Lat';
-  preprocessing_options.position_list(2).conversion = @sxnmea2deg;
-
+  preprocessing_options.position_list(2).position_status = 'NavState';
+  preprocessing_options.position_list(2).position_good = @sxgoodfix;
+  preprocessing_options.position_list(2).conversion = @nmea2deg;
+  
   preprocessing_options.depth_list(1).depth = 'NAV_DEPTH';
   preprocessing_options.depth_list(2).depth = 'Depth';
 

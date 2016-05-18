@@ -5,9 +5,9 @@ function processing_options = configDataProcessingSeaExplorer()
 %    PROCESSING_OPTIONS = CONFIGDATAPROCESSINGSEAEXPLORER()
 %
 %  Description:
-%    PROCESSING_OPTIONS = CONFIGDATAPROCESSINGSEAEXPLORER() should return a struct 
-%    setting the options for SeaExplorer glider data processing as needed by the 
-%    function PROCESSGLIDERDATA.
+%    PROCESSING_OPTIONS = CONFIGDATAPROCESSINGSEAEXPLORER() should return a
+%    struct setting the options for SeaExplorer glider data processing as needed
+%    by the function PROCESSGLIDERDATA.
 %
 %  Examples:
 %    processing_options = configDataProcessingSeaExplorer()
