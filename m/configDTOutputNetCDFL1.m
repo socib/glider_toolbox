@@ -84,7 +84,7 @@ function ncl1_info = configDTOutputNetCDFL1()
     'axis'          'T'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       [] };
+    'sources'                [] };
 
   var_attr_list.depth = {
     'long_name'     'glider depth'
@@ -94,9 +94,9 @@ function ncl1_info = configDTOutputNetCDFL1()
     'axis'          'Z'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []
-    'conversion'    []
-    'filling'       [] };
+    'sources'                []
+    'conversion'             []
+    'filling'                [] };
 
   var_attr_list.latitude = {
     'long_name'     'latitude'
@@ -105,11 +105,11 @@ function ncl1_info = configDTOutputNetCDFL1()
     'axis'          'Y'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []
-    'position_good' []
-    'position_bad'  []
-    'conversion'    []
-    'filling'       [] };
+    'sources'                []
+    'position_good'          []
+    'position_bad'           []
+    'conversion'             []
+    'filling'                [] };
 
   var_attr_list.longitude = {
     'long_name'     'longitude'
@@ -118,11 +118,11 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         'degree_east'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []
-    'position_good' []
-    'position_bad'  []
-    'conversion'    []
-    'filling'       [] };
+    'sources'                []
+    'position_good'          []
+    'position_bad'           []
+    'conversion'             []
+    'filling'                [] };
 
   var_attr_list.heading = {
     'long_name'     'glider heading angle'
@@ -130,9 +130,9 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         'rad'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []
-    'conversion'    []
-    'filling'       [] };
+    'sources'                []
+    'conversion'             []
+    'filling'                [] };
 
   var_attr_list.roll = {
     'long_name'     'glider roll angle'
@@ -140,9 +140,9 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         'rad'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []
-    'conversion'    []
-    'filling'       [] };
+    'sources'                []
+    'conversion'             []
+    'filling'                [] };
 
   var_attr_list.pitch = {
     'long_name'     'glider pitch angle'
@@ -150,9 +150,9 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         'rad'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []
-    'conversion'    []
-    'filling'       [] };
+    'sources'                []
+    'conversion'             []
+    'filling'                [] };
 
   var_attr_list.waypoint_latitude = {
     'long_name'     'waypoint latitude'
@@ -160,9 +160,9 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         'degree_north'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []
-    'conversion'    []
-    'filling'       [] };
+    'sources'                []
+    'conversion'             []
+    'filling'                [] };
 
   var_attr_list.waypoint_longitude = {
     'long_name'     'waypoint longitude'
@@ -170,9 +170,9 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         'degree_east'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []
-    'conversion'    []
-    'filling'       [] };
+    'sources'                []
+    'conversion'             []
+    'filling'                [] };
 
   var_attr_list.distance_over_ground = {
     'long_name'     'distance over ground flown since mission start'
@@ -180,8 +180,8 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         'km'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []
-    'method'        [] };
+    'sources'                []
+    'method'                 [] };
 
   var_attr_list.transect_index = {
     'long_name'     'transect index'
@@ -189,8 +189,8 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         '1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []
-    'method'        [] };
+    'sources'                []
+    'method'                 [] };
 
   var_attr_list.profile_index = {
     'long_name'     'profile index'
@@ -199,14 +199,14 @@ function ncl1_info = configDTOutputNetCDFL1()
     'comment'       'N = inside profile N, N + 0.5 = between profiles N and N + 1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []
-    'method'        []
-    'length'        []
-    'period'        []
-    'inversion'     []
-    'interrupt'     []
-    'stall'         []
-    'shake'         [] };
+    'sources'                []
+    'method'                 []
+    'length'                 []
+    'period'                 []
+    'inversion'              []
+    'interrupt'              []
+    'stall'                  []
+    'shake'                  [] };
 
   var_attr_list.profile_direction = {
     'long_name'     'glider vertical speed direction'
@@ -215,8 +215,8 @@ function ncl1_info = configDTOutputNetCDFL1()
     'comment'       '-1 = ascending, 0 = inflecting or stalled, 1 = descending'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []
-    'method'        [] };
+    'sources'                []
+    'method'                 [] };
 
   var_attr_list.conductivity = {
     'long_name'     'water conductivity'
@@ -260,8 +260,8 @@ function ncl1_info = configDTOutputNetCDFL1()
     'comment'       'CTD time stamp'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []
-    'conversion'    [] };
+    'sources'                []
+    'conversion'             [] };
 
   var_attr_list.depth_ctd = {
     'long_name'     'CTD depth'
@@ -407,7 +407,7 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         'Celsius'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []};
+    'sources'                [] };
 
   var_attr_list.potential_density = {
     'long_name'     'water potential density'
@@ -415,7 +415,7 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         'Kg m-3'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []};
+    'sources'                [] };
 
   var_attr_list.sound_velocity = {
     'long_name'     'sound velocity'
@@ -423,7 +423,7 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         'Kg m-3'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []};
+    'sources'                [] };
 
   var_attr_list.backscatter_470 = {
     'long_name'     'blue backscattering'
@@ -431,7 +431,7 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         '1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []};
+    'sources'                [] };
 
   var_attr_list.backscatter_532 = {
     'long_name'     'green backscattering'
@@ -439,7 +439,7 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         '1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []};
+    'sources'                [] };
 
   var_attr_list.backscatter_660 = {
     'long_name'     'red backscattering'
@@ -447,7 +447,7 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         '1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []};
+    'sources'                [] };
 
   var_attr_list.backscatter_700 = {
     'long_name'     '700 nm wavelength backscatter'
@@ -455,7 +455,7 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         '1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []};
+    'sources'                [] };
 
   var_attr_list.backscatter = {
     'long_name'     'backscattering'
@@ -463,7 +463,7 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         '1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []};
+    'sources'                [] };
 
   var_attr_list.chlorophyll = {
     'long_name'     'chlorophyll'
@@ -539,7 +539,7 @@ function ncl1_info = configDTOutputNetCDFL1()
     'conversion'             []
     'calibration'            []
     'calibration_parameters' [] };
-  
+
   var_attr_list.oxygen_frequency = {
     'long_name'     'oxygen frequency'
     'standard_name' 'oxygen_frequency_from_GPCTD'
@@ -578,7 +578,7 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         'uW cm-2 nm-1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []};
+    'sources'                [] };
 
   var_attr_list.irradiance_442 = {
     'long_name'     'irradiance at 442nm wavelength'
@@ -586,7 +586,7 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         'uW cm-2 nm-1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []};
+    'sources'                [] };
 
   var_attr_list.irradiance_491 = {
     'long_name'     'irradiance at 491nm wavelength'
@@ -594,7 +594,7 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         'uW cm-2 nm-1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []};
+    'sources'                [] };
 
   var_attr_list.irradiance_664 = {
     'long_name'     'irradiance at 664nm wavelength'
@@ -602,7 +602,7 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         'uW cm-2 nm-1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []};
+    'sources'                [] };
 
   var_attr_list.water_velocity_eastward = {
     'long_name'     'mean eastward water velocity in segment'
@@ -610,8 +610,8 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         'm s-1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []
-    'conversion'    [] };
+    'sources'                []
+    'conversion'             [] };
 
   var_attr_list.water_velocity_northward = {
     'long_name'     'mean northward water velocity in segment'
@@ -619,96 +619,96 @@ function ncl1_info = configDTOutputNetCDFL1()
     'units'         'm s-1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
-    'sources'       []
-    'conversion'    [] };
+    'sources'                []
+    'conversion'             [] };
 
   var_attr_list.fluorescence_270_340 = {
-      'long_name'     'Minifluo-UV1 fluorescence Ex./Em. = 270/340nm'
-      'standard_name' 'fluorescence_excitation_270nm_emission_340nm'
-      'units'         'counts'
-      'coordinates'   'time depth latitude longitude'      
-      '_FillValue'    default_fill_value
-      'comment1'      'Tryptophan-like or Naphtalene-like measurements'
-      'comment2'      '270nm is the nominal wavelength of the LED'
-      'sources'       []};
+    'long_name'     'Minifluo-UV1 fluorescence Ex./Em. = 270/340nm'
+    'standard_name' 'fluorescence_excitation_270nm_emission_340nm'
+    'units'         'counts'
+    'coordinates'   'time depth latitude longitude'
+    'comment1'      'Tryptophan-like or Naphtalene-like measurements'
+    'comment2'      '270nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value
+    'sources'                [] };
 
   var_attr_list.fluorescence_255_360 = {
-      'long_name'     'Minifluo-UV1 fluorescence Ex./Em. = 255/360nm'
-      'standard_name' 'fluorescence_excitation_255nm_emission_360nm'
-      'units'         'counts'
-      'coordinates'   'time depth latitude longitude'      
-      '_FillValue'    default_fill_value
-      'comment1'      'Phenanthren-like measurements or water-soluble fraction of petroleum'
-      'comment2'      '255nm is the nominal wavelength of the LED'
-      'sources'       []};
+    'long_name'     'Minifluo-UV1 fluorescence Ex./Em. = 255/360nm'
+    'standard_name' 'fluorescence_excitation_255nm_emission_360nm'
+    'units'         'counts'
+    'coordinates'   'time depth latitude longitude'
+    'comment1'      'Phenanthren-like measurements or water-soluble fraction of petroleum'
+    'comment2'      '255nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value
+    'sources'                [] };
 
   var_attr_list.fluorescence_monitoring_270_340 = {
-      'long_name'     'Minifluo-UV1 monitoring channel of the 270nm LED'
-      'standard_name' 'fluorescence_monitoring_270_340nm'
-      'units'         'counts'
-      'coordinates'   'time depth latitude longitude'      
-      'comment1'      'Measures variations in LED excitation wavelength'
-      'comment2'      '270nm is the nominal wavelength of the LED'
-      '_FillValue'    default_fill_value
-      'sources'       []};
+    'long_name'     'Minifluo-UV1 monitoring channel of the 270nm LED'
+    'standard_name' 'fluorescence_monitoring_270_340nm'
+    'units'         'counts'
+    'coordinates'   'time depth latitude longitude'
+    'comment1'      'Measures variations in LED excitation wavelength'
+    'comment2'      '270nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value
+    'sources'                [] };
 
   var_attr_list.fluorescence_monitoring_255_360 = {
-      'long_name'     'Minifluo-UV1 monitoring channel of the 255nm LED'
-      'standard_name' 'fluorescence_monitoring_255_360nm'
-      'units'         'counts'
-      'coordinates'   'time depth latitude longitude'      
-      'comment1'      'Measures variations in LED excitation wavelength'
-      'comment2'      '255nm is the nominal wavelength of the LED'
-      '_FillValue'    default_fill_value
-      'sources'       []};
+    'long_name'     'Minifluo-UV1 monitoring channel of the 255nm LED'
+    'standard_name' 'fluorescence_monitoring_255_360nm'
+    'units'         'counts'
+    'coordinates'   'time depth latitude longitude'
+    'comment1'      'Measures variations in LED excitation wavelength'
+    'comment2'      '255nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value
+    'sources'                [] };
 
   var_attr_list.fluorescence_260_315 = {
-      'long_name'     'Minifluo-UV2 fluorescence Ex./Em. = 260/315nm'
-      'standard_name' 'fluorescence_excitation_260nm_emission_315nm'
-      'units'         'counts'
-      'coordinates'   'time depth latitude longitude'      
-      '_FillValue'    default_fill_value
-      'comment1'      'Fluorene-like measurements'
-      'comment2'      '260nm is the nominal wavelength of the LED'
-      'sources'       []};
+    'long_name'     'Minifluo-UV2 fluorescence Ex./Em. = 260/315nm'
+    'standard_name' 'fluorescence_excitation_260nm_emission_315nm'
+    'units'         'counts'
+    'coordinates'   'time depth latitude longitude'
+    'comment1'      'Fluorene-like measurements'
+    'comment2'      '260nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value
+    'sources'                [] };
 
   var_attr_list.fluorescence_270_376 = {
-      'long_name'     'Minifluo-UV2 fluorescence Ex./Em. = 270/376nm'
-      'standard_name' 'fluorescence_excitation_270nm_emission_376nm'
-      'units'         'counts'
-      'coordinates'   'time depth latitude longitude'      
-      '_FillValue'    default_fill_value
-      'comment1'      'Pyrene-like measurements'
-      'comment2'      '270nm is the nominal wavelength of the LED'
-      'sources'       []};
+    'long_name'     'Minifluo-UV2 fluorescence Ex./Em. = 270/376nm'
+    'standard_name' 'fluorescence_excitation_270nm_emission_376nm'
+    'units'         'counts'
+    'coordinates'   'time depth latitude longitude'
+    'comment1'      'Pyrene-like measurements'
+    'comment2'      '270nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value
+    'sources'                [] };
 
   var_attr_list.fluorescence_monitoring_260_315 = {
-      'long_name'     'Minifluo-UV2 monitoring channel of the 260nm LED'
-      'standard_name' 'fluorescence_monitoring_260_315nm'
-      'units'         'counts'
-      'coordinates'   'time depth latitude longitude'      
-      'comment1'      'Measures variations in LED excitation wavelength'
-      'comment2'      '260nm is the nominal wavelength of the LED'
-      '_FillValue'    default_fill_value
-      'sources'       []};
+    'long_name'     'Minifluo-UV2 monitoring channel of the 260nm LED'
+    'standard_name' 'fluorescence_monitoring_260_315nm'
+    'units'         'counts'
+    'coordinates'   'time depth latitude longitude'
+    'comment1'      'Measures variations in LED excitation wavelength'
+    'comment2'      '260nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value
+    'sources'                [] };
 
   var_attr_list.fluorescence_monitoring_270_376 = {
-      'long_name'     'Minifluo-UV2 monitoring channel of the 270nm LED'
-      'standard_name' 'fluorescence_monitoring_270_376nm'
-      'units'         'counts'
-      'coordinates'   'time depth latitude longitude'      
-      'comment1'      'Measures variations in LED excitation wavelength'
-      'comment2'      '270nm is the nominal wavelength of the LED'
-      '_FillValue'    default_fill_value
-      'sources'       []};
+    'long_name'     'Minifluo-UV2 monitoring channel of the 270nm LED'
+    'standard_name' 'fluorescence_monitoring_270_376nm'
+    'units'         'counts'
+    'coordinates'   'time depth latitude longitude'
+    'comment1'      'Measures variations in LED excitation wavelength'
+    'comment2'      '270nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value
+    'sources'                [] };
 
-    var_attr_list.methane_concentration = {
-      'long_name'     'Methane concentration (scaled)'
-      'standard_name' 'methane_concentration'
-      'units'         'ug/L'
-      'coordinates'   'time depth latitude longitude'
-      '_FillValue'    default_fill_value
-      'sources'       []};  
+  var_attr_list.methane_concentration = {
+    'long_name'     'Methane concentration (scaled)'
+    'standard_name' 'methane_concentration'
+    'units'         'ug/L'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value
+    'sources'                [] };
 
 
   %% Define global attributes (they may be overwritten with deployment values).
