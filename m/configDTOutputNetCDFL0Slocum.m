@@ -99,13 +99,13 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_lat = {
-    'long_name'     'latitude (GPS fix)'
+    'long_name'     'GPS latitude'
     'standard_name' 'latitude'
     'units'         'nmea_degree'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_gps_lon = {
-    'long_name'     'longitude (GPS fix)'
+    'long_name'     'GPS longitude'
     'standard_name' 'longitude'
     'units'         'nmea_degree'
     '_FillValue'    default_fill_value };
@@ -226,34 +226,40 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
 
   var_attr_list.m_dr_fix_time = {
     'long_name'     'surface-to-fix elapsed time'
-    'standard_name' ''
-    'units'         'seconds'
+    'units'         's'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_dr_postfix_time = {
     'long_name'     'fix-to-postfix elapsed time'
-    'standard_name' ''
-    'units'         'seconds'
+    'units'         's'
     '_FillValue'    default_fill_value };
 
-  var_attr_list.m_gps_fix_x_lmc = {
-    'long_name'     'x gps fix in local mission coordinates'
+  var_attr_list.m_dr_surf_x_lmc = {
+    'long_name'     'dead reckoned x surface location in local mission coordinates'
     'units'         'm'
     '_FillValue'    default_fill_value };
 
-  var_attr_list.m_gps_fix_y_lmc = {
-    'long_name'     'y gps fix in local mission coordinates'
+  var_attr_list.m_dr_surf_y_lmc = {
+    'long_name'     'dead reckoned y surface location in local mission coordinates'
     'units'         'm'
     '_FillValue'    default_fill_value };
 
-  var_attr_list.m_gps_postfix_x_lmc = {
-    'long_name'     'x gps postfix in local mission coordinates'
-    'units'         'm'
+  var_attr_list.m_dr_time = {
+    'long_name'     'dead reckoning time'
+    'units'         's'
+    'comment'       'time elapsed underwater subject to currents'
     '_FillValue'    default_fill_value };
 
-  var_attr_list.m_gps_postfix_y_lmc = {
-    'long_name'     'y gps postfix in local mission coordinates'
+  var_attr_list.m_dr_x_actual_err = {
+    'long_name'     'estimated actual dead reckoning x error in local mission coordinates'
+    'units'         's'
+    'comment'       'initial dead reckoning error minus estimated surface drift'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_dr_x_ini_err = {
+    'long_name'     'initial dead reckoning x error in local mission coordinates'
     'units'         'm'
+    'comment'       'distance between dead reckoned surface location and initial GPS fix'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_dr_x_postfix_drift = {
@@ -261,9 +267,83 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
     'units'         'm'
     '_FillValue'    default_fill_value };
 
+  var_attr_list.m_dr_x_ta_postfix_drift = {
+    'long_name'     'time-adjsuted fix-to-postfix x drift in local mission coordinates'
+    'units'         's'
+    'comment'       'used to account for surface drift in averaged sea water velocity computation'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_dr_y_actual_err = {
+    'long_name'     'estimated actual dead reckoning y error in local mission coordinates'
+    'units'         's'
+    'comment'       'initial dead reckoning error minus estimated surface drift'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_dr_y_ini_err = {
+    'long_name'     'initial dead reckoning y error in local mission coordinates'
+    'units'         'm'
+    'comment'       'distance between dead reckoned surface location and initial GPS fix'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.m_dr_y_postfix_drift = {
     'long_name'     'fix-to-postfix y drift in local mission coordinates'
     'units'         'm'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_dr_y_ta_postfix_drift = {
+    'long_name'     'time-adjsuted fix-to-postfix y drift in local mission coordinates'
+    'units'         's'
+    'comment'       'used to account for surface drift in averaged sea water velocity computation'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_gps_fix_x_lmc = {
+    'long_name'     'x GPS fix in local mission coordinates'
+    'units'         'm'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_gps_fix_y_lmc = {
+    'long_name'     'y GPS fix in local mission coordinates'
+    'units'         'm'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_gps_postfix_x_lmc = {
+    'long_name'     'x GPS postfix in local mission coordinates'
+    'units'         'm'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_gps_postfix_y_lmc = {
+    'long_name'     'y GPS postfix in local mission coordinates'
+    'units'         'm'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_gps_utc_day = {
+    'long_name'     'day component of GPS timestamp'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_gps_utc_hour = {
+    'long_name'     'hour component of GPS timestamp'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_gps_utc_minute = {
+    'long_name'     'minute component of GPS timestamp'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_gps_utc_month = {
+    'long_name'     'month component of GPS timestamp'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_gps_utc_second = {
+    'long_name'     'second component of GPS timestamp'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_gps_utc_year = {
+    'long_name'     'year component of GPS timestamp'
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.m_water_vx = {
@@ -1002,7 +1082,7 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
 
   var_attr_list.u_pressure_autocal_min_time_between = {
     'long_name'     'minimum time between automatic pressure calibrations'
-    'units'         'seconds'
+    'units'         's'
     '_FillValue'    default_fill_value };
 
   var_attr_list.u_pressure_autocal_enabled = {
