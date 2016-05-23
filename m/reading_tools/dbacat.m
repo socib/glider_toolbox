@@ -165,15 +165,16 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
   if isempty(meta_list)
     sources_cat = cell(0, 1);
     headers_cat = ...
-      struct('dbd_label', {}, 'encoding_ver', {}, 'num_ascii_tags', {}, ...
-             'all_sensors', {}, 'filename', {}, 'the8x3_filename', {}, ...
-             'filename_extension', {}, 'filename_label', {}, ...
-             'mission_name', {}, 'fileopen_time', {}, ...
-             'sensors_per_cycle', {}, 'num_label_lines', {}, ...
-             'num_segments', {}, 'segment_filenames', {});
+      struct('dbd_label', cell(0, 1), 'encoding_ver', cell(0, 1), ...
+             'num_ascii_tags', cell(0, 1), 'all_sensors', cell(0, 1), ...
+             'filename', cell(0, 1), 'the8x3_filename', cell(0, 1), ...
+             'filename_extension', cell(0, 1), 'filename_label', cell(0, 1), ...
+             'mission_name', cell(0, 1), 'fileopen_time', cell(0, 1), ...
+             'sensors_per_cycle', cell(0, 1), 'num_label_lines', cell(0, 1), ...
+             'num_segments', cell(0, 1), 'segment_filenames', cell(0, 1));
     sensors_cat_list = cell(0, 1);
     units_cat_list = cell(0, 1);
-    bytes_cat_list = zeros(0, 1, 'int32');
+    bytes_cat_list = cell(0, 1);
   else
     meta_struct = [meta_list{:}];
     sources_cat = vertcat(meta_struct.sources);
@@ -184,17 +185,20 @@ function [meta, data] = dbacat(meta_list, data_list, timestamp, varargin)
   end
   
   % Build list of sensor information for concatenated data and metadata.
-  [sensors_cat, ~, sensors_cat_indices_to] = ...
-    unique(vertcat(sensors_cat_list{:}));
-  units_cat = cell(size(sensors_cat));
-  bytes_cat = zeros(size(sensors_cat), 'int32');
+  [~, ~, sensors_cat_indices_to] = unique(vertcat(sensors_cat_list{:}));
+  sensors_cat = cell(0, 1);
+  units_cat = cell(0, 1);
+  bytes_cat = zeros(0, 1, 'int32');
+  sensors_cat(sensors_cat_indices_to) = vertcat(sensors_cat_list{:});
   units_cat(sensors_cat_indices_to) = vertcat(units_cat_list{:});
   bytes_cat(sensors_cat_indices_to) = vertcat(bytes_cat_list{:});
-
+  
   % Build list of indices of input data entries in concatenated data output.
   stamp_cat_list = cellfun(@(d, m) d(:, strcmp(timestamp, m.sensors)), ...
                            data_list(:), meta_list(:), 'UniformOutput', false);
-  [stamp_cat, ~, stamp_cat_indices_to] = unique(vertcat(stamp_cat_list{:}));
+  [~, ~, stamp_cat_indices_to] = unique(vertcat(stamp_cat_list{:}));
+  stamp_cat = zeros(0, 1);
+  stamp_cat(stamp_cat_indices_to) = vertcat(stamp_cat_list{:});
   
   % Build list of indices of input data entries in concatenated data output.
   row_num_total = numel(stamp_cat);

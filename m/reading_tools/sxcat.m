@@ -151,24 +151,26 @@ function [meta, data] = sxcat(meta_list, data_list, timestamp, varargin)
   %% Cat data and metadata checkin for trivial empty input.
   % Check for trivial empty input.
   if isempty(meta_list)
-    sources_cat_list = cell(0, 1);
+    sources_cat = cell(0, 1);
     variables_cat_list = cell(0, 1);
   else
     meta_struct = [meta_list{:}];
-    sources_cat_list = {meta_struct.sources}';
+    sources_cat = vertcat(meta_struct.sources);
     variables_cat_list = {meta_struct.variables}';
   end
   
   % Build list of sources and variables for concatenated data and metadata.
-  sources_cat = vertcat(sources_cat_list{:});
-  [variables_cat, ~, variables_cat_indices_to] = ...
-    unique(vertcat(variables_cat_list{:}));
+  [~, ~, variables_cat_indices_to] = unique(vertcat(variables_cat_list{:}));
+  variables_cat = cell(0, 1);
+  variables_cat(variables_cat_indices_to) = vertcat(variables_cat_list{:});
   
   % Build list of unique timestamps and the output index of each data row.
   stamp_cat_list = cellfun(@(d, m) d(:, strcmp(timestamp, m.variables)), ...
                            data_list(:), meta_list(:), 'UniformOutput', false);
-  [stamp_cat, ~, stamp_cat_indices_to] = unique(vertcat(stamp_cat_list{:}));
-  
+  [~, ~, stamp_cat_indices_to] = unique(vertcat(stamp_cat_list{:}));
+  stamp_cat = zeros(0, 1);
+  stamp_cat(stamp_cat_indices_to) = vertcat(stamp_cat_list{:});
+
   % Build list of indices of input data entries in concatenated data output.
   total_rows = numel(stamp_cat);
   row_num_list = cellfun(@numel, stamp_cat_list(:));
