@@ -56,8 +56,11 @@ function gridding_options = configDataGridding()
     'chlorophyll'
     'turbidity'
     'cdom'
+    'scatter_650'
+    'backscatter_700'
     'oxygen_concentration'
     'oxygen_saturation'
+    'oxygen_frequency'
     'conductivity_corrected_thermal'
     'temperature_corrected_thermal'
     'salinity'
@@ -73,8 +76,6 @@ function gridding_options = configDataGridding()
     'fluorescence_monitoring_270_340'
     'fluorescence_monitoring_270_376'
     'methane_concentration'
-    'backscatter_700'
-    'oxygen_frequency'                  
   };
 
 end
