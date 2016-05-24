@@ -230,7 +230,7 @@ function ncl2_info = configRTOutputNetCDFL2()
   var_attr_list.pressure = {
     'long_name'     'water pressure'
     'standard_name' 'pressure'
-    'units'         'decibar'
+    'units'         'dbar'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'                []
@@ -340,7 +340,7 @@ function ncl2_info = configRTOutputNetCDFL2()
   var_attr_list.density = {
     'long_name'     'water density using salinity from raw temperature and raw conductivity'
     'standard_name' 'sea_water_density'
-    'units'         'Kg m-3'
+    'units'         'kg m-3'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
@@ -352,7 +352,7 @@ function ncl2_info = configRTOutputNetCDFL2()
   var_attr_list.density_corrected_thermal = {
     'long_name'     'water density using salinity from raw conductivity and temperature with thermal lag corrected'
     'standard_name' 'sea_water_density'
-    'units'         'Kg m-3'
+    'units'         'kg m-3'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
@@ -364,7 +364,7 @@ function ncl2_info = configRTOutputNetCDFL2()
   var_attr_list.density_corrected_sensor = {
     'long_name'     'water density using salinity from conductivity and temperature with sensor lag corrected'
     'standard_name' 'sea_water_density'
-    'units'         'Kg m-3'
+    'units'         'kg m-3'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
@@ -376,7 +376,7 @@ function ncl2_info = configRTOutputNetCDFL2()
   var_attr_list.density_corrected_sensor_thermal = {
     'long_name'     'water density using salinity from conductivity and temperature with sensor lag corrected and thermal lag corrected'
     'standard_name' 'sea_water_density'
-    'units'         'Kg m-3'
+    'units'         'kg m-3'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
@@ -399,7 +399,7 @@ function ncl2_info = configRTOutputNetCDFL2()
   var_attr_list.potential_density = {
     'long_name'     'water potential density'
     'standard_name' 'sea_water_potential_density'
-    'units'         'Kg m-3'
+    'units'         'kg m-3'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
@@ -410,7 +410,7 @@ function ncl2_info = configRTOutputNetCDFL2()
   var_attr_list.sound_velocity = {
     'long_name'     'sound velocity'
     'standard_name' 'sea_water_sound_velocity'
-    'units'         'Kg m-3'
+    'units'         'm s-1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
@@ -502,7 +502,7 @@ function ncl2_info = configRTOutputNetCDFL2()
     'grid_method'            [] };
 
   var_attr_list.cdom = {
-    'long_name'     'cdom'
+    'long_name'     'CDOM'
     'standard_name' 'concentration_of_coloured_dissolved_organic_matter'
     'units'         'ppb'
     'coordinates'   'time depth latitude longitude'
@@ -558,7 +558,7 @@ function ncl2_info = configRTOutputNetCDFL2()
 
   var_attr_list.oxygen_frequency = {
     'long_name'     'oxygen frequency'
-    'standard_name' 'oxygen_frequency_from_GPCTD'
+    'standard_name' 'frequency_output_of_sensor_for_oxygen_in_sea_water'
     'units'         'Hz'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
@@ -766,7 +766,7 @@ function ncl2_info = configRTOutputNetCDFL2()
   var_attr_list.methane_concentration = {
     'long_name'     'Methane concentration (scaled)'
     'standard_name' 'methane_concentration'
-    'units'         'ug/L'
+    'units'         'mg m-3'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
