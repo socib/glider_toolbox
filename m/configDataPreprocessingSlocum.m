@@ -84,6 +84,7 @@ function preprocessing_options = configDataPreprocessingSlocum()
   
   preprocessing_options.optics_list(1).chlorophyll = 'sci_flntu_chlor_units';
   preprocessing_options.optics_list(1).turbidity   = 'sci_flntu_turb_units';
+  preprocessing_options.optics_list(1).temperature = 'sci_flntu_temp';
   preprocessing_options.optics_list(1).time        = 'sci_flntu_timestamp';
   
   preprocessing_options.extra_sensor_list = struct();

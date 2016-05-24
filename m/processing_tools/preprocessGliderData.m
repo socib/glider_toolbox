@@ -204,6 +204,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %          SCATTER_650: 650 nm wavelength scattering sequence name.
 %          BACKSCATTER_700: 700 nm wavelength backscattering sequence name.
 %        It may have the following optional fields (empty or missing):
+%          TEMPERATURE: optic sensor temperature sequence name.
 %          TIME: optic sensor timestamp sequence name.
 %          CALIBRATION: fluorescence and scattering factory calibration.
 %            Handle or name of the optic sensor factory calibration function.
@@ -214,6 +215,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %                              'cdom',            {[]}, ...
 %                              'scatter_650',     {[]}, ...
 %                              'backscatter_700', {[]}, ...
+%                              'temperature',     {'sci_flntu_temp'}, ...
 %                              'time',            {'sci_flntu_timestamp'})
 %      EXTRA_SENSOR_LIST: other sensor set choices.
 %        Struct selecting other sensor sets of interest, where each field 
@@ -318,7 +320,8 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
            'cdom',            {[]}, ...
            'scatter_650',     {[]}, ...
            'backscatter_700', {[]}, ...
-           'time',        {'sci_flntu_timestamp'});
+           'temperature',     {'sci_flntu_temp'}, ...
+           'time',            {'sci_flntu_timestamp'});
   options.extra_sensor_list = ...
     struct();
   options.calibration_parameter_list = ...
@@ -932,9 +935,13 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
     optics_field_list = cellfun(@(v)(optics_choice.(v)), ...
                                 optics_var_list, 'UniformOutput', false);
     time_optics_field = [];
+    temperature_optics_field = [];
     optics_calibration_func = [];
     if isfield(optics_choice_list, 'time')
       time_optics_field = optics_choice.time;
+    end
+    if isfield(optics_choice_list, 'temperature')
+      temperature_optics_field = optics_choice.temperature;
     end
     if isfield(optics_choice_list, 'calibration')
       optics_calibration_func = optics_choice.calibration;
@@ -956,7 +963,14 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
           && any(data_raw.(time_optics_field) > 0)
         data_pre.time_optics = data_raw.(time_optics_field);
         meta_pre.time_optics.sources = time_optics_field;
-        fprintf('  time_optics  : %s\n', time_optics_field);
+        fprintf('  time optics         : %s\n', time_optics_field);
+      end
+      if ~isempty(temperature_optics_field) ...
+          && ismember(temperature_optics_field, field_list) ...
+          && any(data_raw.(temperature_optics_field) > 0)
+        data_pre.temperature_optics = data_raw.(temperature_optics_field);
+        meta_pre.temperature_optics.sources = temperature_optics_field;
+        fprintf('  temperature optics  : %s\n', temperature_optics_field);
       end
       if ~isempty(optics_calibration_func)
         if ischar(optics_calibration_func)

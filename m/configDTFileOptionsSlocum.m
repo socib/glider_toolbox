@@ -112,6 +112,7 @@ function slocum_options = configDTFileOptionsSlocum()
     'sci_water_temp'
     'sci_flntu_chlor_units'
     'sci_flntu_turb_units'
+    'sci_flntu_temp'
     'sci_flntu_timestamp'
     'sci_oxy3835_oxygen'
     'sci_oxy3835_saturation'

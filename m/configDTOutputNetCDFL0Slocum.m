@@ -463,8 +463,28 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
     '_FillValue'    default_fill_value };
 
   % BB3SLO sensor.
+  var_attr_list.sci_bb3slo_b470_ref = {
+    'long_name'     'blue backscattering refersence'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_bb3slo_b470_sig = {
+    'long_name'     'blue backscattering signal'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.sci_bb3slo_b470_scaled = {
     'long_name'     'blue backscattering'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_bb3slo_b532_ref = {
+    'long_name'     'green backscattering reference'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_bb3slo_b532_sig = {
+    'long_name'     'green backscattering signal'
     'units'         '1'
     '_FillValue'    default_fill_value };
 
@@ -473,25 +493,148 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
     'units'         '1'
     '_FillValue'    default_fill_value };
 
+  var_attr_list.sci_bb3slo_b660_ref = {
+    'long_name'     'red backscattering reference'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_bb3slo_b660_sig = {
+    'long_name'     'red backscattering signal'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.sci_bb3slo_b660_scaled = {
     'long_name'     'red backscattering'
     'units'         '1'
     '_FillValue'    default_fill_value };
 
+  var_attr_list.sci_bb3slo_temp = {
+    'long_name'     'temperature (BB3SLO sensor)'
+    'units'         'Celsius'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_bb3slo_timestamp = {
+    'long_name'     'epoch time (BB3SLO sensor)'
+    'standard_name' 'time'
+    'units'         'seconds since 1970-01-01 00:00:00 +00:00'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_bb3slo_b470_do = {
+    'long_name'     'blue backscattering dark water offset'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_bb3slo_b532_do = {
+    'long_name'     'green backscattering dark water offset'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_bb3slo_b660_do = {
+    'long_name'     'red backscattering dark water offset'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_bb3slo_b470_sf = {
+    'long_name'     'blue backscattering scale factor'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_bb3slo_b532_sf = {
+    'long_name'     'green backscattering scale factor'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_bb3slo_b660_sf = {
+    'long_name'     'red backscattering scale factor'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
   % BBFL2S sensor.
+  var_attr_list.sci_bbfl2s_bb_ref = {
+    'long_name'     'backscattering reference'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_bbfl2s_bb_sig = {
+    'long_name'     'backscattering signal'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.sci_bbfl2s_bb_scaled = {
     'long_name'     'backscattering'
     'units'         '1'
     '_FillValue'    default_fill_value };
 
+  var_attr_list.sci_bbfl2s_cdom_ref = {
+    'long_name'     'CDOM reference'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_bbfl2s_cdom_sig = {
+    'long_name'     'CDOM signal'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.sci_bbfl2s_cdom_scaled = {
-    'long_name'     'cdom'
+    'long_name'     'CDOM'
+    'units'         'ppb'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_bbfl2s_chlor_ref = {
+    'long_name'     'chlorophyll reference'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_bbfl2s_chlor_sig = {
+    'long_name'     'chlorophyll signal'
     'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.sci_bbfl2s_chlor_scaled = {
     'long_name'     'chlorophyll'
-    'units'         'mg Kg-3'
+    'standard_name' 'concentration_of_chlorophyll_in_sea_water'
+    'units'         'mg m-3'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_bbfl2s_temp = {
+    'long_name'     'temperature (BBFL2S sensor)'
+    'units'         'Celsius'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.sci_bbfl2s_timestamp = {
+    'long_name'     'epoch time (BBFL2S sensor)'
+    'standard_name' 'time'
+    'units'         'seconds since 1970-01-01 00:00:00 +00:00'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_bbfl2s_bb_cwo = {
+    'long_name'     'backscattering clean water offset'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_bbfl2s_cdom_cwo = {
+    'long_name'     'CDOM clean water offset'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_bbfl2s_chlor_cwo = {
+    'long_name'     'chlorophyll clean water offset'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_bbfl2s_bb_sf = {
+    'long_name'     'backscattering scale factor'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_bbfl2s_cdom_sf = {
+    'long_name'     'cdom scale factor'
+    'units'         'ppb'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_bbfl2s_chlor_sf = {
+    'long_name'     'chlorophyll scale factor'
+    'units'         '1'
     '_FillValue'    default_fill_value };
 
   % OCR504I sensor.
@@ -536,12 +679,6 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
     'units'         'mg m-3'
     '_FillValue'    default_fill_value };
 
-  var_attr_list.sci_flntu_temp = {
-    'long_name'     'temperature'
-    'standard_name' 'sea_water_temperature'
-    'units'         'Celsius'
-    '_FillValue'    default_fill_value };
-
   var_attr_list.sci_flntu_turb_ref = {
     'long_name'     'turbidity reference'
     'units'         '1'
@@ -558,6 +695,11 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
     'units'         'NTU'
     '_FillValue'    default_fill_value };
 
+  var_attr_list.sci_flntu_temp = {
+    'long_name'     'temperature (FLNTU sensor)'
+    'units'         'Celsius'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.sci_flntu_timestamp = {
     'long_name'     'epoch time (FLNTU sensor)'
     'standard_name' 'time'
@@ -566,25 +708,21 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
 
   var_attr_list.u_flntu_chlor_do = {
     'long_name'     'chlorophyll dark water offset'
-    'standard_name' 'chlorophyll'
     'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.u_flntu_turb_do = {
     'long_name'     'turbidity dark water offset'
-    'standard_name' 'turbidity_dark_water_offset'
     'units'         '1'
     '_FillValue'    default_fill_value };
 
   var_attr_list.u_flntu_chlor_sf = {
     'long_name'     'chlorophyll scale factor'
-    'standard_name' 'chlorophyll_scale_factor'
     'units'         'mg m-3'
     '_FillValue'    default_fill_value };
 
   var_attr_list.u_flntu_turb_sf = {
     'long_name'     'turbidity scale factor'
-    'standard_name' 'turbidity_scale_factor'
     'units'         'NTU'
     '_FillValue'    default_fill_value };
 
