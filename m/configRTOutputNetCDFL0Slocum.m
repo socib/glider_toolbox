@@ -853,6 +853,12 @@ function ncl0_info = configRTOutputNetCDFL0Slocum()
     'comment'       'commanded seconds between measurements: <0 stopped, 0 as fast as possible, >0 that many seconds'
     '_FillValue'    default_fill_value };
 
+  var_attr_list.c_oxy4_on = {
+    'long_name'     'optical OXY4 sensor toggle'
+    'units'         's'
+    'comment'       'commanded seconds between measurements: <0 stopped, 0 as fast as possible, >0 that many seconds'
+    '_FillValue'    default_fill_value };
+
   var_attr_list.c_pitch = {
     'long_name'     'commanded pitch'
     'units'         'rad'
