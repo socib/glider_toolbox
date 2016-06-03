@@ -223,7 +223,6 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
           'CData', log10(options.cdata(valid)), ...
           'SizeData', options.sdata(valid));
     end
-    set(haxs, 'CLim', crange, 'XLim', xrange, 'YLim', yrange);
     % Force range to prevent error due to wrong non-positive values.
     % These values should not be there for logarithmic scale magnitudes
     % (e.g. chlorophyll concentration).
