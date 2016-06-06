@@ -15,6 +15,7 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
 %    options in string key-value pairs OPT1, VAL1... or in struct OPTIONS with
 %    field names as option keys and field values as option values.
 %    The scatter plot is generated with the function SCATTER.
+%    See note on performance and invalid values.
 %    Recognized options are:
 %      XDATA: horizontal coordinate data.
 %        Vector of data to be passed as x coordindate to function SCATTER, 
@@ -70,6 +71,10 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
 %    HFIG, HAXS, HSCT, and HCBA, respectively.
 %
 %  Notes:
+%    Invalid values (NaN) introduce a signficant performance penalty in the 
+%    plotting functions. They are discarded without modifying the final
+%    appearance of the plot.
+%
 %    There is no built-in support for logarithmic color scaling. 
 %    The effect is emulated hacking the color data and the color bar ticks.
 %
@@ -93,7 +98,7 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -180,24 +185,44 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
   hcbatit = get(hcba, 'XLabel');
   
   
+  %% Compute mask to discard invalid values to speedup plotting.
+  % Size data might be empty to use default marker size in SCATTER.
+  valid = ~(isnan(options.xdata) | isnan(options.ydata) | isnan(options.cdata));
+  if (~isempty(options.sdata))
+    valid = valid & ~isnan(options.sdata);
+  end
+  
+  
   %% Set properties of plot elements.
-  % Equivalent way to compute quantile without using the function QUANTILE in
-  % statistical toolbox. See documentation there for algorithm details.
-  % crange = quantile(options.cdata(:), crange_quantiles);
+  % Use an equivalent way to compute quantile without using QUANTILE function
+  % in statistical toolbox. See documentation there for algorithm details.
+  % crange = quantile(options.cdata(valid), crange_quantiles);
   crange_quantiles = [0.01 0.99];
-  cdata_sorted = sort(options.cdata(isfinite(options.cdata)));
+  cdata_sorted = sort(options.cdata(valid));
   if isempty(cdata_sorted)
     crange = [0.5 1.5]; % some arbitrary value to let the rest of code work.
   else
     crange = interp1(cdata_sorted([1 1:end end]),...
                      crange_quantiles * numel(cdata_sorted) + 1.5);
   end
+  xrange = [min(options.xdata(:)) max(options.xdata(:))];
+  yrange = [min(options.ydata(:)) max(options.ydata(:))];
   if options.logscale
     % Hack to plot a color bar with logarithmic scale and linear ticks.
     % This code should go after colormap call, otherwise colormap resets ticks.
-    set(hsct, ...
-        'XData', options.xdata(:), 'YData', options.ydata(:), ...
-        'CData', log10(options.cdata(:)), 'SizeData', options.sdata(:));
+    if isscalar(options.sdata)
+      set(hsct, ...
+          'XData', options.xdata(valid), ...
+          'YData', options.ydata(valid), ...
+          'CData', log10(options.cdata(valid)), ...
+          'SizeData', options.sdata);
+    elseif ~isempty(options.sdata)
+      set(hsct, ...
+          'XData', options.xdata(valid), ...
+          'YData', options.ydata(valid), ...
+          'CData', log10(options.cdata(valid)), ...
+          'SizeData', options.sdata(valid));
+    end
     % Force range to prevent error due to wrong non-positive values.
     % These values should not be there for logarithmic scale magnitudes
     % (e.g. chlorophyll concentration).
@@ -224,17 +249,27 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
     end
     ctick_label(ctick_show) = strtrim(cellstr(num2str(10.^ctick(ctick_show))));
     drawnow(); % Hack to force plot update before setting color axis properties.
-    set(haxs, 'CLim', crange);
+    set(haxs, 'CLim', crange, 'XLim', xrange, 'YLim', yrange);
     set(hcba, 'XTick', ctick, 'XTickLabel', ctick_label);
   else
-    % Prevent range error color range contains one single value.
-    if diff(crange) == 0
-      crange = crange + [-0.5 0.5];
+    if isscalar(options.sdata)
+      set(hsct, ...
+          'XData', options.xdata(valid), ...
+          'YData', options.ydata(valid), ...
+          'CData', options.cdata(valid), ...
+          'SizeData', options.sdata);
+    elseif ~isempty(options.sdata)
+      set(hsct, ...
+          'XData', options.xdata(valid), ...
+          'YData', options.ydata(valid), ...
+          'CData', options.cdata(valid), ...
+          'SizeData', options.sdata(valid));
     end
-    set(hsct, ...
-        'XData', options.xdata(:), 'YData', options.ydata(:), ...
-        'CData', options.cdata(:), 'SizeData', options.sdata(:));
-    set(haxs, 'CLim', crange);
+    % Prevent range error when color range contains one single value.
+    if diff(crange) == 0
+      crange = crange + 0.5 * [-1 1];
+    end
+    set(haxs, 'CLim', crange, 'XLim', xrange, 'YLim', yrange);
   end
   for a = 'xyz'
     if ismember(a, options.dateticks)
@@ -249,7 +284,6 @@ function [hfig, haxs, hcba, hsct] = plotTransectVerticalSection(varargin)
       datetick(a, datetick_format, 'keeplimits');
     end
   end
-  axis(haxs, 'tight');
   set(haxs, options.axsprops);
   set(haxstit, options.title);
   set(haxsxlb, options.xlabel);

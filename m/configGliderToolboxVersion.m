@@ -22,7 +22,7 @@ function version = configGliderToolboxVersion()
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014-2015
+%  Copyright (C) 2014-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -41,6 +41,6 @@ function version = configGliderToolboxVersion()
 
   error(nargchk(0, 0, nargin, 'struct'));
   
-  version = '1.1.1';
+  version = '1.2.0';
 
 end

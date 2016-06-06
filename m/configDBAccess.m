@@ -23,7 +23,7 @@ function db_access = configDBAccess()
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -42,7 +42,7 @@ function db_access = configDBAccess()
 
   error(nargchk(0, 0, nargin, 'struct'));
 
-  db_access.url  = 'jdbc:postgresql://mydb.myportal.mydomain:5433/my_data_base';
+  db_access.server = 'jdbc:postgresql://mydb.myportal.mydomain:5433/my_data_base';
   db_access.name = 'my_data_base';
   db_access.user = 'myself';
   db_access.pass = 'top_secret';

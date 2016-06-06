@@ -86,7 +86,7 @@ function savenc(var_data, var_meta, global_meta, filename)
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -127,7 +127,11 @@ function savenc(var_data, var_meta, global_meta, filename)
       % Set dimensions.
       if isfield(global_meta, 'dimensions')
         for global_dim = global_meta.dimensions(:)'
-          nc(global_dim.name) = global_dim.length;      
+          if isfield(global_dim, 'unlimited') && (global_dim.unlimited)
+            nc(global_dim.name) = 0;
+          else
+            nc(global_dim.name) = global_dim.length;
+          end
         end
       end
       % Set variable dimensions and attributes, and variable data.
@@ -157,6 +161,14 @@ function savenc(var_data, var_meta, global_meta, filename)
             nc{var_name}.(var_att.name) = var_att.value;
           end
         end
+      end
+      for var_idx = 1:numel(field_name_list)
+        field_name = field_name_list{var_idx};
+        if isfield(var_meta.(field_name), 'name')
+          var_name = var_meta.(field_name).name;
+        else
+          var_name = field_name;
+        end
         % Set the variable data with fill value and scale handling enabled.
         % Give the range for record dimensions.
         nc_var = nc{var_name};
@@ -179,13 +191,19 @@ function savenc(var_data, var_meta, global_meta, filename)
     try
       % Set global attributes.
       if isfield(global_meta, 'attributes')
-        arrayfun(@(a) nc_attput(filename, nc_global, a.name, a.value), ...
-                 global_meta.attributes);
+        for global_att = global_meta.attributes(:)'
+          nc_attput(filename, nc_global, global_att.name, global_att.value);
+        end
       end
       % Set dimensions.
       if isfield(global_meta, 'dimensions')
-        arrayfun(@(d) nc_adddim(filename, d.name, d.length), ...
-                 global_meta.dimensions);
+        for global_dim = global_meta.dimensions(:)'
+          if isfield(global_dim, 'unlimited') && (global_dim.unlimited)
+            nc_adddim(filename, global_dim.name, 0);
+          else
+            nc_adddim(filename, global_dim.name, global_dim.length);
+          end
+        end
       end
       % Set variable dimensions and attributes, and variable data.
       field_name_list = intersect(fieldnames(var_data), fieldnames(var_meta));
@@ -217,6 +235,14 @@ function savenc(var_data, var_meta, global_meta, filename)
                    'Value', {var_meta.(field_name).attributes.value});
         end
         nc_addvar(filename, nc_var);
+      end
+      for var_idx = 1:numel(field_name_list)
+        field_name = field_name_list{var_idx};
+        if isfield(var_meta.(field_name), 'name')
+          var_name = var_meta.(field_name).name;
+        else
+          var_name = field_name;
+        end
         nc_varput(filename, var_name, var_data.(field_name))
       end
     catch exception

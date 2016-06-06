@@ -31,15 +31,15 @@ function [meta, data] = sgengcat(meta_list, data_list, varargin)
 %    according to the mission number and the dive number, and with the time 
 %    fields as seconds since the start time of the first dive.
 %
-%    [META, DATA] = SGENGCAT(META_LIST, DATA_LIST, TIMESTAMP, OPTIONS) and 
-%    [META, DATA] = SGENGCAT(META_LIST, DATA_LIST, TIMESTAMP, OPT1, VAL1, ...) 
+%    [META, DATA] = SGENGCAT(META_LIST, DATA_LIST, OPTIONS) and 
+%    [META, DATA] = SGENGCAT(META_LIST, DATA_LIST, OPT1, VAL1, ...) 
 %    accept the following options given in key-value pairs OPT1, VAL1...
 %    or in a struct OPTIONS with field names as option keys and field values
 %    as option values:
 %      FORMAT: data output format.
 %        String setting the format of the output DATA. Valid values are:
 %          'array': DATA is a matrix with data readings as columns ordered
-%            as in the columns metadata field.
+%            as in the COLUMNS metadata field.
 %          'struct': DATA is a struct with column names as field names
 %            and column vectors of data columns as field values.
 %        Default value: 'array'
@@ -71,7 +71,7 @@ function [meta, data] = sgengcat(meta_list, data_list, varargin)
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -95,8 +95,8 @@ function [meta, data] = sgengcat(meta_list, data_list, varargin)
   options.format = 'array';
   options.columns = 'all';
   options.period = 'all';
-
-
+  
+  
   %% Parse optional arguments.
   % Get option key-value pairs in any accepted call signature.
   argopts = varargin;
@@ -124,7 +124,7 @@ function [meta, data] = sgengcat(meta_list, data_list, varargin)
             'Invalid option: %s.', opt);
     end
   end
-
+  
   
   %% Set option flags and values.
   output_format = lower(options.format);
@@ -196,8 +196,8 @@ function [meta, data] = sgengcat(meta_list, data_list, varargin)
   starts_list = all_start_secs(time_filtering_and_miss_dive_sorting, :);
   datcol_list = all_columns(time_filtering_and_miss_dive_sorting, :);
   values_list = data_list(time_filtering_and_miss_dive_sorting, :);
-
-
+  
+  
   %% Reorder data columns and correct time offset converting to array if needed. 
   time_column = 'elaps_t';
   dive_start_offset_list = starts_list - min(starts_list);

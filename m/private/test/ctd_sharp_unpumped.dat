@@ -1,5 +1,5 @@
-%              time   conductivity    temperature       pressure          pitch           roll        heading      latitude      longitude profile_number
-%                 s            S/m              C           dbar            rad            rad            rad           deg            deg              -
+%              time   conductivity    temperature       pressure          pitch           roll        heading       latitude      longitude profile_number
+%                 s            S/m              C           dbar            rad            rad            rad            deg            deg              -
 1376305916.06701994     4.40161000    18.17590000     0.09349297    -0.12437526    -0.33358168     4.61640888            NaN            NaN            0.5
 1376305917.21442008     4.40171000    18.17430000     0.09558562    -0.12463669    -0.32971838     4.62140508            NaN            NaN            0.5
 1376305918.23270011     4.40135000    18.17300000     0.09822655    -0.12486690    -0.32631637     4.62580471            NaN            NaN            0.5

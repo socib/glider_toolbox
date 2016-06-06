@@ -95,7 +95,7 @@ function [meta, data] = sglogcat(meta_list, data_list, varargin)
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -119,8 +119,8 @@ function [meta, data] = sglogcat(meta_list, data_list, varargin)
   options.format = 'array';
   options.params = 'all';
   options.period = 'all';
-
-
+  
+  
   %% Parse optional arguments.
   % Get option key-value pairs in any accepted call signature.
   argopts = varargin;
@@ -148,7 +148,7 @@ function [meta, data] = sglogcat(meta_list, data_list, varargin)
             'Invalid option: %s.', opt);
     end
   end
-
+  
   
   %% Set option flags and values.
   output_format = lower(options.format);
@@ -222,7 +222,7 @@ function [meta, data] = sglogcat(meta_list, data_list, varargin)
   starts_list = all_start_secs(time_filtering_and_miss_dive_sorting, :);
   values_list = data_list(time_filtering_and_miss_dive_sorting, :);
   
-
+  
   %% Compute data availability according to required output.
   % Compute some support variables useful for the rest of the code:
   % - The list of available fields is the union of the fields in each data set.

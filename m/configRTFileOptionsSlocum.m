@@ -45,7 +45,7 @@ function slocum_options = configRTFileOptionsSlocum()
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -97,7 +97,9 @@ function slocum_options = configRTFileOptionsSlocum()
     'm_gps_status'
     'c_wpt_lat'
     'c_wpt_lon'
+    'm_roll'
     'm_pitch'
+    'm_heading'
     'm_depth'
     'm_final_water_vx'
     'm_final_water_vy'
@@ -108,9 +110,11 @@ function slocum_options = configRTFileOptionsSlocum()
     'sci_water_temp'
     'sci_flntu_chlor_units'
     'sci_flntu_turb_units'
+    'sci_flntu_temp'
     'sci_flntu_timestamp'
     'sci_oxy3835_oxygen'
     'sci_oxy3835_saturation'
+    'sci_oxy3835_temp'
     'sci_oxy3835_timestamp'
   };
   

@@ -17,7 +17,7 @@ function gridding_options = configDataGridding()
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -49,22 +49,33 @@ function gridding_options = configDataGridding()
 
   gridding_options.depth_step = 1;
 
-  gridding_options.variable_list = { 
+  gridding_options.variable_list = {
     'conductivity'
     'temperature'
     'pressure'
     'chlorophyll'
     'turbidity'
     'cdom'
+    'scatter_650'
+    'backscatter_700'
     'oxygen_concentration'
     'oxygen_saturation'
+    'oxygen_frequency'
     'conductivity_corrected_thermal'
     'temperature_corrected_thermal'
     'salinity'
     'density'
     'salinity_corrected_thermal'
     'density_corrected_thermal'
+    'fluorescence_255_360'
+    'fluorescence_260_315'
+    'fluorescence_270_340'
+    'fluorescence_270_376'
+    'fluorescence_monitoring_255_360'
+    'fluorescence_monitoring_260_315'
+    'fluorescence_monitoring_270_340'
+    'fluorescence_monitoring_270_376'
+    'methane_concentration'
   };
 
 end
-

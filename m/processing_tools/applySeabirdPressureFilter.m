@@ -45,7 +45,7 @@ function new_pressure = applySeabirdPressureFilter(time, old_pressure, time_cons
 %  Authors:
 %    Bartolome Garau  tgarau@socib.es
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -72,7 +72,7 @@ function new_pressure = applySeabirdPressureFilter(time, old_pressure, time_cons
   % Initialize output.
   new_pressure = nan(size(old_pressure));
   
-  % Denan original data.
+  % Filter invalid values in original data.
   % The positive time test is needed to deal with odd data from initial
   % lines in Slocum segment files.
   good_rows = ~isnan(old_pressure) & (time > 0);
@@ -99,7 +99,7 @@ function new_pressure = applySeabirdPressureFilter(time, old_pressure, time_cons
   % Set the time series on its original time instants.
   new_pres_signal = interp1(reg_time_range, new_pres_signal, time_range);
 
-  % Return the filtered signal preserving original nan values.
+  % Return the filtered signal preserving original invalid values.
   new_pressure(good_rows)  = new_pres_signal;
 
 end

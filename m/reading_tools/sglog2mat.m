@@ -20,31 +20,31 @@ function [meta, data] = sglog2mat(filename, varargin)
 %          'array': DATA is a struct with a scalar field for each scalar 
 %            parameter and an array or cell array field for each non-scalar
 %            parameter. Values of non-scalar parameters are in the column order
-%            given by the corresponding field of the COLUMNS metadata field.
-%          'merged': DATA is a struct with a scalar or column vector field 
-%            for each scalar parameter or entry of a non-scalar parameter.
+%            given by the corresponding field of the PARAMS metadata field.
+%          'merged': DATA is a struct with a scalar or column vector field for
+%            each scalar parameter or entry of a non-scalar parameter.
 %            For scalar parameters, the field is named after the parameter,
-%            while for non-scalar parameters the field names are the parameter 
+%            while for non-scalar parameters the field names are the parameter
 %            name and its field names, separated by underscore.
 %          'struct': DATA is a struct with a scalar field for each scalar 
 %            parameter and a struct array for each non-scalar parameter.
 %            The fields of the non-scalar parameters are given by the 
-%            corresponding field of the COLUMNS metadata field.
+%            corresponding field of the PARAMS metadata field.
 %        Default value: 'array'
 %      PARAMS: parameter filtering list.
-%        String cell array with the names of the parameters of interest. 
+%        String cell array with the names of the parameters of interest.
 %        If given, only parameters present in both the input file and this list
 %        will be present in output. For non-scalar parameters, the name 
 %        of the identifier as it appears in the log line specifies including
 %        all of its fields. Individual parameter fields are selected 
-%        with the identifier and the name of the field separated by underscore 
+%        with the identifier and the name of the field separated by underscore
 %        (e.g. 'GC_st_secs'). The string 'all' may also be given, in which case
 %        parameter filtering is not performed and all parameters in input file
 %        will be present in output.
 %        Default value: 'all' (do not perform parameter filtering).
 %
-%    META has the following fields based on the tags of the header
-%    and the content of some metaparameters:
+%    META has the following fields based on the tags of the header and the
+%    content of some metaparameters:
 %      HEADERS: a struct with the initial tags in the log file:
 %        VERSION: string with the version tag in log header.
 %        GLIDER : string with the glider id tag in log header.
@@ -110,7 +110,7 @@ function [meta, data] = sglog2mat(filename, varargin)
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -128,7 +128,7 @@ function [meta, data] = sglog2mat(filename, varargin)
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   error(nargchk(1, 5, nargin, 'struct'));
-
+  
   
   %% Set options and default values.
   options.format = 'array';
@@ -179,7 +179,7 @@ function [meta, data] = sglog2mat(filename, varargin)
     error('glider_toolbox:sglog2mat:FileError', fid_msg);
   end
   
-    
+  
   %% Parse the file.
   try
     % Read header tags:
@@ -196,7 +196,7 @@ function [meta, data] = sglog2mat(filename, varargin)
     header_struct = {header_fields{:}; header_values{:}};
     header_struct = struct(header_struct{:});
     header_struct.start = sscanf(header_struct.start, '%d')';
-  
+    
     % Build metadata structure:
     %   - The filename (without base directory).
     %   - The log file header lines.
@@ -219,7 +219,7 @@ function [meta, data] = sglog2mat(filename, varargin)
     gps_field = 'GPSFIX';
     gps_param_list = {'GPS1' 'GPS2' 'GPS'};
     gps_member_list = {'ddmmyy' 'hhmmss' 'fixlat'  'fixlon' 'ttffix' 'hordop' 'ttafix' 'magvar'};
-
+    
     % Parameters to rename (valid identifiers begin with a letter):
     rename_param_map = [ {
       '_CALLS'        'CALLS'
@@ -372,12 +372,12 @@ function [meta, data] = sglog2mat(filename, varargin)
     fclose(fid);
     rethrow(exception);
   end
-
-
+  
+  
   %% Close the file after successful reading.
   fclose(fid); 
-
-
+  
+  
   %% Convert data to desired format:
   switch output_format
     case 'array'
@@ -417,5 +417,5 @@ function [meta, data] = sglog2mat(filename, varargin)
       error('glider_toolbox:sglog2mat:InvalidFormat', ...
             'Invalid output format: %s.', output_format)
   end
-  
+
 end

@@ -25,7 +25,7 @@ function [sql_query, deployment_fields] = configRTDeploymentInfoQueryDB()
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -58,12 +58,12 @@ function [sql_query, deployment_fields] = configRTDeploymentInfoQueryDB()
   };
 
   deployment_fields = fields_map(:,1)';
-  db_fields = fields_map(:,2)';
+  database_fields = fields_map(:,2)';
 
   % Build the query.
-  db_fields_str = [sprintf('%s, ', db_fields{1:end-1}) db_fields{end}];
-
-  sql_query = ['select ' db_fields_str ...
+  database_fields_str = ...
+    [sprintf('%s, ', database_fields{1:end-1}) database_fields{end}];
+  sql_query = ['select ' database_fields_str ...
                '  from instrumentation.deployment' ...
                '  inner join instrumentation.instrument' ...
                '    on (deployment_instrument_id=instrument_id)' ...

@@ -18,7 +18,7 @@ function [meta, data] = sgeng2mat(filename, varargin)
 %      FORMAT: data output format.
 %        String setting the format of the output DATA. Valid values are:
 %          'array': DATA is a matrix with data readings as columns ordered
-%            as in the columns metadata field.
+%            as in the COLUMNS metadata field.
 %          'struct': DATA is a struct with column names as field names
 %            and column vectors of data columns as field values.
 %        Default value: 'array'
@@ -28,7 +28,7 @@ function [meta, data] = sgeng2mat(filename, varargin)
 %        renaming). If given, only parameters present in both the input
 %        file and this list will be present in output. The string 'all'
 %        may also be given, in which case column filtering is not performed
-%        and all columns in input list will be present in output.
+%        and all columns in the input list will be present in output.
 %        Default value: 'all' (do not perform column filtering).
 %
 %    META has the following fields based on the tags of the header and the
@@ -62,12 +62,12 @@ function [meta, data] = sgeng2mat(filename, varargin)
 %    of the HEADERS metadata field.
 %
 %  Examples:
-%    [meta, data] = sgen2mat(filename)
-%    [meta, data] = sgen2mat(filename, 'format', 'struct')
+%    [meta, data] = sgeng2mat(filename)
+%    [meta, data] = sgeng2mat(filename, 'format', 'struct')
 %    options = struct( ...
-%      'params', {{'GPS_date' 'GPS_time' 'GPS_latf' 'GPS_lonf' 'CURRENT'}}, ...
+%      'columns', {{'elaps_t' 'depth' 'head' 'pitchAng' 'rollAng'}}, ...
 %      'format', {'merged'});
-%    [meta, data] = sgen2mat(filename, options)
+%    [meta, data] = sgeng2mat(filename, options)
 %
 %  See also:
 %    SGLOG2MAT
@@ -78,7 +78,7 @@ function [meta, data] = sgeng2mat(filename, varargin)
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2014-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -96,7 +96,7 @@ function [meta, data] = sgeng2mat(filename, varargin)
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   error(nargchk(1, 5, nargin, 'struct'));
-
+  
   
   %% Set options and default values.
   options.format = 'array';
@@ -147,7 +147,7 @@ function [meta, data] = sgeng2mat(filename, varargin)
     error('glider_toolbox:sgeng2mat:FileError', fid_msg);
   end
   
-    
+  
   %% Parse the file.
   try
     % Read header tags:
@@ -218,9 +218,9 @@ function [meta, data] = sgeng2mat(filename, varargin)
     fclose(fid);
     rethrow(exception);
   end
-
-
+  
+  
   %% Close the file after successful reading.
   fclose(fid); 
-  
+
 end

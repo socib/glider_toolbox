@@ -23,7 +23,7 @@ function data = getDeploymentInfoDB(query, dbname, varargin)
 %        Default value: '' (user name not required by database)
 %      SERVER: database server url.
 %        String with the URL of the database server.
-%        Default value: [] (do not specify a URL when connection to database)
+%        Default value: [] (do not specify a URL when connecting to database)
 %      DRIVER: database driver.
 %        String with the name of the driver to access the database.
 %        Default value: [] (do not specify a driver when connecting to database)
@@ -76,7 +76,7 @@ function data = getDeploymentInfoDB(query, dbname, varargin)
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %

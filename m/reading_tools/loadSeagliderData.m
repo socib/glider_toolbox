@@ -7,15 +7,15 @@ function [meta, data] = loadSeagliderData(sgdir, logregexp, engregexp, varargin)
 %    [META, DATA] = LOADSEAGLIDERDATA(SGDIR, LOGREGEXP, ENGREGEXP, OPT1, VAL1, ...)
 %
 %  Description:
-%    [META, DATA] = LOADSEAGLIDERDATA(SGDIR, LOGREGEXP, ENGREGEXP) loads data 
-%    metadata from Seaglider files in log text format (.log) and eng data
+%    [META, DATA] = LOADSEAGLIDERDATA(SGDIR, LOGREGEXP, ENGREGEXP) loads data
+%    and metadata from Seaglider files in log text format (.log) and eng data
 %    format (.eng) contained in directory named by string SGDIR and whose name 
 %    matches regular expression in string LOGREGEXP or string ENGREGEXP. 
 %    META and DATA contain loaded metadata and data in the format returned by 
 %    SGLOGENGMERGE.
 %
 %    [META, DATA] = LOADSEAGLIDERDATA(SGDIR, LOGREGEXP, ENGREGEXP, OPTIONS) and
-%    [META, DATA] = LOADSEAGLIDERDATA(SGDIR, LOGREGEXP, ENGREGEXP, OPT1, VAL1, ...) 
+%    [META, DATA] = LOADSEAGLIDERDATA(SGDIR, LOGREGEXP, ENGREGEXP, OPT1, VAL1, ...)
 %    accept the following options, given in key-value pairs OPT1, VAL1...
 %    or in a struct OPTIONS with field names as option keys and field values
 %    as option values, allowing to restrict the time range or the set of 
@@ -83,7 +83,7 @@ function [meta, data] = loadSeagliderData(sgdir, logregexp, engregexp, varargin)
 %      loadSeagliderData(sgdir, logregexp, engregexp, ...
 %                        'columns', columns_of_interest, ...
 %                        'params', params_of_interest, 
-%                        'period', period_of_interset, ...
+%                        'period', period_of_interest, ...
 %                        'format', 'merged');
 %
 %  See also:
@@ -98,7 +98,7 @@ function [meta, data] = loadSeagliderData(sgdir, logregexp, engregexp, varargin)
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -179,11 +179,10 @@ function [meta, data] = loadSeagliderData(sgdir, logregexp, engregexp, varargin)
   data_log = cell(size(log_names));
   for log_idx = 1:numel(log_names)
     try
-     log_files{log_idx} = ...
-       fullfile(sgdir, log_names{log_idx});
-     [meta_log{log_idx}, data_log{log_idx}] = ...
-       sglog2mat(log_files{log_idx}, 'params', options.params);
-     log_success(log_idx) = true;
+      log_files{log_idx} = fullfile(sgdir, log_names{log_idx});
+      [meta_log{log_idx}, data_log{log_idx}] = ...
+        sglog2mat(log_files{log_idx}, 'params', options.params);
+      log_success(log_idx) = true;
     catch exception
       disp(['Error loading Seaglider log file ' log_files{log_idx} ':']);
       disp(getReport(exception, 'extended'));
@@ -193,8 +192,8 @@ function [meta, data] = loadSeagliderData(sgdir, logregexp, engregexp, varargin)
   data_log = data_log(log_success);
   disp(['Seaglider log files loaded: ' ...
         num2str(numel(data_log)) ' of ' num2str(numel(log_names)) '.']);
-
-
+  
+  
   %% Load eng files.
   disp('Loading Seaglider eng files...');
   eng_files = cell(size(eng_names));
@@ -203,11 +202,10 @@ function [meta, data] = loadSeagliderData(sgdir, logregexp, engregexp, varargin)
   data_eng = cell(size(eng_names));
   for eng_idx = 1:numel(eng_names)
     try
-     eng_files{eng_idx} = ...
-       fullfile(sgdir, eng_names{eng_idx});
-     [meta_eng{eng_idx}, data_eng{eng_idx}] = ...
-       sgeng2mat(eng_files{eng_idx}, 'columns', options.columns);
-     eng_success(eng_idx) = true;
+      eng_files{eng_idx} = fullfile(sgdir, eng_names{eng_idx});
+      [meta_eng{eng_idx}, data_eng{eng_idx}] = ...
+        sgeng2mat(eng_files{eng_idx}, 'columns', options.columns);
+      eng_success(eng_idx) = true;
     catch exception
       disp(['Error loading Seglider eng file ' eng_files{eng_idx} ':']);
       disp(getReport(exception, 'extended'));
@@ -217,14 +215,14 @@ function [meta, data] = loadSeagliderData(sgdir, logregexp, engregexp, varargin)
   data_eng = data_eng(eng_success);
   disp(['Seaglider eng files loaded: ' ...
         num2str(numel(data_eng)) ' of ' num2str(numel(eng_names)) '.']);
-
-
-  %% Combine data from each bay.
+  
+  
+  %% Combine data from log and eng files respectively.
   [meta_log, data_log] = sglogcat(meta_log, data_log, 'period', options.period);
   [meta_eng, data_eng] = sgengcat(meta_eng, data_eng, 'period', options.period);
   
   
-  %% Merge data from both bays.
+  %% Merge data from log and eng files.
   [meta, data] = sglogengmerge(meta_log, data_log, meta_eng, data_eng, ...
                                'format', options.format);
 

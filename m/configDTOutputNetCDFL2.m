@@ -9,10 +9,10 @@ function ncl2_info = configDTOutputNetCDFL2()
 %    describing the structure of the NetCDF file for gridded glider
 %    deployment data in delayed time (see the note about the file generation).
 %    The returned struct should have the following fields:
-%      DIMENSIONS: struct array with fields 'NAME' and 'LENGTH' defining the 
+%      DIMENSIONS: struct array with fields 'NAME' and 'LENGTH' defining the
 %        dimensions for variables in the file.
 %        A variable may have dimensions not listed here or with their length
-%        left undefined (empty field value), and they are inferred from the 
+%        left undefined (empty field value), and they are inferred from the
 %        data during the generation of the file. However, it is useful to preset
 %        the length of a dimension for record or string size dimensions.
 %      ATTRIBUTES: struct array with fields 'NAME' and 'VALUE' defining global
@@ -49,7 +49,7 @@ function ncl2_info = configDTOutputNetCDFL2()
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -70,7 +70,7 @@ function ncl2_info = configDTOutputNetCDFL2()
 
   %% Define variable information.
   % To define the variable attributes easily and readably, add the corresponding
-  % variable field to the struct defined below, with its attributes defined in 
+  % variable field to the struct defined below, with its attributes defined in
   % a cell array (attribute name in first column and attribute value in second).
   % This cell array will be converted at the end of the function to the proper
   % representation needed by SAVENC.
@@ -112,6 +112,8 @@ function ncl2_info = configDTOutputNetCDFL2()
     'coordinates'   'time'
     '_FillValue'    default_fill_value
     'sources'          []
+    'position_good'    []
+    'position_bad'     []
     'conversion'       []
     'filling'          []
     'grid_sources'     []
@@ -126,6 +128,8 @@ function ncl2_info = configDTOutputNetCDFL2()
     'coordinates'   'time'
     '_FillValue'    default_fill_value
     'sources'          []
+    'position_good'    []
+    'position_bad'     []
     'conversion'       []
     'filling'          []
     'grid_sources'     []
@@ -179,9 +183,12 @@ function ncl2_info = configDTOutputNetCDFL2()
     '_FillValue'    default_fill_value
     'sources'          []
     'method'           []
-    'min_range'        []
-    'join_equal'       []
-    'source_filling'   []
+    'length'           []
+    'period'           []
+    'inversion'        []
+    'interrupt'        []
+    'stall'            []
+    'shake'            []
     'grid_sources'     []
     'grid_coordinates' []
     'grid_method'      [] };
@@ -223,7 +230,7 @@ function ncl2_info = configDTOutputNetCDFL2()
   var_attr_list.pressure = {
     'long_name'     'water pressure'
     'standard_name' 'pressure'
-    'units'         'decibar'
+    'units'         'dbar'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'                []
@@ -333,7 +340,7 @@ function ncl2_info = configDTOutputNetCDFL2()
   var_attr_list.density = {
     'long_name'     'water density using salinity from raw temperature and raw conductivity'
     'standard_name' 'sea_water_density'
-    'units'         'Kg m-3'
+    'units'         'kg m-3'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
@@ -345,7 +352,7 @@ function ncl2_info = configDTOutputNetCDFL2()
   var_attr_list.density_corrected_thermal = {
     'long_name'     'water density using salinity from raw conductivity and temperature with thermal lag corrected'
     'standard_name' 'sea_water_density'
-    'units'         'Kg m-3'
+    'units'         'kg m-3'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
@@ -357,7 +364,7 @@ function ncl2_info = configDTOutputNetCDFL2()
   var_attr_list.density_corrected_sensor = {
     'long_name'     'water density using salinity from conductivity and temperature with sensor lag corrected'
     'standard_name' 'sea_water_density'
-    'units'         'Kg m-3'
+    'units'         'kg m-3'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
@@ -369,7 +376,7 @@ function ncl2_info = configDTOutputNetCDFL2()
   var_attr_list.density_corrected_sensor_thermal = {
     'long_name'     'water density using salinity from conductivity and temperature with sensor lag corrected and thermal lag corrected'
     'standard_name' 'sea_water_density'
-    'units'         'Kg m-3'
+    'units'         'kg m-3'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
@@ -392,7 +399,7 @@ function ncl2_info = configDTOutputNetCDFL2()
   var_attr_list.potential_density = {
     'long_name'     'water potential density'
     'standard_name' 'sea_water_potential_density'
-    'units'         'Kg m-3'
+    'units'         'kg m-3'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
@@ -403,7 +410,7 @@ function ncl2_info = configDTOutputNetCDFL2()
   var_attr_list.sound_velocity = {
     'long_name'     'sound velocity'
     'standard_name' 'sea_water_sound_velocity'
-    'units'         'Kg m-3'
+    'units'         'm s-1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
@@ -412,8 +419,8 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_method'      [] };
 
   var_attr_list.backscatter_470 = {
-    'long_name'     'blue backscatter'
-    'standard_name' 'blue_backscatter'
+    'long_name'     'blue backscattering'
+    'standard_name' 'blue_backscattering'
     'units'         '1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
@@ -423,8 +430,8 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_method'      [] };
 
   var_attr_list.backscatter_532 = {
-    'long_name'     'green backscatter'
-    'standard_name' 'green_backscatter'
+    'long_name'     'green backscattering'
+    'standard_name' 'green_backscattering'
     'units'         '1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
@@ -434,8 +441,8 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_method'      [] };
 
   var_attr_list.backscatter_660 = {
-    'long_name'     'red backscatter'
-    'standard_name' 'red_backscatter'
+    'long_name'     'red backscattering'
+    'standard_name' 'red_backscattering'
     'units'         '1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
@@ -444,9 +451,20 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_coordinates' []
     'grid_method'      [] };
 
+    var_attr_list.backscatter_700 = {
+    'long_name'     '700 nm wavelength backscatter'
+    'standard_name' '700nm_backscatter'
+    'units'         '1'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value
+    'sources'          [] 
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
   var_attr_list.backscatter = {
-    'long_name'     'backscatter'
-    'standard_name' 'backscatter'
+    'long_name'     'backscattering'
+    'standard_name' 'backscattering'
     'units'         '1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
@@ -484,7 +502,7 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_method'            [] };
 
   var_attr_list.cdom = {
-    'long_name'     'cdom'
+    'long_name'     'CDOM'
     'standard_name' 'concentration_of_coloured_dissolved_organic_matter'
     'units'         'ppb'
     'coordinates'   'time depth latitude longitude'
@@ -534,6 +552,20 @@ function ncl2_info = configDTOutputNetCDFL2()
     'conversion'             []
     'calibration'            []
     'calibration_parameters' []
+    'grid_sources'           []
+    'grid_coordinates'       []
+    'grid_method'            [] };
+
+  var_attr_list.oxygen_frequency = {
+    'long_name'     'oxygen frequency'
+    'standard_name' 'frequency_output_of_sensor_for_oxygen_in_sea_water'
+    'units'         'Hz'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value
+    'sources'                []
+    'conversion'             []
+    'calibration'            []
+    'calibration_parameters' [] 
     'grid_sources'           []
     'grid_coordinates'       []
     'grid_method'            [] };
@@ -595,11 +627,11 @@ function ncl2_info = configDTOutputNetCDFL2()
     'grid_sources'     []
     'grid_coordinates' []
     'grid_method'      [] };
-  
+
   var_attr_list.water_velocity_eastward = {
     'long_name'     'mean eastward water velocity in segment'
     'standard_name' 'eastward_water_velocity'
-    'units'         'm s-1'  
+    'units'         'm s-1'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
@@ -611,7 +643,130 @@ function ncl2_info = configDTOutputNetCDFL2()
   var_attr_list.water_velocity_northward = {
     'long_name'     'mean northward water velocity in segment'
     'standard_name' 'northward_water_velocity'
-    'units'         'm s-1'  
+    'units'         'm s-1'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value
+    'sources'          []
+    'conversion'       []
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
+  var_attr_list.fluorescence_270_340 = {
+    'long_name'     'Minifluo-UV1 fluorescence Ex./Em. = 270/340nm'
+    'standard_name' 'fluorescence_excitation_270nm_emission_340nm'
+    'units'         'counts'
+    'coordinates'   'time depth latitude longitude'
+    'comment1'      'Tryptophan-like or Naphtalene-like measurements'
+    'comment2'      '270nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value
+    'sources'          []
+    'conversion'       []
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
+  var_attr_list.fluorescence_255_360 = {
+    'long_name'     'Minifluo-UV1 fluorescence Ex./Em. = 255/360nm'
+    'standard_name' 'fluorescence_excitation_255nm_emission_360nm'
+    'units'         'counts'
+    'coordinates'   'time depth latitude longitude'
+    'comment1'      'Phenanthren-like measurements or water-soluble fraction of petroleum'
+    'comment2'      '255nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value
+    'sources'          []
+    'conversion'       []
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
+  var_attr_list.fluorescence_monitoring_270_340 = {
+    'long_name'     'Minifluo-UV1 monitoring channel of the 270nm LED'
+    'standard_name' 'fluorescence_monitoring_270_340nm'
+    'units'         'counts'
+    'coordinates'   'time depth latitude longitude'
+    'comment1'      'Measures variations in LED excitation wavelength'
+    'comment2'      '270nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value
+    'sources'          []
+    'conversion'       []
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
+  var_attr_list.fluorescence_monitoring_255_360 = {
+    'long_name'     'Minifluo-UV1 monitoring channel of the 255nm LED'
+    'standard_name' 'fluorescence_monitoring_255_360nm'
+    'units'         'counts'
+    'coordinates'   'time depth latitude longitude'
+    'comment1'      'Measures variations in LED excitation wavelength'
+    'comment2'      '255nm is the nominal wavelength of the LED'
+    'sources'          []
+    'conversion'       []
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
+  var_attr_list.fluorescence_260_315 = {
+    'long_name'     'Minifluo-UV2 fluorescence Ex./Em. = 260/315nm'
+    'standard_name' 'fluorescence_excitation_260nm_emission_315nm'
+    'units'         'counts'
+    'coordinates'   'time depth latitude longitude'
+    'comment1'      'Fluorene-like measurements'
+    'comment2'      '260nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value
+    'sources'          []
+    'conversion'       []
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
+  var_attr_list.fluorescence_270_376 = {
+    'long_name'     'Minifluo-UV2 fluorescence Ex./Em. = 270/376nm'
+    'standard_name' 'fluorescence_excitation_270nm_emission_376nm'
+    'units'         'counts'
+    'coordinates'   'time depth latitude longitude'
+    'comment1'      'Pyrene-like measurements'
+    'comment2'      '270nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value
+    'sources'          []
+    'conversion'       []
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
+  var_attr_list.fluorescence_monitoring_260_315 = {
+    'long_name'     'Minifluo-UV2 monitoring channel of the 260nm LED'
+    'standard_name' 'fluorescence_monitoring_260_315nm'
+    'units'         'counts'
+    'coordinates'   'time depth latitude longitude'
+    'comment1'      'Measures variations in LED excitation wavelength'
+    'comment2'      '260nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value
+    'sources'          []
+    'conversion'       []
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
+  var_attr_list.fluorescence_monitoring_270_376 = {
+    'long_name'     'Minifluo-UV2 monitoring channel of the 270nm LED'
+    'standard_name' 'fluorescence_monitoring_270_376nm'
+    'units'         'counts'
+    'coordinates'   'time depth latitude longitude'
+    'comment1'      'Measures variations in LED excitation wavelength'
+    'comment2'      '270nm is the nominal wavelength of the LED'
+    '_FillValue'    default_fill_value
+    'sources'          []
+    'conversion'       []
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
+  var_attr_list.methane_concentration = {
+    'long_name'     'Methane concentration (scaled)'
+    'standard_name' 'methane_concentration'
+    'units'         'mg m-3'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
@@ -641,7 +796,7 @@ function ncl2_info = configDTOutputNetCDFL2()
     'creator_url'                  '' % deployment_author_url
     'data_center'                  '' % deployment_data_center
     'data_center_email'            '' % deployment_data_center_email
-    'data_mode'                    delayed time'
+    'data_mode'                    'delayed time'
     'date_modified'                'undefined'
     'featureType'                  'trajectoryProfile'
     'geospatial_lat_max'           'undefined'

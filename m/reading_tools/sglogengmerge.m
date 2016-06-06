@@ -99,12 +99,12 @@ function [meta, data] = sglogengmerge(meta_log, data_log, meta_eng, data_eng, va
 %    Depth in 'GC' log lines and in eng columns is not merged because they come
 %    in different units (m and cm). Also, there seems to be some time mismatch.
 %
-%    Output in 'array' format when there are both textual and numeric columns is
+%    Output in 'array' format when there are both textual and numeric columns
 %    might require a large amount of memory because of the storage in a cell
 %    array.
 %
 %  Examples:
-%    [meta, data] = sglogengmerge(meta_log, data_log, meta_nav, data_nav)
+%    [meta, data] = sglogengmerge(meta_log, data_log, meta_eng, data_eng)
 %
 %  See also:
 %    SGLOG2MAT
@@ -114,7 +114,7 @@ function [meta, data] = sglogengmerge(meta_log, data_log, meta_eng, data_eng, va
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -168,7 +168,7 @@ function [meta, data] = sglogengmerge(meta_log, data_log, meta_eng, data_eng, va
             'Invalid option: %s.', opt);
     end
   end
-
+  
   
   %% Set option flags and values.
   output_format = options.format;
@@ -385,7 +385,7 @@ function [meta, data] = sglogengmerge(meta_log, data_log, meta_eng, data_eng, va
   meta.params = param_list;
   meta.columns = column_list;
   
- 
+  
   %% Convert output data to struct format if needed.
   switch output_format
     case 'array'

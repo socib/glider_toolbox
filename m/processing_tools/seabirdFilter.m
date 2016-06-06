@@ -51,7 +51,7 @@ function outputSignal = seabirdFilter(inputSignal, timeConstant, samplingPeriod)
 % Authors:
 %   Bartolome Garau  <tomeu.garau@socib.es>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 % 
@@ -68,36 +68,34 @@ function outputSignal = seabirdFilter(inputSignal, timeConstant, samplingPeriod)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>."
 
-%------------- BEGIN CODE --------------
+  % Store original size of input signal and
+  % make sure it is a column vector (later will be flipped ud)
+  origSize    = size(inputSignal);
+  inputSignal = inputSignal(:);
 
-    % Store original size of input signal and
-    % make sure it is a column vector (later will be flipped ud)
-    origSize    = size(inputSignal);
-    inputSignal = inputSignal(:);
+  % Precompute some filter constants
+  magicNumber = 2 * timeConstant / samplingPeriod;
+  A = 1 / ( 1 + magicNumber);
+  B = (1 - magicNumber) * A;
 
-    % Precompute some filter constants
-    magicNumber = 2 * timeConstant / samplingPeriod;
-    A = 1 / ( 1 + magicNumber);
-    B = (1 - magicNumber) * A;
+  % Pass the filter twice, first forward and then backward
+  % to produce zero phase and thus avoid delays
+  theSignal = inputSignal;
+  for filterPass = 1:2
+    outputSignal = theSignal;
+    % Loop through the scans, recursive filter
+    for scanIdx = 2:length(theSignal)
+        outputSignal(scanIdx) = ...
+            A .* (theSignal(scanIdx) + theSignal(scanIdx - 1)) -...
+            B .* outputSignal(scanIdx - 1);
+    end
+    % Make the signal to be filtered the output
+    % from the first filter pass, but turned upside down
+    theSignal = flipud(outputSignal);
+  end
 
-    % Pass the filter twice, first forward and then backward
-    % to produce zero phase and thus avoid delays
-    theSignal = inputSignal;
-    for filterPass = 1:2
-        outputSignal = theSignal;
-        % Loop through the scans, recursive filter
-        for scanIdx = 2:length(theSignal)
-            outputSignal(scanIdx) = ...
-                A .* (theSignal(scanIdx) + theSignal(scanIdx - 1)) -...
-                B .* outputSignal(scanIdx - 1);
-        end;
-        % Make the signal to be filtered the output
-        % from the first filter pass, but turned upside down
-        theSignal = flipud(outputSignal);
-    end;
-
-    % The result from the second filter pass is in theSignal,
-    % so reshape it to be same size as input signal
-    outputSignal = reshape(theSignal, origSize);
+  % The result from the second filter pass is in theSignal,
+  % so reshape it to be same size as input signal
+  outputSignal = reshape(theSignal, origSize);
 
 end

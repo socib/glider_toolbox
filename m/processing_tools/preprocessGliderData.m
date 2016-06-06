@@ -46,12 +46,12 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %        Unit conversions and manufacturer calibrations may be applied,
 %        if needed.
 %
-%      DATA_RAW should be a struct in the format returned by LOADSLOCUMDATA or
-%      LOADSEAGLIDERDATA, where each field is a vector sequence from the sensor 
-%      or variable with the same name. META_RAW should be the struct with the
-%      metadata required for the preprocessing. Currently it is only used for
-%      the following actions:
-%        - Seaglider log parameter alignment (see option SG_DIVE_PARAMS below).
+%    DATA_RAW should be a struct in the format returned by LOADSLOCUMDATA or
+%    LOADSEAGLIDERDATA, where each field is a vector sequence from the sensor
+%    or variable with the same name. META_RAW should be the struct with the
+%    metadata required for the preprocessing. Currently it is only used for
+%    the following actions:
+%      - Seaglider log parameter alignment (see option SG_DIVE_PARAMS below).
 %
 %    Preprocessed data is returned in struct DATA_PRE, where each field is a
 %    sequence of readings selected and preprocessed according to given options
@@ -83,9 +83,9 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %          LONGITUDE: longitude sequence name.
 %          LATITUDE: latitude sequence name.
 %        It may have the following optional fields (empty or missing):
-%          STATUS: position status sequence name.
-%          STATUS_GOOD: position status good values or filter.
-%          STATUS_BAD:  position status bad values or filter.
+%          POSITION_STATUS: position status sequence name.
+%          POSITION_GOOD: position status good values or filter.
+%          POSITION_BAD:  position status bad values or filter.
 %          CONVERSION: position coordinate conversion.
 %            Handle or name of the position coordinate conversion function.
 %            If present and not empty, the selected longitude and latitude 
@@ -184,9 +184,10 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %                 'pressure_conversion', {@bar2dbar        @bar2dbar})
 %      OXYGEN_LIST: oxygen sensor set choices.
 %        Struct array selecting the oxygen sensor sets, in order of preference.
-%        It should have the following fields:
+%        It should have any of the following fields:
 %          OXYGEN_CONCENTRATION: concentration of oxygen sequence name.
 %          OXYGEN_SATURATION: saturation of oxygen sequence name.
+%          OXYGEN_FREQUENCY: frequency of oxygen sensor sequence name.
 %        It may have the following optional fields (empty or missing):
 %          TEMPERATURE: oxygen temperature sequence name.
 %          TIME: oxygen timestamp sequence name.
@@ -196,22 +197,26 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %                              'time',                 {'sci_oxy3835_timestamp'})
 %      OPTICS_LIST: fluorescence and scattering sensor set choices.
 %        Struct array selecting the fluorescence and scattering sensor sets,
-%        in  order of preference. It may have the following optional fields 
-%        (empty or missing):
+%        in  order of preference. It should have any of the following fields:
 %          CHLOROPHYLL: chlorophyl sequence name.
 %          TURBIDITY: turbidity sequence name.
 %          CDOM: CDOM sequence name.
 %          SCATTER_650: 650 nm wavelength scattering sequence name.
+%          BACKSCATTER_700: 700 nm wavelength backscattering sequence name.
+%        It may have the following optional fields (empty or missing):
+%          TEMPERATURE: optic sensor temperature sequence name.
 %          TIME: optic sensor timestamp sequence name.
 %          CALIBRATION: fluorescence and scattering factory calibration.
 %            Handle or name of the optic sensor factory calibration function.
 %            If present and not empty, the selected raw sequences are passed to
 %            this function to get the calibrated optic measurements.
-%        Default value: struct('chlorophyll', {'sci_flntu_chlor_units'}, ...
-%                              'turbidity',   {'sci_flntu_turb_units'}, ...
-%                              'cdom',        {[]}, ...
-%                              'scatter_650', {[]}, ...
-%                              'time',        {'sci_flntu_timestamp'})
+%        Default value: struct('chlorophyll',     {'sci_flntu_chlor_units'}, ...
+%                              'turbidity',       {'sci_flntu_turb_units'}, ...
+%                              'cdom',            {[]}, ...
+%                              'scatter_650',     {[]}, ...
+%                              'backscatter_700', {[]}, ...
+%                              'temperature',     {'sci_flntu_temp'}, ...
+%                              'time',            {'sci_flntu_timestamp'})
 %      EXTRA_SENSOR_LIST: other sensor set choices.
 %        Struct selecting other sensor sets of interest, where each field 
 %        represents a sensor of interest. The field name is an arbitrary sensor 
@@ -221,6 +226,11 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %        battery_nominal_capacity and battery_total_consumption) and field 
 %        values are the original sequence name choices (fields in struct 
 %        DATA_RAW, e.g. f_coulomb_battery_capacity and m_coulomb_amphr_total).
+%        Optionally, each sensor choice may include a special field named
+%        CALIBRATION with the handle or name of the extra sensor factory
+%        calibration function. If present and not empty, the selected raw
+%        sequences are passed to this function to get the calibrated
+%        extra sensor measurements.
 %        Default value: struct()
 %      CALIBRATION_PARAMETER_LIST: calibration parameters for each variable.
 %        Struct with the calibration parameters of each uncalibrated variable.
@@ -239,12 +249,12 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %    BAR2DBAR
 %    SGDEPTH2PRES
 %    CALIBRATESBECT
-%    CALIBRATEWLECBBFL2
+%    CALIBRATEWLECOBBFL2
 %    
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -305,11 +315,13 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
            'temperature',          {'sci_oxy3835_temp'}, ...
            'time',                 {'sci_oxy3835_timestamp'});
   options.optics_list = ...
-    struct('chlorophyll', {'sci_flntu_chlor_units'}, ...
-           'turbidity',   {'sci_flntu_turb_units'}, ...
-           'cdom',        {[]}, ...
-           'scatter_650', {[]}, ...
-           'time',        {'sci_flntu_timestamp'});
+    struct('chlorophyll',     {'sci_flntu_chlor_units'}, ...
+           'turbidity',       {'sci_flntu_turb_units'}, ...
+           'cdom',            {[]}, ...
+           'scatter_650',     {[]}, ...
+           'backscatter_700', {[]}, ...
+           'temperature',     {'sci_flntu_temp'}, ...
+           'time',            {'sci_flntu_timestamp'});
   options.extra_sensor_list = ...
     struct();
   options.calibration_parameter_list = ...
@@ -389,7 +401,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         meta_pre.time.conversion = func2str(time_conversion_func);
         fprintf('  conversion: %s\n', func2str(time_conversion_func));
       end
-      break;
+      break
     end
   end
   if ~isfield(data_pre, 'time')
@@ -436,7 +448,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
     if isfield(position_choice_list, 'time_conversion')
       position_time_conversion_func = position_choice.time_conversion;
     end
-    if all(ismember({lat_field lon_field}, field_list)) ...
+    if all(ismember({lon_field lat_field}, field_list)) ...
         && ~all(isnan(data_raw.(lon_field))) ...
         && ~all(isnan(data_raw.(lat_field)))
       data_pre.longitude = data_raw.(lon_field);
@@ -495,8 +507,24 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
             fprintf('  position bad   : %s\n', num2str(position_bad));
           end
         end
-        data_pre.latitude(position_invalid) = nan;
         data_pre.longitude(position_invalid) = nan;
+        data_pre.latitude(position_invalid) = nan;
+        meta_pre.longitude.sources = ...
+          {lon_field lat_field position_status_field}';
+        meta_pre.latitude.sources = ...
+          {lon_field lat_field position_status_field}';
+        if isfield(meta_pre.position_status, 'position_good')
+          meta_pre.longitude.position_good = ...
+            meta_pre.position_status.position_good;
+          meta_pre.latitude.position_good = ...
+            meta_pre.position_status.position_good;
+        end
+        if isfield(meta_pre.position_status, 'position_bad')
+          meta_pre.longitude.position_bad = ...
+            meta_pre.position_status.position_bad;
+          meta_pre.latitude.position_bad = ...
+            meta_pre.position_status.position_bad;
+        end
       end
       if ~isempty(position_conversion_func)
         if ischar(position_conversion_func)
@@ -504,9 +532,11 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         end
         [data_pre.longitude, data_pre.latitude] = ...
           position_conversion_func(data_pre.longitude, data_pre.latitude);
-        meta_pre.longitude.sources = {lon_field lat_field}';
+        meta_pre.longitude.sources = ...
+          union(cellstr(meta_pre.longitude.sources), {lon_field lat_field}');
         meta_pre.longitude.conversion = func2str(position_conversion_func);
-        meta_pre.latitude.sources = {lon_field lat_field}';
+        meta_pre.latitude.sources = ...
+          union(cellstr(meta_pre.latitude.sources), {lon_field lat_field}');
         meta_pre.latitude.conversion = func2str(position_conversion_func);
         fprintf('  conversion : %s\n', func2str(position_conversion_func));
       end
@@ -537,7 +567,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         fprintf('  time conversion : %s\n', ...
                 func2str(position_time_conversion_func));
       end
-      break;
+      break
     end
   end
   if ~all(isfield(data_pre, {'longitude' 'latitude'}))
@@ -571,7 +601,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         meta_pre.depth.conversion = func2str(depth_conversion_func);
         fprintf('  conversion : %s\n', func2str(depth_conversion_func));
       end
-      break;
+      break
     end
   end
   
@@ -608,7 +638,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         meta_pre.pitch.conversion = func2str(attitude_conversion);
         fprintf('  conversion : %s\n', func2str(attitude_conversion));
       end
-      break;
+      break
     end
   end
   
@@ -637,7 +667,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         meta_pre.heading.conversion = func2str(heading_conversion_func);
         fprintf('  conversion : %s\n', func2str(heading_conversion_func));
       end
-      break;
+      break
     end
   end
   
@@ -677,7 +707,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         meta_pre.waypoint_latitude.conversion = func2str(wpt_conversion_func);
         fprintf('  conversion : %s\n', func2str(wpt_conversion_func));
       end
-      break;
+      break
     end
   end
   
@@ -720,7 +750,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
           func2str(wat_vel_conversion_func);
         fprintf('  conversion : %s\n', func2str(wat_vel_conversion_func));
       end
-      break;
+      break
     end
   end
   
@@ -832,7 +862,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
                   cond_calib_param_values(cond_calib_param_idx));
         end
       end
-      break;
+      break
     end
   end
   
@@ -841,10 +871,16 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
   % Find preferred valid oxygen sensor availbale in list of sensor fields, 
   % if any.
   oxygen_choice_list = options.oxygen_list;
+  oxygen_variables = ...
+    {'oxygen_concentration' 'oxygen_saturation' 'oxygen_frequency'};
   for oxygen_choice_idx = 1:numel(oxygen_choice_list)
     oxygen_choice = oxygen_choice_list(oxygen_choice_idx);
-    oxy_con_field = oxygen_choice.oxygen_concentration;
-    oxy_sat_field = oxygen_choice.oxygen_saturation;
+    oxygen_variables_select = ...
+      cellfun(@(v)(isfield(oxygen_choice_list, v) && ~isempty(oxygen_choice.(v))), ...
+              oxygen_variables);
+    oxygen_var_list = oxygen_variables(oxygen_variables_select);
+    oxygen_field_list = cellfun(@(v)(oxygen_choice.(v)), ...
+                                oxygen_var_list, 'UniformOutput', false);
     time_oxygen_field = [];
     temperature_oxygen_field = [];
     if isfield(oxygen_choice_list, 'time')
@@ -853,16 +889,18 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
     if isfield(oxygen_choice_list, 'temperature')
       temperature_oxygen_field = oxygen_choice.temperature;
     end
-    if all(ismember({oxy_con_field oxy_sat_field}, field_list)) ...
-        && any(data_raw.(oxy_con_field) > 0) ...
-        && any(data_raw.(oxy_sat_field) > 0)
-      data_pre.oxygen_concentration = data_raw.(oxy_con_field);
-      data_pre.oxygen_saturation = data_raw.(oxy_sat_field);
-      meta_pre.oxygen_concentration.sources = oxy_con_field;
-      meta_pre.oxygen_saturation.sources = oxy_sat_field;
+    oxygen_available = ...
+      all(ismember(oxygen_field_list, field_list)) && ...
+      all(cellfun(@(f)(any(data_raw.(f)) > 0), oxygen_field_list));
+    if oxygen_available
       fprintf('Selected oxygen sensor %d:\n', oxygen_choice_idx);
-      fprintf('  oxygen concentration: %s\n', oxy_con_field);
-      fprintf('  oxygen saturation   : %s\n', oxy_sat_field);
+      for oxygen_var_idx = 1:numel(oxygen_var_list);
+        oxygen_var = oxygen_var_list{oxygen_var_idx};
+        oxygen_field = oxygen_field_list{oxygen_var_idx};
+        data_pre.(oxygen_var) = data_raw.(oxygen_field);
+        meta_pre.(oxygen_var).sources = oxygen_field;
+        fprintf('  %-20s: %s\n', oxygen_var, oxygen_field);
+      end
       if ~isempty(time_oxygen_field) ...
           && ismember(time_oxygen_field, field_list) ...
           && any(data_raw.(time_oxygen_field) > 0)
@@ -877,7 +915,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
         meta_pre.temperature_oxygen.sources = temperature_oxygen_field;
         fprintf('  temperature oxygen  : %s\n', temperature_oxygen_field);
       end
-      break;
+      break
     end
   end
   
@@ -886,7 +924,8 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
   % Find preferred valid fluorescence and turbidity sensor available in list of 
   % sensor fields, if any.
   optics_choice_list = options.optics_list;
-  optics_variables = {'chlorophyll' 'turbidity' 'cdom' 'scatter_650'};
+  optics_variables = ...
+    {'chlorophyll' 'turbidity' 'cdom' 'scatter_650' 'backscatter_700'};
   for optics_choice_idx = 1:numel(optics_choice_list)
     optics_choice = optics_choice_list(optics_choice_idx);
     optics_variables_select = ...
@@ -896,9 +935,13 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
     optics_field_list = cellfun(@(v)(optics_choice.(v)), ...
                                 optics_var_list, 'UniformOutput', false);
     time_optics_field = [];
+    temperature_optics_field = [];
     optics_calibration_func = [];
     if isfield(optics_choice_list, 'time')
       time_optics_field = optics_choice.time;
+    end
+    if isfield(optics_choice_list, 'temperature')
+      temperature_optics_field = optics_choice.temperature;
     end
     if isfield(optics_choice_list, 'calibration')
       optics_calibration_func = optics_choice.calibration;
@@ -920,7 +963,14 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
           && any(data_raw.(time_optics_field) > 0)
         data_pre.time_optics = data_raw.(time_optics_field);
         meta_pre.time_optics.sources = time_optics_field;
-        fprintf('  time_optics  : %s\n', time_optics_field);
+        fprintf('  time optics         : %s\n', time_optics_field);
+      end
+      if ~isempty(temperature_optics_field) ...
+          && ismember(temperature_optics_field, field_list) ...
+          && any(data_raw.(temperature_optics_field) > 0)
+        data_pre.temperature_optics = data_raw.(temperature_optics_field);
+        meta_pre.temperature_optics.sources = temperature_optics_field;
+        fprintf('  temperature optics  : %s\n', temperature_optics_field);
       end
       if ~isempty(optics_calibration_func)
         if ischar(optics_calibration_func)
@@ -965,7 +1015,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
           end
         end
       end
-      break;
+      break
     end
   end
   
@@ -1070,7 +1120,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
               meta_pre.(extra_sensor_var).calibration_parameter_names = ...
                 extra_sensor_var_calib_param_names;
             end
-            for optics_var_calib_param_idx = 1:numel(extra_sensor_var_calib_param_names)
+            for extra_sensor_var_calib_param_idx = 1:numel(extra_sensor_var_calib_param_names)
               fprintf('  %-12s calibration parameter %-8s: %f\n', ...
                       extra_sensor_var, ...
                       extra_sensor_var_calib_param_names{extra_sensor_var_calib_param_idx}, ...

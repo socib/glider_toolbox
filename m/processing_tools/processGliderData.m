@@ -340,7 +340,7 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -690,12 +690,12 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
       if isempty(profiling_time)
         profiling_vars = {data_proc.(profiling_depth)};
         profiling_avail = true;
-        break;
+        break
       elseif profiling_time_avail
         profiling_vars = ...
           {data_proc.(profiling_time) data_proc.(profiling_depth)};
         profiling_avail = true;
-        break;
+        break
       end
     end
   end
@@ -817,9 +817,9 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
         {flow_ctd_time flow_ctd_depth 'profile_index'};
       meta_proc.flow_ctd.pitch_value = options.flow_ctd_pitch_value;
     end
-    meta_proc.method = 'computeCTDFlowSpeed';
-    meta_proc.min_pitch = options.flow_ctd_min_pitch;
-    meta_proc.min_vel = options.flow_ctd_min_velocity;
+    meta_proc.flow_ctd.method = 'computeCTDFlowSpeed';
+    meta_proc.flow_ctd.min_pitch = options.flow_ctd_min_pitch;
+    meta_proc.flow_ctd.min_vel = options.flow_ctd_min_velocity;
   end
  
   
@@ -1152,7 +1152,7 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
       if isfield(data_proc, thermal_lag_time) ...
           && any(data_proc.(thermal_lag_time) > 0)
         thermal_lag_time_avail = true;
-        break;
+        break
       end
     end
     for thermal_lag_depth_idx = 1:numel(thermal_lag_depth_list)

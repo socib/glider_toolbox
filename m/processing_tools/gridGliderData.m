@@ -88,7 +88,7 @@ function [data_grid, meta_grid] = gridGliderData(data_proc, meta_proc, varargin)
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2015
+%  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %
@@ -165,7 +165,7 @@ function [data_grid, meta_grid] = gridGliderData(data_proc, meta_proc, varargin)
       fprintf('Selected profile index coordinate sequence:\n');
       fprintf('  profile: %s\n', profile_sequence);
       profile_available = true;
-      break;
+      break
     end
   end
   % Select time coordinate sequence.
@@ -177,7 +177,7 @@ function [data_grid, meta_grid] = gridGliderData(data_proc, meta_proc, varargin)
       fprintf('Selected time coordinate sequence:\n');
       fprintf('  time: %s\n', time_sequence);
       time_available = true;
-      break;
+      break
     end
   end
   % Select position coordinate sequences.
@@ -192,7 +192,7 @@ function [data_grid, meta_grid] = gridGliderData(data_proc, meta_proc, varargin)
       fprintf('  longitude: %s\n', latitude_sequence);
       fprintf('  latitude : %s\n', longitude_sequence);
       position_available = true;
-      break;
+      break
     end
   end
   % Select depth sequence.
@@ -204,7 +204,7 @@ function [data_grid, meta_grid] = gridGliderData(data_proc, meta_proc, varargin)
       fprintf('Selected depth coordinate sequence:\n');
       fprintf('  depth: %s\n', depth_sequence);
       depth_available = true;
-      break;
+      break
     end
   end
   % Check all required inputs are present.
