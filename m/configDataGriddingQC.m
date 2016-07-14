@@ -105,7 +105,7 @@ gridding_qc_config.validRangeCheck.passingParameters = {
         [{'longitude'}; -6; 37; 4];
         [{'latitude'}; 30; 46; 4];
         [{'temperature'}; {[0; 3; 3; 3; 3; 3]}; {[34; 30; 28; 26; 22; 20]}; 4; {'depth'}; {[0, 20; 20, 50; 50, 75; 75, 150; 150, 300; 300, 1100]}];
-        [{'salinity'}; {[0; 12; 31; 33]}; {[40; 40; 40; 40]}; 4; {'depth'}; {[0, 30; 30, 75; 75, 600; 600, 1100]}]
+        [{'salinity'}; {[36; 36; 36; 36]}; {[40; 40; 40; 40]}; 4; {'depth'}; {[0, 30; 30, 75; 75, 600; 600, 1100]}]
     };
 
 gridding_qc_config.spikeCheck.functionHandle = str2func('spikeCheck');

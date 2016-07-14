@@ -112,7 +112,7 @@ processing_qc_options.validRangeCheck.passingParameters = {
         [{data_processed.waypoint_longitude}; -6; 37; 3];
         [{data_processed.waypoint_latitude}; 30; 46; 3];
         [{data_processed.temperature}; {[0; 3; 3; 3; 3; 3]}; {[34; 30; 28; 26; 22; 20]}; 4; {data_processed.depth}; {[0, 20; 20, 50; 50, 75; 75, 150; 150, 300; 300, 1100]}];
-        [{data_processed.salinity}; {[0; 12; 31; 33]}; {[40; 40; 40; 40]}; 4; {data_processed.depth}; {[0, 30; 30, 75; 75, 600; 600, 1100]}]
+        [{data_processed.salinity}; {[36; 36; 36; 36]}; {[40; 40; 40; 40]}; 4; {data_processed.depth}; {[0, 30; 30, 75; 75, 600; 600, 1100]}]
     };
 
 processing_qc_options.spikeCheck.functionHandle = str2func('spikeCheck');
