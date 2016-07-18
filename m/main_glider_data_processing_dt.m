@@ -309,9 +309,9 @@ for deployment_idx = 1:numel(deployment_list)
   
   %% Configure netCDF variables for QC variables.
   netcdf_l1_options = config.output_netcdf_l1;
-  netcdf_l1_options.variables = addQcToNetcdfVariables(netcdf_l1_options.variables, config.basic_qc_config.applied_QC_LuT);
+  netcdf_l1_options.variables = addQcToNetcdfVariables(netcdf_l1_options.variables);
   netcdf_l2_options = config.output_netcdf_l2;
-  netcdf_l2_options.variables = addQcToNetcdfVariables(netcdf_l2_options.variables, config.basic_qc_config.applied_QC_LuT);
+  netcdf_l2_options.variables = addQcToNetcdfVariables(netcdf_l2_options.variables);
 
 
   %% Start deployment processing logging.
@@ -546,7 +546,7 @@ for deployment_idx = 1:numel(deployment_list)
   if ~isempty(fieldnames(data_preprocessed))
       disp('Reading defined QC methods for preprocessed data...')
       try
-          config.preprocessing_qc_options = configDataPreprocessingQC(data_preprocessed);
+          config.preprocessing_qc_options = configDataPreprocessingQC();
       catch exception
           disp('Error reading QC methods.');
           disp(getReport(exception, 'extended'));
@@ -557,7 +557,7 @@ for deployment_idx = 1:numel(deployment_list)
   if ~isempty(fieldnames(data_preprocessed)) && ~isempty(fieldnames(config.preprocessing_qc_options)) && config.basic_qc_config.preprocessing.performQC
       disp('Perform QC upon preprocessed data...')
       try
-          qc_preprocessed = performQC(data_preprocessed, config.preprocessing_qc_options);
+          qc_preprocessed = performGriddedQC(data_preprocessed, config.preprocessing_qc_options);
           logQC(qc_preprocessed, data_preprocessed, config.basic_qc_config.preprocessing.summaryFileName);
       catch exception
           disp('Error processing QC methods.');
@@ -594,7 +594,7 @@ for deployment_idx = 1:numel(deployment_list)
   if ~isempty(fieldnames(data_processed))
       disp('Reading defined QC methods for processed data...')
       try
-          config.processing_qc_options = configDataProcessingQC(data_processed);
+          config.processing_qc_options = configDataProcessingQC();
       catch exception
           disp('Error reading QC methods.');
           disp(getReport(exception, 'extended'));
@@ -605,20 +605,29 @@ for deployment_idx = 1:numel(deployment_list)
   if ~isempty(fieldnames(data_processed)) && ~isempty(fieldnames(config.processing_qc_options)) && config.basic_qc_config.processing.performQC
       disp('Perform QC upon processed data...')
       try
-          qc_processed = performQC(data_processed, config.processing_qc_options);
+          qc_processed = performGriddedQC(data_processed, config.processing_qc_options);
+          logQC(qc_processed, data_processed, config.basic_qc_config.processing.summaryFileName);
       catch exception
           disp('Error processing QC methods.');
           disp(getReport(exception, 'extended'));
       end
   end
-  
-  
+  %% Plot Suspicous Profiles (experimental useage only).
+  if ~isempty(fieldnames(data_processed)) && ~isempty(fieldnames(qc_processed)) && config.basic_qc_config.processing.plotSuspiciousProfiles
+      disp('Plotting suspicious profiles for all variables...')
+      try
+          plot_suspicious_profiles(qc_processed, data_processed)
+      catch exception
+          disp('Error plotting suspicous profiles.');
+          disp(getReport(exception, 'extended'));
+      end
+  end
+
   %% Generate L1 NetCDF file (processed data), if needed and possible.
   if ~isempty(fieldnames(data_processed)) && ~isempty(netcdf_l1_file)
     disp('Generating NetCDF L1 output...');
-    data_processed_combined = combineDataAndQc(data_processed, qc_processed, config.basic_qc_config.applied_QC_LuT);
+    data_processed_combined = combineDataAndQc(data_processed, qc_processed);
     data_processed_combined = removeVariablesFromStruct(data_processed_combined, config.basic_qc_config.ignore_qc_variables_for_netCDF, 'QC_');
-    data_processed_combined = removeVariablesFromStruct(data_processed_combined, config.basic_qc_config.ignore_qc_variables_for_netCDF, 'QC_ID_');
     try
       outputs.netcdf_l1 = generateOutputNetCDF( ...
         netcdf_l1_file, data_processed_combined, meta_processed, deployment, ...
@@ -698,9 +707,8 @@ for deployment_idx = 1:numel(deployment_list)
   %% Generate L2 (gridded data) netcdf file, if needed and possible.
   if ~isempty(fieldnames(data_gridded)) && ~isempty(netcdf_l2_file)
     disp('Generating NetCDF L2 output...');
-    data_gridded_combined = combineDataAndQc(data_gridded, qc_gridded, config.basic_qc_config.applied_QC_LuT);
+    data_gridded_combined = combineDataAndQc(data_gridded, qc_gridded);
     data_gridded_combined = removeVariablesFromStruct(data_gridded_combined, config.basic_qc_config.ignore_qc_variables_for_netCDF, 'QC_');
-    data_gridded_combined = removeVariablesFromStruct(data_gridded_combined, config.basic_qc_config.ignore_qc_variables_for_netCDF, 'QC_ID_');
     try
       outputs.netcdf_l2 = generateOutputNetCDF( ...
         netcdf_l2_file, data_gridded_combined, meta_gridded, deployment, ...

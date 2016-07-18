@@ -64,15 +64,15 @@ for i=1:numel(dataNames)
     fprintf(fileID, '%d NaN (QC flag 9) values\r\n', tempLen);
     tempLen = length(find(qc_data.(dataNames{i}).qcFlaggedOutput>2 & qc_data.(dataNames{i}).qcFlaggedOutput<9));
     fprintf(fileID, '%d (probably) Bad (QC flag (3), 4, 6) values\r\n', tempLen);
-    tempCell = qc_data.(dataNames{i}).appliedQcIdentifiers;
-    tempCell(any(cellfun(@isempty,tempCell),2),:) = [];
-    appliedQcNames = unique(tempCell);
-    fprintf(fileID, 'Detailed list of applied QC:\r\n');
-    for j=1:numel(appliedQcNames)
-        idx = find(strcmp(appliedQcNames{j}, tempCell));
-        lenIdx = length(idx);
-        fprintf(fileID, '%d entries marked with %s\r\n', lenIdx, appliedQcNames{j});
-    end
+     tempCell = qc_data.(dataNames{i}).appliedQcIdentifiers;
+     tempCell(any(cellfun(@isempty,tempCell),2),:) = [];
+     appliedQcNames = unique(tempCell);
+     fprintf(fileID, 'Detailed list of applied QC:\r\n');
+     for j=1:numel(appliedQcNames)
+         idx = find(strcmp(appliedQcNames{j}, tempCell));
+         lenIdx = length(idx);
+         fprintf(fileID, '%d entries marked with %s\r\n', lenIdx, appliedQcNames{j});
+     end
     fprintf(fileID, '\r\n');
 end
 fclose(fileID);

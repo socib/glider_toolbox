@@ -1,8 +1,8 @@
-function combined_struct = combineDataAndQc(data_struct, qc_struct, applied_qc_LuT)
+function combined_struct = combineDataAndQc(data_struct, qc_struct)
 %COMBINEDATAANDQC  Combines the data struct with QC outputs.
 %
 %  Syntax:
-%    COMBINED_STRUCT = COMBINEDATAANDQC(DATA_STRUCT, QC_STRUCT, APPLIED_QC_LUT)
+%    COMBINED_STRUCT = COMBINEDATAANDQC(DATA_STRUCT, QC_STRUCT)
 %
 %  Description:
 %    Returns one structure consisting the data and QC flagged output, as
@@ -19,8 +19,7 @@ function combined_struct = combineDataAndQc(data_struct, qc_struct, applied_qc_L
 %    applied_qc_LuT = config.applied_QC_LuT;
 %    test_struct.time = [1 2 3 4 5];
 %    test_qc_struct.time.qcFlaggedOutput = [1 1 1 4 1];
-%    test_qc_struct.time.appliedQcIdentifiers = ['' '' '' 'impossibleDateCheck' ''];
-%    combineDataAndQc(test_struct, test_qc_struct, applied_qc_LuT)
+%    combineDataAndQc(test_struct, test_qc_struct)
 %
 %  See also:
 %    ADDQCTONETCDFVARIABLES
@@ -48,10 +47,9 @@ function combined_struct = combineDataAndQc(data_struct, qc_struct, applied_qc_L
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 %% Check inputs.
-narginchk(3,3)
+narginchk(2,2)
 validateattributes(data_struct, {'struct'}, {'nonempty'})
 validateattributes(qc_struct, {'struct'}, {'nonempty'})
-validateattributes(applied_qc_LuT, {'struct'}, {'nonempty'})
 
 %% Start assembling.
 names_data = fieldnames(data_struct);
@@ -62,28 +60,6 @@ for i=1:numel(names_data)
     if isfield(qc_struct, (names_data{i}))
         new_name = strcat('QC_', names_data{i});
         combined_struct.(new_name) = qc_struct.(names_data{i}).qcFlaggedOutput;
-        new_name = strcat('QC_ID_', names_data{i});
-
-        %% Format qc LuT for processing format.
-        idx = strfind(applied_qc_LuT.QC_method_names, ' ');
-        pointer = 1;
-        splitted_method_names = cell(1,length(idx)+1);
-        splitted_method_ids = zeros(1, length(idx)+1);
-        for j=1:length(idx)
-            splitted_method_names{j} = applied_qc_LuT.QC_method_names(pointer:idx(j)-1);
-            splitted_method_ids(j) = applied_qc_LuT.QC_method_IDs(j);
-            pointer = idx(j);
-        end
-        splitted_method_names{end} = applied_qc_LuT.QC_method_names(pointer+1:end);
-        splitted_method_ids(end) =  applied_qc_LuT.QC_method_IDs(end);
-        
-        %% Replace String representation of QC flag identifiers.
-        IDs = zeros(size(qc_struct.(names_data{i}).qcFlaggedOutput));
-        for j=1:length(splitted_method_names)
-            idx = strcmp(splitted_method_names{j}, qc_struct.(names_data{i}).appliedQcIdentifiers);
-            IDs(idx) = splitted_method_ids(j);
-        end
-        combined_struct.(new_name) = IDs;
     else
         disp('QC variable name not found')
     end

@@ -1,22 +1,20 @@
-function out_struct = addQcToNetcdfVariables(variable_list, applied_qc_config)
+function out_struct = addQcToNetcdfVariables(variable_list)
 %ADDQCTONETCDFVARIABLES  Adds QC structs for NetCDF generation.
 %
 %  Syntax:
-%    OUT_STRUCT = ADDQCTONETCDFVARIABLES(VARIABLE_LIST, APPLIED_QC_CONFIG)
+%    OUT_STRUCT = ADDQCTONETCDFVARIABLES(VARIABLE_LIST)
 %
 %  Description:
 %    Uses existing variable list from a configDTOutputNetCDF to add QC
 %    structs to use the QC outputs for the netcdf generation.
-%    Adds the identifier QC_ and QC_ID_ to the variable structs.
+%    Adds the identifier QC_ to the variable structs.
 %    Uses the long_name and standard_name inputs from the linked variable
 %    list for clearness.
 %
 %  Notes:
-%    The QC applied Identifier (QC_ID) is converted to simple identifiers,
-%    defined in the CONFIGBASICQUALITYCONTROL.
 %
 %  Examples:
-%    out_struct = addQcToNetcdfVariables(variable_list, applied_qc_config)
+%    out_struct = addQcToNetcdfVariables(variable_list)
 %
 %  See also:
 %    CONFIGBASICQUALITYCONTROL
@@ -46,9 +44,8 @@ function out_struct = addQcToNetcdfVariables(variable_list, applied_qc_config)
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 %% Check inputs.
-narginchk(2,2)
+narginchk(1,1)
 validateattributes(variable_list, {'struct'}, {'nonempty'})
-validateattributes(applied_qc_config, {'struct'}, {'nonempty'})
 
 %% Begin assembly.
 
@@ -78,25 +75,6 @@ for i=1:numel(names)
     out_struct.(new_name).attributes(7,1).value = 'good_data probably_bad_data bad_data spike missing_value';
     out_struct.(new_name).datatype = 'byte';
     
-    %% Add _QC_Identifier
-    new_name = strcat('QC_ID_', names{i});
-    out_struct.(new_name).dimensions = variable_list.(names{i}).dimensions;
-    out_struct.(new_name).attributes = struct();
-    out_struct.(new_name).attributes(1,1).name = variable_list.(names{i}).attributes(1).name;
-    out_struct.(new_name).attributes(1,1).value = ['QC_ID of ' variable_list.(names{i}).attributes(1).value];
-    out_struct.(new_name).attributes(2,1).name = variable_list.(names{i}).attributes(2).name;
-    out_struct.(new_name).attributes(2,1).value = ['QC_ID_' variable_list.(names{i}).attributes(2).value];
-    out_struct.(new_name).attributes(3,1).name = 'quality_control_convention';
-    out_struct.(new_name).attributes(3,1).value = 'SOCIB Quality control';
-    out_struct.(new_name).attributes(4,1).name = 'valid_min';
-    out_struct.(new_name).attributes(4,1).value = '0';
-    out_struct.(new_name).attributes(5,1).name = 'valid_max';
-    out_struct.(new_name).attributes(5,1).value = '9';
-    out_struct.(new_name).attributes(6,1).name = 'flag_values';
-    out_struct.(new_name).attributes(6,1).value = strrep(mat2str(uint8([0, applied_qc_config.QC_method_IDs])),' ', ', ');
-    out_struct.(new_name).attributes(7,1).name = 'flag_meanings';
-    out_struct.(new_name).attributes(7,1).value = ['good_data ' applied_qc_config.QC_method_names];
-    out_struct.(new_name).datatype = 'byte';
 end
 
 end
