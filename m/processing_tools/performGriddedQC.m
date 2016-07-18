@@ -181,10 +181,18 @@ for i=1:numel(tests)
             var_name = grid_qc_config.(tests{i}).processOn{j};
         end
         % qcOut = handle(grid_qc_config.(tests{i}).passingParameters{j}{:});
+        if ~isfield(output_data_struct, var_name)
+            fprintf('QC variable name %s not found. Will skip this test. Please remove or rename the variable.\n', var_name)
+            continue;
+        end
         idx = output_data_struct.(var_name).qcFlaggedOutput < qcOut;
         if isCellFlag
             for k=1:length(grid_qc_config.(tests{i}).processOn{j})
                 var_name = grid_qc_config.(tests{i}).processOn{j}{k};
+                if ~isfield(gridded_data, var_name)
+                    fprintf('QC variable name %s not found. Will skip this variable.\n', var_name)
+                    continue;
+                end
                 if checkForTwoDimensionalData(gridded_data.(var_name)) && ~checkForTwoDimensionalData(idx)
                     %to process on is 2D data and the idx is only 1D
                     tempidx = find(idx);

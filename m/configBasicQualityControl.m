@@ -10,7 +10,9 @@ function basic_qc_configuration = configBasicQualityControl()
 %    or gridded data. The useNanReplacement switch is used to determine, if
 %    bad flagged data should be given as NaNs to the next processing step.
 %    The summary fileName is used for the logging of QC flags during the
-%    preprocessing step.
+%    processing steps.
+%    Use the plotSuspiciousProfiles flag to plot profiles with bad flagged
+%    data.
 %
 %  Notes:
 %
@@ -47,7 +49,10 @@ basic_qc_configuration.preprocessing.useNanReplacementForProcessing = false;
 basic_qc_configuration.preprocessing.summaryFileName = 'qc_preprocessing.log';
 
 basic_qc_configuration.processing.performQC = true;
-basic_qc_configuration.processing.useNanReplacementForGridding = true;
+basic_qc_configuration.processing.useNanReplacementForGridding = false;
+basic_qc_configuration.processing.summaryFileName = 'qc_processing.log';
+% Experimental use only.
+basic_qc_configuration.processing.plotSuspiciousProfiles = false;
 
 basic_qc_configuration.gridding.performQC = true;
 basic_qc_configuration.gridding.useNanReplacementForPlotting = true;

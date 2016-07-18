@@ -1,9 +1,9 @@
-function preprocessing_qc_options = configDataPreprocessingQC(data_preprocessed)
+function preprocessing_qc_options = configDataPreprocessingQC()
 %CONFIGDATAPREPROCESSINGQC  Defines QC methods to be applied on
 %preprocessed data.
 %
 %  Syntax:
-%    PREPROCESSING_QC_OPTIONS = CONFIGDATAPREPROCESSINGQC(DATA_PREPROCESSED)
+%    PREPROCESSING_QC_OPTIONS = CONFIGDATAPREPROCESSINGQC()
 %
 %  Description:
 %    Returns a struct setting the options for the quality controls applied
@@ -29,8 +29,8 @@ function preprocessing_qc_options = configDataPreprocessingQC(data_preprocessed)
 %    str2func('validRangeCheck');
 %    preprocessing_qc_options.validRangeCheck.processOn = { 'temperature';
 %    {'latitude'; 'longitude'};};
-%    preprocessing_qc_options.validRangeCheck.passingParameters = { [{data_preprocessed.temperature}; -2; 42; 4];
-%    [{data_preprocessed.latitude}; 30; 46; 4];};
+%    preprocessing_qc_options.validRangeCheck.passingParameters = { [{'temperature'}; -2; 42; 4];
+%    [{'latitude'}; 30; 46; 4];};
 %    This means, if the passing temperature measurements exceed the
 %    threshold (between -2 and 42 degrees Celsius), the variable
 %    temperature (defined in processOn) will be flagged with the outcome of
@@ -42,10 +42,10 @@ function preprocessing_qc_options = configDataPreprocessingQC(data_preprocessed)
 %       Requires the preprocessed data as input.
 %
 %  Examples:
-%    preprocessing_qc_options = configDataPreprocessingQC(data_preprocessed)
+%    preprocessing_qc_options = configDataPreprocessingQC()
 %
 %  See also:
-%    PERFORMQC
+%    PERFORMGRIDDEDQC
 %
 %  Authors:
 %    Andreas Krietemeyer  <akrietemeyer@socib.es>
@@ -76,14 +76,14 @@ preprocessing_qc_options.impossibleDateCheck.processOn = {
     {'time_ctd'; 'temperature'; 'conductivity'; 'oxygen_concentration'; 'oxygen_saturation'; 'pressure'; 'chlorophyll'; 'turbidity'}
     };
 preprocessing_qc_options.impossibleDateCheck.passingParameters = {
-        [{data_preprocessed.time}; 4];
-        [{data_preprocessed.time_ctd}; 4]
+        [{'time'}; 4];
+        [{'time_ctd'}; 4]
     };
 
 preprocessing_qc_options.impossibleLocationCheck.functionHandle = str2func('impossibleLocationCheck');
 preprocessing_qc_options.impossibleLocationCheck.processOn = {{'longitude'; 'latitude'}};
 preprocessing_qc_options.impossibleLocationCheck.passingParameters = {
-        [{data_preprocessed.latitude}; {data_preprocessed.longitude}; 4]
+        [{'latitude'}; {'longitude'}; 4]
     };
 
 preprocessing_qc_options.validRangeCheck.functionHandle = str2func('validRangeCheck');
@@ -101,16 +101,16 @@ preprocessing_qc_options.validRangeCheck.processOn = {
     };
 
 preprocessing_qc_options.validRangeCheck.passingParameters = {
-        [{data_preprocessed.temperature}; -2; 42; 4];
-        [{data_preprocessed.chlorophyll}; 0; 50; 4];
-        [{data_preprocessed.turbidity}; 0; 50; 4];
-        [{data_preprocessed.oxygen_concentration}; 0; 500; 4];
-        [{data_preprocessed.oxygen_saturation}; 0; 200; 4];
-        [{data_preprocessed.longitude}; -6; 37; 4];
-        [{data_preprocessed.latitude}; 30; 46; 4];
-        [{data_preprocessed.waypoint_longitude}; -6; 37; 3];
-        [{data_preprocessed.waypoint_latitude}; 30; 46; 3];
-        [{data_preprocessed.temperature}; {[0; 3; 3; 3; 3; 3]}; {[34; 30; 28; 26; 22; 20]}; 4; {data_preprocessed.depth}; {[0, 20; 20, 50; 50, 75; 75, 150; 150, 300; 300, 1100]}]
+        [{'temperature'}; -2; 42; 4];
+        [{'chlorophyll'}; 0; 50; 4];
+        [{'turbidity'}; 0; 50; 4];
+        [{'oxygen_concentration'}; 0; 500; 4];
+        [{'oxygen_saturation'}; 0; 200; 4];
+        [{'longitude'}; -6; 37; 4];
+        [{'latitude'}; 30; 46; 4];
+        [{'waypoint_longitude'}; -6; 37; 3];
+        [{'waypoint_latitude'}; 30; 46; 3];
+        [{'temperature'}; {[0; 3; 3; 3; 3; 3]}; {[34; 30; 28; 26; 22; 20]}; 4; {'depth'}; {[0, 20; 20, 50; 50, 75; 75, 150; 150, 300; 300, 1100]}]
     };
 
 preprocessing_qc_options.spikeCheck.functionHandle = str2func('spikeCheck');
@@ -118,8 +118,8 @@ preprocessing_qc_options.spikeCheck.processOn = {'temperature';
     'turbidity'
     };
 preprocessing_qc_options.spikeCheck.passingParameters = {
-        [{data_preprocessed.temperature}; 6; {data_preprocessed.pressure}; 500; 6; 2];
-        [{data_preprocessed.turbidity}; 6; 5]
+        [{'temperature'}; 6; {'pressure'}; 500; 6; 2];
+        [{'turbidity'}; 6; 5]
     };
 
 end

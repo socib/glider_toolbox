@@ -1,8 +1,8 @@
-function processing_qc_options = configDataProcessingQC(data_processed)
+function processing_qc_options = configDataProcessingQC()
 %CONFIGDATAPROCESSINGQC  Sets the defines the applied QC methods for processed data.
 %
 %  Syntax:
-%    PROCESSING_QC_OPTIONS = CONFIGDATAPROCESSINGQC(DATA_PROCESSED)
+%    PROCESSING_QC_OPTIONS = CONFIGDATAPROCESSINGQC()
 %
 %  Description:
 %    Returns the configuration struct for the QC applied to the processed
@@ -30,8 +30,8 @@ function processing_qc_options = configDataProcessingQC(data_processed)
 %    str2func('validRangeCheck');
 %    processing_qc_options.validRangeCheck.processOn = { 'temperature';
 %    {'latitude'; 'longitude'};};
-%    processing_qc_options.validRangeCheck.passingParameters = { [{data_processed.temperature}; -2; 42; 4];
-%    [{data_processed.latitude}; 30; 46; 4];};
+%    processing_qc_options.validRangeCheck.passingParameters = { [{'temperature'}; -2; 42; 4];
+%    [{'latitude'}; 30; 46; 4];};
 %    This means, if the passing temperature measurements exceed the
 %    threshold (between -2 and 42 degrees Celsius), the variable
 %    temperature (defined in processOn) will be flagged with the outcome of
@@ -77,14 +77,14 @@ processing_qc_options.impossibleDateCheck.processOn = {
     {'time_ctd'; 'temperature'; 'conductivity'; 'salinity'; 'oxygen_concentration'; 'oxygen_saturation'; 'pressure'; 'chlorophyll'; 'turbidity'}
     };
 processing_qc_options.impossibleDateCheck.passingParameters = {
-        [{data_processed.time}; 4];
-        [{data_processed.time_ctd}; 4]
+        [{'time'}; 4];
+        [{'time_ctd'}; 4]
     };
 
 processing_qc_options.impossibleLocationCheck.functionHandle = str2func('impossibleLocationCheck');
 processing_qc_options.impossibleLocationCheck.processOn = {{'longitude'; 'latitude'}};
 processing_qc_options.impossibleLocationCheck.passingParameters = {
-        [{data_processed.latitude}; {data_processed.longitude}; 4]
+        [{'latitude'}; {'longitude'}; 4]
     };
 
 processing_qc_options.validRangeCheck.functionHandle = str2func('validRangeCheck');
@@ -102,17 +102,17 @@ processing_qc_options.validRangeCheck.processOn = {
     'salinity'
     };
 processing_qc_options.validRangeCheck.passingParameters = {
-        [{data_processed.temperature}; -2; 42; 4];
-        [{data_processed.chlorophyll}; 0; 50; 4];
-        [{data_processed.turbidity}; 0; 50; 4];
-        [{data_processed.oxygen_concentration}; 0; 500; 4];
-        [{data_processed.oxygen_saturation}; 0; 200; 4];
-        [{data_processed.longitude}; -6; 37; 4];
-        [{data_processed.latitude}; 30; 46; 4];
-        [{data_processed.waypoint_longitude}; -6; 37; 3];
-        [{data_processed.waypoint_latitude}; 30; 46; 3];
-        [{data_processed.temperature}; {[0; 3; 3; 3; 3; 3]}; {[34; 30; 28; 26; 22; 20]}; 4; {data_processed.depth}; {[0, 20; 20, 50; 50, 75; 75, 150; 150, 300; 300, 1100]}];
-        [{data_processed.salinity}; {[36; 36; 36; 36]}; {[40; 40; 40; 40]}; 4; {data_processed.depth}; {[0, 30; 30, 75; 75, 600; 600, 1100]}]
+        [{'temperature'}; -2; 42; 4];
+        [{'chlorophyll'}; 0; 50; 4];
+        [{'turbidity'}; 0; 50; 4];
+        [{'oxygen_concentration'}; 0; 500; 4];
+        [{'oxygen_saturation'}; 0; 200; 4];
+        [{'longitude'}; -6; 37; 4];
+        [{'latitude'}; 30; 46; 4];
+        [{'waypoint_longitude'}; -6; 37; 3];
+        [{'waypoint_latitude'}; 30; 46; 3];
+        [{'temperature'}; {[0; 3; 3; 3; 3; 3]}; {[34; 30; 28; 26; 22; 20]}; 4; {'depth'}; {[0, 20; 20, 50; 50, 75; 75, 150; 150, 300; 300, 1100]}];
+        [{'salinity'}; {[36; 36; 36; 36]}; {[40; 40; 40; 40]}; 4; {'depth'}; {[0, 30; 30, 75; 75, 600; 600, 1100]}]
     };
 
 processing_qc_options.spikeCheck.functionHandle = str2func('spikeCheck');
@@ -120,14 +120,14 @@ processing_qc_options.spikeCheck.processOn = {'temperature';
     'turbidity'
     };
 processing_qc_options.spikeCheck.passingParameters = {
-        [{data_processed.temperature}; 6; {data_processed.pressure}; 500; 6; 2];
-        [{data_processed.turbidity}; 6; 5]
+        [{'temperature'}; 6; {'pressure'}; 500; 6; 2];
+        [{'turbidity'}; 6; 5]
     };
 
 processing_qc_options.performSpecialGradientCheck.functionHandle = str2func('performSpecialGradientCheck');
 processing_qc_options.performSpecialGradientCheck.processOn = {{'conductivity'; 'density'; 'salinity'}
     };
 processing_qc_options.performSpecialGradientCheck.passingParameters = {
-        [{data_processed.conductivity}; {data_processed.depth}; {data_processed.profile_index}; 0.05; 0.05; 200; 4]
+        [{'conductivity'}; {'depth'}; {'profile_index'}; 0.05; 0.05; 200; 4]
     };
 end

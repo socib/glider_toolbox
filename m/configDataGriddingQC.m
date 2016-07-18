@@ -111,19 +111,23 @@ gridding_qc_config.validRangeCheck.passingParameters = {
 gridding_qc_config.spikeCheck.functionHandle = str2func('spikeCheck');
 gridding_qc_config.spikeCheck.processOn = {
     'temperature';
-    'turbidity'
+    'turbidity';
+    'oxygen_concentration';
+    'oxygen_saturation'
     };
 gridding_qc_config.spikeCheck.passingParameters = {
         [{'temperature'}; 6; {'pressure'}; 500; 6; 2];
-        [{'turbidity'}; 6; 5]
+        [{'turbidity'}; 6; 5];
+        [{'oxygen_concentration'}; 6; 20];
+        [{'oxygen_saturation'}; 6; 20]
     };
 
-%gridding_qc_config.specialGradientCheck.functionHandle = str2func('specialGradientCheck');
-%gridding_qc_config.specialGradientCheck.processOn = {
-%    {'conductivity', 'density', 'salinity'}
-%    };
-%gridding_qc_config.specialGradientCheck.passingParameters = {
-%        [{'conductivity'}; {'depth'}; 0.05; 0.05; 200; 4]
-%    };
+gridding_qc_config.specialGradientCheck.functionHandle = str2func('specialGradientCheck');
+gridding_qc_config.specialGradientCheck.processOn = {
+    {'conductivity', 'density', 'salinity'}
+    };
+gridding_qc_config.specialGradientCheck.passingParameters = {
+        [{'conductivity'}; {'depth'}; 0.05; 0.05; 200; 4]
+    };
 
 end
