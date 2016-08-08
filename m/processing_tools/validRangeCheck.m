@@ -104,7 +104,9 @@ elseif nargin==6
         startRange = depthRanges(i,1);
         endRange = depthRanges(i,2);
         tempDepthIndex = find(depth >= startRange & depth < endRange);
-        qcFlaggedOutput(tempDepthIndex) = validRangeCheck(data(tempDepthIndex), minRange(i), maxRange(i), qcFlag);
+        if ~isempty(tempDepthIndex)
+            qcFlaggedOutput(tempDepthIndex) = validRangeCheck(data(tempDepthIndex), minRange(i), maxRange(i), qcFlag);
+        end
     end
     
 end
