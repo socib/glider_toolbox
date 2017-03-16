@@ -287,6 +287,20 @@ function ncl1_info = configDTOutputNetCDFL1()
     'profile_min_range'      []
     'profile_gap_ratio'      [] };
 
+  var_attr_list.temperature_corrected_sensor_preset = {
+    'long_name'     'water temperature with sensor time response corrected using a fixed offset'
+    'standard_name' 'sea_water_temperature'
+    'units'         'Celsius'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value
+    'sources'                []
+    'method'                 []
+    'parameters'             []
+    'parameter_method'       []
+    'parameter_estimator'    []
+    'profile_min_range'      []
+    'profile_gap_ratio'      [] };
+
   var_attr_list.temperature_corrected_thermal = {
     'long_name'     'water temperature with thermal lag corrected'
     'standard_name' 'sea_water_temperature'
