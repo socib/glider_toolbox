@@ -313,6 +313,18 @@ function ncl2_info = configRTOutputNetCDFL2()
     'grid_coordinates' []
     'grid_method'      [] };
 
+  var_attr_list.salinity_corrected_temperature_conductivity_thermal = {
+    'long_name'     'water salinity from conductivity with sensor lag corrected and temperature with sensor lag and thermal lag corrected'
+    'standard_name' 'sea_water_salinity'
+    'units'         'PSU'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value
+    'sources'          []
+    'method'           []
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
   var_attr_list.salinity_corrected_sensor = {
     'long_name'     'water salinity from conductivity and temperature with sensor lag corrected'
     'standard_name' 'sea_water_salinity'
@@ -325,8 +337,32 @@ function ncl2_info = configRTOutputNetCDFL2()
     'grid_coordinates' []
     'grid_method'      [] };
 
+  var_attr_list.salinity_corrected_sensor_preset = {
+    'long_name'     'water salinity from conductivity and temperature with sensor lag corrected using preset offsets'
+    'standard_name' 'sea_water_salinity'
+    'units'         'PSU'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value
+    'sources'          []
+    'method'           []
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
   var_attr_list.salinity_corrected_sensor_thermal = {
     'long_name'     'water salinity from conductivity and temperature with sensor lag corrected and thermal lag corrected'
+    'standard_name' 'sea_water_salinity'
+    'units'         'PSU'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value
+    'sources'          []
+    'method'           []
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
+  var_attr_list.salinity_corrected_sensor_preset_thermal = {
+    'long_name'     'water salinity from conductivity and temperature with sensor lag corrected using preset offsets and thermal lag corrected'
     'standard_name' 'sea_water_salinity'
     'units'         'PSU'
     'coordinates'   'time depth latitude longitude'
@@ -361,6 +397,30 @@ function ncl2_info = configRTOutputNetCDFL2()
     'grid_coordinates' []
     'grid_method'      [] };
 
+  var_attr_list.density_corrected_temperature_thermal = {
+    'long_name'     'water density using salinity from raw conductivity and temperature with sensor lag and thermal lag corrected'
+    'standard_name' 'sea_water_density'
+    'units'         'Kg m-3'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value
+    'sources'          []
+    'method'           []
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
+  var_attr_list.density_corrected_temperature_conductivity_thermal = {
+    'long_name'     'water density using salinity from conductivity with sensor lag corrected and temperature with sensor lag and thermal lag corrected'
+    'standard_name' 'sea_water_density'
+    'units'         'Kg m-3'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value
+    'sources'          []
+    'method'           []
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
   var_attr_list.density_corrected_sensor = {
     'long_name'     'water density using salinity from conductivity and temperature with sensor lag corrected'
     'standard_name' 'sea_water_density'
@@ -373,10 +433,34 @@ function ncl2_info = configRTOutputNetCDFL2()
     'grid_coordinates' []
     'grid_method'      [] };
 
+  var_attr_list.density_corrected_sensor_preset = {
+    'long_name'     'water density using salinity from conductivity and temperature with sensor lag corrected using preset offsets'
+    'standard_name' 'sea_water_density'
+    'units'         'Kg m-3'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value
+    'sources'          []
+    'method'           []
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
   var_attr_list.density_corrected_sensor_thermal = {
     'long_name'     'water density using salinity from conductivity and temperature with sensor lag corrected and thermal lag corrected'
     'standard_name' 'sea_water_density'
     'units'         'kg m-3'
+    'coordinates'   'time depth latitude longitude'
+    '_FillValue'    default_fill_value
+    'sources'          []
+    'method'           []
+    'grid_sources'     []
+    'grid_coordinates' []
+    'grid_method'      [] };
+
+  var_attr_list.density_corrected_sensor_preset_thermal = {
+    'long_name'     'water density using salinity from conductivity and temperature with sensor lag corrected using preset offsets and thermal lag corrected'
+    'standard_name' 'sea_water_density'
+    'units'         'Kg m-3'
     'coordinates'   'time depth latitude longitude'
     '_FillValue'    default_fill_value
     'sources'          []
