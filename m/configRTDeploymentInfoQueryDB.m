@@ -48,13 +48,39 @@ function [sql_query, deployment_fields] = configRTDeploymentInfoQueryDB()
   % First column is deployment field
   % Second column is column in data base table.
   fields_map = {
+    % Mandatory fields and fields required for paths.
     'deployment_id'          'deployment_id'
     'deployment_name'        'deployment_name'
-    'deployment_start'       'deployment_initial_date'
-    'deployment_end'         'deployment_end_date'
+    'deployment_start'       'deployment_initial_date AT TIME ZONE ''UTC'''
+    'deployment_end'         'deployment_end_date AT TIME ZONE ''UTC'''
     'glider_name'            'platform_name'
     'glider_serial'          'instrument_serial'
     'glider_model'           'instrument_model'
+    'glider_instrument_name' 'instrument_name'
+    'glider_deployment_code' 'deployment_code'
+    % Optional fields for global attributes.
+    'abstract'                     'deployment_description'
+    'acknowledgement'              'deployment_acknowledgement'
+    'author'                       'deployment_author'
+    'author_email'                 'deployment_author_email'
+    'creator'                      'deployment_author'
+    'creator_email'                'deployment_author_email'
+    'creator_url'                  'deployment_author_url'
+    'data_center'                  'deployment_data_center'
+    'data_center_email'            'deployment_data_center_email'
+    'institution'                  'institution_name'
+    'institution_references'       'institution_references'
+    'instrument'                   'instrument_name'
+    'instrument_manufacturer'      'instrument_manufacturer'
+    'instrument_model'             'instrument_model'
+    'license'                      'deployment_license'
+    'principal_investigator'       'deployment_principal_investigator'
+    'principal_investigator_email' 'deployment_principal_investigator_email'
+    'project'                      'deployment_project'
+    'publisher'                    'deployment_publisher_name'
+    'publisher_email'              'deployment_publisher_email'
+    'publisher_url'                'deployment_publisher_url'
+    'summary'                      'deployment_description'
   };
 
   deployment_fields = fields_map(:,1)';
