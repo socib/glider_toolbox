@@ -61,11 +61,24 @@ function public_paths = configDTPathsPublic()
 
   error(nargchk(0, 0, nargin, 'struct'));
 
-  public_paths.netcdf_l0   = '/path/to/public/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l0.nc';
-  public_paths.netcdf_l1   = '/path/to/public/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l1.nc';
-  public_paths.netcdf_l2   = '/path/to/public/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l2.nc';
-  public_paths.figure_dir  = '/path/to/public/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/figures';
-  public_paths.figure_url  = 'http://myserver/url/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/figures';
-  public_paths.figure_info = 'http://myserver/url/to/delayed_time/glider_data/figures/${DEPLOYMENT_ID}.json';
+  netcdf_basedir        = '/path/to/delayed/time';
+  netcdf_glider_dir     = '${GLIDER_NAME,l,s/-/_}-${GLIDER_INSTRUMENT_NAME,l,s/-/_}';
+  netcdf_deployment_dir = '${DEPLOYMENT_START,Tyyyy}';
+  netcdf_l0  = 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L0_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_dt.nc';
+  netcdf_l1  = 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L1_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_dt.nc';
+  netcdf_l2  = 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L2_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_dt.nc';
+
+  figure_basedir        = '/home/glider/public_html/dt';
+  figure_glider_dir     = '${GLIDER_NAME}';
+  figure_deployment_dir = '${DEPLOYMENT_START,Tyyyymmdd}';
+  figure_baseurl = 'http://www.socib.es/users/glider/dt';
+  figure_list    = '${DEPLOYMENT_ID,%d}_figures.json';
+
+  public_paths.netcdf_l0 = fullfile(netcdf_basedir, netcdf_glider_dir, 'L0', netcdf_deployment_dir, netcdf_l0);
+  public_paths.netcdf_l1 = fullfile(netcdf_basedir, netcdf_glider_dir, 'L1', netcdf_deployment_dir, netcdf_l1);
+  public_paths.netcdf_l2 = fullfile(netcdf_basedir, netcdf_glider_dir, 'L2', netcdf_deployment_dir, netcdf_l2);
+  public_paths.figure_dir = fullfile(figure_basedir, figure_glider_dir, figure_deployment_dir, 'figures');
+  public_paths.figure_url = fullfile(figure_baseurl, figure_glider_dir, figure_deployment_dir, 'figures');
+  public_paths.figure_info = fullfile(figure_basedir, figure_list);
 
 end
