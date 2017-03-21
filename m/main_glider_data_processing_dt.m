@@ -595,6 +595,7 @@ for deployment_idx = 1:numel(deployment_list)
       disp('Reading defined QC methods for processed data...')
       try
           config.processing_qc_options = configDataProcessingQC();
+          qc_processed = struct([]);
       catch exception
           disp('Error reading QC methods.');
           disp(getReport(exception, 'extended'));
