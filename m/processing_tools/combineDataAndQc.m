@@ -49,12 +49,11 @@ function combined_struct = combineDataAndQc(data_struct, qc_struct)
 %% Check inputs.
 narginchk(2,2)
 validateattributes(data_struct, {'struct'}, {'nonempty'})
-validateattributes(qc_struct, {'struct'}, {'nonempty'})
 
 %% Start assembling.
 names_data = fieldnames(data_struct);
 combined_struct = struct();
-
+if ~isempty(qc_struct)
 for i=1:numel(names_data)
     combined_struct.(names_data{i}) = data_struct.(names_data{i});
     if isfield(qc_struct, (names_data{i}))
@@ -64,4 +63,9 @@ for i=1:numel(names_data)
         disp('QC variable name not found')
     end
 end
+else
+    combined_struct = data_struct;
+end
+
+
 end
