@@ -82,7 +82,6 @@ function preprocessing_options = configDataPreprocessingSlocum()
   preprocessing_options.oxygen_list(1).temperature          = 'sci_oxy3835_temp';
   preprocessing_options.oxygen_list(1).time                 = 'sci_oxy3835_timestamp';
 
-  % options for FMI sensors
   preprocessing_options.oxygen_list(2).oxygen_concentration = 'sci_oxy4_oxygen';
   preprocessing_options.oxygen_list(2).oxygen_saturation    = 'sci_oxy4_saturation';
   preprocessing_options.oxygen_list(2).temperature          = 'sci_oxy4_temp';
