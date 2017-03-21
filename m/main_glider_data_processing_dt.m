@@ -688,6 +688,7 @@ for deployment_idx = 1:numel(deployment_list)
       disp('Reading defined QC methods for gridded data...')
       try
           config.gridding_qc_options = configDataGriddingQC();
+          qc_gridded=([]);
       catch exception
           disp('Error reading QC methods.');
           disp(getReport(exception, 'extended'));
