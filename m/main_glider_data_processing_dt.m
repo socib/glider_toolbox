@@ -149,7 +149,7 @@
 %    Frederic Cyr  <Frederic.Cyr@mio.osupytheas.fr>
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2016
+%  Copyright (C) 2013-2017
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %

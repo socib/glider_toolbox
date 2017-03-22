@@ -51,7 +51,7 @@ function qcFlaggedOutput = calcSpike(data, limit, nonNanIndex, qcFlag, originalL
 %  Authors:
 %    Andreas Krietemeyer  <akrietemeyer@socib.es>
 
-%  Copyright (C) 2016
+%  Copyright (C) 2017
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %  <http://www.socib.es>
 %

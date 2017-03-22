@@ -33,7 +33,7 @@ function transect_index = findTransects(waypoint_latitude, waypoint_longitude)
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2013-2016
+%  Copyright (C) 2013-2017
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
 %

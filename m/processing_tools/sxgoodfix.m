@@ -74,7 +74,7 @@ function good = sxgoodfix(longitude, latitude, state)
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
 
-%  Copyright (C) 2016
+%  Copyright (C) 2017
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears.
 %  <http://www.socib.es>
 %
