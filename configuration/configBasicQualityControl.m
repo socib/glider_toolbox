@@ -54,8 +54,8 @@ basic_qc_configuration.processing.summaryFileName = 'qc_processing.log';
 % Experimental use only.
 basic_qc_configuration.processing.plotSuspiciousProfiles = false;
 
-basic_qc_configuration.gridding.performQC = true;
-basic_qc_configuration.gridding.useNanReplacementForPlotting = true;
+basic_qc_configuration.gridding.performQC = false;
+basic_qc_configuration.gridding.useNanReplacementForPlotting = false;
 
 basic_qc_configuration.applied_QC_LuT.QC_method_names = 'impossibleDateCheck impossibleLocationCheck validRangeCheck spikeCheck specialGradientCheck nanCheck';
 basic_qc_configuration.applied_QC_LuT.QC_method_IDs = [1, 2, 3, 4, 5, 9];
