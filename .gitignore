@@ -1,6 +1,5 @@
-m/private/
-m/mex_tools/*.mex*
-m/mex_tools/gpcl/
-m/common_tools/@sftp/private/*.mex*
-m/common_tools/@sftp/private/libssh
-doc/
+private/
+mex_tools/*.mex*
+mex_tools/gpcl/
+common_tools/@sftp/private/*.mex*
+common_tools/@sftp/private/libssh
