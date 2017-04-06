@@ -212,24 +212,32 @@ config.file_options_slocum = configDTFileOptionsSlocum();
 config.file_options_seaglider = configDTFileOptionsSeaglider();
 config.file_options_seaexplorer = configDTFileOptionsSeaExplorer();
 
-
 %% Configure data base deployment information source.
 config.db_access = configDBAccess();
-[config.db_query, config.db_fields] = configDTDeploymentInfoQueryDB();
 
-
+ if config.db_access.useSQL
+    [config.db_query, config.db_fields] = configDTDeploymentInfoQueryDB();
+ end
+ 
 %% Get list of deployments to process from database.
-disp('Querying information of glider deployments...');
+if config.db_access.useSQL
+    %Use SQL Database to extract Deployment Metadata
+ disp('Querying deployment information from Database...');
 deployment_list = getDeploymentInfoDB( ...
-  config.db_query, config.db_access.name, ...
-  'user', config.db_access.user, 'pass', config.db_access.pass, ...
-  'server', config.db_access.server, 'driver', config.db_access.driver, ...
-  'fields', config.db_fields);
+config.db_query, config.db_access.name, ...
+ 'user', config.db_access.user, 'pass', config.db_access.pass, ...
+ 'server', config.db_access.server, 'driver', config.db_access.driver, ...
+ 'fields', config.db_fields);
 if isempty(deployment_list)
-  disp('Selected glider deployments are not available.');
-  return
+   disp('Selected glider deployments are not available.');
+   return
+ else
+   disp(['Selected deployments found: ' num2str(numel(deployment_list)) '.']);
+end
 else
-  disp(['Selected deployments found: ' num2str(numel(deployment_list)) '.']);
+    %Use Script File to extract Deployment Metadata
+   disp('Querying deployment information from Script File...');
+   deployment_list = getDeploymentInfoScript();
 end
 
 

@@ -45,7 +45,7 @@ function [sql_query, deployment_fields] = configDTDeploymentInfoQueryDB()
   error(nargchk(0, 0, nargin, 'struct'));
 
   % Select the identifiers of deployments to process.
-  deployment_ids = ['1'];
+  deployment_ids = [1];
   
   % Select the deployment fields.
   % First column is deployment field

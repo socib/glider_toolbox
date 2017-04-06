@@ -41,7 +41,12 @@ function db_access = configDBAccess()
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   error(nargchk(0, 0, nargin, 'struct'));
+  
+  %Boolean to Specify Whether to use SQL Database (1)
+  %or Script (0) for Deployment Metadata
+  db_access.useSQL = 0
 
+  %SQL Database Details
   db_access.server = 'jdbc:postgresql://mydb.myportal.mydomain:5433/my_data_base';
   db_access.name = 'my_data_base';
   db_access.user = 'myself';
