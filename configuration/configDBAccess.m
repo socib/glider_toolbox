@@ -44,7 +44,7 @@ function db_access = configDBAccess()
   
   %Boolean to Specify Whether to use SQL Database (1)
   %or Script (0) for Deployment Metadata
-  db_access.useSQL = 0
+  db_access.useSQL = 0;
 
   %SQL Database Details
   db_access.server = 'jdbc:postgresql://mydb.myportal.mydomain:5433/my_data_base';
