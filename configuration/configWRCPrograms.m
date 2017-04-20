@@ -60,12 +60,12 @@ function wrc_progs = configWRCPrograms()
   error(nargchk(0, 0, nargin, 'struct'));
   
   % This program is needed.
-  wrc_progs.dbd2asc           = '/path/to/dbd2asc';
+  wrc_progs.dbd2asc           = '/path/to/bin/dbd2asc';
   % These programs are optional.
-  wrc_progs.dba_merge         = '/path/to/dba_merge';
-  wrc_progs.dba_sensor_filter = '/path/to/dba_sensor_filter';
-  wrc_progs.dba_time_filter   = '/path/to/dba_time_filter';
-  wrc_progs.dba2_orig_matlab  = '/path/to/dba2_orig_matlab';
-  wrc_progs.rename_dbd_files  = '/path/to/rename_dbd_files';
+  wrc_progs.dba_merge         = '/path/to/bin/dba_merge';
+  wrc_progs.dba_sensor_filter = '/path/to/bin/dba_sensor_filter';
+  wrc_progs.dba_time_filter   = '/path/to/bin/dba_time_filter';
+  wrc_progs.dba2_orig_matlab  = '/path/to/bin/dba2_orig_matlab';
+  wrc_progs.rename_dbd_files  = '/path/to/bin/rename_dbd_files';
 
 end
