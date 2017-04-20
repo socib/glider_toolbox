@@ -762,7 +762,8 @@ for deployment_idx = 1:numel(deployment_list)
   end
 
   %% Copy selected products to corresponding public location, if needed.
-  if ~isempty(fieldnames(outputs))
+  if ~isempty(fieldnames(outputs)) ...
+       && config.paths_public.create_public_copy
     disp('Copying public outputs...');
     output_name_list = fieldnames(outputs);
     for output_name_idx = 1:numel(output_name_list)
@@ -805,7 +806,8 @@ for deployment_idx = 1:numel(deployment_list)
   % excluding the ones in the exclude list. 
   if ~isempty(fieldnames(figures)) ...
       && isfield(config.paths_public, 'figure_dir') ...
-      && ~isempty(config.paths_public.figure_dir)
+      && ~isempty(config.paths_public.figure_dir) ...
+      && config.paths_public.create_public_copy
     disp('Copying public figures...');
     public_figure_baseurl = ...
       strfstruct(config.paths_public.figure_url, deployment);
