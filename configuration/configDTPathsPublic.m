@@ -60,6 +60,9 @@ function public_paths = configDTPathsPublic()
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   error(nargchk(0, 0, nargin, 'struct'));
+  
+  %Set whether or not to produce a public version of processed
+  public_paths.create_public_copy = false;
 
   netcdf_basedir        = '/path/to/delayed/time';
   netcdf_glider_dir     = '${GLIDER_NAME,l,s/-/_}-${GLIDER_INSTRUMENT_NAME,l,s/-/_}';
