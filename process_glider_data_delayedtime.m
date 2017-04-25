@@ -171,19 +171,15 @@
 glider_toolbox_dir = configGliderToolboxPath();
 glider_toolbox_ver = configGliderToolboxVersion();
 
-
 %% Configure external programs paths.
 config.wrcprogs = configWRCPrograms();
-
 
 %% Configure deployment data paths.
 config.paths_public = configDTPathsPublic();
 config.paths_local = configDTPathsLocal();
 
-
 %% Configure figure outputs.
 [config.figures_processed, config.figures_gridded] = configFigures();
-
 
 %% Configure NetCDF outputs.
 config.output_netcdf_l0_slocum = configDTOutputNetCDFL0Slocum();
@@ -191,7 +187,6 @@ config.output_netcdf_l0_seaglider = configDTOutputNetCDFL0Seaglider();
 config.output_netcdf_l0_seaexplorer = configDTOutputNetCDFL0SeaExplorer();
 config.output_netcdf_l1 = configDTOutputNetCDFL1();
 config.output_netcdf_l2 = configDTOutputNetCDFL2();
-
 
 %% Configure processing options.
 config.preprocessing_options_slocum = configDataPreprocessingSlocum();
@@ -239,7 +234,6 @@ else
    disp('Querying deployment information from Script File...');
    deployment_list = getDeploymentInfoScript();
 end
-
 
 %% Process active deployments.
 for deployment_idx = 1:numel(deployment_list)
@@ -321,7 +315,6 @@ for deployment_idx = 1:numel(deployment_list)
   netcdf_l2_options = config.output_netcdf_l2;
   netcdf_l2_options.variables = addQcToNetcdfVariables(netcdf_l2_options.variables);
 
-
   %% Start deployment processing logging.
   % DIARY will fail if log file base directory does not exist.
   % Create the base directory first, if needed.
@@ -350,10 +343,8 @@ for deployment_idx = 1:numel(deployment_list)
   disp(['Deployment processing start time: ' ...
         datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00:00')]);
 
-
   %% Report toolbox version:    
   disp(['Toolbox version: ' glider_toolbox_ver]);
-
 
   %% Report deployment information.
   disp('Deployment information:')
@@ -368,7 +359,6 @@ for deployment_idx = 1:numel(deployment_list)
   else
     disp(['  Deployment end       : ' datestr(deployment_end)]);
   end
-
 
   %% Convert binary glider files to ascii human readable format, if needed.
   % Check deployment files available in binary directory,
@@ -421,7 +411,6 @@ for deployment_idx = 1:numel(deployment_list)
     otherwise
   end
 
-
   %% Load data from ascii deployment glider files.
   disp('Loading raw deployment data from text files...');
   load_start = utc2posixtime(deployment_start);
@@ -470,7 +459,6 @@ for deployment_idx = 1:numel(deployment_list)
     disp(getReport(exception, 'extended'));
   end
 
-
   %% Add source files to deployment structure if loading succeeded.
   if isempty(source_files)
     disp('No deployment data, processing and product generation will be skipped.');
@@ -478,7 +466,6 @@ for deployment_idx = 1:numel(deployment_list)
     disp(['Files loaded in deployment period: ' num2str(numel(source_files)) '.']);
     deployment.source_files = sprintf('%s\n', source_files{:});
   end
-
 
   %% Generate L0 NetCDF file (raw/preprocessed data), if needed and possible.
   if ~isempty(fieldnames(data_raw)) && ~isempty(netcdf_l0_file)
@@ -530,7 +517,6 @@ for deployment_idx = 1:numel(deployment_list)
     end
   end
 
-
   %% Preprocess raw glider data.
   if ~isempty(fieldnames(data_raw))
     disp('Preprocessing raw data...');
@@ -573,19 +559,6 @@ for deployment_idx = 1:numel(deployment_list)
       end
   end
   
-  %% Replace bad flagged preprocessed data with NaNs?
-  if config.basic_qc_config.preprocessing.useNanReplacementForProcessing
-      if ~isempty(fieldnames(qc_preprocessed))
-          disp('Replace bad flagged data with NaNs...');
-          try
-            data_preprocessed = filterGoodData(qc_preprocessed, data_preprocessed);
-          catch exception
-              disp('Error replacing bad flagged data:');
-              disp(getReport(exception, 'extended'));
-          end
-      end
-  end
-
   %% Process preprocessed glider data.
   if ~isempty(fieldnames(data_preprocessed))
     disp('Processing glider data...');
@@ -621,6 +594,7 @@ for deployment_idx = 1:numel(deployment_list)
           disp(getReport(exception, 'extended'));
       end
   end
+  
   %% Plot Suspicous Profiles (experimental useage only).
   if ~isempty(fieldnames(data_processed)) && ~isempty(fieldnames(qc_processed)) && config.basic_qc_config.processing.plotSuspiciousProfiles
       disp('Plotting suspicious profiles for all variables...')
@@ -652,19 +626,6 @@ for deployment_idx = 1:numel(deployment_list)
     end
   end
 
-  %% Replace bad flagged processed data with NaNs?
-  if config.basic_qc_config.processing.useNanReplacementForGridding
-      if ~isempty(fieldnames(qc_processed))
-          disp('Replace bad flagged data with NaNs...');
-          try
-            data_processed = filterGoodData(qc_processed, data_processed);
-          catch exception
-              disp('Error replacing bad flagged data:');
-              disp(getReport(exception, 'extended'));
-          end
-      end
-  end
-
   %% Generate processed data figures.
   if ~isempty(fieldnames(data_processed)) && ~isempty(figure_dir)
     disp('Generating figures from processed data...');
@@ -691,7 +652,7 @@ for deployment_idx = 1:numel(deployment_list)
     end
   end
   
-%% Configure Quality Control parameters for gridded data.
+  %% Configure Quality Control parameters for gridded data.
   if ~isempty(fieldnames(data_preprocessed))
       disp('Reading defined QC methods for gridded data...')
       try
@@ -734,19 +695,6 @@ for deployment_idx = 1:numel(deployment_list)
     end
   end
   
-  %% Replace bad flagged gridded data with NaNs?
-  if config.basic_qc_config.gridding.useNanReplacementForPlotting
-      if ~isempty(fieldnames(qc_gridded))
-          disp('Replace bad flagged data with NaNs...');
-          try
-            data_gridded = filterGoodData(qc_gridded, data_gridded);
-          catch exception
-              disp('Error replacing bad flagged data:');
-              disp(getReport(exception, 'extended'));
-          end
-      end
-  end
-
   %% Generate gridded data figures.
   if ~isempty(fieldnames(data_gridded)) && ~isempty(figure_dir)
     disp('Generating figures from gridded data...');
@@ -799,7 +747,6 @@ for deployment_idx = 1:numel(deployment_list)
       end
     end
   end
-
 
   %% Copy selected figures to its public location, if needed.
   % Copy all generated figures or only the ones in the include list (if any) 
@@ -900,7 +847,6 @@ for deployment_idx = 1:numel(deployment_list)
       end
     end
   end
-
 
   %% Stop deployment processing logging.
   disp(['Deployment processing end time: ' ...

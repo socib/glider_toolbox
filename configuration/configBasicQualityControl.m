@@ -45,17 +45,15 @@ function basic_qc_configuration = configBasicQualityControl()
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 basic_qc_configuration.preprocessing.performQC = true;
-basic_qc_configuration.preprocessing.useNanReplacementForProcessing = false;
 basic_qc_configuration.preprocessing.summaryFileName = 'qc_preprocessing.log';
 
 basic_qc_configuration.processing.performQC = true;
-basic_qc_configuration.processing.useNanReplacementForGridding = false;
 basic_qc_configuration.processing.summaryFileName = 'qc_processing.log';
-% Experimental use only.
-basic_qc_configuration.processing.plotSuspiciousProfiles = false;
 
 basic_qc_configuration.gridding.performQC = false;
-basic_qc_configuration.gridding.useNanReplacementForPlotting = false;
+
+% Experimental use only.
+basic_qc_configuration.processing.plotSuspiciousProfiles = false;
 
 basic_qc_configuration.applied_QC_LuT.QC_method_names = 'impossibleDateCheck impossibleLocationCheck validRangeCheck spikeCheck specialGradientCheck nanCheck';
 basic_qc_configuration.applied_QC_LuT.QC_method_IDs = [1, 2, 3, 4, 5, 9];
