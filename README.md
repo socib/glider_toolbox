@@ -65,7 +65,7 @@ by running `make doc` from the toolbox top directory.
   [doc]: http://www.socib.es/users/glider/glider_toolbox/doc
   [m2html]: http://www.artefact.tk/software/matlab/m2html/
 
-In addition, a tutorial together with sample data is included in the 'dccumentation' folder
+In addition, a tutorial together with sample data is included in the [documentation][documentation] folder
 of the toolbox!
 
 Outline
