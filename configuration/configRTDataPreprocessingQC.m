@@ -73,11 +73,11 @@ preprocessing_qc_options.checkAllForNan.functionHandle = str2func('nanCheck');
 preprocessing_qc_options.impossibleDateCheck.functionHandle = str2func('impossibleDateCheck');
 preprocessing_qc_options.impossibleDateCheck.processOn = {
     'time';
-    {'time_ctd'; 'temperature'; 'conductivity'; 'oxygen_concentration'; 'oxygen_saturation'; 'pressure'; 'chlorophyll'; 'turbidity'}
+    {'time'; 'temperature'; 'conductivity'; 'oxygen_concentration'; 'oxygen_saturation'; 'pressure'; 'chlorophyll'; 'turbidity'}
     };
 preprocessing_qc_options.impossibleDateCheck.passingParameters = {
         [{'time'}; 4];
-        [{'time_ctd'}; 4]
+        [{'time'}; 4]
     };
 
 preprocessing_qc_options.impossibleLocationCheck.functionHandle = str2func('impossibleLocationCheck');
@@ -95,8 +95,6 @@ preprocessing_qc_options.validRangeCheck.processOn = {
     {'oxygen_saturation'; 'oxygen_concentration'};
     {'longitude'; 'latitude'};
     {'latitude'; 'longitude'};
-    {'waypoint_longitude'; 'waypoint_latitude'};
-    {'waypoint_latitude'; 'waypoint_longitude'};
     'temperature'
     };
 
@@ -108,8 +106,6 @@ preprocessing_qc_options.validRangeCheck.passingParameters = {
         [{'oxygen_saturation'}; 0; 200; 4];
         [{'longitude'}; -6; 37; 4];
         [{'latitude'}; 30; 46; 4];
-        [{'waypoint_longitude'}; -6; 37; 3];
-        [{'waypoint_latitude'}; 30; 46; 3];
         [{'temperature'}; {[0; 3; 3; 3; 3; 3]}; {[34; 30; 28; 26; 22; 20]}; 4; {'depth'}; {[0, 20; 20, 50; 50, 75; 75, 150; 150, 300; 300, 1100]}]
     };
 
