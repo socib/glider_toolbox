@@ -186,19 +186,15 @@
 glider_toolbox_dir = configGliderToolboxPath();
 glider_toolbox_ver = configGliderToolboxVersion();
 
-
 %% Configure external programs paths.
 config.wrcprogs = configWRCPrograms();
-
 
 %% Configure deployment data paths.
 config.paths_public = configRTPathsPublic();
 config.paths_local = configRTPathsLocal();
 
-
 %% Configure figure outputs.
 [config.figures_processed, config.figures_gridded] = configFigures();
-
 
 %% Configure NetCDF outputs.
 config.output_netcdf_l0_slocum = configRTOutputNetCDFL0Slocum();
@@ -206,7 +202,6 @@ config.output_netcdf_l0_seaglider = configRTOutputNetCDFL0Seaglider();
 config.output_netcdf_l0_seaexplorer = configRTOutputNetCDFL0SeaExplorer();
 config.output_netcdf_l1 = configRTOutputNetCDFL1();
 config.output_netcdf_l2 = configRTOutputNetCDFL2();
-
 
 %% Configure processing options.
 config.preprocessing_options_slocum = configDataPreprocessingSlocum();
@@ -218,37 +213,46 @@ config.processing_options_seaglider = configDataProcessingSeaglider();
 config.processing_options_seaexplorer = configDataProcessingSeaExplorer();
 config.gridding_options = configDataGridding();
 
+%% Configure basic quality control options.
+config.basic_qc_config = configRTBasicQualityControl();
+config.basic_qc_config.ignore_qc_variables_for_netCDF = configRTOutputNetCDFIgnoreQcParameters();
 
 %% Configure file download and conversion and data loading.
 config.file_options_slocum = configRTFileOptionsSlocum();
 config.file_options_seaglider = configRTFileOptionsSeaglider();
 config.file_options_seaexplorer = configRTFileOptionsSeaExplorer();
 
-
 %% Configure dockserver and basestation glider data sources.
 config.dockservers = configDockservers();
 config.basestations = configBasestations();
 
-
 %% Configure data base deployment information source.
 config.db_access = configDBAccess();
-[config.db_query, config.db_fields] = configRTDeploymentInfoQueryDB();
 
-
+ if config.db_access.useSQL
+    [config.db_query, config.db_fields] = configRTDeploymentInfoQueryDB();
+ end
+ 
 %% Get list of deployments to process from database.
-disp('Querying information of glider deployments...');
+if config.db_access.useSQL
+    %Use SQL Database to extract Deployment Metadata
+ disp('Querying deployment information from Database...');
 deployment_list = getDeploymentInfoDB( ...
-  config.db_query, config.db_access.name, ...
-  'user', config.db_access.user, 'pass', config.db_access.pass, ...
-  'server', config.db_access.server, 'driver', config.db_access.driver, ...
-  'fields', config.db_fields);
+config.db_query, config.db_access.name, ...
+ 'user', config.db_access.user, 'pass', config.db_access.pass, ...
+ 'server', config.db_access.server, 'driver', config.db_access.driver, ...
+ 'fields', config.db_fields);
 if isempty(deployment_list)
-  disp('No active glider deployments available.');
-  return
-else
-  disp(['Active deployments found: ' num2str(numel(deployment_list)) '.']);
+   disp('Selected glider deployments are not available.');
+   return
+ else
+   disp(['Selected deployments found: ' num2str(numel(deployment_list)) '.']);
 end
-
+else
+    %Use Script File to extract Deployment Metadata
+   disp('Querying deployment information from Script File...');
+   deployment_list = getDeploymentInfoScript();
+end
 
 %% Process active deployments.
 for deployment_idx = 1:numel(deployment_list)
@@ -321,11 +325,14 @@ for deployment_idx = 1:numel(deployment_list)
     preprocessing_options.calibration_parameter_list = deployment.calibrations;
   end
   gridding_options = config.gridding_options;
-  netcdf_l1_options = config.output_netcdf_l1;
-  netcdf_l2_options = config.output_netcdf_l2;
   figproc_options = config.figures_processed;
   figgrid_options = config.figures_gridded;
-
+  
+  %% Configure netCDF variables for QC variables.
+  netcdf_l1_options = config.output_netcdf_l1;
+  netcdf_l1_options.variables = addQcToNetcdfVariables(netcdf_l1_options.variables);
+  netcdf_l2_options = config.output_netcdf_l2;
+  netcdf_l2_options.variables = addQcToNetcdfVariables(netcdf_l2_options.variables);
 
   %% Start deployment processing logging.
   % DIARY will fail if log file base directory does not exist.
@@ -355,10 +362,8 @@ for deployment_idx = 1:numel(deployment_list)
   disp(['Deployment processing start time: ' ...
         datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00:00')]);
 
-
   %% Report toolbox version:    
   disp(['Toolbox version: ' glider_toolbox_ver]);
-
 
   %% Report deployment information.
   disp('Deployment information:')
@@ -373,7 +378,6 @@ for deployment_idx = 1:numel(deployment_list)
   else
     disp(['  Deployment end       : ' datestr(deployment_end)]);
   end
-
 
   %% Download deployment glider files from station(s).
   % Check for new or updated deployment files in every dockserver.
@@ -436,7 +440,6 @@ for deployment_idx = 1:numel(deployment_list)
     otherwise
   end
 
-
   %% Convert binary glider files to ascii human readable format.
   % For Seaglider, do nothing but join the lists of new eng and log files.
   % For Slocum, convert each downloaded binary file to ascii format in the
@@ -485,7 +488,6 @@ for deployment_idx = 1:numel(deployment_list)
       new_files = {new_files(~[new_files.isdir]).name};
     otherwise
   end
-
 
   %% Load data from ascii deployment glider files if there is new data.
   if isempty(new_files)
@@ -539,12 +541,10 @@ for deployment_idx = 1:numel(deployment_list)
     end
   end
 
-
   %% Add source files to deployment structure if loading succeeded.
   if ~isempty(source_files)
     deployment.source_files = sprintf('%s\n', source_files{:});
   end
-
 
   %% Generate L0 NetCDF file (raw/preprocessed data), if needed and possible.
   if ~isempty(fieldnames(data_raw)) && ~isempty(netcdf_l0_file)
@@ -596,7 +596,6 @@ for deployment_idx = 1:numel(deployment_list)
     end
   end
 
-
   %% Preprocess raw glider data.
   if ~isempty(fieldnames(data_raw))
     disp('Preprocessing raw data...');
@@ -616,7 +615,29 @@ for deployment_idx = 1:numel(deployment_list)
     end
   end
 
-
+  %% Configure Quality Control parameters for preprocessing data.
+  if ~isempty(fieldnames(data_preprocessed))
+      disp('Reading defined QC methods for preprocessed data...')
+      try
+          config.preprocessing_qc_options = configRTDataPreprocessingQC();
+      catch exception
+          disp('Error reading QC methods.');
+          disp(getReport(exception, 'extended'));
+      end
+  end
+  
+  %% Perform Quality Control methods upon preprocessing data and log differences.
+  if ~isempty(fieldnames(data_preprocessed)) && ~isempty(fieldnames(config.preprocessing_qc_options)) && config.basic_qc_config.preprocessing.performQC
+      disp('Perform QC upon preprocessed data...')
+      try
+          qc_preprocessed = performGriddedQC(data_preprocessed, config.preprocessing_qc_options);
+          logQC(qc_preprocessed, data_preprocessed, config.basic_qc_config.preprocessing.summaryFileName);
+      catch exception
+          disp('Error processing QC methods.');
+          disp(getReport(exception, 'extended'));
+      end
+  end
+  
   %% Process preprocessed glider data.
   if ~isempty(fieldnames(data_preprocessed))
     disp('Processing glider data...');
@@ -628,14 +649,50 @@ for deployment_idx = 1:numel(deployment_list)
       disp(getReport(exception, 'extended'));
     end
   end
+  
+  %% Configure Quality Control parameters for processing data.
+  if ~isempty(fieldnames(data_processed))
+      disp('Reading defined QC methods for processed data...')
+      try
+          config.processing_qc_options = configRTDataProcessingQC();
+          qc_processed = struct([]);
+      catch exception
+          disp('Error reading QC methods.');
+          disp(getReport(exception, 'extended'));
+      end
+  end
 
+  %% Perform Quality Control methods upon processing data.
+  if ~isempty(fieldnames(data_processed)) && ~isempty(fieldnames(config.processing_qc_options)) && config.basic_qc_config.processing.performQC
+      disp('Perform QC upon processed data...')
+      try
+          qc_processed = performGriddedQC(data_processed, config.processing_qc_options);
+          logQC(qc_processed, data_processed, config.basic_qc_config.processing.summaryFileName);
+      catch exception
+          disp('Error processing QC methods.');
+          disp(getReport(exception, 'extended'));
+      end
+  end
+  
+  %% Plot Suspicous Profiles (experimental useage only).
+  if ~isempty(fieldnames(data_processed)) && ~isempty(fieldnames(qc_processed)) && config.basic_qc_config.processing.plotSuspiciousProfiles
+      disp('Plotting suspicious profiles for all variables...')
+      try
+          plot_suspicious_profiles(qc_processed, data_processed)
+      catch exception
+          disp('Error plotting suspicous profiles.');
+          disp(getReport(exception, 'extended'));
+      end
+  end
 
   %% Generate L1 NetCDF file (processed data), if needed and possible.
   if ~isempty(fieldnames(data_processed)) && ~isempty(netcdf_l1_file)
     disp('Generating NetCDF L1 output...');
+    data_processed_combined = combineDataAndQc(data_processed, qc_processed);
+    data_processed_combined = removeVariablesFromStruct(data_processed_combined, config.basic_qc_config.ignore_qc_variables_for_netCDF, 'QC_');
     try
       outputs.netcdf_l1 = generateOutputNetCDF( ...
-        netcdf_l1_file, data_processed, meta_processed, deployment, ...
+        netcdf_l1_file, data_processed_combined, meta_processed, deployment, ...
         netcdf_l1_options.variables, ...
         netcdf_l1_options.dimensions, ...
         netcdf_l1_options.attributes);
@@ -647,7 +704,6 @@ for deployment_idx = 1:numel(deployment_list)
       disp(getReport(exception, 'extended'));
     end
   end
-
 
   %% Generate processed data figures.
   if ~isempty(fieldnames(data_processed)) && ~isempty(figure_dir)
@@ -663,7 +719,6 @@ for deployment_idx = 1:numel(deployment_list)
     end
   end
 
-
   %% Grid processed glider data.
   if ~isempty(fieldnames(data_processed))
     disp('Gridding glider data...');
@@ -675,14 +730,38 @@ for deployment_idx = 1:numel(deployment_list)
       disp(getReport(exception, 'extended'));
     end
   end
-
+  
+  %% Configure Quality Control parameters for gridded data.
+  if ~isempty(fieldnames(data_preprocessed))
+      disp('Reading defined QC methods for gridded data...')
+      try
+          config.gridding_qc_options = configRTDataGriddingQC();
+          qc_gridded=([]);
+      catch exception
+          disp('Error reading QC methods.');
+          disp(getReport(exception, 'extended'));
+      end
+  end
+  
+  %% Perform Quality Control methods upon gridded data.
+  if ~isempty(fieldnames(data_gridded)) && ~isempty(fieldnames(config.gridding_qc_options)) && config.basic_qc_config.gridding.performQC
+      disp('Perform QC upon gridded data...')
+      try
+          qc_gridded = performGriddedQC(data_gridded, config.gridding_qc_options);
+      catch exception
+          disp('Error processing QC methods.');
+          disp(getReport(exception, 'extended'));
+      end
+  end
 
   %% Generate L2 (gridded data) netcdf file, if needed and possible.
   if ~isempty(fieldnames(data_gridded)) && ~isempty(netcdf_l2_file)
     disp('Generating NetCDF L2 output...');
+    data_gridded_combined = combineDataAndQc(data_gridded, qc_gridded);
+    data_gridded_combined = removeVariablesFromStruct(data_gridded_combined, config.basic_qc_config.ignore_qc_variables_for_netCDF, 'QC_');
     try
       outputs.netcdf_l2 = generateOutputNetCDF( ...
-        netcdf_l2_file, data_gridded, meta_gridded, deployment, ...
+        netcdf_l2_file, data_gridded_combined, meta_gridded, deployment, ...
         netcdf_l2_options.variables, ...
         netcdf_l2_options.dimensions, ...
         netcdf_l2_options.attributes);
@@ -694,7 +773,6 @@ for deployment_idx = 1:numel(deployment_list)
       disp(getReport(exception, 'extended'));
     end
   end
-
 
   %% Generate gridded data figures.
   if ~isempty(fieldnames(data_gridded)) && ~isempty(figure_dir)
@@ -709,7 +787,6 @@ for deployment_idx = 1:numel(deployment_list)
       disp(getReport(exception, 'extended'));
     end
   end
-
 
   %% Copy selected products to corresponding public location, if needed.
   if ~isempty(fieldnames(outputs))
@@ -748,7 +825,6 @@ for deployment_idx = 1:numel(deployment_list)
       end
     end
   end
-
 
   %% Copy selected figures to its public location, if needed.
   % Copy all generated figures or only the ones in the include list (if any) 
@@ -848,7 +924,6 @@ for deployment_idx = 1:numel(deployment_list)
       end
     end
   end
-
 
   %% Stop deployment processing logging.
   disp(['Deployment processing end time: ' ...
