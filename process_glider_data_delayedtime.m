@@ -199,7 +199,7 @@ config.processing_options_seaexplorer = configDataProcessingSeaExplorer();
 config.gridding_options = configDataGridding();
 
 %% Configure basic quality control options.
-config.basic_qc_config = configBasicQualityControl();
+config.basic_qc_config = configDTBasicQualityControl();
 config.basic_qc_config.ignore_qc_variables_for_netCDF = configDTOutputNetCDFIgnoreQcParameters();
 
 %% Configure file download and conversion and data loading.
@@ -540,7 +540,7 @@ for deployment_idx = 1:numel(deployment_list)
   if ~isempty(fieldnames(data_preprocessed))
       disp('Reading defined QC methods for preprocessed data...')
       try
-          config.preprocessing_qc_options = configDataPreprocessingQC();
+          config.preprocessing_qc_options = configDTDataPreprocessingQC();
       catch exception
           disp('Error reading QC methods.');
           disp(getReport(exception, 'extended'));
@@ -575,7 +575,7 @@ for deployment_idx = 1:numel(deployment_list)
   if ~isempty(fieldnames(data_processed))
       disp('Reading defined QC methods for processed data...')
       try
-          config.processing_qc_options = configDataProcessingQC();
+          config.processing_qc_options = configDTDataProcessingQC();
           qc_processed = struct([]);
       catch exception
           disp('Error reading QC methods.');
@@ -656,7 +656,7 @@ for deployment_idx = 1:numel(deployment_list)
   if ~isempty(fieldnames(data_preprocessed))
       disp('Reading defined QC methods for gridded data...')
       try
-          config.gridding_qc_options = configDataGriddingQC();
+          config.gridding_qc_options = configDTDataGriddingQC();
           qc_gridded=([]);
       catch exception
           disp('Error reading QC methods.');
