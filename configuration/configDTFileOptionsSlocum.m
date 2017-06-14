@@ -65,7 +65,7 @@ function slocum_options = configDTFileOptionsSlocum()
   
   % Binary file conversion to text format
   % (disable it when reprocessing deployments with no new binary data):
-  slocum_options.format_conversion = true;
+  slocum_options.format_conversion = false;
   
   % All binary files, renamed or not:
   % slocum_options.xbd_name_pattern = '^(.*)\.([smdtne]bd)$';

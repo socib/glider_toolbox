@@ -61,17 +61,17 @@ function public_paths = configRTPathsPublic()
 
   error(nargchk(0, 0, nargin, 'struct'));
 
-  netcdf_basedir        = '/path/to/public/real_time';
+  netcdf_basedir        = '/data/current/opendap/observational/auv/glider';
   netcdf_glider_dir     = '${GLIDER_NAME,l,s/-/_}-${GLIDER_INSTRUMENT_NAME,l,s/-/_}';
   netcdf_deployment_dir = '${DEPLOYMENT_START,Tyyyy}';
   netcdf_l0  = 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L0_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.nc';
   netcdf_l1  = 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L1_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.nc';
   netcdf_l2  = 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L2_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.nc';
 
-  figure_basedir = '/path/to/public/real_time';
+  figure_basedir = '/home/glider/public_html/rt';
   figure_glider_dir     = '${GLIDER_NAME}';
   figure_deployment_dir = '${DEPLOYMENT_START,Tyyyymmdd}';
-  figure_baseurl = 'http://myserver/url/to/real_time';
+  figure_baseurl = 'http://www.socib.es/users/glider/rt';
   figure_list = '${DEPLOYMENT_ID,%d}_figures.json';
 
   public_paths.netcdf_l0 = fullfile(netcdf_basedir, netcdf_glider_dir, 'L0', netcdf_deployment_dir, netcdf_l0);

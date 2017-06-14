@@ -44,13 +44,13 @@ function db_access = configDBAccess()
   
   %Boolean to Specify Whether to use SQL Database (1)
   %or Script (0) for Deployment Metadata
-  db_access.useSQL = 0;
+  db_access.useSQL = 1;
 
   %SQL Database Details
-  db_access.server = 'jdbc:postgresql://mydb.myportal.mydomain:5433/my_data_base';
-  db_access.name = 'my_data_base';
-  db_access.user = 'myself';
-  db_access.pass = 'top_secret';
+  db_access.server = 'jdbc:postgresql://apps.socib.es:5433/';
+  db_access.name = 'management';
+  db_access.user = 'postgres';
+  db_access.pass = '+mngp0st+';
   db_access.driver = 'org.postgresql.Driver';
 
 end

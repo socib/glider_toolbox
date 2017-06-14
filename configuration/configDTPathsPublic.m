@@ -62,9 +62,9 @@ function public_paths = configDTPathsPublic()
   error(nargchk(0, 0, nargin, 'struct'));
   
   %Set whether or not to produce a public version of processed
-  public_paths.create_public_copy = false;
+  public_paths.create_public_copy = true;
 
-  netcdf_basedir        = '/path/to/delayed/time';
+  netcdf_basedir        = '/data/current/opendap/observational/auv/glider';
   netcdf_glider_dir     = '${GLIDER_NAME,l,s/-/_}-${GLIDER_INSTRUMENT_NAME,l,s/-/_}';
   netcdf_deployment_dir = '${DEPLOYMENT_START,Tyyyy}';
   netcdf_l0  = 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L0_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_dt.nc';

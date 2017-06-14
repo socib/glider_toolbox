@@ -56,7 +56,7 @@ function local_paths = configRTPathsLocal()
 
   error(nargchk(0, 0, nargin, 'struct'));
 
-  base_dir       = '/path/to/rt_data';
+  base_dir       = '/home/glider/data_rt';
   glider_dir     = '${GLIDER_NAME}';
   deployment_dir = '${DEPLOYMENT_START,Tyyyymmdd}';
   binary_dir = 'binary';

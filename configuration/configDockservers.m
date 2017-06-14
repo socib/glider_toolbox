@@ -42,12 +42,14 @@ function dockservers = configDockservers()
 
   error(nargchk(0, 0, nargin, 'struct'));
 
-  dockservers(1).url  = 'http://mydockserver01.myportal.mydomain';
-  dockservers(1).user = 'myself';
-  dockservers(1).pass = 'top_secret';
+  %% Main dockserver at IMEDEA TMOOS installations.
+  dockservers(1).host = '130.206.32.240';
+  dockservers(1).user = 'localuser';
+  dockservers(1).conn = @sftp;
 
-  dockservers(2).url  = 'http://mydockserver02.myportal.mydomain';
-  dockservers(2).user = 'myself';
-  dockservers(2).conn = @sftp;
+  %% Secondary dockserver at IMEDEA TMOOS installations.
+  %dockservers(2).host = '130.206.32.243';
+  %dockservers(2).user = 'localuser';
+  %dockservers(2).conn = @sftp;
 
 end
