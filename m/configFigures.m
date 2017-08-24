@@ -438,7 +438,7 @@ function [figures_proc, figures_grid] = configFigures()
   figures_grid.profiles_flntu.plotopts.axsprops(1:2) = default_axes;
   figures_grid.profiles_flntu.prntopts = default_prntopts;
   figures_grid.profiles_flntu.prntopts.filename = 'flntu_profiles';
-  figures_grid.profiles_flntu.prntopts.title = 'Chlorohpyll and turbidity profiles';
+  figures_grid.profiles_flntu.prntopts.title = 'Chlorophyll and turbidity profiles';
   figures_grid.profiles_flntu.prntopts.comment = 'Profile statistics of chlorophyll and turbidity.';
 
   figures_grid.profiles_bbfl2.plotfunc = @plotProfileStatistics;
@@ -455,7 +455,7 @@ function [figures_proc, figures_grid] = configFigures()
   figures_grid.profiles_bbfl2.plotopts.axsprops(1:2) = default_axes;
   figures_grid.profiles_bbfl2.prntopts = default_prntopts;
   figures_grid.profiles_bbfl2.prntopts.filename = 'bbfl2_profiles';
-  figures_grid.profiles_bbfl2.prntopts.title = 'Chlorohpyll and CDOM profiles';
+  figures_grid.profiles_bbfl2.prntopts.title = 'Chlorophyll and CDOM profiles';
   figures_grid.profiles_bbfl2.prntopts.comment = 'Profile statistics of chlorophyll and CDOM.';
 
   figures_grid.profiles_oxygen.plotfunc = @plotProfileStatistics;
