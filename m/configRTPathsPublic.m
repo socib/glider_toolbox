@@ -71,7 +71,7 @@ function public_paths = configRTPathsPublic()
   figure_basedir = '/home/mcharcos/public_html/rt';
   figure_glider_dir     = '${GLIDER_NAME}';
   figure_deployment_dir = '${DEPLOYMENT_START,Tyyyymmdd}';
-  baseurl = 'http://socib.es/users/mcharcos/rt';
+  figure_baseurl = 'http://socib.es/users/mcharcos/rt';
   figure_list = '${DEPLOYMENT_ID,%d}_figures.json';
 
   public_paths.netcdf_l0 = fullfile(netcdf_basedir, netcdf_glider_dir, 'L0', netcdf_deployment_dir, netcdf_l0);
