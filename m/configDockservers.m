@@ -43,8 +43,9 @@ function dockservers = configDockservers()
   error(nargchk(0, 0, nargin, 'struct'));
 
   dockservers(1).url  = 'http://mydockserver01.myportal.mydomain';
-  dockservers(1).user = 'myself';
-  dockservers(1).pass = 'top_secret';
+  dockservers(1).host = ip.of.your.host;
+  dockservers(1).user = 'localuser';
+  dockservers(1).pass = ;
 
   dockservers(2).url  = 'http://mydockserver02.myportal.mydomain';
   dockservers(2).user = 'myself';

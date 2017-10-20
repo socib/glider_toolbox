@@ -56,14 +56,27 @@ function local_paths = configDTPathsLocal()
 
   error(nargchk(0, 0, nargin, 'struct'));
 
-  local_paths.binary_path    = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/binary';
-  local_paths.cache_path     = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/binary';
-  local_paths.log_path       = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/log';
-  local_paths.ascii_path     = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/ascii';
-  local_paths.figure_path    = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/figures';
-  local_paths.netcdf_l0      = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l0.nc';
-  local_paths.netcdf_l1      = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l1.nc';
-  local_paths.netcdf_l2      = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l2.nc';
-  local_paths.processing_log = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/processing.log';
+  base_dir = '/LOCALDATA/mcharcos/data_dt';
+  glider_dir     = '${GLIDER_NAME}';
+  deployment_dir = '${DEPLOYMENT_START,Tyyyymmdd}';
+  binary_dir = 'binary';
+  log_dir = 'log';
+  ascii_dir = 'ascii';
+  figure_dir = 'figures';
+  netcdf_dir = 'netcdf';
+  netcdf_l0  = 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L0_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_dt.nc';
+  netcdf_l1  = 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L1_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_dt.nc';
+  netcdf_l2  = 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L2_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_dt.nc';
+  processing_log = 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_dt.log';
+
+  local_paths.binary_path    = fullfile(base_dir, glider_dir, deployment_dir, binary_dir);
+  local_paths.cache_path     = local_paths.binary_path;
+  local_paths.log_path       = fullfile(base_dir, glider_dir, deployment_dir, log_dir);
+  local_paths.ascii_path     = fullfile(base_dir, glider_dir, deployment_dir, ascii_dir);
+  local_paths.figure_path    = fullfile(base_dir, glider_dir, deployment_dir, figure_dir);
+  local_paths.netcdf_l0      = fullfile(base_dir, glider_dir, deployment_dir, netcdf_dir, netcdf_l0);
+  local_paths.netcdf_l1      = fullfile(base_dir, glider_dir, deployment_dir, netcdf_dir, netcdf_l1);
+  local_paths.netcdf_l2      = fullfile(base_dir, glider_dir, deployment_dir, netcdf_dir, netcdf_l2);
+  local_paths.processing_log = fullfile(base_dir, glider_dir, deployment_dir, processing_log);
 
 end
