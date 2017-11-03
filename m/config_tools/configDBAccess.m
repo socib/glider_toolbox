@@ -40,8 +40,10 @@ function db_access = configDBAccess()
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(0, 0, nargin, 'struct'));
-
+  narginchk(0, 0);
+  
+  % When using database, set nodb to false and configure DB settings 
+  db_access.active = 1;  
   db_access.server = 'jdbc:postgresql://mydb.myportal.mydomain:5433/my_data_base';
   db_access.name = 'my_data_base';
   db_access.user = 'myself';

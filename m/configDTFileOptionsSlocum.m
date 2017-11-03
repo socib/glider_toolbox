@@ -61,11 +61,11 @@ function slocum_options = configDTFileOptionsSlocum()
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(0, 0, nargin, 'struct'));
+  narginchk(0, 0);
   
   % Binary file conversion to text format
   % (disable it when reprocessing deployments with no new binary data):
-  slocum_options.format_conversion = true;
+  slocum_options.format_conversion = 1;
   
   % All binary files, renamed or not:
   % slocum_options.xbd_name_pattern = '^(.*)\.([smdtne]bd)$';

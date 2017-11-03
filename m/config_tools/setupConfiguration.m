@@ -1,0 +1,403 @@
+function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
+% SETUPCONFIGURATION  Read configuration for processing glider data
+%
+%  Syntax:
+%    [CONFIG] = SETUPCONFIGURATION(GLIDER_TOOLBOX_DIR, FCONFIG)
+%    [CONFIG] = SETUPCONFIGURATION(GLIDER_TOOLBOX_DIR, FCONFIG, OPT1, VAL1, ...)
+%
+%  Description:
+%    SETUPCONFIGURATION creates a configuration structure that can be used
+%    for processing  glider data using DEPLOYMENTDATAPROCESSING. The
+%    configuration structure contains information for the following:
+%          - External libraries
+%          - Dockserver
+%          - Databases
+%          - Input and output local and public directory tree
+%          - Binary to Ascii conversion
+%          - Figures and netCDF creation
+%          - L0, L1 and L2 variables
+%          - L0, L1 and L2 processing
+%          - Quality control
+%
+%    The configuration is created in two steps. Firstly, for each type of
+%    configurtion the appropriate function is called that returns the default
+%    configuration. These function are described below and can be edited by
+%    the user if different default parameters are required. The second step
+%    consists of reading specific parameter values to overwrite the default
+%    ones. These values are read from a configuration file that should follow
+%    the format define by the template config/configTemplate.txt. The
+%    configuration file may contain only a subset of the parameters. Only
+%    those parameters contained in the configuration file will be overwriten.
+%    The values of the other parameters remain the default values. As
+%    specified in the template, the input template may refer to other
+%    templates containing the values for the specific subset of variables.
+%
+%  Input:
+%    GLIDER_TOOLBOX_DIR is the path of the glider toolbox installation.
+%    This path must contain the m folder with the matlab code. 
+%
+%  Output:
+%    CONFIG is the configuration struture. It contains the following
+%    fields:
+%       - STATUS: Name of the configuration file if any.
+%       - WRC_PROGS: External libraries (configWRCPrograms)
+%           -- wrc_progs.status: File name or configuration function 
+%           -- wrc_progs.base_dir: Location of binary files relative to base_dir           
+%           -- wrc_progs.dbd2asc: File name of binary to ascii script relative to base_dir
+%           -- wrc_progs.dba_merge: File name of dba merge scrip relative to base_dir 
+%           -- wrc_progs.dba_sensor_filter: File name of sensor filter script relative to base_dir
+%           -- wrc_progs.dba_time_filter: File name of time filter script relative to base_dir 
+%           -- wrc_progs.dba2_orig_matlab: File name of orig matlab script relative to base_dir
+%           -- wrc_progs.rename_dbd_files: File name of CF2 Persistor
+%                        file rename script relative to base_dir
+%       - LOCAL_PATHS: Definition of data folder structure (configPathsLocal)
+%           -- local_paths.status: File name or configuration function 
+%           -- local_paths.base_dir: Base directory containing the other folders
+%           -- local_paths.binary_path: Directory for binary files under relative to base_dir
+%           -- local_paths.cache_path: Directory for cache of db2asc files relative to base_dir
+%           -- local_paths.log_path: Directory for log files relative to base_dir
+%           -- local_paths.ascii_path: Directory for ascii files relative to base_dir
+%           -- local_paths.figure_path: Directory for figure files relative to base_dir
+%           -- local_paths.netcdf_l0: File name for L0 products relative to base_dir
+%           -- local_paths.netcdf_l1: File name for L1 products relative to base_dir
+%           -- local_paths.netcdf_l2: File name for L2 products relative to base_dir
+%           -- local_paths.processing_log: File name for log file relative to base_dir
+%       - PUBLIC_PATHS: Definition of public paths and urls (configPathsPublic)
+%           -- public_paths.status: File name or configuration function 
+%           -- public_paths.base_dir: Base directory containing the other folders
+%           -- public_paths.netcdf_l0: File name for L0 products relative to base_dir
+%           -- public_paths.netcdf_l1: File name for L1 products relative to base_dir
+%           -- public_paths.netcdf_l2: File name for L2 products relative to base_dir
+%           -- public_paths.figure_dir: Directory for public figures
+%           -- public_paths.base_url: URL of public access for json creation
+%           -- public_paths.figure_url: URL for public figures for json creation
+%           -- public_paths.figure_info: json name format
+%       - DB_ACCESS: Definition of database access (configDBAccess)
+%           -- db_access.status: File name or configuration function 
+%           -- db_access.active: Indicates the use of database  
+%           -- db_access.server: DB server name/ip
+%           -- db_access.name: DB name
+%           -- db_access.user: DB user name for access
+%           -- db_access.pass: DB password for access
+%           -- db_access.driver: DB drivers
+%       - DOCKSERVERS: Definition of dockserver access (configDockservers)
+%           -- dockservers.status: File name or configuration function 
+%           -- dockservers.active: Indicates the use of dockserver
+%           -- dockservers.remote_base_dir: Directory in remote server
+%           -- dockservers.remote_xbd_dir: Directory of xdb files relative to base_dir 
+%           -- dockservers.remote_log_dir: Directory of log files relative to base_dir
+%           -- dockservers.server(1).url: Dockserver url
+%           -- dockservers.server(1).host: Dockserver host name
+%           -- dockservers.server(1).user: User for dockserver access
+%           -- dockservers.server(1).pass: Password for dockserver access
+%           -- dockservers.server(1).conn: Communication protocol to access
+%       - FILE_OPTIONS_SLOCUM: Options for creating files from Slocum data (configDTFileOptionsSlocum)
+%           -- file_options_slocum.status: File name or configuration function 
+%           -- file_options_slocum.format_conversion: Indicates the use of
+%                        binary to ascii conversion
+%           -- file_options_slocum.xbd_name_pattern: Pattern to indentify
+%                        valid binary files
+%           -- file_options_slocum.dba_name_replace: Pattern for creating
+%                        ascii file names
+%           -- file_options_slocum.dba_name_pattern_nav: Navigation file pattern
+%           -- file_options_slocum.dba_name_pattern_sci: Science file pattern
+%           -- file_options_slocum.dba_time_sensor_nav: Navigation files
+%                         time parameter
+%           -- file_options_slocum.dba_time_sensor_sci: Science files
+%                         time parameter
+%           -- file_options_slocum.dba_sensors: Name of parameters to
+%                         consider from binary files (array)
+%
+%    The following configuration parameters do not allow configuration file
+%    overwrite. Check function for details. Some of them allow for delayed
+%    or real time mode configuration according to the input processing_mode
+%    option.
+%       - FIGURES_PROCESSED and FIGURES_GRIDDED: Definitions for figure
+%                 creation (configFigures).  
+%       - OUTPUT_NETCDF_L0_SLOCUM: Definition for L0 netCDF file creation
+%                 for Slocum data (configXTOutputNetCDFL0Slocum). 
+%       - OUTPUT_NETCDF_L0_SEAGLIDER: Definition for L0 netCDF file creation
+%                 for Seaglider data (configXTOutputNetCDFL0Seaglider). 
+%       - OUTPUT_NETCDF_L0_SEAEXPLORER: Definition for L0 netCDF file creation
+%                 for SeaExplorer data (configXTOutputNetCDFL0SeaExplorer). 
+%       - OUTPUT_NETCDF_L1: Definition for L1 netCDF file creation (configXTOutputNetCDFL1). 
+%       - OUTPUT_NETCDF_L1: Definition for L1 netCDF-EGO file creation (configOutputNetCDFEGOL1). 
+%       - OUTPUT_NETCDF_L2: Definition for L2 netCDF file creation (configXTOutputNetCDFL2). 
+%       - PREPROCESSING_OPTIONS_SLOCUM: Definition of pre-processing data
+%                from Slocum (configDataPreprocessingSlocum)
+%       - PREPROCESSING_OPTIONS_SEAGLIDER: Definition of pre-processing data
+%                from Seaglider (configDataPreprocessingSeaglider)
+%       - PREPROCESSING_OPTIONS_SEAEXPLORER: Definition of pre-processing data
+%                from SeaExplorer (configDataPreprocessingSeaExplorer)
+%       - PROCESSING_OPTIONS_SLOCUM: Definition of processing data
+%                from Slocum G1 (configDataProcessingSlocumG1)
+%       - PROCESSING_OPTIONS_SLOCUM: Definition of processing data
+%                from Slocum G2 (configDataProcessingSlocumG2)
+%       - PROCESSING_OPTIONS_SEAGLIDER: Definition of processing data
+%                from Seaglider (configDataProcessingSeaglider)
+%       - PROCESSING_OPTIONS_SEAEXPLORER: Definition of processing data
+%                from SeaExplorer (configDataProcessingSeaExplorer)
+%       - GRIDDING_OPTIONS: Definition for gridding (L2) process (configDataGridding)
+%       - FILE_OPTIONS_SEAGLIDER: Options for creating files from Seaglider
+%                data (configXTFileOptionsSeaglider)
+%       - FILE_OPTIONS_SEAEXPLORER: Options for creating files from Seaexplorer
+%                data (configXTFileOptionsSeaExplorer)
+% 
+%  Options:
+%    FCONFIG is the name of the configuration file to use if necessary. The
+%      options for the configuration will be read from this file if it
+%      follows a specific format defined in the configuration template
+%      (config/configTemplate.txt). The values extracted from the file
+%      overwrites the default values.
+%
+%    PROCESSING_MODE indicates if the processing is for real time data or
+%      delayed mode data. The difference happens in the configuration since
+%      the data is gathered differently and has different formats and
+%      content.
+%
+%  Default Values:
+%      Default values result from the call of the 
+%
+%  Authors:
+%    Miguel Charcos Llorens  <mcharcos@socib.es>
+%
+%  Copyright (C) 2013-2016
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
+%
+%  This program is free software: you can redistribute it and/or modify
+%  it under the terms of the GNU General Public License as published by
+%  the Free Software Foundation, either version 3 of the License, or
+%  (at your option) any later version.
+%
+%  This program is distributed in the hope that it will be useful,
+%  but WITHOUT ANY WARRANTY; without even the implied warranty of
+%  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%  GNU General Public License for more details.
+%
+%  You should have received a copy of the GNU General Public License
+%  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+    narginchk(2, 2);
+    options.processing_mode = 'rt';  %TODO: we can probably standarize the processing to avoid having this variable
+    options.fconfig = '';
+    
+    %% Parse optional arguments.
+    % Get option key-value pairs in any accepted call signature.
+    argopts = varargin;
+    if isscalar(argopts) && isstruct(argopts{1})
+        % Options passed as a single option struct argument:
+        % field names are option keys and field values are option values.
+        opt_key_list = fieldnames(argopts{1});
+        opt_val_list = struct2cell(argopts{1});
+    elseif mod(numel(argopts), 2) == 0
+        % Options passed as key-value argument pairs.
+        opt_key_list = argopts(1:2:end);
+        opt_val_list = argopts(2:2:end);
+    else
+        error('glider_toolbox:gliderDataProcessingEGO:InvalidOptions', ...
+              'Invalid optional arguments (neither key-value pairs nor struct).');
+    end
+    % Overwrite default options with values given in extra arguments.
+    for opt_idx = 1:numel(opt_key_list)
+        opt = lower(opt_key_list{opt_idx});
+        val = opt_val_list{opt_idx};
+        if isfield(options, opt)
+          options.(opt) = val;
+        else
+          error('glider_toolbox:gliderDataProcessingEGO:InvalidOption', ...
+                'Invalid option: %s.', opt);
+        end
+    end
+    options.processing_mode = lower(options.processing_mode);
+  
+    %% Read configuration file
+    readconfig = struct([]);
+    if ~strcmp(options.fconfig, '')
+        readconfig = readConfigFile(options.fconfig);
+        config.status = options.fconfig;
+        disp(['Configuration file ' options.fconfig]);
+    else 
+        disp('No configuration file was input');
+        config.status = '';
+    end
+  
+    %% Configure external tools.
+    config.wrc_progs = configExternalLibs(glider_toolbox_dir);
+    config.wrc_progs.status = 'configExternalLibs';
+
+    if ~isempty(readconfig) && isfield(readconfig, 'wrc_progs')
+        if isfield(readconfig.wrc_progs, 'fconfig') 
+          config.wrc_progs.status = readconfig.wrcprogs.fconfig;
+          config_wrcprogs = readConfigFile(readconfig.wrc_progs.fconfig);
+        else
+          config.wrc_progs.status = fconfig;
+          config_wrcprogs = readconfig.wrc_progs;
+        end
+        fields = fieldnames(config_wrcprogs);
+        for i = 1:numel(fields)
+            config.wrc_progs.(fields{i}) = config_wrcprogs.(fields{i});
+        end
+    end
+  
+  
+    %% Configure data path.
+    config.local_paths = configPathsLocal(glider_toolbox_dir);
+    config.local_paths.status = 'configPathsLocal';
+  
+    if ~isempty(readconfig) && isfield(readconfig, 'local_paths')
+        if isfield(readconfig.local_paths, 'fconfig') 
+            config.local_paths.status = readconfig.paths_local.fconfig;
+            config_localpaths = readConfigFile(readconfig.local_paths.fconfig);
+        else
+            config.local_paths.status = fconfig;
+            config_localpaths = readconfig.local_paths;
+        end
+        fields = fieldnames(config_localpaths);
+        for i = 1:numel(fields)
+            config.local_paths.(fields{i}) = config_localpaths.(fields{i});
+        end
+    end
+     
+    %% Configure public path.
+    config.public_paths = configPathsLocal(glider_toolbox_dir);
+    config.public_paths.status = 'configPathsPublic';
+  
+    if ~isempty(readconfig) && isfield(readconfig, 'public_paths')
+        if isfield(readconfig.public_paths, 'fconfig') 
+            config.public_paths.status = readconfig.public_paths.fconfig;
+            config_publicpaths = readConfigFile(readconfig.public_paths.fconfig);
+        else
+            config.public_paths.status = fconfig;
+            config_publicpaths = readconfig.public_paths;
+        end
+        fields = fieldnames(config_publicpaths);
+        for i = 1:numel(fields)
+            config.public_paths.(fields{i}) = config_publicpaths.(fields{i});
+        end
+    end
+  
+    %% Configure data base deployment information source.
+    config.db_access = configDBAccess();
+    config.db_access.status = 'configDBAccess';
+    
+    if ~isempty(readconfig) && isfield(readconfig, 'db_access')
+        if isfield(readconfig.db_access, 'fconfig') 
+          config.db_access.status = readconfig.db_access.fconfig;
+          config_db_access = readConfigFile(readconfig.db_access.fconfig);
+        else
+          config.db_access.status = fconfig;
+          config_db_access = readconfig.db_access;
+        end
+        fields = fieldnames(config_db_access);
+        for i = 1:numel(fields)
+            if strcmp(fields{i},'active') == 0
+                config.db_access.(fields{i}) = config_db_access.(fields{i});
+            else
+                config.db_access.(fields{i}) = strcmp(config_db_access.(fields{i}),'1') + strcmp(config_db_access.(fields{i}),'true');
+            end
+        end
+    end
+
+    %% Configure Dockserver
+    config.dockservers = configDockservers();
+    config.dockservers.status = 'configDockservers';
+    
+    if ~isempty(readconfig) && isfield(readconfig, 'dockservers')
+        if isfield(readconfig.dockservers, 'fconfig') 
+          config.dockservers.status = readconfig.dockservers.fconfig;
+          config_dockservers = readConfigFile(readconfig.dockservers.fconfig);
+        else
+          config.dockservers.status = fconfig;
+          config_dockservers = readconfig.dockservers;
+        end
+        fields = fieldnames(config_dockservers);
+        for i = 1:numel(fields)
+            if strcmp(fields{i},'active') == 0
+                config.dockservers.(fields{i}) = config_dockservers.(fields{i});
+            else
+                config.dockservers.(fields{i}) = strcmp(config_dockservers.(fields{i}),'1') + strcmp(config_dockservers.(fields{i}),'true');
+            end
+        end
+    end
+    
+    %% Configure figure outputs.
+    [config.figures_processed, config.figures_gridded] = configFigures();
+
+
+    %% Configure NetCDF outputs.
+    if strcmp(options.processing_mode, 'dt')
+        config.output_netcdf_l0_slocum      = configDTOutputNetCDFL0Slocum();
+        config.output_netcdf_l0_seaglider   = configDTOutputNetCDFL0Seaglider();
+        config.output_netcdf_l0_seaexplorer = configDTOutputNetCDFL0SeaExplorer();
+        config.output_netcdf_l1             = configDTOutputNetCDFL1();
+        config.output_netcdf_egol1          = configOutputNetCDFEGOL1();    % TODO: different for RT or DT?
+        config.output_netcdf_l2             = configDTOutputNetCDFL2();
+    elseif strcmp(options.processing_mode, 'rt')
+        config.output_netcdf_l0_slocum      = configRTOutputNetCDFL0Slocum();
+        config.output_netcdf_l0_seaglider   = configRTOutputNetCDFL0Seaglider();
+        config.output_netcdf_l0_seaexplorer = configRTOutputNetCDFL0SeaExplorer();
+        config.output_netcdf_l1             = configRTOutputNetCDFL1();
+        config.output_netcdf_egol1          = configOutputNetCDFEGOL1();    % TODO: different for RT or DT?
+        config.output_netcdf_l2             = configRTOutputNetCDFL2();
+    else
+        error('glider_toolbox:setupConfiguration:InvalidOption', ...
+                'Invalid processing mode: %s.', options.processing_mode);
+    end
+
+    %% Configure processing options.
+    config.preprocessing_options_slocum = configDataPreprocessingSlocum();
+    config.preprocessing_options_seaglider = configDataPreprocessingSeaglider();
+    config.preprocessing_options_seaexplorer = configDataPreprocessingSeaExplorer();
+    config.processing_options_slocum_g1 = configDataProcessingSlocumG1();
+    config.processing_options_slocum_g2 = configDataProcessingSlocumG2();
+    config.processing_options_seaglider = configDataProcessingSeaglider();
+    config.processing_options_seaexplorer = configDataProcessingSeaExplorer();
+    config.gridding_options = configDataGridding();
+
+
+    %% Configure Slocum file options
+    if strcmp(options.processing_mode, 'dt')
+        config.file_options_slocum = configDTFileOptionsSlocum();
+    elseif strcmp(options.processing_mode, 'rt')
+        config.file_options_slocum = configRTFileOptionsSlocum();
+    else
+        error('glider_toolbox:setupConfiguration:InvalidOption', ...
+                'Invalid processing mode: %s.', options.processing_mode);
+    end
+    config.file_options_slocum.status = 'configRTFileOptionsSlocum';
+    
+    if ~isempty(readconfig) && isfield(readconfig, 'file_options_slocum')
+        if isfield(readconfig.dockservers, 'fconfig') 
+          config.file_options_slocum.status = readconfig.file_options_slocum.fconfig;
+          config_file_options_slocum = readConfigFile(readconfig.file_options_slocum.fconfig);
+        else
+          config.file_options_slocum.status = fconfig;
+          config_file_options_slocum = readconfig.file_options_slocum;
+        end
+        fields = fieldnames(config_file_options_slocum);
+        for i = 1:numel(fields)
+            if strcmp(fields{i},'format_conversion') == 0
+                config.file_options_slocum.(fields{i}) = config_file_options_slocum.(fields{i});
+            else
+                config.file_options_slocum.(fields{i}) = strcmp(config_file_options_slocum.(fields{i}),'1') + strcmp(config_file_options_slocum.(fields{i}),'true');
+            end
+        end
+    end
+    
+    %% Configure file download and conversion and data loading.
+    if strcmp(options.processing_mode, 'dt')
+        config.file_options_seaglider = configDTFileOptionsSeaglider();
+        config.file_options_seaexplorer = configDTFileOptionsSeaExplorer();
+    elseif strcmp(options.processing_mode, 'rt')
+        config.file_options_seaglider = configRTFileOptionsSeaglider();
+        config.file_options_seaexplorer = configRTFileOptionsSeaExplorer();
+    else
+        error('glider_toolbox:setupConfiguration:InvalidOption', ...
+                'Invalid processing mode: %s.', options.processing_mode);
+    end
+
+
+end
+

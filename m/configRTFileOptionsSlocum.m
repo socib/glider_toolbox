@@ -62,7 +62,7 @@ function slocum_options = configRTFileOptionsSlocum()
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(0, 0, nargin, 'struct'));
+  narginchk(0, 0);
   
   % Surface log files of any kind:
   slocum_options.log_name_pattern = '^\w+_(modem|network|freewave)_\d{8}T\d{6}\.log$';

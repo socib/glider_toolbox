@@ -357,7 +357,7 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
   
-  error(nargchk(2, 56, nargin, 'struct'));
+  narginchk(2, 56);
   
   %% Configure default values for optional profile identification settings.
   default_profiling_time = [];
@@ -636,7 +636,6 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
     meta_proc.depth_ctd.method = 'sw_depth';
   end
   
-  
   %% Identify start and end of profiles.
   % Find preferred vertical coordinate sequence
   % (e.g. navigation depth, CTD-derived depth, pressure...)
@@ -673,7 +672,7 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
     if isfield(profiling_option, 'length') && ~isempty(profiling_option.length)
       profiling_length = profiling_option.legnth;
     end
-    if isfield(profiling_option, 'preiod') && ~isempty(profiling_option.period)
+    if isfield(profiling_option, 'period') && ~isempty(profiling_option.period)
       profiling_period = profiling_option.period;
     end
     profiling_depth_avail = false;

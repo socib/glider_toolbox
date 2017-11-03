@@ -113,6 +113,8 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %            If present and not empty, the selected depth sequence is converted 
 %            through this function. 
 %        Default value: struct('depth', {'m_depth'});
+%      GPS_LIST: gps sensor choices including time, latitude and longitude
+%        TODO: Complete description for gps_list
 %      ATTITUDE_LIST: roll and pitch sensor choices.
 %        Struct array with the roll and pitch sensor choices sequences, 
 %        in order of preference. It should have the following fields:
@@ -271,7 +273,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(2, 24, nargin, 'struct'));
+  narginchk(2, 24);
   
   
   %% Set preprocessing options.
@@ -291,6 +293,10 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
            'conversion',           {@nmea2deg      @nmea2deg});
   options.depth_list = ...
     struct('depth', {'m_depth'});
+  options.gps_list = ...
+    struct('time_gps',       {'m_gps_utc_day' 'm_present_time' 'sci_m_present_time'}, ...
+           'longitude_gps',  {'m_gps_lon'}, ...
+           'latitude_gps',   {'m_gps_lat'}); 
   options.attitude_list = ...
     struct('roll',  {'m_roll'}, ...
            'pitch', {'m_pitch'});
@@ -573,6 +579,52 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
   if ~all(isfield(data_pre, {'longitude' 'latitude'}))
     error('glider_toolbox:preprocessGliderData:MissingSensorPosition', ...
           'No longitude and latitude sensor present in data set.');
+  end
+  
+  %% Select gps time, latitude, logitude coordinate sensor.
+  % Fills the gps time and geo-position values. 
+  % TODO: Add conversion functions and quality of geospatial sensor
+  gps_choice_list = options.gps_list;
+  for gps_choice_idx = 1:numel(gps_choice_list)
+    gps_choice = gps_choice_list(gps_choice_idx);
+    gps_time_field = gps_choice.time_gps;
+    gps_latitude_field = gps_choice.latitude_gps;
+    gps_longitude_field = gps_choice.longitude_gps;
+    if ismember(gps_time_field, field_list) && any(data_raw.(gps_time_field) > 0) && ...
+            ismember(gps_latitude_field, field_list) && any(data_raw.(gps_latitude_field) > 0) && ...
+            ismember(gps_longitude_field, field_list) && any(data_raw.(gps_longitude_field) > 0)
+      % Remove NaN values from data. It may happen that we are using a time
+      % that does not come from the gps data if the gps time data was not
+      % sent by the glider. However, we should match the gps values for the
+      % time and the geolocation
+      gps_valid_values = ~isnan(data_raw.(gps_time_field))     &  ...
+                         ~isnan(data_raw.(gps_latitude_field)) &  ...
+                         ~isnan(data_raw.(gps_longitude_field));
+      
+      data_pre.time_gps = data_raw.(gps_time_field)(gps_valid_values);
+      meta_pre.time_gps.sources = gps_time_field;
+      
+      data_pre.latitude_gps = data_raw.(gps_latitude_field)(gps_valid_values);
+      meta_pre.latitude_gps.sources = gps_latitude_field;
+      
+      data_pre.longitude_gps = data_raw.(gps_longitude_field)(gps_valid_values);
+      meta_pre.longitude_gps.sources = gps_longitude_field;
+                  
+      data_pre.positioning_method = 2.*ones(size(data_raw.(gps_time_field)));
+      data_pre.positioning_method(gps_valid_values) = 0;
+      meta_pre.positioning_method.method = 'preprocessGliderData';
+      meta_pre.positioning_method.sources = gps_time_field;
+      
+      fprintf('Selected gps time/geolocation sensor %d:\n', time_choice_idx); ...
+      fprintf('  time: %s\n', time_field);
+      fprintf('  latitude: %s\n', gps_latitude_field);
+      fprintf('  logitude: %s\n', gps_longitude_field);
+      break
+    end
+  end
+  if ~isfield(data_pre, 'time_gps')
+    error('glider_toolbox:preprocessGliderData:MissingSensorTime', ...
+          'No gps time/geolocation sensor present in data set.');
   end
   
   

@@ -1,0 +1,75 @@
+##
+# Define the configuration parameters for glider toolbox. We need to create a proper template here with a complete description of each parameter
+# 
+# Names of parameters must be unique and defined in some sort of dictionary
+# We may need a separate config file for windows due to the paths
+##
+
+########################
+# WRC_PROGS parameters 
+#   Description: Webb Research Company to deal with Slocum glider data files.
+
+    # This program is needed.
+    wrcprogs = configWRCPrograms.m
+    wrcprogs.base_dir          = ~/.local/bin
+    wrcprogs.dbd2asc           = dbd2asc
+
+    # These programs are optional. Set to empty string if not required
+    wrcprogs.dba_merge         = dba_merge
+    wrcprogs.dba_sensor_filter = dba_sensor_filter
+    wrcprogs.dba_time_filter   = dba_time_filter
+    wrcprogs.dba2_orig_matlab  = dba2_orig_matlab
+    wrcprogs.rename_dbd_files  = rename_dbd_files
+
+########################
+# Local Paths
+
+    local_paths_dt = configDTPathsLocal.m
+    local_paths_dt.base_dir         = /home/glidertest/data_dt
+    local_paths_dt.binary_dir       = binary
+    local_paths_dt.cache_dir        = binary
+    local_paths_dt.log_dir          = log
+    local_paths_dt.ascii_dir        = ascii
+    local_paths_dt.figure_dir       = figures
+    local_paths_dt.netcdf_dir       = netcdf
+
+    local_paths_rt = configRTPathsLocal.m
+    local_paths_rt.base_dir         = /home/glidertest/data_rt
+    local_paths_rt.binary_dir       = binary
+    local_paths_rt.cache_dir        = binary
+    local_paths_rt.log_dir          = log
+    local_paths_rt.ascii_dir        = ascii
+    local_paths_rt.figure_dir       = figures
+    local_paths_rt.netcdf_dir       = netcdf
+
+
+########################
+# Public Paths
+
+    public_paths_dt = configDTPathsPublic.m
+    public_paths_dt.baseurl              = http://socib.es/users/glider/dt
+    public_paths_dt.netcdf_basedir       = /data/current/opendap/observational/auv/netcdf
+    public_paths_dt.figure_basedir       = /home/glider/public_html/dt
+
+    public_paths_rt = configRTPathsPublic.m
+    public_paths_rt.baseurl              = http://socib.es/users/glider/rt
+    public_paths_rt.netcdf_basedir       = /data/current/opendap/observational/auv/netcdf
+    public_paths_rt.figure_basedir       = /home/glider/public_html/rt
+
+
+#########################
+# Database
+
+    DBaccess = configDBAccess.m
+    DBaccess.db_access.server    = jdbc:postgresql://scb-db01:5432/
+    DBaccess.db_access.name      = management4
+    DBaccess.db_access.user      = postgres
+    DBaccess.db_access.pass      = +20mngD3d3b3b317+
+    DBaccess.db_access.driver    = org.postgresql.Driver
+
+#########################
+# Dockserver
+
+    DOCKSERV = configDockservers.m
+    DOCKSERV.dockservers(1).host = 130.206.32.240
+    DOCKSERV.dockservers(1).user = localuser

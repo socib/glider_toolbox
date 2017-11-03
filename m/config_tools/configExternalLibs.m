@@ -1,5 +1,6 @@
-function wrc_progs = configWRCPrograms()
+function wrc_progs = configExternalLibs(glider_toolbox_dir)
 %CONFIGWRCPROGRAMS  Configure path of the Slocum glider programs provided by WRC.
+%  TODO: update documentation
 %
 %  Syntax:
 %    WRC_PROGS = CONFIGWRCPROGRAMS()
@@ -57,27 +58,16 @@ function wrc_progs = configWRCPrograms()
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  narginchk(0, 0);
+  narginchk(1, 1);
   
-  % Base directory of external libraries
-  base_dir = '~/.local/bin';
-
+  wrc_progs.base_dir          = fullfile(glider_toolbox_dir, 'ext_lib', 'bin');
   % This program is needed.
-  dbd2asc = 'dbd2asc';
+  wrc_progs.dbd2asc           = fullfile('dbd2asc');
   % These programs are optional.
-  dba_merge = 'dba_merge';
-  dba_sensor_filter = 'dba_sensor_filter';
-  dba_time_filter = 'dba_time_filter';
-  dba2_orig_matlab = 'dba2_orig_matlab';
-  rename_dbd_files = 'rename_dbd_files';
-
-  wrc_progs.base_dir            = fullfile(base_dir, base_dir);
-  wrc_progs.dbd2asc             = fullfile(base_dir, dbd2asc);
-  wrc_progs.dba_merge           = fullfile(base_dir, dba_merge);
-  wrc_progs.dba_sensor_filter   = fullfile(base_dir, dba_sensor_filter);
-  wrc_progs.dba_time_filter     = fullfile(base_dir, dba_time_filter);
-  wrc_progs.dba2_orig_matlab    = fullfile(base_dir, dba2_orig_matlab);
-  wrc_progs.rename_dbd_files    = fullfile(base_dir, rename_dbd_files);
-
+  wrc_progs.dba_merge         = fullfile('dba_merge');
+  wrc_progs.dba_sensor_filter = fullfile('dba_sensor_filter');
+  wrc_progs.dba_time_filter   = fullfile('dba_time_filter');
+  wrc_progs.dba2_orig_matlab  = fullfile('dba2_orig_matlab');
+  wrc_progs.rename_dbd_files  = fullfile('rename_dbd_files');
 
 end

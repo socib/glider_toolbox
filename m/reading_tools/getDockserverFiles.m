@@ -1,4 +1,4 @@
-function [xbds, logs] = getDockserverFiles(dockserver, glider, xbd_dir, log_dir, varargin)
+function [xbds, logs] = getDockserverFiles(dockserver, xbd_dir, log_dir, varargin)
 %GETDOCKSERVERFILES  Get binary data files and surface log files from dockserver through (S)FTP.
 %
 %  Syntax:
@@ -120,10 +120,15 @@ function [xbds, logs] = getDockserverFiles(dockserver, glider, xbd_dir, log_dir,
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(4, 16, nargin, 'struct'));
-
+  narginchk(3, 23);
   
   %% Set options and default values.
+  % Old dockservers used this other base path:
+  %options.remote_base_dir = '/home/dockserver/gliders';
+  options.remote_base_dir = '/var/opt/gmc/gliders';
+  options.remote_xbd_dir  = 'from-glider';
+  options.remote_log_dir  = 'logs';
+  options.glider          = '';
   options.start = -Inf;
   options.final = +Inf;
   options.xbd = '^.+\.[smdtne]bd$';
@@ -166,14 +171,15 @@ function [xbds, logs] = getDockserverFiles(dockserver, glider, xbd_dir, log_dir,
 
 
   %% Dockserver (remote) directory definition.
-  % Consider pass these paths as (maybe optional) input arguments.
-  % Old dockservers used this other base path:
-  %remote_base_dir = '/home/dockserver/gliders';
-  remote_base_dir = '/var/opt/gmc/gliders';
-  remote_xbd_dir = [remote_base_dir '/' lower(glider) '/' 'from-glider'];
-  remote_log_dir = [remote_base_dir '/' lower(glider) '/' 'logs'];
-
-
+  if ~isempty(options.glider)
+    remote_xbd_dir = [options.remote_base_dir '/' lower(options.glider) '/' options.remote_xbd_dir];
+    remote_log_dir = [options.remote_base_dir '/' lower(options.glider) '/' options.remote_log_dir];
+  else
+    remote_xbd_dir = [options.remote_base_dir '/' options.remote_xbd_dir];
+    remote_log_dir = [options.remote_base_dir '/' options.remote_log_dir];
+  end
+    
+  
   %% Collect some parameters given in options.
   xbd_name = options.xbd;
   log_name = options.log;
