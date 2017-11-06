@@ -40,6 +40,8 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
 %    CONFIG is the configuration struture. It contains the following
 %    fields:
 %       - STATUS: Name of the configuration file if any.
+%       - PROCESSING_MODE: Must be rt or dt for real time mode or delayed
+%           mode. If set, the value will overwrite the input option.
 %       - WRC_PROGS: External libraries (configWRCPrograms)
 %           -- wrc_progs.status: File name or configuration function 
 %           -- wrc_progs.base_dir: Location of binary files relative to base_dir           
@@ -153,7 +155,8 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
 %    PROCESSING_MODE indicates if the processing is for real time data or
 %      delayed mode data. The difference happens in the configuration since
 %      the data is gathered differently and has different formats and
-%      content.
+%      content. The processing mode value is overwritten if it is also set
+%      in the input configuration file.
 %
 %  Default Values:
 %      Default values result from the call of the 
@@ -179,8 +182,8 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-    narginchk(2, 2);
-    options.processing_mode = 'rt';  %TODO: we can probably standarize the processing to avoid having this variable
+    narginchk(1, 3);
+    options.processing_mode = 'rt';  
     options.fconfig = '';
     
     %% Parse optional arguments.
@@ -210,7 +213,6 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
                 'Invalid option: %s.', opt);
         end
     end
-    options.processing_mode = lower(options.processing_mode);
   
     %% Read configuration file
     readconfig = struct([]);
@@ -222,7 +224,13 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
         disp('No configuration file was input');
         config.status = '';
     end
-  
+    
+    %% Set processing mode for default configuration values
+    if ~isempty(readconfig) && isfield(readconfig, 'processing_mode')
+        options.processing_mode = readconfig.processing_mode;
+    end
+    options.processing_mode = lower(options.processing_mode);
+    
     %% Configure external tools.
     config.wrc_progs = configExternalLibs(glider_toolbox_dir);
     config.wrc_progs.status = 'configExternalLibs';
@@ -232,7 +240,7 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
           config.wrc_progs.status = readconfig.wrcprogs.fconfig;
           config_wrcprogs = readConfigFile(readconfig.wrc_progs.fconfig);
         else
-          config.wrc_progs.status = fconfig;
+          config.wrc_progs.status = options.fconfig;
           config_wrcprogs = readconfig.wrc_progs;
         end
         fields = fieldnames(config_wrcprogs);
@@ -251,7 +259,7 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
             config.local_paths.status = readconfig.paths_local.fconfig;
             config_localpaths = readConfigFile(readconfig.local_paths.fconfig);
         else
-            config.local_paths.status = fconfig;
+            config.local_paths.status = options.fconfig;
             config_localpaths = readconfig.local_paths;
         end
         fields = fieldnames(config_localpaths);
@@ -269,7 +277,7 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
             config.public_paths.status = readconfig.public_paths.fconfig;
             config_publicpaths = readConfigFile(readconfig.public_paths.fconfig);
         else
-            config.public_paths.status = fconfig;
+            config.public_paths.status = options.fconfig;
             config_publicpaths = readconfig.public_paths;
         end
         fields = fieldnames(config_publicpaths);
@@ -287,7 +295,7 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
           config.db_access.status = readconfig.db_access.fconfig;
           config_db_access = readConfigFile(readconfig.db_access.fconfig);
         else
-          config.db_access.status = fconfig;
+          config.db_access.status = options.fconfig;
           config_db_access = readconfig.db_access;
         end
         fields = fieldnames(config_db_access);
@@ -309,7 +317,7 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
           config.dockservers.status = readconfig.dockservers.fconfig;
           config_dockservers = readConfigFile(readconfig.dockservers.fconfig);
         else
-          config.dockservers.status = fconfig;
+          config.dockservers.status = options.fconfig;
           config_dockservers = readconfig.dockservers;
         end
         fields = fieldnames(config_dockservers);
@@ -332,14 +340,14 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
         config.output_netcdf_l0_seaglider   = configDTOutputNetCDFL0Seaglider();
         config.output_netcdf_l0_seaexplorer = configDTOutputNetCDFL0SeaExplorer();
         config.output_netcdf_l1             = configDTOutputNetCDFL1();
-        config.output_netcdf_egol1          = configOutputNetCDFEGOL1();    % TODO: different for RT or DT?
+        config.output_netcdf_egol1          = configDTOutputNetCDFEGOL1();    
         config.output_netcdf_l2             = configDTOutputNetCDFL2();
     elseif strcmp(options.processing_mode, 'rt')
         config.output_netcdf_l0_slocum      = configRTOutputNetCDFL0Slocum();
         config.output_netcdf_l0_seaglider   = configRTOutputNetCDFL0Seaglider();
         config.output_netcdf_l0_seaexplorer = configRTOutputNetCDFL0SeaExplorer();
         config.output_netcdf_l1             = configRTOutputNetCDFL1();
-        config.output_netcdf_egol1          = configOutputNetCDFEGOL1();    % TODO: different for RT or DT?
+        config.output_netcdf_egol1          = configRTOutputNetCDFEGOL1();    
         config.output_netcdf_l2             = configRTOutputNetCDFL2();
     else
         error('glider_toolbox:setupConfiguration:InvalidOption', ...
@@ -373,7 +381,7 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
           config.file_options_slocum.status = readconfig.file_options_slocum.fconfig;
           config_file_options_slocum = readConfigFile(readconfig.file_options_slocum.fconfig);
         else
-          config.file_options_slocum.status = fconfig;
+          config.file_options_slocum.status = options.fconfig;
           config_file_options_slocum = readconfig.file_options_slocum;
         end
         fields = fieldnames(config_file_options_slocum);

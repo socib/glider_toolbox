@@ -5,6 +5,12 @@
 # We may need a separate config file for windows due to the paths
 ##
 
+
+########################
+# Processing mode
+
+    processing_mode = rt 
+    
 ########################
 # WRC_PROGS parameters 
 #   Description: Webb Research Company to deal with Slocum glider data files.

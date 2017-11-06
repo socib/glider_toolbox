@@ -163,6 +163,12 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
 
   narginchk(6, 28);
   
+  %% Define type list and available types
+  available_type = {'double', 'single', ...
+                    'int8', 'uint8', 'int16', 'uint16', ...
+                    'int32', 'uint32', 'int64', 'uint64', ...
+                    'char', 'string', 'logical'};
+                
   %% Set options and default values.
   options.netcdf_format = '';   % in an attempt to generalize this function
   options.modified = ...
@@ -452,12 +458,16 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
       if iscellstr(data.(data_field))
         variable_data.(data_field) = strc(data.(data_field));
       else
-        variable_data.(data_field) = data.(data_field);
+        if isfield(vars.(data_field), 'type') &&  any(strcmp(available_type,vars.(data_field).type))
+          eval(['variable_data.(data_field) = ' vars.(data_field).type '(data.(data_field));' ]);
+        else
+          variable_data.(data_field) = data.(data_field);
+        end
       end
     end
   end
   
-  %% Convert variable data and metadata for requested format
+  %% Convert variable data and metadata for requested format (Uppercase)
   switch (options.netcdf_format)
     case 'EGO'
         % Make all attributes uppercase
@@ -475,9 +485,10 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
           [variable_data(:).(new_var_name)] = deal(variable_data(:).(var_name));
           variable_data = rmfield(variable_data,var_name);
         end   
-        for att_idx = 1:numel(global_meta.attributes)
-          global_meta.attributes(att_idx).name = upper(global_meta.attributes(att_idx).name);
-        end  
+        %for att_idx = 1:numel(global_meta.attributes)
+        %  global_meta.attributes(att_idx).name = upper(global_meta.attributes(att_idx).name);
+        %end  
+        disp('.... done converting attribute names for EGO format');
     otherwise
       ;
   end

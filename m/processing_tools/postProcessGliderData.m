@@ -78,14 +78,13 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
     data_conv.phase = zeros(size(profile_direction));
     data_conv.phase_number = zeros(size(profile_direction));
     
-    %TODO: Not very elegant, check if we can optimize the algorithm using
-    %      array operations
+    %TODO: More accurate calculations of phase and phase_number
     for i=2:numel(data_conv.profile_direction)
         if profile_direction(i) == profile_direction(i-1);
             data_conv.phase_number(i) = data_conv.phase_number(i-1);
             data_conv.phase(i) = data_conv.phase(i-1);
         else
-            data_conv.phase_number(i) = data_conv.phase_number(i-1);
+            data_conv.phase_number(i) = data_conv.phase_number(i-1) + 1;
             
             % Check the phase according to profile direction
             if profile_direction(i) == 0 
@@ -119,5 +118,15 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
         end
     end
   
+    %% Create glider_original_parameter_name from field
+    meta_conv_list = fieldnames(meta_conv);
+    for param_change_idx = 1:numel(meta_conv_list)
+        param_convert_name = meta_conv_list{param_change_idx};
+        if isfield(meta_conv.(param_convert_name), 'sources')
+            meta_conv.(param_convert_name).glider_original_parameter_name = meta_conv.(param_convert_name).sources;
+            meta_conv.(param_convert_name) = rmfield(meta_conv.(param_convert_name),'sources');
+        end
+    end
+    
 end
 
