@@ -1,4 +1,4 @@
-function [sql_query, deployment_fields] = configDTDeploymentInfoQueryDB()
+function [sql_query, deployment_fields] = configDTDeploymentInfoQueryDB(varargin)
 %CONFIGDTDEPLOYMENTINFOQUERYDB  Configure the query to retrieve delayed time glider deployment information.
 %
 %  Syntax:
@@ -24,7 +24,7 @@ function [sql_query, deployment_fields] = configDTDeploymentInfoQueryDB()
 %
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
-
+%
 %  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
@@ -42,10 +42,39 @@ function [sql_query, deployment_fields] = configDTDeploymentInfoQueryDB()
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(0, 0, nargin, 'struct'));
-
+  narginchk(0, 2);
+  
+  options.deployment_ids = {'1' '2'};
+    
+  %% Parse optional arguments.
+  % Get option key-value pairs in any accepted call signature.
+  argopts = varargin;
+  if isscalar(argopts) && isstruct(argopts{1})
+      % Options passed as a single option struct argument:
+      % field names are option keys and field values are option values.
+      opt_key_list = fieldnames(argopts{1});
+      opt_val_list = struct2cell(argopts{1});
+  elseif mod(numel(argopts), 2) == 0
+      % Options passed as key-value argument pairs.
+      opt_key_list = argopts(1:2:end);
+      opt_val_list = argopts(2:2:end);
+  else
+      error('glider_toolbox:gliderDataProcessing:InvalidOptions', ...
+            'Invalid optional arguments (neither key-value pairs nor struct).');
+  end
+  % Overwrite default options with values given in extra arguments.
+  for opt_idx = 1:numel(opt_key_list)
+      opt = lower(opt_key_list{opt_idx});
+      val = opt_val_list{opt_idx};
+      if isfield(options, opt)
+        options.(opt) = val;
+      else
+        error('glider_toolbox:gliderDataProcessing:InvalidOption', ...
+              'Invalid option: %s.', opt);
+      end
+  end
   % Select the identifiers of deployments to process.
-  deployment_ids = {'1' '2'};
+  deployment_ids = options.deployment_ids;
   
   % Select the deployment fields.
   % First column is deployment field

@@ -186,52 +186,36 @@
 glider_toolbox_dir = configGliderToolboxPath();
 glider_toolbox_ver = configGliderToolboxVersion();
 
+config = setupConfiguration(glider_toolbox_dir, ...
+                            'fconfig', fullfile(glider_toolbox_dir, 'config', 'configMainRT.txt'));
 
-%% Configure external programs paths.
-config.wrcprogs = configWRCPrograms();
+%% Configure deployment data and binary paths.
+% This is necessary since we changed the configuration setup
+config.paths_public.netcdf_l0 = fullfile(config.public_paths.base_dir,config.public_paths.netcdf_l0);
+config.paths_public.netcdf_l1 = fullfile(config.public_paths.base_dir,config.public_paths.netcdf_l1);
+config.paths_public.netcdf_l2 = fullfile(config.public_paths.base_dir,config.public_paths.netcdf_l2);
+config.paths_public.figure_dir = fullfile(config.public_paths.base_html_dir,config.public_paths.figure_dir);
+config.paths_public.figure_url = fullfile(config.public_paths.base_url,config.public_paths.figure_dir);
+config.paths_public.figure_info = fullfile(config.public_paths.base_html_dir,config.public_paths.figure_info);
 
+config.paths_local.binary_path = fullfile(config.local_paths.base_dir,config.local_paths.binary_path);
+config.paths_local.cache_path = fullfile(config.local_paths.base_dir,config.local_paths.cache_path);
+config.paths_local.log_path = fullfile(config.local_paths.base_dir,config.local_paths.log_path);
+config.paths_local.ascii_path = fullfile(config.local_paths.base_dir,config.local_paths.ascii_path);
+config.paths_local.figure_path = fullfile(config.local_paths.base_dir,config.local_paths.figure_path);
+config.paths_local.netcdf_l0 = fullfile(config.local_paths.base_dir,config.local_paths.netcdf_l0);
+config.paths_local.netcdf_l1 = fullfile(config.local_paths.base_dir,config.local_paths.netcdf_l1);
+config.paths_local.netcdf_l2 = fullfile(config.local_paths.base_dir,config.local_paths.netcdf_l2);
+config.paths_local.processing_log = fullfile(config.local_paths.base_dir,config.local_paths.processing_log);
 
-%% Configure deployment data paths.
-config.paths_public = configRTPathsPublic();
-config.paths_local = configRTPathsLocal();
-
-
-%% Configure figure outputs.
-[config.figures_processed, config.figures_gridded] = configFigures();
-
-
-%% Configure NetCDF outputs.
-config.output_netcdf_l0_slocum = configRTOutputNetCDFL0Slocum();
-config.output_netcdf_l0_seaglider = configRTOutputNetCDFL0Seaglider();
-config.output_netcdf_l0_seaexplorer = configRTOutputNetCDFL0SeaExplorer();
-config.output_netcdf_l1 = configRTOutputNetCDFL1();
-config.output_netcdf_l2 = configRTOutputNetCDFL2();
-
-
-%% Configure processing options.
-config.preprocessing_options_slocum = configDataPreprocessingSlocum();
-config.preprocessing_options_seaglider = configDataPreprocessingSeaglider();
-config.preprocessing_options_seaexplorer = configDataPreprocessingSeaExplorer();
-config.processing_options_slocum_g1 = configDataProcessingSlocumG1();
-config.processing_options_slocum_g2 = configDataProcessingSlocumG2();
-config.processing_options_seaglider = configDataProcessingSeaglider();
-config.processing_options_seaexplorer = configDataProcessingSeaExplorer();
-config.gridding_options = configDataGridding();
-
-
-%% Configure file download and conversion and data loading.
-config.file_options_slocum = configRTFileOptionsSlocum();
-config.file_options_seaglider = configRTFileOptionsSeaglider();
-config.file_options_seaexplorer = configRTFileOptionsSeaExplorer();
-
-
-%% Configure dockserver and basestation glider data sources.
-config.dockservers = configDockservers();
-config.basestations = configBasestations();
-
+config.wrcprogs.dbd2asc             = fullfile(config.wrcprogs.base_dir, config.wrcprogs.dbd2asc);
+config.wrcprogs.dba_merge           = fullfile(config.wrcprogs.base_dir, config.wrcprogs.dba_merge);
+config.wrcprogs.dba_sensor_filter   = fullfile(config.wrcprogs.base_dir, config.wrcprogs.dba_sensor_filter);
+config.wrcprogs.dba_time_filter     = fullfile(config.wrcprogs.base_dir, config.wrcprogs.dba_time_filter);
+config.wrcprogs.dba2_orig_matlab    = fullfile(config.wrcprogs.base_dir, config.wrcprogs.dba2_orig_matlab);
+config.wrcprogs.rename_dbd_files    = fullfile(config.wrcprogs.base_dir, config.wrcprogs.rename_dbd_files);
 
 %% Configure data base deployment information source.
-config.db_access = configDBAccess();
 [config.db_query, config.db_fields] = configRTDeploymentInfoQueryDB();
 
 
@@ -389,10 +373,10 @@ for deployment_idx = 1:numel(deployment_list)
   end
   switch glider_type
     case {'slocum_g1' 'slocum_g2'}
-      new_xbds = cell(size(config.dockservers));
-      new_logs = cell(size(config.dockservers));
-      for dockserver_idx = 1:numel(config.dockservers)
-        dockserver = config.dockservers(dockserver_idx);
+      new_xbds = cell(size(config.dockservers.server));
+      new_logs = cell(size(config.dockservers.server));
+      for dockserver_idx = 1:numel(config.dockservers.server)
+        dockserver = config.dockservers.server(dockserver_idx);
         try
           [new_xbds{dockserver_idx}, new_logs{dockserver_idx}] = ...
             getDockserverFiles(dockserver, binary_dir, log_dir, ...
@@ -414,7 +398,7 @@ for deployment_idx = 1:numel(deployment_list)
       new_engs = cell(size(config.basestations));
       new_logs = cell(size(config.basestations));
       for basestation_idx = 1:numel(config.basestations)
-        basestation = config.dockservers(basestation_idx);
+        basestation = config.dockservers.server(basestation_idx);
         try
           [new_engs{basestation_idx}, new_logs{basestation_idx}] = ...
             getDockserverFiles(basestation, ascii_dir, ascii_dir, ...

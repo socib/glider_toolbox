@@ -22,7 +22,11 @@ function [] = gliderDataProcessing(varargin)
 %             -- Call DEPLOYMENTDATAPROCESSING for processing deployment
 %             -- Organize public data (TBD)
 %
-%  Input: None
+%  Input: TODO: complete descrpition
+%     GLIDER_TOOLBOX_DIR
+%     PROCESSING_MODE
+%     CONFIG
+%     DEPLOYMENT_LIST
 %
 %  Output: None
 %
@@ -86,8 +90,8 @@ function [] = gliderDataProcessing(varargin)
                                  'glider_name', 'glider_serial', 'glider_model'};
     
     options.glider_toolbox_dir = '';
-    %TODO: Remove the default path and set it to empty. I am using this for
-    %      testing
+    options.processing_mode = 'rt';  
+    %TODO: Remove the default path and set it to empty. I am using this for testing
     options.config            = '/home/mcharcos/gtb_versions/glider_toolbox_scbd077_db01_ego/config/configMain.txt';
     options.deployment_list    = [];
     
@@ -129,12 +133,14 @@ function [] = gliderDataProcessing(varargin)
     
     %% Read configuration values from configuration file
     if ~isempty(options.config) && ischar(options.config)
-        config = setupConfiguration(options.glider_toolbox_dir, 'fconfig', options.config);
+        config = setupConfiguration(options.glider_toolbox_dir, ...
+                                    'processing_mode', options.processing_mode, ...
+                                    'fconfig', options.config);
     elseif isstruct(options.config)
         config = options.config;
     end
     
-    if isempty(config) || ~isstruct(config)  % Could do a smarter check
+    if isempty(config) || ~isstruct(config)  % TODO: Could make function to validate config structure 
         error('glider_toolbox:gliderDataProcessing:MissingConfiguration',...
               'Empty configuration file');
     end
@@ -145,7 +151,18 @@ function [] = gliderDataProcessing(varargin)
         user_db_access = config.db_access.active;
     end
     if user_db_access && isempty(options.deployment_list)
-        [config.db_query, config.db_fields] = configRTDeploymentInfoQueryDB();
+        if ~isfield(config,'processing_mode')
+            error('glider_toolbox:gliderDataProcessing:InvalidConfiguration',...
+              'Configuration file is missing processing mode');
+        end
+        if strcmp(config.processing_mode, 'rt')
+            [config.db_query, config.db_fields] = configRTDeploymentInfoQueryDB();
+        elseif strcmp(config.processing_mode, 'dt')
+            [config.db_query, config.db_fields] = configDTDeploymentInfoQueryDB();
+        else
+            error('glider_toolbox:gliderDataProcessing:InvalidConfiguration',...
+              'Configuration file has wrong processing mode');
+        end
         
         disp('Querying information of glider deployments...');
         options.deployment_list = getDeploymentInfoDB( ...
@@ -190,10 +207,13 @@ function [] = gliderDataProcessing(varargin)
       startLogging(data_paths.processing_log, options.glider_toolbox_ver, deployment);
       
       %% Process data
-      [meta, data] = deploymentDataProcessing(data_paths, deployment, config, ...
+      [netcdf_products, figure_products, meta, data] = deploymentDataProcessing(data_paths, deployment, config, ...
                                               'data_result', 'postprocessed');
       
-      %TODO: finish and call stat = organizePublicData();
+      %% Define public paths
+      public_paths = createFStruct(config.public_paths, deployment);
+                                          
+      organizePublicData(public_paths, netcdf_products, figure_products);
       
       %% Stop deployment processing logging.
       disp(['Deployment processing end time: ' ...

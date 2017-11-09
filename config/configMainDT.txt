@@ -1,0 +1,44 @@
+##
+# This file defines the configuration parameters for glider toolbox in delayed mode 
+# processing by main_glider_data_processing_dt. Users can add any parameter 
+# of the configuration to overwrite the default values. For detailed information
+# about the available parameters refer to the configTemplate.txt template. 
+# Comments may be used by adding a # at the beginning of the line. 
+#
+# Do not change the processing_mode value (equal to dt) of this configuration 
+# since it is used mainly by the delayed mode processing script. 
+#
+# Edit the data paths and the database information according to your needs.
+# 
+##
+
+
+########################
+# Processing mode
+
+    processing_mode = dt 
+
+########################
+# Paths to local and public data
+    
+    local_paths.base_dir = /path/to/local/folders
+    
+    public_paths.base_dir          = /path/to/public/folders
+    public_paths.base_url          = http://your.public.url/path/to/data
+    public_paths.base_html_dir     = /your/public/url/path/to/data
+
+#########################
+# Database
+
+    db_access.active    = 1
+    db_access.server    = jdbc:postgresql://mydb.myportal.mydomain:5433/my_data_base
+    db_access.name      = my_data_base
+    db_access.user      = db_user
+    db_access.pass      = top_secret
+    db_access.driver    = org.postgresql.Driver
+    db_access.deployment_ids = id1|id2|id3...
+
+#########################
+# Slocum file options
+
+    file_options_slocum.format_conversion = 1

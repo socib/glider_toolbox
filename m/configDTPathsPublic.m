@@ -59,7 +59,7 @@ function public_paths = configDTPathsPublic()
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(0, 0, nargin, 'struct'));
+  narginchk(0, 0);
 
   netcdf_basedir = '/LOCALDATA/mcharcos/data/current/opendap/observational/auv/netcdf';
   netcdf_glider_dir     = '${GLIDER_NAME,l,s/-/_}-${GLIDER_INSTRUMENT_NAME,l,s/-/_}';

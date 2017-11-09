@@ -96,7 +96,7 @@ function [meta, data] = sxcat(meta_list, data_list, timestamp, varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(3, 9, nargin, 'struct'));
+  narginchk(3, 9);
   
   
   %% Set options and default values.

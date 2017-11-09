@@ -131,7 +131,7 @@ function [meta, data] = sglogengmerge(meta_log, data_log, meta_eng, data_eng, va
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(4, 14, nargin, 'struct'));
+  narginchk(4, 14);
   
   
   %% Set options and default values.

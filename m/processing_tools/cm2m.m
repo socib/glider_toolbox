@@ -35,7 +35,7 @@ function m = cm2m(cm)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(nargin, 1, 1, 'struct'));
+  narginchk(1, 1);
 
   m = cm * 0.01;
 

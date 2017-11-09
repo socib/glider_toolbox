@@ -1,4 +1,4 @@
-function [meta_res, data_res] = deploymentDataProcessing(data_paths, deployment, configuration, varargin)
+function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_paths, deployment, configuration, varargin)
 % DEPLOYMENTDATAPROCESSING  Process glider data of a specific deployment
 %                            and given configuration
 %
@@ -24,7 +24,7 @@ function [meta_res, data_res] = deploymentDataProcessing(data_paths, deployment,
 %           to 1. It is necessary for Slocum data unless the files were
 %           previously converted. In this case, it will save time to skip
 %           this step. The conversion uses the shell dbd2asc 
-%          script profided by Slocumdefined by config.wrc_progs.dbd2asc.
+%          script profided by Slocumdefined by config.wrcprogs.dbd2asc.
 %      - Load data from all files in a single and consistent structure.
 %      - Generate standarized product version of raw data (NetCDF level 0).
 %           This step is optional and happens when the netcdf0 file name is
@@ -75,16 +75,16 @@ function [meta_res, data_res] = deploymentDataProcessing(data_paths, deployment,
 %
 %  Inputs:
 %    DATA_PATH defines the location of the input files and the products that
-%    are created including netCDF files and figures. It may be a directory 
-%    name or a struct in the format returned by createFStruct where the
-%    binary, ascii, cache, log, figure directories and netcdf L0, L1 and L2
-%    files are defined. When DATA_PATHS is a directory name, data may be
-%    read and writen in the specified path or structured under a given tree
-%    when the option data_tree is set to structured. In the latest case,
-%    the following folders will be created under the input directory: binary, 
-%    log, ascii, figure and netcdf. The files netcdf_l0.nc, netcdf_l1.nc
-%    and netcdf_l2.nc are created for L0, L1 and L2 netCDF files
-%    respecively.
+%      are created including netCDF files and figures. It may be a directory 
+%      name or a struct in the format returned by createFStruct where the
+%      binary, ascii, cache, log, figure directories and netcdf L0, L1 and L2
+%      files are defined. When DATA_PATHS is a directory name, data may be
+%      read and writen in the specified path or structured under a given tree
+%      when the option data_tree is set to structured. In the latest case,
+%      the following folders will be created under the input directory: binary, 
+%      log, ascii, figure and netcdf. The files netcdf_l0.nc, netcdf_l1.nc
+%      and netcdf_l2.nc are created for L0, L1 and L2 netCDF files
+%      respecively.
 %
 %    DEPLOYMENT contains the information of the deployment to be processed.
 %    It should be a structure containing the following information:
@@ -107,6 +107,18 @@ function [meta_res, data_res] = deploymentDataProcessing(data_paths, deployment,
 %    configuration structure.
 %
 %  Outputs:
+%    OUTPUTS is a structure containing the names of the NetCDF files that
+%      were created along the process. The structure may contain
+%      (optionally) these fields
+%       - netcdf_l0:    L0 level NetCDF file
+%       - netcdf_l1:    L1 level NetCDF file
+%       - netcdf_l2:    L2 level NetCDF file
+%       - netcdf_egol0: L1 level NetCDF-EGO file
+%    FIGURES is a structure containing the file names of the figures that
+%      were created along the process. The structure may contain
+%      (optionally) these fields
+%       - fig_proc: structure with the figures of processed data
+%       - fig_grid: structure with the figures of gridded data  
 %    META_RES and DATA_RES are a struct containg the data and meta data at
 %    a given step. The funcion returns the step as specified by the data_result
 %    option. The result depends on the step that is request as:
@@ -196,10 +208,10 @@ function [meta_res, data_res] = deploymentDataProcessing(data_paths, deployment,
  
   narginchk(3, 5);
     
+  options.processing_mode = 'rt';  
   options.data_tree = 'default';
-  options.data_result = 'gridded';  % raw, preprocessed, processed, qc_processed
-                                    % postprocessed, qc_postprocessed,
-                                    % gridded
+  options.data_result = '';  % (empty/other), raw, preprocessed, processed, 
+                             % qc_processed, postprocessed, qc_postprocessed, gridded
   
   %% Parse optional arguments.
   % Get option key-value pairs in any accepted call signature.
@@ -253,15 +265,31 @@ function [meta_res, data_res] = deploymentDataProcessing(data_paths, deployment,
           netcdf_l2_file = fullfile(data_paths, 'netcdf_l2.nc');
       end
   elseif isstruct(data_paths)
-      binary_dir         = data_paths.binary_dir;
-      cache_dir          = data_paths.cache_dir;
-      log_dir            = data_paths.log_dir;
-      ascii_dir          = data_paths.ascii_dir;
-      figure_dir         = data_paths.figure_dir;
-      netcdf_l0_file     = data_paths.netcdf_l0_file;
-      netcdf_l1_file     = data_paths.netcdf_l1_file;
-      netcdf_egol1_file  = data_paths.netcdf_egol1_file;
-      netcdf_l2_file     = data_paths.netcdf_l2_file;
+      binary_dir         = fullfile(data_paths.base_dir, data_paths.binary_path);
+      cache_dir          = fullfile(data_paths.base_dir, data_paths.cache_path);
+      log_dir            = fullfile(data_paths.base_dir, data_paths.log_path);
+      ascii_dir          = fullfile(data_paths.base_dir, data_paths.ascii_path);
+      figure_dir         = data_paths.figure_path;
+      netcdf_l0_file     = data_paths.netcdf_l0;
+      netcdf_l1_file     = data_paths.netcdf_l1;
+      netcdf_l2_file     = data_paths.netcdf_l2;
+      netcdf_egol1_file  = data_paths.netcdf_egol1;
+      
+      if ~isempty(figure_dir)
+        figure_dir         = fullfile(data_paths.base_dir, figure_dir);
+      end
+      if ~isempty(netcdf_l0_file)
+        netcdf_l0_file     = fullfile(data_paths.base_dir, netcdf_l0_file);
+      end
+      if ~isempty(netcdf_l1_file)
+        netcdf_l1_file     = fullfile(data_paths.base_dir, netcdf_l1_file);
+      end
+      if ~isempty(netcdf_l2_file)
+        netcdf_l2_file     = fullfile(data_paths.base_dir, netcdf_l2_file);
+      end
+      if ~isempty(netcdf_egol1_file)
+        netcdf_egol1_file     = fullfile(data_paths.base_dir, netcdf_egol1_file);
+      end
   else
     error('glider_toolbox:deploymentDataProcessing:InvalidOptions', ...
           'Data path input must be a string or a structure.');
@@ -273,12 +301,14 @@ function [meta_res, data_res] = deploymentDataProcessing(data_paths, deployment,
   %% Read configuration values from configuration file
   if ischar(configuration)
       glider_toolbox_dir = configGliderToolboxPath();
-      config = setupConfiguration(glider_toolbox_dir, 'fconfig', configuration);
+      config = setupConfiguration(glider_toolbox_dir,  ...
+                                    'processing_mode', options.processing_mode, ...
+                                    'fconfig', configuration);
   else
       config = configuration;
   end
     
-  if isempty(config) && ~isstruct(config)  % Could do a smarter check
+  if isempty(config) && ~isstruct(config)  % TODO: Could make function to validate config structure
     error('glider_toolbox:deploymentDataProcessing:MissingConfiguration',...
           'Empty configuration file');
   end
@@ -292,6 +322,8 @@ function [meta_res, data_res] = deploymentDataProcessing(data_paths, deployment,
   data_processed = struct();
   meta_gridded = struct();
   data_gridded = struct();
+  meta_res = struct();
+  data_res = struct();
   outputs = struct();
   figures = struct();
   
@@ -343,7 +375,7 @@ function [meta_res, data_res] = deploymentDataProcessing(data_paths, deployment,
                            'xbd_name_pattern', processing_config.file_options.xbd_name_pattern, ...
                            'dba_name_replace', processing_config.file_options.dba_name_replace, ...
                            'cache', cache_dir, ...
-                           'cmdname', fullfile(config.wrc_progs.base_dir, config.wrc_progs.dbd2asc))
+                           'cmdname', fullfile(config.wrcprogs.base_dir, config.wrcprogs.dbd2asc))
       catch exception
         disp(['Error generating Ascii data from ' binary_dir ':']);
         disp(getReport(exception, 'extended'));

@@ -43,7 +43,7 @@ function t = posixtime()
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(0, 0, nargin, 'struct'));
+  narginchk(0, 0);
 
   % Consider making the variable persistent
   % (the needed emptiness check may be more expensive than the existence check).

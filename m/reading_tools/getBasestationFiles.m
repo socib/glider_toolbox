@@ -106,7 +106,7 @@ function [engs, logs] = getBasestationFiles(basestation, glider, eng_dir, log_di
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(4, 12, nargin, 'struct'));
+  narginchk(4, 12);
 
   
   %% Set options and default values.

@@ -128,5 +128,17 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
         end
     end
     
+    %TODO: Allow deployment to be input and complete data variable
+    %attributes if deployment contains the data that is needed. These are:
+    %        - sensor_orientation: downward, upward, vertical, horizontal.
+    %        - sensor_name
+    %        - sensor_serial_number
+    %        - ancillary_variables: PARAM_QC. Could be completed in QC processing
+    %        - accuracy, precision, resolution: BD
+    %        - cell_methods: require new implementation which considers
+    %               this info in the instrumentation webapp
+    %        - DM_indicator: needs to be completed from general config
+    %        processing_mode
+    
 end
 

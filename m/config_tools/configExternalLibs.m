@@ -1,12 +1,12 @@
-function wrc_progs = configExternalLibs(glider_toolbox_dir)
-%CONFIGWRCPROGRAMS  Configure path of the Slocum glider programs provided by WRC.
+function wrcprogs = configExternalLibs(glider_toolbox_dir)
+%  CONFIGEXTERNALLIBS  Configure path of the Slocum glider programs provided by WRC.
 %  TODO: update documentation
 %
 %  Syntax:
-%    WRC_PROGS = CONFIGWRCPROGRAMS()
+%    WRCPROGS = CONFIGEXTERNALLIBS()
 %
 %  Description:
-%    WRC_PROGS = CONFIGWRCPROGRAMS() should return a struct with the path to
+%    WRCPROGS = CONFIGEXTERNALLIBS() should return a struct with the path to
 %    the executables provided by the Webb Research Company to deal with Slocum
 %    glider data files. It should have the following fields:
 %      DBD2ASC: path to the program to convert Slocum binary data files
@@ -33,7 +33,7 @@ function wrc_progs = configExternalLibs(glider_toolbox_dir)
 %    XBD2DBA function.
 %
 %  Examples:
-%    wrc_progs = configWRCPrograms()
+%    wrcprogs = configExternalLibs()
 %
 %  See also:
 %    XBD2DBA
@@ -60,14 +60,14 @@ function wrc_progs = configExternalLibs(glider_toolbox_dir)
 
   narginchk(1, 1);
   
-  wrc_progs.base_dir          = fullfile(glider_toolbox_dir, 'ext_lib', 'bin');
+  wrcprogs.base_dir          = fullfile(glider_toolbox_dir, 'ext_lib', 'bin');
   % This program is needed.
-  wrc_progs.dbd2asc           = fullfile('dbd2asc');
+  wrcprogs.dbd2asc           = fullfile('dbd2asc');
   % These programs are optional.
-  wrc_progs.dba_merge         = fullfile('dba_merge');
-  wrc_progs.dba_sensor_filter = fullfile('dba_sensor_filter');
-  wrc_progs.dba_time_filter   = fullfile('dba_time_filter');
-  wrc_progs.dba2_orig_matlab  = fullfile('dba2_orig_matlab');
-  wrc_progs.rename_dbd_files  = fullfile('rename_dbd_files');
+  wrcprogs.dba_merge         = fullfile('dba_merge');
+  wrcprogs.dba_sensor_filter = fullfile('dba_sensor_filter');
+  wrcprogs.dba_time_filter   = fullfile('dba_time_filter');
+  wrcprogs.dba2_orig_matlab  = fullfile('dba2_orig_matlab');
+  wrcprogs.rename_dbd_files  = fullfile('rename_dbd_files');
 
 end

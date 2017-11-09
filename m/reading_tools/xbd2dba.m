@@ -80,7 +80,7 @@ function dba_file_full = xbd2dba(dbd_files, dba_file, varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(2, 8, nargin, 'struct'));
+  narginchk(2, 8);
   
   
   %% Set options and default values.

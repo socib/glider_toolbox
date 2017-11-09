@@ -64,7 +64,7 @@ function [chlr, cdom, scat] = calibrateWLECOBbFl2(chlr_cnts, cdom_cnts, scat_cnt
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(nargin, 6, 6, 'struct'));
+  narginchk(6, 6);
   
   if isstruct(chlr_coefs)
     sd_chlr = [chlr_coefs.sf chlr_coefs.dc];

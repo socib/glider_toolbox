@@ -42,15 +42,15 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
 %       - STATUS: Name of the configuration file if any.
 %       - PROCESSING_MODE: Must be rt or dt for real time mode or delayed
 %           mode. If set, the value will overwrite the input option.
-%       - WRC_PROGS: External libraries (configWRCPrograms)
-%           -- wrc_progs.status: File name or configuration function 
-%           -- wrc_progs.base_dir: Location of binary files relative to base_dir           
-%           -- wrc_progs.dbd2asc: File name of binary to ascii script relative to base_dir
-%           -- wrc_progs.dba_merge: File name of dba merge scrip relative to base_dir 
-%           -- wrc_progs.dba_sensor_filter: File name of sensor filter script relative to base_dir
-%           -- wrc_progs.dba_time_filter: File name of time filter script relative to base_dir 
-%           -- wrc_progs.dba2_orig_matlab: File name of orig matlab script relative to base_dir
-%           -- wrc_progs.rename_dbd_files: File name of CF2 Persistor
+%       - WRCPROGS: External libraries (configWRCPrograms)
+%           -- wrcprogs.status: File name or configuration function 
+%           -- wrcprogs.base_dir: Location of binary files relative to base_dir           
+%           -- wrcprogs.dbd2asc: File name of binary to ascii script relative to base_dir
+%           -- wrcprogs.dba_merge: File name of dba merge scrip relative to base_dir 
+%           -- wrcprogs.dba_sensor_filter: File name of sensor filter script relative to base_dir
+%           -- wrcprogs.dba_time_filter: File name of time filter script relative to base_dir 
+%           -- wrcprogs.dba2_orig_matlab: File name of orig matlab script relative to base_dir
+%           -- wrcprogs.rename_dbd_files: File name of CF2 Persistor
 %                        file rename script relative to base_dir
 %       - LOCAL_PATHS: Definition of data folder structure (configPathsLocal)
 %           -- local_paths.status: File name or configuration function 
@@ -70,7 +70,7 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
 %           -- public_paths.netcdf_l0: File name for L0 products relative to base_dir
 %           -- public_paths.netcdf_l1: File name for L1 products relative to base_dir
 %           -- public_paths.netcdf_l2: File name for L2 products relative to base_dir
-%           -- public_paths.figure_dir: Directory for public figures
+%           -- public_paths.base_html_dir: Directory for public figures
 %           -- public_paths.base_url: URL of public access for json creation
 %           -- public_paths.figure_url: URL for public figures for json creation
 %           -- public_paths.figure_info: json name format
@@ -182,7 +182,7 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-    narginchk(1, 3);
+    narginchk(1, 5);
     options.processing_mode = 'rt';  
     options.fconfig = '';
     
@@ -199,7 +199,7 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
         opt_key_list = argopts(1:2:end);
         opt_val_list = argopts(2:2:end);
     else
-        error('glider_toolbox:gliderDataProcessingEGO:InvalidOptions', ...
+        error('glider_toolbox:setupConfiguration:InvalidOptions', ...
               'Invalid optional arguments (neither key-value pairs nor struct).');
     end
     % Overwrite default options with values given in extra arguments.
@@ -209,7 +209,7 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
         if isfield(options, opt)
           options.(opt) = val;
         else
-          error('glider_toolbox:gliderDataProcessingEGO:InvalidOption', ...
+          error('glider_toolbox:setupConfiguration:InvalidOption', ...
                 'Invalid option: %s.', opt);
         end
     end
@@ -229,23 +229,28 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     if ~isempty(readconfig) && isfield(readconfig, 'processing_mode')
         options.processing_mode = readconfig.processing_mode;
     end
-    options.processing_mode = lower(options.processing_mode);
+    config.processing_mode = lower(options.processing_mode);
+    
     
     %% Configure external tools.
-    config.wrc_progs = configExternalLibs(glider_toolbox_dir);
-    config.wrc_progs.status = 'configExternalLibs';
+    config.wrcprogs = configExternalLibs(glider_toolbox_dir);
+    config.wrcprogs.status = 'configExternalLibs';
 
-    if ~isempty(readconfig) && isfield(readconfig, 'wrc_progs')
-        if isfield(readconfig.wrc_progs, 'fconfig') 
-          config.wrc_progs.status = readconfig.wrcprogs.fconfig;
-          config_wrcprogs = readConfigFile(readconfig.wrc_progs.fconfig);
+    if ~isempty(readconfig) && isfield(readconfig, 'wrcprogs')
+        if isfield(readconfig.wrcprogs, 'fconfig') 
+          config.wrcprogs.status = readconfig.wrcprogs.fconfig;
+          array_delimiter = '';
+          if isfield(config.wrcprogs, 'array_delimiter')
+            array_delimiter = config.wrcprogs.array_delimiter;
+          end
+          config_wrcprogs = readConfigFile(readconfig.wrcprogs.fconfig, 'array_delimiter', array_delimiter);
         else
-          config.wrc_progs.status = options.fconfig;
-          config_wrcprogs = readconfig.wrc_progs;
+          config.wrcprogs.status = options.fconfig;
+          config_wrcprogs = readconfig.wrcprogs;
         end
         fields = fieldnames(config_wrcprogs);
         for i = 1:numel(fields)
-            config.wrc_progs.(fields{i}) = config_wrcprogs.(fields{i});
+            config.wrcprogs.(fields{i}) = config_wrcprogs.(fields{i});
         end
     end
   
@@ -257,7 +262,11 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     if ~isempty(readconfig) && isfield(readconfig, 'local_paths')
         if isfield(readconfig.local_paths, 'fconfig') 
             config.local_paths.status = readconfig.paths_local.fconfig;
-            config_localpaths = readConfigFile(readconfig.local_paths.fconfig);
+            array_delimiter = '';
+            if isfield(config.local_paths, 'array_delimiter')
+              array_delimiter = config.local_paths.array_delimiter;
+            end
+            config_localpaths = readConfigFile(readconfig.local_paths.fconfig, 'array_delimiter', array_delimiter);
         else
             config.local_paths.status = options.fconfig;
             config_localpaths = readconfig.local_paths;
@@ -269,13 +278,17 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     end
      
     %% Configure public path.
-    config.public_paths = configPathsLocal(glider_toolbox_dir);
+    config.public_paths = configPathsPublic(glider_toolbox_dir, struct());
     config.public_paths.status = 'configPathsPublic';
   
     if ~isempty(readconfig) && isfield(readconfig, 'public_paths')
         if isfield(readconfig.public_paths, 'fconfig') 
             config.public_paths.status = readconfig.public_paths.fconfig;
-            config_publicpaths = readConfigFile(readconfig.public_paths.fconfig);
+            array_delimiter = '';
+            if isfield(config.public_paths, 'array_delimiter')
+              array_delimiter = config.public_paths.array_delimiter;
+            end
+            config_publicpaths = readConfigFile(readconfig.public_paths.fconfig, 'array_delimiter', array_delimiter);
         else
             config.public_paths.status = options.fconfig;
             config_publicpaths = readconfig.public_paths;
@@ -293,7 +306,11 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     if ~isempty(readconfig) && isfield(readconfig, 'db_access')
         if isfield(readconfig.db_access, 'fconfig') 
           config.db_access.status = readconfig.db_access.fconfig;
-          config_db_access = readConfigFile(readconfig.db_access.fconfig);
+          array_delimiter = '';
+          if isfield(config.db_access, 'array_delimiter')
+            array_delimiter = config.db_access.array_delimiter;
+          end
+          config_db_access = readConfigFile(readconfig.db_access.fconfig, 'array_delimiter', array_delimiter);
         else
           config.db_access.status = options.fconfig;
           config_db_access = readconfig.db_access;
@@ -315,7 +332,11 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     if ~isempty(readconfig) && isfield(readconfig, 'dockservers')
         if isfield(readconfig.dockservers, 'fconfig') 
           config.dockservers.status = readconfig.dockservers.fconfig;
-          config_dockservers = readConfigFile(readconfig.dockservers.fconfig);
+          array_delimiter = '';
+          if isfield(config.dockservers, 'array_delimiter')
+            array_delimiter = config.dockservers.array_delimiter;
+          end
+          config_dockservers = readConfigFile(readconfig.dockservers.fconfig, 'array_delimiter', array_delimiter);
         else
           config.dockservers.status = options.fconfig;
           config_dockservers = readconfig.dockservers;
@@ -335,14 +356,14 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
 
 
     %% Configure NetCDF outputs.
-    if strcmp(options.processing_mode, 'dt')
+    if strcmp(config.processing_mode, 'dt')
         config.output_netcdf_l0_slocum      = configDTOutputNetCDFL0Slocum();
         config.output_netcdf_l0_seaglider   = configDTOutputNetCDFL0Seaglider();
         config.output_netcdf_l0_seaexplorer = configDTOutputNetCDFL0SeaExplorer();
         config.output_netcdf_l1             = configDTOutputNetCDFL1();
         config.output_netcdf_egol1          = configDTOutputNetCDFEGOL1();    
         config.output_netcdf_l2             = configDTOutputNetCDFL2();
-    elseif strcmp(options.processing_mode, 'rt')
+    elseif strcmp(config.processing_mode, 'rt')
         config.output_netcdf_l0_slocum      = configRTOutputNetCDFL0Slocum();
         config.output_netcdf_l0_seaglider   = configRTOutputNetCDFL0Seaglider();
         config.output_netcdf_l0_seaexplorer = configRTOutputNetCDFL0SeaExplorer();
@@ -351,7 +372,7 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
         config.output_netcdf_l2             = configRTOutputNetCDFL2();
     else
         error('glider_toolbox:setupConfiguration:InvalidOption', ...
-                'Invalid processing mode: %s.', options.processing_mode);
+                'Invalid processing mode: %s.', config.processing_mode);
     end
 
     %% Configure processing options.
@@ -366,20 +387,24 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
 
 
     %% Configure Slocum file options
-    if strcmp(options.processing_mode, 'dt')
+    if strcmp(config.processing_mode, 'dt')
         config.file_options_slocum = configDTFileOptionsSlocum();
-    elseif strcmp(options.processing_mode, 'rt')
+    elseif strcmp(config.processing_mode, 'rt')
         config.file_options_slocum = configRTFileOptionsSlocum();
     else
         error('glider_toolbox:setupConfiguration:InvalidOption', ...
-                'Invalid processing mode: %s.', options.processing_mode);
+                'Invalid processing mode: %s.', config.processing_mode);
     end
     config.file_options_slocum.status = 'configRTFileOptionsSlocum';
     
     if ~isempty(readconfig) && isfield(readconfig, 'file_options_slocum')
-        if isfield(readconfig.dockservers, 'fconfig') 
+        if isfield(readconfig.file_options_slocum, 'fconfig') 
           config.file_options_slocum.status = readconfig.file_options_slocum.fconfig;
-          config_file_options_slocum = readConfigFile(readconfig.file_options_slocum.fconfig);
+          array_delimiter = '';
+          if isfield(config.file_options_slocum, 'array_delimiter')
+            array_delimiter = config.file_options_slocum.array_delimiter;
+          end
+          config_file_options_slocum = readConfigFile(readconfig.file_options_slocum.fconfig, 'array_delimiter', array_delimiter);
         else
           config.file_options_slocum.status = options.fconfig;
           config_file_options_slocum = readconfig.file_options_slocum;
@@ -395,15 +420,15 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     end
     
     %% Configure file download and conversion and data loading.
-    if strcmp(options.processing_mode, 'dt')
+    if strcmp(config.processing_mode, 'dt')
         config.file_options_seaglider = configDTFileOptionsSeaglider();
         config.file_options_seaexplorer = configDTFileOptionsSeaExplorer();
-    elseif strcmp(options.processing_mode, 'rt')
+    elseif strcmp(config.processing_mode, 'rt')
         config.file_options_seaglider = configRTFileOptionsSeaglider();
         config.file_options_seaexplorer = configRTFileOptionsSeaExplorer();
     else
         error('glider_toolbox:setupConfiguration:InvalidOption', ...
-                'Invalid processing mode: %s.', options.processing_mode);
+                'Invalid processing mode: %s.', config.processing_mode);
     end
 
 

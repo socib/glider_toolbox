@@ -47,7 +47,7 @@ function h = sftp(host, username, password)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(0, 3, nargin, 'struct'));
+  narginchk(0, 3);
 
   if (nargin == 1) && isa(host, 'sftp')
     % Short circuit copy constructor.

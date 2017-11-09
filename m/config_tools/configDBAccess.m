@@ -43,11 +43,11 @@ function db_access = configDBAccess()
   narginchk(0, 0);
   
   % When using database, set nodb to false and configure DB settings 
-  db_access.active = 1;  
-  db_access.server = 'jdbc:postgresql://mydb.myportal.mydomain:5433/my_data_base';
-  db_access.name = 'my_data_base';
-  db_access.user = 'myself';
-  db_access.pass = 'top_secret';
-  db_access.driver = 'org.postgresql.Driver';
+  db_access.active = 0;  
+  %db_access.server = 'jdbc:postgresql://mydb.myportal.mydomain:5433/my_data_base';
+  %db_access.name = 'my_data_base';
+  %db_access.user = 'myself';
+  %db_access.pass = 'top_secret';
+  %db_access.driver = 'org.postgresql.Driver';
 
 end

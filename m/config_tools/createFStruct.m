@@ -8,19 +8,8 @@ function [ data_paths ] = createFStruct( path_formats, deployment )
 %  Description:
 %    CREATEFSTRUCT creates the directory names for glider data for a given
 %    format specified in path_formats and the information of the deployment.
-%    path_formats contains the following fields:
-%       - base_dir: Root directory. All other paths will be relative to it.
-%       - binary_path: Path to binary files
-%       - ascii_path: Path to ascii files 
-%       - cache_path: Path to cache files used to convert binary data files
-%             from Slocum to ascii. Cache files are created because only the
-%             first binary files of a set contains the complete hearder
-%       - log_path: Path to log files 
-%       - processing_log: Name of the log file
-%       - figure_path: Path where figure files will be created
-%       - netcdf_l0, netcdf_l1, netcdf_l2: File names of L0, L1 and L2
-%             NetCDF products 
-%       - netcdf_egol1: File names of L1 EGO formatted products
+%    path_formats may contain any field.
+%       - 
 %    This function calls STRFSTRUCT to complete the name of the files and
 %    directories using the format defined by the function. For example,
 %    ${GLIDER_NAME} may be used to complete the string with the glider name
@@ -37,17 +26,7 @@ function [ data_paths ] = createFStruct( path_formats, deployment )
 %
 %  Output:
 %    DATA_PATHS is a structure of directory and names containing the
-%       information of the paths built from the input path_formats.
-%           - binary_dir
-%           - cache_dir
-%           - log_dir
-%           - ascii_dir
-%           - figure_dir (optional)
-%           - netcdf_l0_file (optional)
-%           - netcdf_l1_file (optional)
-%           - netcdf_l2_file (optional)
-%           - netcdf_egol1_file (optional)
-%           
+%       information of the paths built from the input path_formats.%           
 %
 %  Authors:
 %    Miguel Charcos Llorens  <mcharcos@socib.es>
@@ -70,37 +49,15 @@ function [ data_paths ] = createFStruct( path_formats, deployment )
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %
 
-    data_paths.processing_log = fullfile(path_formats.base_dir, strfstruct(path_formats.processing_log, deployment));
-    data_paths.binary_dir     = fullfile(path_formats.base_dir, strfstruct(path_formats.binary_path, deployment));
-    data_paths.cache_dir      = fullfile(path_formats.base_dir, strfstruct(path_formats.cache_path, deployment));
-    data_paths.log_dir        = fullfile(path_formats.base_dir, strfstruct(path_formats.log_path, deployment));
-    data_paths.ascii_dir      = fullfile(path_formats.base_dir, strfstruct(path_formats.ascii_path, deployment));
+    narginchk(2, 2);
     
-    data_paths.figure_dir = '';
-    if ~isempty(path_formats.figure_path)
-      data_paths.figure_dir     = fullfile(path_formats.base_dir, strfstruct(path_formats.figure_path, deployment));
-    end
-
-    %% Check and make netCDF file names
-    data_paths.netcdf_l0_file = '';
-    if ~isempty(path_formats.netcdf_l0)
-      data_paths.netcdf_l0_file = fullfile(path_formats.base_dir, strfstruct(path_formats.netcdf_l0, deployment));
-    end
-
-    data_paths.netcdf_l1_file = '';
-    if ~isempty(path_formats.netcdf_l1)      
-      data_paths.netcdf_l1_file = fullfile(path_formats.base_dir, strfstruct(path_formats.netcdf_l1, deployment));
-    end
+    path_list = fieldnames(path_formats);
+    data_paths = struct();
     
-    data_paths.netcdf_l2_file = '';
-    if ~isempty(path_formats.netcdf_l2)
-      data_paths.netcdf_l2_file = fullfile(path_formats.base_dir, strfstruct(path_formats.netcdf_l2, deployment));
-    end
-
-    %% Check and make special data file names (e.g. EGO)
-    data_paths.netcdf_egol1_file = '';
-    if ~isempty(path_formats.netcdf_egol1)
-      data_paths.netcdf_egol1_file = fullfile(path_formats.base_dir, strfstruct(path_formats.netcdf_egol1, deployment));
+    for i=1:numel(path_list)
+        current_path_name = path_list(i);
+        data_paths.(current_path_name{1}) = ...
+            fullfile(strfstruct(path_formats.(current_path_name{1}), deployment));
     end
 end
 

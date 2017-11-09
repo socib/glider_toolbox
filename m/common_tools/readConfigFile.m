@@ -1,4 +1,4 @@
-function [ readvals ] = readConfigFile( fconfig )
+function [ readvals ] = readConfigFile( fconfig, varargin )
 %READCONFIGFILE 
 %        TODO: Add description
 %   This function should read the configuration file and return a structure
@@ -25,7 +25,37 @@ function [ readvals ] = readConfigFile( fconfig )
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  narginchk(1, 1);
+  narginchk(1, 3);
+  
+  options.array_delimiter = '|';  
+    
+  %% Parse optional arguments.
+  % Get option key-value pairs in any accepted call signature.
+  argopts = varargin;
+  if isscalar(argopts) && isstruct(argopts{1})
+    % Options passed as a single option struct argument:
+    % field names are option keys and field values are option values.
+    opt_key_list = fieldnames(argopts{1});
+    opt_val_list = struct2cell(argopts{1});
+  elseif mod(numel(argopts), 2) == 0
+    % Options passed as key-value argument pairs.
+    opt_key_list = argopts(1:2:end);
+    opt_val_list = argopts(2:2:end);
+  else
+    error('glider_toolbox:readConfigFile:InvalidOptions', ...
+          'Invalid optional arguments (neither key-value pairs nor struct).');
+  end
+  % Overwrite default options with values given in extra arguments.
+  for opt_idx = 1:numel(opt_key_list)
+    opt = lower(opt_key_list{opt_idx});
+    val = opt_val_list{opt_idx};
+    if isfield(options, opt)
+      options.(opt) = val;
+    else
+      error('glider_toolbox:readConfigFile:InvalidOption', ...
+            'Invalid option: %s.', opt);
+    end
+  end
   
   %% Read configuration file
   fid = fopen(fconfig, 'rt');
@@ -45,10 +75,10 @@ function [ readvals ] = readConfigFile( fconfig )
       [var,tok] = strtok(line,' =');
       var = lower(var); 
       tok = strtok(tok,' =');  % remove = sign
-      if any(tok==','),   % for arrays
+      if ~isempty(options.array_delimiter) && any(tok==options.array_delimiter),   % for arrays
         k = 1; 
         while (1)
-            [val, tok]=strtok(tok,',');
+            [val, tok]=strtok(tok,options.array_delimiter);
             %R.(var){k} = strtrim(val);  	% return value of function 
             eval(sprintf('readvals.%s{%i}=''%s'';',var,k,strtrim(val)));  % stores variable in local workspace
         if isempty(tok), break; end;

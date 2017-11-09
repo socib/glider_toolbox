@@ -106,7 +106,7 @@ function flow = computeCTDFlowSpeed(varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(2, 9, nargin, 'struct'));
+  narginchk(2, 9);
   
   
   %% Parse mandatory input arguments.

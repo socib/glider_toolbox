@@ -42,19 +42,19 @@ function dockservers = configDockservers()
 
   narginchk(0, 0);
 
-  dockservers.active = 1;
+  dockservers.active = 0;
   dockservers.remote_base_dir = '/var/opt/gmc/gliders';
   dockservers.remote_xbd_dir  = 'from-glider';
   dockservers.remote_log_dir  = 'logs';
   
-  dockservers.server(1).url    = 'http://mydockserver01.myportal.mydomain';
-  dockservers.server(1).host   = '130.206.32.240';
-  dockservers.server(1).user   = 'localuser';
-  dockservers.server(1).pass   = '';
+  %dockservers.server(1).url    = 'http://mydockserver01.myportal.mydomain';
+  %dockservers.server(1).host   = '130.206.32.240';
+  %dockservers.server(1).user   = 'localuser';
+  %dockservers.server(1).pass   = '';
   dockservers.server(1).conn   = @sftp;
 
-  dockservers.server(2).url  = 'http://mydockserver02.myportal.mydomain';
-  dockservers.server(2).user = 'myself';
+  %dockservers.server(2).url  = 'http://mydockserver02.myportal.mydomain';
+  %dockservers.server(2).user = 'myself';
   dockservers.server(2).conn = @sftp;
 
 end

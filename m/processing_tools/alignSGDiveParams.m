@@ -45,7 +45,7 @@ function data = alignSGDiveParams(data, meta, params)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(3, 3, nargin, 'struct'));
+  narginchk(3, 3);
   
   dive_select = ~cellfun(@isempty, {meta.engheaders.dive}');
   dive_start = vertcat(meta.logheaders(dive_select).start);
