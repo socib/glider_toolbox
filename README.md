@@ -1,7 +1,3 @@
-Important announcement
---------
-Due to a mistake, we uploaded an unstable version of our project. This version was in the cloud between March 13th and June 14th of the current year. We have checked that none of our followers had cloned this wrong version. Now, we have reverted (reset --hard) to the previous stable version, the one in June 6th 2016. Should any of you need some help or any clarification, please feel free to contact us. Our apologies.
-
 glider_toolbox
 ==============
 
