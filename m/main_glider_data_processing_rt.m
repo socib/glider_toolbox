@@ -181,14 +181,25 @@
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+% Configuration and deployment files
+configuration_file = 'configMainRT.txt';
+deployment_file    = 'deploymentRT.txt';
+
+% required parameters of deployment structure
+required_deployment_strparam = {'deployment_name', 'glider_name', ...
+                       'glider_serial', 'glider_model'};
+required_deployment_numparam = {'deployment_id', ...
+                       'deployment_start', 'deployment_end'};
 
 %% Configure toolbox and configuration file path.
 glider_toolbox_dir = configGliderToolboxPath();
 glider_toolbox_ver = configGliderToolboxVersion();
 
 config = setupConfiguration(glider_toolbox_dir, ...
-                            'fconfig', fullfile(glider_toolbox_dir, 'config', 'configMainRT.txt'));
-
+                            'fconfig', fullfile(glider_toolbox_dir, 'config', configuration_file));
+deployment_file = fullfile(glider_toolbox_dir, 'config', deployment_file);
+                        
+                        
 %% Configure deployment data and binary paths.
 % This is necessary since we changed the configuration setup
 config.paths_public.netcdf_l0 = fullfile(config.public_paths.base_dir,config.public_paths.netcdf_l0);
@@ -220,19 +231,57 @@ config.wrcprogs.rename_dbd_files    = fullfile(config.wrcprogs.base_dir, config.
 
 
 %% Get list of deployments to process from database.
-disp('Querying information of glider deployments...');
-deployment_list = getDeploymentInfoDB( ...
-  config.db_query, config.db_access.name, ...
-  'user', config.db_access.user, 'pass', config.db_access.pass, ...
-  'server', config.db_access.server, 'driver', config.db_access.driver, ...
-  'fields', config.db_fields);
+% If the active parameter is set and set to 0 then the deployments will be
+% gathered from the deployment file under config
+user_db_access = 1;
+deployment_list = '';
+if ~isempty(config.db_access) && isfield(config.db_access, 'active')
+    user_db_access = config.db_access.active;
+end
+if user_db_access         
+    disp('Querying information of glider deployments...');
+    deployment_list = getDeploymentInfoDB( ...
+      config.db_query, config.db_access.name, ...
+      'user', config.db_access.user, 'pass', config.db_access.pass, ...
+      'server', config.db_access.server, 'driver', config.db_access.driver, ...
+      'fields', config.db_fields);
+else
+    disp(['Reading information of glider deployments from ' deployment_file '...']);
+    try
+        read_deployment = readConfigFile(deployment_file);
+        deployment_list = read_deployment.deployment_list;
+        
+        %Check/modify format of deployment_list 
+        for i=1:numel(required_deployment_strparam)
+           fieldname = required_deployment_strparam(i);
+           if ~isfield( deployment_list, fieldname{1})
+               disp(['ERROR: Deployment definition does not contain ' fieldname{1}]);
+               return;
+           end
+        end
+        for i=1:numel(required_deployment_numparam)
+           fieldname = required_deployment_numparam(i);
+           if ~isfield( deployment_list, fieldname{1})
+               disp(['ERROR: Deployment definition does not contain ' fieldname{1}]);
+               return;
+           else
+               for j=1:numel(deployment_list)  % TODO: not very elegant loop. 
+                   deployment_list(j).(fieldname{1}) = str2num(deployment_list(j).(fieldname{1}));
+               end
+           end
+        end
+    catch exception
+        disp(['Error reading deployment file ' deployment_file]);
+        disp(getReport(exception, 'extended'));
+    end    
+end
+
 if isempty(deployment_list)
   disp('No active glider deployments available.');
   return
 else
   disp(['Active deployments found: ' num2str(numel(deployment_list)) '.']);
 end
-
 
 %% Process active deployments.
 for deployment_idx = 1:numel(deployment_list)

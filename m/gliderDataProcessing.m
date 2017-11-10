@@ -86,8 +86,11 @@ function [] = gliderDataProcessing(varargin)
     narginchk(0, 10);
 
     % required parameters of deployment structure
-    required_deployment_param = {'deployment_start', 'deployment_end', ...
-                                 'glider_name', 'glider_serial', 'glider_model'};
+    required_deployment_strparam = {'deployment_name', 'glider_name', ...
+                       'glider_serial', 'glider_model'};
+    required_deployment_numparam = {'deployment_id', ...
+                       'deployment_start', 'deployment_end'};
+                   
     
     options.glider_toolbox_dir = '';
     options.processing_mode = 'rt';  
@@ -176,23 +179,45 @@ function [] = gliderDataProcessing(varargin)
         else
           disp(['Selected deployments found: ' num2str(numel(options.deployment_list)) '.']);
         end
-    elseif isempty(options.deployment_list)
-        error('glider_toolbox:gliderDataProcessing:InvalidOptions',...
+    else
+        if isempty(options.deployment_list)
+          error('glider_toolbox:gliderDataProcessing:InvalidOptions',...
               'Missing database and deployment list');
+        elseif ischar(options.deployment_list)
+            try
+                read_deployment = readConfigFile(deployment_file);
+                deployment_list = read_deployment.deployment_list;
+            catch exception
+                error('glider_toolbox:gliderDataProcessing:InvalidConfiguration',...
+                  'Could not read deployment definition file');
+            end            
+        end
+        
+        %Check/modify format of deployment_list 
+        for i=1:numel(required_deployment_strparam)
+           fieldname = required_deployment_strparam(i);
+           if ~isfield( deployment_list, fieldname{1})
+               disp(['ERROR: Deployment definition does not contain ' fieldname{1}]);
+               return;
+           end
+        end
+        for i=1:numel(required_deployment_numparam)
+           fieldname = required_deployment_numparam(i);
+           if ~isfield( options.deployment_list, fieldname{1})
+               disp(['ERROR: Deployment definition does not contain ' fieldname{1}]);
+               return;
+           else
+               for j=1:numel(options.deployment_list)  % TODO: not very elegant loop. 
+                   options.deployment_list(j).(fieldname{1}) = str2num(options.deployment_list(j).(fieldname{1}));
+               end
+           end
+        end        
     end
     
     %% Validate deployment list
     if isempty(options.deployment_list)
         disp('No deployments to be processed');
         return;
-    else
-        % Check deployment structure
-        for i = 1:numel(required_deployment_param)
-            if ~isfield(options.deployment_list(1), required_deployment_param(i))
-               msg = strcat('Missing', {' '}, required_deployment_param(i), ' in deployment definition');
-               error('glider_toolbox:gliderDataProcessing:IvalidFormat', msg);
-            end
-        end
     end
     
     %% Process active deployments.

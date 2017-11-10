@@ -1,0 +1,138 @@
+#!/bin/bash
+
+########
+# This script installs the glider toolbox dependencies
+#######
+
+##
+# Definitions 
+echo "";
+default_path='../ext_lib/';
+GBT_EXT_PATH=$(cd $default_path;pwd);
+if [[ $# -ge 1 ]]; then 
+  if [[ ! -d $1 ]]; then
+    echo "Input path $1 does not exist";
+    exit 1;
+  fi
+  GBT_EXT_PATH=$(cd $1;pwd);
+elif [[ ! -d $default_path ]]; then 
+  echo "Default path $default_path is missed";
+  echo "Input argument is required for external library path";
+  exit 1;
+fi
+
+echo "PATH DEFINITIONS:";
+echo "      - ROOT: $GBT_EXT_PATH";
+
+GBT_EXTLIB_PATH="${GBT_EXT_PATH}/lib/";
+echo "      - External libraries: $GBT_EXTLIB_PATH";
+
+GBT_EXTBIN_PATH="${GBT_EXT_PATH}/bin/";
+echo "      - Slocum binaries: $GBT_EXTBIN_PATH";
+
+GBT_EXTMAT_PATH="${GBT_EXT_PATH}/matlab/";
+echo "      - Matlab jar files: $GBT_EXTMAT_PATH";
+echo "";
+
+##
+# Installation of external dependencies
+echo ""
+echo "*************************";
+echo "* EXTERNAL DEPENDENCIES *";
+echo "*************************";
+echo "";
+
+
+# Install mexcdf
+cd ${GBT_EXTLIB_PATH};
+wget -t 3 -q -O "mexcdf.r4053.zip" "https://sourceforge.net/projects/mexcdf/files/mexcdf/mexcdf.r4053.zip/download";
+if [[ -f "mexcdf.r4053.zip" ]]; then 
+  unzip "mexcdf.r4053.zip";
+  # TODO: Check if files were correctly downloaded and unzip
+  rm "mexcdf.r4053.zip";
+else 
+  echo "Error when downloading mexcdf.r4053.zip";
+fi
+
+# Install m2html
+cd ${GBT_EXTLIB_PATH};
+echo "";
+wget -t 3 -q -O "m2html.zip" "http://www.artefact.tk/software/matlab/m2html/m2html.zip";
+if [[ -f "m2html.zip" ]]; then 
+  unzip "m2html.zip";
+  # TODO: Check if files were correctly downloaded and unzip
+  rm "m2html.zip";
+else 
+  echo "Error when downloading m2html.zip";
+fi
+
+# Install m_map
+cd ${GBT_EXTLIB_PATH};
+echo "";
+wget -t 3 --no-check-certificate -O "m_map1.4.tar.gz" "http://www.eos.ubc.ca/~rich/m_map1.4.tar.gz";
+if [[ -f "m_map1.4.tar.gz" ]]; then 
+  tar -xvf "m_map1.4.tar.gz";
+  # TODO: Check if files were correctly downloaded and unzip
+  rm "m_map1.4.tar.gz";
+else 
+  echo "Error when downloading m_map1.4.tar.gz";
+fi
+
+# Install Seawater library
+cd ${GBT_EXTLIB_PATH};
+echo "";
+mkdir seawater;
+cd seawater;
+wget -t 3 -O "seawater_ver3_3.1.zip" "http://www.marine.csiro.au/cgi-bin/marlin-dl/seawater/seawater_ver3_3.1.zip?action=Accept&file=%2Fseawater%2Fseawater_ver3_3.1.zip";
+if [[ -f "seawater_ver3_3.1.zip" ]]; then 
+  unzip "seawater_ver3_3.1.zip";
+  # TODO: Check if files were correctly downloaded and unzip
+  rm "seawater_ver3_3.1.zip";
+else
+  echo "Error when downloading seawater_ver3_3.1.zip";
+fi
+
+##
+# Installation of Slocum binaries
+echo ""
+echo "***********************";
+echo "* SLOCUM BINARY FILES *";
+echo "***********************";
+echo "";
+
+# Install Slocum binary files
+echo "";
+cd $GBT_EXTBIN_PATH;
+wget -t 3 -O slocum-master.zip "https://github.com/kerfoot/slocum/archive/master.zip";
+if [[ -f "slocum-master.zip" ]]; then 
+  unzip -j slocum-master.zip "slocum-master/linux-bin/*" -d .
+  # TODO: Check if files were correctly downloaded and unzip
+  rm "slocum-master.zip";
+else
+  echo "Error when downloading slocum-master.zip";
+fi
+
+
+##
+# Download matlab libraries
+echo ""
+echo "*****************************";
+echo "* EXTERNAL MATLAB LIBRARIES *";
+echo "*****************************";
+echo "";
+
+cd ${GBT_EXTMAT_PATH};
+echo "... downloading postgresql 9.4";
+wget -t 3 -q  "https://jdbc.postgresql.org/download/postgresql-9.4.1212.jar";
+echo "... downloading netcdfAll 4.2";
+wget -t 3 -q "ftp://ftp.unidata.ucar.edu/pub/netcdf-java/v4.2/netcdfAll-4.2.jar";
+echo "Add the following lines to the  classpath.txt in your Matlab installation at [MatlabRoot]/toolbox/local";
+echo '     $matlabroot/java/jarext/postgresql-9.4.1212.jre6.jar';
+echo '     $matlabroot/java/jarext/netcdfAll-4.2.jar';
+echo "Copy the files at ${GBT_EXTMAT_PATH} to [MatlabRoot]/java/jarext";
+
+echo "";
+echo " INSTALLATION COMPLETE ";
+echo "";
+
+

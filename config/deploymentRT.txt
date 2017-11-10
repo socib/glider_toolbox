@@ -1,0 +1,35 @@
+##
+# This file defines the deployments to be processed by the glider toolbox
+# when no database is available in real time. 
+#
+# When db_access.active is set to 0 in configMainRT.txt, the main_glider_data_processing_rt
+# script will read this file and create a list of deployments to be processed
+# from the content of its content
+# 
+##
+
+  
+    deployment_list(1).deployment_id    = 773
+    deployment_list(1).deployment_name  = your_deployment_name
+    deployment_list(1).deployment_start = 7.3700e+05
+    deployment_list(1).deployment_end   = NaN
+    deployment_list(1).glider_name      = your_glider_name
+    deployment_list(1).glider_serial    = 518
+    deployment_list(1).glider_model     = Slocum G2 Deep
+
+    deployment_list(2).deployment_id    = 773
+    deployment_list(2).deployment_name  = your_deployment_name
+    deployment_list(2).deployment_start = 7.3700e+05
+    deployment_list(2).deployment_end   = NaN
+    deployment_list(2).glider_name      = your_glider_name
+    deployment_list(2).glider_serial    = 518
+    deployment_list(2).glider_model     = Slocum G2 Deep
+
+# Add as many deployments as needed as follow for deployment i
+#   deployment_list(i).deployment_id    = 773
+#   deployment_list(i).deployment_name  = your_deployment_name
+#   deployment_list(i).deployment_start = 7.3700e+05
+#   deployment_list(i).deployment_end   = NaN
+#   deployment_list(i).glider_name      = your_glider_name
+#   deployment_list(i).glider_serial    = 518
+#   deployment_list(i).glider_model     = Slocum G2 Deep
