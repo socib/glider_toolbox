@@ -62,9 +62,9 @@ function public_paths = configPathsPublic(glider_toolbox_dir, public_site)
   narginchk(1, 2);
   
   public_paths.base_dir    = fullfile(glider_toolbox_dir, 'glider_data', 'public');
-  public_paths.netcdf_l0   = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'netcdf', '${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l0.nc');
-  public_paths.netcdf_l1   = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'netcdf', '${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l1.nc');
-  public_paths.netcdf_l2   = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'netcdf', '${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l2.nc');
+  public_paths.netcdf_l0   = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'netcdf', 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L0_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.nc');
+  public_paths.netcdf_l1   = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'netcdf', 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L1_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.nc');
+  public_paths.netcdf_l2   = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'netcdf', 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L2_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.nc');
   
   public_paths.figure_dir     = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'figures');
   public_paths.figure_info    = '${DEPLOYMENT_ID,%d}_figures.json';

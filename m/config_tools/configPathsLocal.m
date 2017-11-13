@@ -62,9 +62,9 @@ function local_paths = configPathsLocal(glider_toolbox_dir)
   local_paths.log_path       = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'log');
   local_paths.ascii_path     = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'ascii');
   local_paths.figure_path    = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'figures');
-  local_paths.netcdf_l0      = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'netcdf', '${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l0.nc');
-  local_paths.netcdf_l1      = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'netcdf', '${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l1.nc');
-  local_paths.netcdf_l2      = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'netcdf', '${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l2.nc');
-  local_paths.processing_log = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'processing.log');
+  local_paths.netcdf_l0      = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'netcdf', 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L0_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.nc');
+  local_paths.netcdf_l1      = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'netcdf', 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L1_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.nc');
+  local_paths.netcdf_l2      = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'netcdf', 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L2_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.nc');
+  local_paths.processing_log = fullfile('${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}', 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.log');
     
 end
