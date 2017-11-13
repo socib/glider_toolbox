@@ -118,6 +118,22 @@ function slocum_options = configDTFileOptionsSlocum()
     'sci_oxy3835_saturation'
     'sci_oxy3835_temp'
     'sci_oxy3835_timestamp'
+    % GFMR0058 Alnitak 2017 uses different names for variables (c_ballast_pumped and m_ballast_pumped)
+    'm_ballast_pumped'       
+    'c_ballast_pumped'
+    'x_gps_reasonable_radius'
+    'm_gps_dist_from_dr'
+    'm_gps_num_satellites'
+    'm_system_clock_lags_gps'
+    'x_system_clock_adjusted'
+    'u_max_lag_before_syncing_time'
+    'c_weight_drop'
+    'u_tickle_on_gps'
+    'm_tot_on_time'
+    'x_hardware_cop_timeout'
+    'm_veh_temp'
+    'm_veh_overheat'
+
   };
   
 end

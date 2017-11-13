@@ -1319,6 +1319,64 @@ function ncl0_info = configDTOutputNetCDFL0Slocum()
     'comment'       'id of active surface behavior (>0 = active)'
     '_FillValue'    default_fill_value };
 
+  % GFMR0058 Alnitak 2017 uses different names for variables (c_ballast_pumped and m_ballast_pumped)
+  var_attr_list.m_ballast_pumped = {
+    'long_name'     'out, pumps ballast overboard goes up'
+    'units'         'cc'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.c_ballast_pumped = {
+    'long_name'     'in, pumps ballast overboard goes up'
+    'units'         'cc'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.x_gps_reasonable_radius = {
+    'long_name'     'out, how far fix CAN BE from dead reckoned position'
+    'units'         'm'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_gps_num_satellites = {
+    'long_name'     'out, Number of satellites in use, 00 to 12'
+    'units'         '1'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_system_clock_lags_gps = {
+    'long_name'     'lagtime between persistor and gps clock'
+    'units'         's'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.x_system_clock_adjusted = {
+    'long_name'     'last sync_time offset'
+    'units'         's'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_max_lag_before_syncing_time = {
+    'long_name'     'sync_time when avg lag exceeds 12 secs'
+    'units'         's'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.u_tickle_on_gps = {
+    'long_name'     'in, non-zero reset watchdog on every gps fix'
+    'units'         '1'
+    'comment'       '0=off, 1=on'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_tot_on_time = {
+    'long_name'     'out, How long we have been powered on'
+    'units'         'd'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_veh_temp = {
+    'long_name'     'temperature that was read out from the board'
+    'units'         'c'
+    '_FillValue'    default_fill_value };
+
+  var_attr_list.m_veh_overheat = {
+    'long_name'     'non-zero ==> m_veh_temp >= f_veh_temp_threshold'
+    'units'         '1'
+    'comment'       'bool'
+    '_FillValue'    default_fill_value };
+
 
   %% Define global attributes (they may be overwritten with deployment values).
   % To define the global attributes easily and readably, add them to this
