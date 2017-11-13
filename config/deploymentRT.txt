@@ -10,13 +10,15 @@
 
   
     # Required parameters
-    deployment_list(1).deployment_id    = 773
-    deployment_list(1).deployment_name  = your_deployment_name
-    deployment_list(1).deployment_start = 7.3700e+05
-    deployment_list(1).deployment_end   = NaN
-    deployment_list(1).glider_name      = your_glider_name
-    deployment_list(1).glider_serial    = 518
-    deployment_list(1).glider_model     = Slocum G2 Deep
+    deployment_list(1).deployment_id                = 773
+    deployment_list(1).deployment_name              = your_deployment_name
+    deployment_list(1).deployment_start             = 7.3700e+05
+    deployment_list(1).deployment_end               = NaN
+    deployment_list(1).glider_name                  = your_glider_name
+    deployment_list(1).glider_serial                = 518
+    deployment_list(1).glider_model                 = Slocum G2 Deep
+    deployment_list(1).glider_instrument_name       = SCB-SGDEEP003
+    deployment_list(1).glider_deployment_code       = 0002
 
     # Examples of optional parameters
     deployment_list(1).project                      = MARS2015
@@ -27,7 +29,6 @@
     deployment_list(1).author                       = Glider Respo
     deployment_list(1).author_email                 = respo@glider.edu
     deployment_list(1).glider_instrument_name       = SCB-SGDEEP003
-    deployment_list(1).glider_deployment_code       = 0002
     deployment_list(1).institution                  = IEO-PLOCAN
     deployment_list(1).instrument                   = 
     deployment_list(1).instrument_manufacturer      = 
