@@ -8,7 +8,7 @@
 # 
 ##
 
-  
+    # Required parameters
     deployment_list(1).deployment_id    = 773
     deployment_list(1).deployment_name  = your_deployment_name
     deployment_list(1).deployment_start = 7.3700e+05
@@ -16,6 +16,21 @@
     deployment_list(1).glider_name      = your_glider_name
     deployment_list(1).glider_serial    = 518
     deployment_list(1).glider_model     = Slocum G2 Deep
+
+    # Optional parameters
+    deployment_list(1).project                      = MARS2015
+    deployment_list(1).abstract                     = Some description
+    deployment_list(1).project_url                  = http://myproject.org/
+    deployment_list(1).principal_investigator       = Pi Name
+    deployment_list(1).principal_investigator_email = pi@glider.edu
+    deployment_list(1).author                       = Glider Respo
+    deployment_list(1).author_email                 = respo@glider.edu
+    deployment_list(1).glider_instrument_name       = SCB-SGDEEP003
+    deployment_list(1).glider_deployment_code       = 0002
+    deployment_list(1).institution                  = IEO-PLOCAN
+    deployment_list(1).instrument                   = 
+    deployment_list(1).instrument_manufacturer      = 
+    deployment_list(1).instrument_model             = 
 
 # Add as many deployments as needed as follow for deployment i
 #   deployment_list(i).deployment_id    = 773
