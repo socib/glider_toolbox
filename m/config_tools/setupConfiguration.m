@@ -354,9 +354,11 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     end
     
     %% Configure figure outputs.
-    [config.figures_processed, config.figures_gridded] = configFigures();
-    config.figures_processed.status = 'configFigures';
-    config.figures_gridded.status = 'configFigures';
+    [figures_processed_options, figures_gridded_options] = configFigures();
+    config.figures_processed.options = figures_processed_options;
+    config.figures_gridded.options   = figures_gridded_options;
+    config.figures_processed.status  = 'configFigures';
+    config.figures_gridded.status    = 'configFigures';
     
     % Overwrite figures_processed
     if ~isempty(readconfig) && isfield(readconfig, 'figures_processed')

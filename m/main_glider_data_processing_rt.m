@@ -356,8 +356,8 @@ for deployment_idx = 1:numel(deployment_list)
   gridding_options = config.gridding_options;
   netcdf_l1_options = config.output_netcdf_l1;
   netcdf_l2_options = config.output_netcdf_l2;
-  figproc_options = config.figures_processed;
-  figgrid_options = config.figures_gridded;
+  figproc_options = config.figures_processed.options;
+  figgrid_options = config.figures_gridded.options;
 
 
   %% Start deployment processing logging.
