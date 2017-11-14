@@ -116,6 +116,10 @@ function slocum_options = configRTFileOptionsSlocum()
     'sci_oxy3835_saturation'
     'sci_oxy3835_temp'
     'sci_oxy3835_timestamp'
+    'sci_oxy4_oxygen'
+    'sci_oxy4_saturation'
+    'sci_oxy4_temp'
+    'sci_oxy4_timestamp'
   };
   
 end

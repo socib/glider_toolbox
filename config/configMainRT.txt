@@ -48,4 +48,3 @@
     dockservers.server(1).host   = xxx.xxx.xxx.xxx
     dockservers.server(1).user   = dock_user
     dockservers.server(1).pass   = top_secret
-

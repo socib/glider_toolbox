@@ -109,13 +109,15 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
 %                         time parameter
 %           -- file_options_slocum.dba_sensors: Name of parameters to
 %                         consider from binary files (array)
+%       - FIGURES_PROCESSED and FIGURES_GRIDDED: Definitions for figure
+%                 creation (configFigures). The default parameters are
+%                 explained in configFigures but potentially it allows any
+%                 figure in the configuration file
 %
 %    The following configuration parameters do not allow configuration file
 %    overwrite. Check function for details. Some of them allow for delayed
 %    or real time mode configuration according to the input processing_mode
 %    option.
-%       - FIGURES_PROCESSED and FIGURES_GRIDDED: Definitions for figure
-%                 creation (configFigures).  
 %       - OUTPUT_NETCDF_L0_SLOCUM: Definition for L0 netCDF file creation
 %                 for Slocum data (configXTOutputNetCDFL0Slocum). 
 %       - OUTPUT_NETCDF_L0_SEAGLIDER: Definition for L0 netCDF file creation
@@ -353,6 +355,54 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     
     %% Configure figure outputs.
     [config.figures_processed, config.figures_gridded] = configFigures();
+    config.figures_processed.status = 'configFigures';
+    config.figures_gridded.status = 'configFigures';
+    
+    % Overwrite figures_processed
+    if ~isempty(readconfig) && isfield(readconfig, 'figures_processed')
+        if isfield(readconfig.figures_processed, 'fconfig') 
+          config.figures_processed.status = readconfig.figures_processed.fconfig;
+          array_delimiter = '';
+          if isfield(config.figures_processed, 'array_delimiter')
+            array_delimiter = config.figures_processed.array_delimiter;
+          end
+          config_figures_processed = readConfigFile(readconfig.figures_processed.fconfig, 'array_delimiter', array_delimiter);
+        else
+          config.figures_processed.status = options.fconfig;
+          config_figures_processed = readconfig.figures_processed;
+        end
+        fields = fieldnames(config_figures_processed);
+        for i = 1:numel(fields)
+            if strcmp(fields{i},'active') == 0
+                config.figures_processed.(fields{i}) = config_figures_processed.(fields{i});
+            else
+                config.figures_processed.(fields{i}) = strcmp(config_figures_processed.(fields{i}),'1') + strcmp(config_figures_processed.(fields{i}),'true');
+            end
+        end
+    end
+    
+    % Overwrite figures_gridded
+    if ~isempty(readconfig) && isfield(readconfig, 'figures_gridded')
+        if isfield(readconfig.figures_gridded, 'fconfig') 
+          config.figures_gridded.status = readconfig.figures_gridded.fconfig;
+          array_delimiter = '';
+          if isfield(config.figures_gridded, 'array_delimiter')
+            array_delimiter = config.figures_gridded.array_delimiter;
+          end
+          config_figures_gridded = readConfigFile(readconfig.figures_gridded.fconfig, 'array_delimiter', array_delimiter);
+        else
+          config.figures_gridded.status = options.fconfig;
+          config_figures_gridded = readconfig.figures_gridded;
+        end
+        fields = fieldnames(config_figures_gridded);
+        for i = 1:numel(fields)
+            if strcmp(fields{i},'active') == 0
+                config.figures_gridded.(fields{i}) = config_figures_gridded.(fields{i});
+            else
+                config.figures_gridded.(fields{i}) = strcmp(config_figures_gridded.(fields{i}),'1') + strcmp(config_figures_gridded.(fields{i}),'true');
+            end
+        end
+    end
 
 
     %% Configure NetCDF outputs.
@@ -410,12 +460,18 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
           config_file_options_slocum = readconfig.file_options_slocum;
         end
         fields = fieldnames(config_file_options_slocum);
+        add2dba_sensors = {};
         for i = 1:numel(fields)
-            if strcmp(fields{i},'format_conversion') == 0
-                config.file_options_slocum.(fields{i}) = config_file_options_slocum.(fields{i});
-            else
+            if strcmp(fields{i},'format_conversion') == 1
                 config.file_options_slocum.(fields{i}) = strcmp(config_file_options_slocum.(fields{i}),'1') + strcmp(config_file_options_slocum.(fields{i}),'true');
+            elseif strcmp(fields{i},'add2dba_sensors') == 0
+                config.file_options_slocum.(fields{i}) = config_file_options_slocum.(fields{i});
+            else 
+                add2dba_sensors = [add2dba_sensors, config_file_options_slocum.(fields{i})];
             end
+        end
+        if ~isempty(add2dba_sensors)
+            config.file_options_slocum.dba_sensors = union(config.file_options_slocum.dba_sensors, add2dba_sensors);
         end
     end
     

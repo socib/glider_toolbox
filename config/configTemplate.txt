@@ -80,6 +80,12 @@
 #                         time parameter
 #           -- file_options_slocum.dba_sensors: Name of parameters to
 #                         consider from binary files (array)
+#           -- file_options_slocum.add2dba_sensors: Appends the specified parameters
+#                         to file_options_slocum.dba_sensors.
+#       - FIGURES_PROCESSED and FIGURES_GRIDDED: Definitions for figure
+#                 creation (configFigures). The default parameters are
+#                 explained in configFigures but potentially it allows any
+3                 figure in the configuration file
 #
 # Notice that no ; or quotes are needed to define the variables. This would create
 # an error in the processing. 
@@ -184,3 +190,14 @@
     file_options_slocum.dba_time_sensor_nav  = m_present_time
     file_options_slocum.dba_time_sensor_sci  = sci_m_present_time
     file_options_slocum.dba_sensors          = m_present_time|m_lat|m_lon|m_gps_lat|m_gps_lon|m_gps_status
+    file_options_slocum.add2dba_sensors      = sci_oxy4_oxygen|m_lat|sci_oxy4_saturation|sci_oxy4_temp|sci_oxy4_timestamp
+
+#########################
+# Processed and gridded figure options
+#   Definition: List of figures to be produced
+#   Note: Refer to the configFigure description for details
+#         Only a few examples are shown here
+
+    figures_proc.current_map.plotopts.coastfile     = private/coast_wmed_h
+    figures_proc.oxygen_saturation.prntopts.comment = My own comment about oxygen saturation
+    
