@@ -7,7 +7,7 @@ configGliderToolboxPath;
 %% External libraries
 [glider_toolbox_dir, ~, ~] = fileparts(mfilename('fullpath'));
 ext_lib_path = fullfile(glider_toolbox_dir, 'ext_lib', 'lib');  % 'octave', 'packages');
-disp([{'Loading libraries at '}, ext_lib_path, '...']);
+disp(strcat({'Loading libraries at '}, ext_lib_path, '...'));
 
 % snctools: NetCDF library preferences.
 % patched version for text attribute encoding.
