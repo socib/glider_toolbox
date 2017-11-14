@@ -103,8 +103,8 @@ function [ glider_type, processing_config ] = extractDeploymentConfig( glider_mo
   processing_config.netcdf_l1_options    = config.output_netcdf_l1;
   processing_config.netcdf_egol1_options = config.output_netcdf_egol1;
   processing_config.netcdf_l2_options    = config.output_netcdf_l2;
-  processing_config.figproc_options      = config.figures_processed;
-  processing_config.figgrid_options      = config.figures_gridded;
+  processing_config.figproc_options      = config.figures_processed.options;
+  processing_config.figgrid_options      = config.figures_gridded.options;
 
 end
 
