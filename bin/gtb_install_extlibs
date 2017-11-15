@@ -84,7 +84,7 @@ cd ${GBT_EXTLIB_PATH};
 echo "";
 wget -t 3 --no-check-certificate -O "m_map1.4.tar.gz" "http://www.eos.ubc.ca/~rich/m_map1.4.tar.gz";
 if [[ -f "m_map1.4.tar.gz" ]]; then 
-  tar -xvf "m_map1.4.tar.gz";
+  tar -xf "m_map1.4.tar.gz";
   # TODO: Check if files were correctly downloaded and unzip
   rm "m_map1.4.tar.gz";
 else 
