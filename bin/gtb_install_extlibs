@@ -99,6 +99,14 @@ if [[ -d ${gshhs_path} ]]; then
   wget -t 3 --no-check-certificate -O "gshhs_2.0.zip" "https://www.ngdc.noaa.gov/mgg/shorelines/data/gshhs/oldversions/version2.0/gshhs_2.0.zip";
   if [[ -f "gshhs_2.0.zip" ]]; then
     unzip -q gshhs_2.0.zip;
+    if [[ -d gshhs ]]; then
+      ln -s gshhs/gshhs_c.b .;
+      ln -s gshhs/gshhs_l.b .; 
+      ln -s gshhs/gshhs_i.b .;
+      ln -s gshhs/gshhs_h.b .;
+    else
+      echo "Error, could not find gshhs directory";
+    fi
     # TODO: Check if files were correctly downloaded and unzip
     rm gshhs_2.0.zip;
   else
