@@ -26,12 +26,25 @@ echo "      - ROOT: $GBT_EXT_PATH";
 
 GBT_EXTLIB_PATH="${GBT_EXT_PATH}/lib/";
 echo "      - External libraries: $GBT_EXTLIB_PATH";
+if [[ ! -d ${GBT_EXT_PATH}/lib/ ]]; then
+  mkdir -p ${GBT_EXT_PATH}/lib/;
+  echo "              ... creating directory";
+fi
 
 GBT_EXTBIN_PATH="${GBT_EXT_PATH}/bin/";
 echo "      - Slocum binaries: $GBT_EXTBIN_PATH";
+if [[ ! -d ${GBT_EXT_PATH}/bin/ ]]; then
+  mkdir -p ${GBT_EXT_PATH}/bin/;
+  echo "              ... creating directory";
+fi
 
 GBT_EXTMAT_PATH="${GBT_EXT_PATH}/matlab/";
 echo "      - Matlab jar files: $GBT_EXTMAT_PATH";
+if [[ ! -d ${GBT_EXT_PATH}/matlab/ ]]; then
+  mkdir -p ${GBT_EXT_PATH}/matlab/;
+  echo "              ... creating directory";
+fi
+
 echo "";
 
 ##
@@ -47,7 +60,7 @@ echo "";
 cd ${GBT_EXTLIB_PATH};
 wget -t 3 -q -O "mexcdf.r4053.zip" "https://sourceforge.net/projects/mexcdf/files/mexcdf/mexcdf.r4053.zip/download";
 if [[ -f "mexcdf.r4053.zip" ]]; then 
-  unzip "mexcdf.r4053.zip";
+  unzip -q "mexcdf.r4053.zip";
   # TODO: Check if files were correctly downloaded and unzip
   rm "mexcdf.r4053.zip";
 else 
@@ -59,7 +72,7 @@ cd ${GBT_EXTLIB_PATH};
 echo "";
 wget -t 3 -q -O "m2html.zip" "http://www.artefact.tk/software/matlab/m2html/m2html.zip";
 if [[ -f "m2html.zip" ]]; then 
-  unzip "m2html.zip";
+  unzip -q "m2html.zip";
   # TODO: Check if files were correctly downloaded and unzip
   rm "m2html.zip";
 else 
@@ -78,6 +91,24 @@ else
   echo "Error when downloading m_map1.4.tar.gz";
 fi
 
+# Install GSHHS high resolution maps
+gshhs_path="${GBT_EXTLIB_PATH}/m_map/private";
+echo "";
+if [[ -d ${gshhs_path} ]]; then 
+  cd ${gshhs_path};
+  wget -t 3 --no-check-certificate -O "gshhs_2.0.zip" "https://www.ngdc.noaa.gov/mgg/shorelines/data/gshhs/oldversions/version2.0/gshhs_2.0.zip";
+  if [[ -f "gshhs_2.0.zip" ]]; then
+    unzip -q gshhs_2.0.zip;
+    # TODO: Check if files were correctly downloaded and unzip
+    rm gshhs_2.0.zip;
+  else
+    echo "Error when downloading gshhs_2.0.zip";
+  fi
+else
+  echo "Error when adding GSHHS. ${gshhs_path} does not exist";
+fi
+
+
 # Install Seawater library
 cd ${GBT_EXTLIB_PATH};
 echo "";
@@ -85,7 +116,7 @@ mkdir seawater;
 cd seawater;
 wget -t 3 -O "seawater_ver3_3.1.zip" "http://www.marine.csiro.au/cgi-bin/marlin-dl/seawater/seawater_ver3_3.1.zip?action=Accept&file=%2Fseawater%2Fseawater_ver3_3.1.zip";
 if [[ -f "seawater_ver3_3.1.zip" ]]; then 
-  unzip "seawater_ver3_3.1.zip";
+  unzip -q "seawater_ver3_3.1.zip";
   # TODO: Check if files were correctly downloaded and unzip
   rm "seawater_ver3_3.1.zip";
 else
@@ -105,7 +136,7 @@ echo "";
 cd $GBT_EXTBIN_PATH;
 wget -t 3 -O slocum-master.zip "https://github.com/kerfoot/slocum/archive/master.zip";
 if [[ -f "slocum-master.zip" ]]; then 
-  unzip -j slocum-master.zip "slocum-master/linux-bin/*" -d .
+  unzip -q -j slocum-master.zip "slocum-master/linux-bin/*" -d .
   # TODO: Check if files were correctly downloaded and unzip
   rm "slocum-master.zip";
 else
