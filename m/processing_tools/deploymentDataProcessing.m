@@ -320,8 +320,14 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
   data_preprocessed = struct();
   meta_processed = struct();
   data_processed = struct();
+  meta_qc_processed = struct();
+  data_qc_processed = struct();
   meta_gridded = struct();
   data_gridded = struct();
+  meta_postprocessed = struct();
+  data_postprocessed = struct();
+  meta_qc_postprocessed = struct();
+  data_qc_postprocessed = struct();
   meta_res = struct();
   data_res = struct();
   outputs = struct();
@@ -379,6 +385,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
       catch exception
         disp(['Error generating Ascii data from ' binary_dir ':']);
         disp(getReport(exception, 'extended'));
+        return;
       end
   else
       disp('Skip binary conversion due to request of no binary format conversion');
@@ -391,6 +398,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
   catch exception
     disp(['Error loading Ascii data from ' ascii_dir ':']);
     disp(getReport(exception, 'extended'));
+    return;
   end
   
   if strcmp(options.data_result, 'raw')
@@ -475,6 +483,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
     catch exception
       disp('Error preprocessing glider deployment data:');
       disp(getReport(exception, 'extended'));
+      return;
     end
   end
 
@@ -492,6 +501,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
     catch exception
       disp('Error processing glider deployment data:');
       disp(getReport(exception, 'extended'));
+      return;
     end
   end
   
@@ -510,6 +520,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
     catch exception
       disp('Error performing QC of processed data:');
       disp(getReport(exception, 'extended'));
+      return;
     end
   end
     
@@ -573,23 +584,26 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
       disp(getReport(exception, 'extended'));
     end
     
-    if strcmp(options.data_result, 'postprocessed')
-        meta_res = meta_postprocessed;
-        data_res = data_postprocessed;
-    end
-
-    disp('QC of post processed glider data (add EGO QC keywords)...');
-    try
-      [data_qc_postprocessed, meta_qc_postprocessed] = ...
-        postProcessQCGliderData(data_postprocessed, meta_postprocessed); %, processing_config.postprocessing_options);
-    catch exception
-      disp('Error performing QC of post processed glider data:');
-      disp(getReport(exception, 'extended'));
-    end
     
-    if strcmp(options.data_result, 'qc_postprocessed')
-        meta_res = meta_qc_postprocessed;
-        data_res = data_qc_postprocessed;
+    if ~isempty(fieldnames(data_qc_postprocessed))
+        if strcmp(options.data_result, 'postprocessed')
+            meta_res = meta_postprocessed;
+            data_res = data_postprocessed;
+        end
+
+        disp('QC of post processed glider data (add EGO QC keywords)...');
+        try
+          [data_qc_postprocessed, meta_qc_postprocessed] = ...
+            postProcessQCGliderData(data_postprocessed, meta_postprocessed); %, processing_config.postprocessing_options);
+        catch exception
+          disp('Error performing QC of post processed glider data:');
+          disp(getReport(exception, 'extended'));
+        end
+
+        if strcmp(options.data_result, 'qc_postprocessed')
+            meta_res = meta_qc_postprocessed;
+            data_res = data_qc_postprocessed;
+        end
     end
   end
   
@@ -636,6 +650,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
     catch exception
       disp('Error gridding glider deployment data:');
       disp(getReport(exception, 'extended'));
+      return;
     end
   end
   
