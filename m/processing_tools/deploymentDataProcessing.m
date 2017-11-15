@@ -269,33 +269,33 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
       cache_dir          = fullfile(data_paths.base_dir, data_paths.cache_path);
       log_dir            = fullfile(data_paths.base_dir, data_paths.log_path);
       ascii_dir          = fullfile(data_paths.base_dir, data_paths.ascii_path);
-      figure_dir         = data_paths.figure_path;
-      netcdf_l0_file     = data_paths.netcdf_l0;
-      netcdf_l1_file     = data_paths.netcdf_l1;
-      netcdf_l2_file     = data_paths.netcdf_l2;
-      netcdf_egol1_file  = data_paths.netcdf_egol1;
+      figure_dir         = '';
+      netcdf_l0_file     = '';
+      netcdf_l1_file     = '';
+      netcdf_l2_file     = '';
+      netcdf_egol1_file  = '';
       
-      if ~isempty(figure_dir)
-        figure_dir         = fullfile(data_paths.base_dir, figure_dir);
+      if isfield(data_paths,'figure_path')
+        figure_dir         = fullfile(data_paths.base_dir, data_paths.figure_path);
       end
-      if ~isempty(netcdf_l0_file)
-        netcdf_l0_file     = fullfile(data_paths.base_dir, netcdf_l0_file);
+      if isfield(data_paths,'netcdf_l0')
+        netcdf_l0_file     = fullfile(data_paths.base_dir, data_paths.netcdf_l0);
       end
-      if ~isempty(netcdf_l1_file)
-        netcdf_l1_file     = fullfile(data_paths.base_dir, netcdf_l1_file);
+      if isfield(data_paths,'netcdf_l1')
+        netcdf_l1_file     = fullfile(data_paths.base_dir, data_paths.netcdf_l1);
       end
-      if ~isempty(netcdf_l2_file)
-        netcdf_l2_file     = fullfile(data_paths.base_dir, netcdf_l2_file);
+      if isfield(data_paths,'netcdf_l2')
+        netcdf_l2_file     = fullfile(data_paths.base_dir, data_paths.netcdf_l2);
       end
-      if ~isempty(netcdf_egol1_file)
-        netcdf_egol1_file     = fullfile(data_paths.base_dir, netcdf_egol1_file);
+      if isfield(data_paths,'netcdf_egol1')
+        netcdf_egol1_file     = fullfile(data_paths.base_dir, data_paths.netcdf_egol1);
       end
   else
     error('glider_toolbox:deploymentDataProcessing:InvalidOptions', ...
           'Data path input must be a string or a structure.');
   end
   
-  %TODO: Check if datapath exists!
+  %TODO: Check if datapath exists!?
   
   
   %% Read configuration values from configuration file
@@ -578,7 +578,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
         data_res = data_postprocessed;
     end
 
-    disp('QC of post processed glider data...');
+    disp('QC of post processed glider data (add EGO QC keywords)...');
     try
       [data_qc_postprocessed, meta_qc_postprocessed] = ...
         postProcessQCGliderData(data_postprocessed, meta_postprocessed); %, processing_config.postprocessing_options);

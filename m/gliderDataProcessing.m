@@ -232,8 +232,9 @@ function [] = gliderDataProcessing(varargin)
       startLogging(data_paths.processing_log, options.glider_toolbox_ver, deployment);
       
       %% Process data
-      [netcdf_products, figure_products, meta, data] = deploymentDataProcessing(data_paths, deployment, config, ...
-                                              'data_result', 'postprocessed');
+      [netcdf_products, figure_products, ~, ~] = ...
+          deploymentDataProcessing(data_paths, deployment, config, ...
+                                        'data_result', 'postprocessed');
       
       %% Define public paths
       public_paths = createFStruct(config.public_paths, deployment);
