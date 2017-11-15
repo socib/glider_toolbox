@@ -1,8 +1,60 @@
 function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, varargin )
-%TODO: Help
-% This function converts the data and meta data to EGO standards
-% It can be generalized using the varargin option to any conversion but for
-% now I am going to hard code the entire change
+% POSTPROCESSGLIDERDATA    Transform processed data to fit EGO standards
+%
+%  Syntax:
+%    [DATA_CONV, META_CONV] = POSTPROCESSGLIDERDATA( DATA_PROC, META_PROC)
+%    [DATA_CONV, META_CONV] = POSTPROCESSGLIDERDATA( DATA_PROC, META_PROC, PARAM1, VAL1)
+%
+%  Description:
+%    POSTPROCESSGLIDERDATA converts names and units of the variables of the
+%    inputs to fit the EGO standards.
+%
+%  Input:
+%
+%    DATA_PROC should be a struct in the format returned by POSTPROCESSGLIDERDATA,
+%    where each field is a sequence of measurements of the variable with the 
+%    same name.
+
+%    META_PROC should be a struct in the format returned by POSTPROCESSGLIDERDATA,
+%    where each field is a sequence of meta data of the variable with the 
+%    same name.
+%
+%  Output:
+%
+%    DATA_CONV is a struct in the same format as DATA_PROC, with time sequences 
+%    resulting from the processing actions described above, performed according
+%    to the options described below.
+%
+%    META_CONV is also a struct with one field per variable, adding processing 
+%    metadata to any existing metadata in META_PROC.
+%
+%  Options:
+%
+%    TIME: Variable name to be used as time.
+%
+%    PARAM_CONVERT: Defines the parameters to be renamed as an array of
+%      strings {param_ego_1 param_socib_1 param_ego_2 param_socib_1 ...}
+%
+%  Authors:
+%    Miguel Charcos Llorens  <mcharcos@socib.es>
+%
+%  Copyright (C) 2013-2016
+%  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
+%  <http://www.socib.es>
+%
+%  This program is free software: you can redistribute it and/or modify
+%  it under the terms of the GNU General Public License as published by
+%  the Free Software Foundation, either version 3 of the License, or
+%  (at your option) any later version.
+%
+%  This program is distributed in the hope that it will be useful,
+%  but WITHOUT ANY WARRANTY; without even the implied warranty of
+%  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%  GNU General Public License for more details.
+%
+%  You should have received a copy of the GNU General Public License
+%  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  
 
     narginchk(2, 4);
 
@@ -57,11 +109,10 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
     time_field_list = cellstr(options.time);
     time_field_present = isfield(data_conv, time_field_list);
 
-    % TODO: Check if juld exist?
-    if any(time_field_present)
+    if any(time_field_present) && ~isfield(data_conv, 'juld')
         time_field_index = find(time_field_present, 1);
         time_field = time_field_list{time_field_index};
-        if isfield(data_conv, time_field)
+        if isfield(data_conv, time_field) 
             data_conv(:).juld = data_conv(:).(time_field)/86400 + daysact('1-jan-1950',  '1-jan-1970');
             meta_conv.juld.sources = 'time';
             meta_conv.juld.filling = 'linear';
@@ -73,8 +124,8 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
     meta_conv.phase.method = 'postProcessGliderData';
     meta_conv.phase_number.sources = 'profile_direction positioning_method';
     meta_conv.phase_number.method = 'postProcessGliderData';
-    profile_direction = data_conv.profile_direction;   % TODO: Check if it exists and generalize
-    positioning_method = data_conv.positioning_method; % TODO: Check if it exists and generalize
+    profile_direction = data_conv.profile_direction;   
+    positioning_method = data_conv.positioning_method; 
     data_conv.phase = zeros(size(profile_direction));
     data_conv.phase_number = zeros(size(profile_direction));
     

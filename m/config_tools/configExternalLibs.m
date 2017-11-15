@@ -1,6 +1,5 @@
 function wrcprogs = configExternalLibs(glider_toolbox_dir)
 %  CONFIGEXTERNALLIBS  Configure path of the Slocum glider programs provided by WRC.
-%  TODO: update documentation
 %
 %  Syntax:
 %    WRCPROGS = CONFIGEXTERNALLIBS()
@@ -8,25 +7,16 @@ function wrcprogs = configExternalLibs(glider_toolbox_dir)
 %  Description:
 %    WRCPROGS = CONFIGEXTERNALLIBS() should return a struct with the path to
 %    the executables provided by the Webb Research Company to deal with Slocum
-%    glider data files. It should have the following fields:
-%      DBD2ASC: path to the program to convert Slocum binary data files
-%        to ascii data ('dbd2asc').
+%    glider data files. This function replaces the configWRCPrograms and
+%    assumes that the external libraries are installed under the
+%    GLIDER_TOOLBOX_DIR/ext_lib/bin. Contrary to configWRCPrograms, this
+%    function must not be edited. Users must use the configuration files to
+%    overwrite the values returned by CONFIGEXTERNALLIBS if their external
+%    libraries live in a different path. Read SETUPCONFIGURATION for more
+%    details.
 %
-%    The following fields are optional. The glider processing functions do not
-%    use them in any way. They are here just for completeness and to allow
-%    using these programs from the MATLAB/Octave environment in which the
-%    glider processing toolbox is used.
-%      DBA_MERGE: path to program to merge ascii versions of the navigation
-%        and science files ('dba_merge').
-%      DBA_SENSOR_FILTER: path to program to filter data in ascii versions of
-%        the Slocum data files based on the source sensor ('dba_sensor_filter').
-%      DBA_TIME_FILTER: path to program to filter data in ascii versions of
-%        the Slocum data files based on the time stamp ('dba_time_filter').
-%      DBA2_ORIG_MATLAB: path to program to convert ascii versions of the 
-%        Slocum data files to MATLAB/Octave loadable files ('dba2_orig_matlab').
-%      RENAME_DBD_FILES: path to program to perform 8x3 DOS name format 
-%        renaming of the Slocum binary data files ('rename_dbd_files').
-%
+%    Users can use gtb_install_extlib to install the WRC programs in the
+%    default path used by this function.
 %  Notes:
 %    The executables required are provided by the Webb Research Company and
 %    should be available in your system binary path as required by the

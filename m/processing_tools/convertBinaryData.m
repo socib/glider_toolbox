@@ -7,13 +7,37 @@ function [] = convertBinaryData( input_path, output_path, glider_type, varargin)
 %    CONVERTBINARYDATA(INPUT_PATH, OUTPUT_PATH, GLIDER_TYPE, OPT1, VAL1, ...)
 %
 %  Description:
-%    TODO: Description for CONVERTBINARYDATA
+%    CONVERTBINARYDATA converts binary glider files to ascii human readable
+%    format for Slocum data. Check deployment files available in binary
+%    directory, convert them to ascii format in the ascii directory, and
+%    store the returned absolute path for later use. Since some conversion
+%    may fail use a cell array of string cell arrays and flatten it when
+%    finished, leaving only the succesfully created dbas. Give a second try
+%    to failing files, because they might have failed due to  a missing
+%    cache file generated later. 
 %
 %  Input:
-%    TODO: Inputs for CONVERTBINARYDATA
+%    INPUT_PATH: Location where the binary xdb files are in the local drive.
+%    OUTPUT_PATH: Location where the ascii files are created. 
+%    GLIDER_TYPE: Glider type may be slocum_g1, slocum_g2 or seaglider. It
+%      is used to select the dockserver retrieval method. Onlly slocum
+%      types creates a process since the other glider types do not produce
+%      binary files.
+%    
+%  Options:
+%    XBD_NAME_PATTERN: Pattern to identify XBD files. Default is
+%      ^(\w+-\d{4}-\d+-\d+-\d+)\.([smdtne]bd)$ 
+%    DBA_NAME_REPLACE: Convention to create the DBA ascii files. Default is
+%      $1-$2.dba
+%    CACHE: Directory where the cache files containing the header
+%      information are created. These files are used because only the first
+%      file of a data set received from the Slocum contains the entire
+%      header information in order to save satellite communication
+%      time/data. Default is input path.
+%    CMDNAME: Command used to convert the data. Default is the WRC binary
+%      file dbd2asc which converts Slocum files.
 %
-%  Output:
-%    TODO: Outputs for CONVERTBINARYDATA
+%  Output: Files are created in the output directory.
 %
 %  Authors:
 %    Miguel Charcos Llorens  <mcharcos@socib.es>
@@ -73,14 +97,7 @@ function [] = convertBinaryData( input_path, output_path, glider_type, varargin)
 
 
 
-%% Convert binary glider files to ascii human readable format, if needed.
-  % Check deployment files available in binary directory,
-  % convert them to ascii format in the ascii directory,
-  % and store the returned absolute path for later use.
-  % Since some conversion may fail use a cell array of string cell arrays and
-  % flatten it when finished, leaving only the succesfully created dbas.
-  % Give a second try to failing files, because they might have failed due to 
-  % a missing cache file generated later.
+  %% Convert binary glider files to ascii human readable format
   switch glider_type
     case {'slocum_g1' 'slocum_g2'}
         % Look for xbds in binary directory.

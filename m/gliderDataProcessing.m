@@ -22,12 +22,7 @@ function [] = gliderDataProcessing(varargin)
 %             -- Call DEPLOYMENTDATAPROCESSING for processing deployment
 %             -- Organize public data (TBD)
 %
-%  Input: TODO: complete descrpition
-%     GLIDER_TOOLBOX_DIR
-%     PROCESSING_MODE
-%     CONFIG
-%     DEPLOYMENT_LIST
-%     PUBLIC_EXCEPTIONS
+%  Input: No required input (see options)
 %
 %  Output: None
 %
@@ -53,6 +48,14 @@ function [] = gliderDataProcessing(varargin)
 %        the deployment list must contai: deployment_id, deployment_name,
 %        deployment_start, deployment_end, glider_name, glider_serial and
 %        glider_model
+%      PROCESSING_MODE: Defines the processing mode, either real time (rt or RT)
+%        or delayed time (dt or DT).
+%      PUBLIC_NETCDFS_EXCEPTIONS: Describes the netCDF files that must not
+%        be copied to the public location. By default all products will be
+%        copied.
+%      PUBLIC_FIGURES_EXCEPTIONS: Describes the figues that must not
+%        be copied to the public location. By default all figures will be
+%        copied.
 %
 %  See also:
 %    DEPLOYMENTDATAPROCESSING
@@ -61,7 +64,7 @@ function [] = gliderDataProcessing(varargin)
 %    GETDEPLOYMENTINFODB
 %    CREATEFSTRUCT
 %    STARTLOGGING
-%    organizePublicData (TBD)
+%    ORGANIZEPUBLICDATA
 %
 %  Authors:
 %    Miguel Charcos Llorens  <mcharcos@socib.es>
@@ -98,7 +101,8 @@ function [] = gliderDataProcessing(varargin)
     %TODO: Remove the default path and set it to empty. I am using this for testing
     options.config            = '/home/mcharcos/gtb_versions/glider_toolbox_scbd077_db01_ego/config/configMain.txt';
     options.deployment_list    = [];
-    options.public_exceptions  = [];
+    options.public_netcdfs_exceptions  = [];
+    options.public_figures_exceptions  = [];
     
     %% Parse optional arguments.
     % Get option key-value pairs in any accepted call signature.
@@ -145,7 +149,7 @@ function [] = gliderDataProcessing(varargin)
         config = options.config;
     end
     
-    if isempty(config) || ~isstruct(config)  % TODO: Could make function to validate config structure 
+    if isempty(config) || ~isstruct(config)  
         error('glider_toolbox:gliderDataProcessing:MissingConfiguration',...
               'Empty configuration file');
     end
@@ -213,7 +217,7 @@ function [] = gliderDataProcessing(varargin)
                disp(['ERROR: Deployment definition does not contain ' fieldname{1}]);
                return;
            else
-               for j=1:numel(options.deployment_list)  % TODO: not very elegant loop. 
+               for j=1:numel(options.deployment_list)  
                    options.deployment_list(j).(fieldname{1}) = str2num(options.deployment_list(j).(fieldname{1}));
                end
            end
@@ -230,7 +234,6 @@ function [] = gliderDataProcessing(varargin)
     for deployment_idx = 1:numel(options.deployment_list)
       disp(['Processing deployment ' num2str(deployment_idx) '...']);
       deployment = options.deployment_list(deployment_idx);
-      data_res = struct();
       
       %% Define paths for processing
       data_paths = createFStruct(config.local_paths, deployment);
@@ -240,7 +243,7 @@ function [] = gliderDataProcessing(varargin)
       
       %% Process data
       try
-        [netcdf_products, figure_products, ~, data_res] = ...
+        [netcdf_products, figure_products, ~, ~] = ...
             deploymentDataProcessing(data_paths, deployment, config, ...
                                         'data_result', 'postprocessed');
       catch exception
@@ -249,7 +252,27 @@ function [] = gliderDataProcessing(varargin)
       end
       
       %% Define public paths and copy data to public
-      if ~isempty(fieldnames(data_res))
+      if ~isempty(fieldnames(netcdf_products)) || ~isempty(fieldnames(figure_products))
+          % remove netcdf exceptions
+          if ~isempty(fieldnames(netcdf_products)) && ~isempty(fieldnames(options.public_netcdfs_exceptions))
+              except_list = fieldnames(options.public_netcdfs_exceptions);
+              for count_except=1:numel(except_list)
+                  if isfield(netcdf_products,except_list(count_except))
+                      netcdf_products = rmfield(netcdf_products,except_list(count_except));
+                  end
+              end
+          end
+          
+          % remove figure exceptions
+          if ~isempty(fieldnames(figure_products)) && ~isempty(fieldnames(options.public_figures_exceptions))
+              except_list = fieldnames(options.public_figures_exceptions);
+              for count_except=1:numel(except_list)
+                  if isfield(figure_products,except_list(count_except))
+                      figure_products = rmfield(figure_products,except_list(count_except));
+                  end
+              end
+          end
+          
           public_paths = createFStruct(config.public_paths, deployment);
           organizePublicData(public_paths, netcdf_products, figure_products);
       end

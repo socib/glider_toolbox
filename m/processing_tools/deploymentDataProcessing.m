@@ -293,10 +293,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
   else
     error('glider_toolbox:deploymentDataProcessing:InvalidOptions', ...
           'Data path input must be a string or a structure.');
-  end
-  
-  %TODO: Check if datapath exists!?
-  
+  end  
   
   %% Read configuration values from configuration file
   if ischar(configuration)
@@ -308,7 +305,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
       config = configuration;
   end
     
-  if isempty(config) && ~isstruct(config)  % TODO: Could make function to validate config structure
+  if isempty(config) && ~isstruct(config)  
     error('glider_toolbox:deploymentDataProcessing:MissingConfiguration',...
           'Empty configuration file');
   end
@@ -333,8 +330,6 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
   outputs = struct();
   figures = struct();
   
-  % TODO: Move deployment outside function. This will require to add a
-  % calibration in varin
   glider_model = deployment.glider_model;
   [glider_type, processing_config] = extractDeploymentConfig(glider_model, config);
 
@@ -357,6 +352,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
       glider_serial = deployment.glider_serial;
       output_path = binary_dir;
       DSbin_options = struct();
+      DSbin_options.start_utc = deployment.deployment_start;
       DSbin_options.end_utc = deployment.deployment_end;
       DSbin_options.remote_base_dir = config.dockservers.remote_base_dir;
       DSbin_options.remote_xbd_dir  = config.dockservers.remote_xbd_dir;
@@ -364,10 +360,10 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
       DSbin_options.glider = glider_name;
       if isfield(config, 'basestations')  % TODO: Check if we really need basestations
          output_path = ascii_dir;
-         DSbin_options.basestations = config.basestations;
+         %DSbin_options.basestations = config.basestations;
          DSbin_options.glider = glider_serial;
       end
-      getBinaryData(output_path, log_dir, glider_type, deployment.deployment_start, ...
+      getBinaryData(output_path, log_dir, glider_type, ...
                     processing_config.file_options, config.dockservers.server, DSbin_options);
   end
   

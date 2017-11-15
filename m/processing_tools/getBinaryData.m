@@ -1,22 +1,53 @@
-function [ ] = getBinaryData( output_path, log_dir, glider_type, start_utc, file_options, dockservers, varargin)
+function [ ] = getBinaryData( output_path, log_dir, glider_type, file_options, dockservers, varargin)
 % GETBINARYDATA  Retrieves the raw data of a glider from the dockserver or path
 %
 %  Syntax:
 %    GETBINARYDATA(OUTPUT_PATH, LOG_DIR, GLIDER_TYPE, ...
-%                       START_UTC, FILE_OPTIONS, DOCKSERVERS)
+%                       FILE_OPTIONS, DOCKSERVERS)
 %
 %    GETBINARYDATA(OUTPUT_PATH, LOG_DIR, GLIDER_TYPE, ...
 %                       START_UTC, FILE_OPTIONS, DOCKSERVERS, OPT1, VAL1, ...)
 %
 %  Description:
-%    TODO: Description for GETBINARYDATA
+%    GETBINARYDATA wraps the GETDOCKSERVERFILES function to retrieve data
+%    according to the glider time.  
 %
 %  Input:
-%    TODO: Inputs for GETBINARYDATA
+%    OUTPUT_PATH: Location where the raw xdb files are downloaded in the local drive.
+%    LOG_DIR: Location where the log files are downloaded in the local drive.
+%    GLIDER_TYPE: Glider type may be slocum_g1, slocum_g2 or seaglider. It
+%      is used to select the dockserver retrieval method.
+%    FILE_OPTIONS: struct with the parameters that control the files to
+%      retrieve, how they will  be converted, and which files and data should
+%      be used in real time mode. 
+%    DOCKSERVER is a struct with the fields needed by functions FTP or SFTP:
+%      HOST: url as either fully qualified name or IP with optional port (string).
+%      USER: user to access the dockserver if needed (string).
+%      PASS: password of the dockserver if needed (string).
+%      CONN: name or handle of connection type function, @FTP (default) or @SFTP.
 %
-%  Output:
-%    TODO: Outputs for GETBINARYDATA
+%  Output: Binary files are downloaded from dockserver and copied in the output_path.
 %
+%  Options:
+%    START_UTC: initial date of the period of interest.
+%      If given, do not download files before the given date.
+%      It may be any valid input compatible with XBD2DATE and LOG2DATE
+%      options below, usually a serial date number.
+%      Default value: -Inf
+%    END_UTC: final date of the period of interest.
+%      If given, do not download files after the the given date.
+%      It may be any valid input compatible with XBD2DATE and LOG2DATE
+%      options below, usually a serial date number.
+%      Default value: +Inf
+%    REMOTE_BASE_DIR: Root directory where the data live in the dockserver.
+%    REMOTE_XBD_DIR: Path relative to REMOTE_BASE_DIR to the xbd files.
+%    REMOTE_LOG_DIR: Path relative to REMOTE_BASE_DIR to the log files.
+%    GLIDER: Name of the glider. It is used to build the directory path in
+%      the remote server relative to REMOTE_BASE_DIR. If Glider is defined,
+%      data path will be REMOTE_BASE_DIR/GLIDER/REMOTE_XBD_DIR or
+%      REMOTE_BASE_DIR/GLIDER/REMOTE_LOG_DIR. Otherwise, XBD and LOG paths
+%      are directly under REMOTE_BASE_DIR.
+%   
 %  Authors:
 %    Miguel Charcos Llorens  <mcharcos@socib.es>
 %
@@ -40,9 +71,8 @@ function [ ] = getBinaryData( output_path, log_dir, glider_type, start_utc, file
 
     narginchk(6, 20);
 
-    options.end_utc          = NaN;
-    options.basestation      = [];
-    options.ascii_dir        = '';
+    options.start_utc        = -Inf;
+    options.end_utc          = +Inf;
     options.glider           = '';
     options.remote_base_dir = '/var/opt/gmc/gliders';
     options.remote_xbd_dir  = 'from-glider';
@@ -120,7 +150,7 @@ function [ ] = getBinaryData( output_path, log_dir, glider_type, start_utc, file
           new_engs = cell(size(basestations));
           new_logs = cell(size(basestations));
           for basestation_idx = 1:numel(basestations)
-            basestation = dockservers(basestation_idx);  %TODO: are we really using basestations or just dockservers
+            basestation = dockservers(basestation_idx);  
             try
               [new_engs{basestation_idx}, new_logs{basestation_idx}] = ...
                 getDockserverFiles(basestation, output_path, output_path, ...

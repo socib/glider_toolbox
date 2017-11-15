@@ -52,6 +52,10 @@ function [data_proc, meta_proc] = processGliderData(data_pre, meta_pre, varargin
 %    DATA_PRE should be a struct in the format returned by PREPROCESSGLIDERDATA,
 %    where each field is a sequence of measurements of the variable with the 
 %    same name.
+
+%    META_PRE should be a struct in the format returned by PREPROCESSGLIDERDATA,
+%    where each field is a sequence of meta data of the variable with the 
+%    same name.
 %
 %    DATA_PROC is a struct in the same format as DATA_PRE, with time sequences 
 %    resulting from the processing actions described above, performed according

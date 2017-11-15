@@ -265,7 +265,7 @@ else
                disp(['ERROR: Deployment definition does not contain ' fieldname{1}]);
                return;
            else
-               for j=1:numel(deployment_list)  % TODO: not very elegant loop. 
+               for j=1:numel(deployment_list)   
                    deployment_list(j).(fieldname{1}) = str2num(deployment_list(j).(fieldname{1}));
                end
            end

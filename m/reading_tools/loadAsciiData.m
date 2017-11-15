@@ -1,6 +1,37 @@
 function [meta_raw, data_raw, source_files] = loadAsciiData( input_path, glider_type, start_utc, file_options, varargin )
 % LOADASCIIDATA 
-%        TODO: Add description
+%
+%  Syntax: 
+%       [META_RAW, DATA_RAW, SOURCE_FILES] = ...
+%            LOADASCIIDATA( INPUT_PATH, GLIDER_TYPE, START_UTC, FILE_OPTIONS)
+%       [META_RAW, DATA_RAW, SOURCE_FILES] = ...
+%            LOADASCIIDATA( INPUT_PATH, GLIDER_TYPE, START_UTC, FILE_OPTIONS, 'END_UTC', END_UTC)
+%
+%  Description:
+%    LOADASCIIDATA reads ascii files with glider data from Slocum,
+%    Seaglider or SeaExplorer and creates two arrays containing the
+%    metadata and data from the files. It also creates a list of the files
+%    that were read during the process.
+%
+%  Input:
+%    INPUT_PATH: Location where the raw xdb files are in the local drive.
+%    GLIDER_TYPE: Glider type may be slocum_g1, slocum_g2 or seaglider. It
+%      is used to select the dockserver retrieval method.
+%    START_UTC: initial date of the period of interest.
+%    FILE_OPTIONS: struct with the parameters that control the files to
+%      load and which files and data should. These struc shoudl contain the
+%      parameters needed by LOADSLOCUMDATA, LOADSEAGLIDERDATA or
+%      LOADSEAEXPLORER accordingly. 
+%
+%  Options:
+%    START_UTC: End date of the period of interest. Default is current date.
+%
+%  Ouput:
+%    
+%    DATA_RAW should be a struct in the format returned by where each field
+%      is a vector sequence from the sensor or variable with the same name.
+%    META_RAW should be the struct with the metadata required for the preprocessing. 
+%
 %
 %  Authors:
 %    Miguel Charcos Llorens  <mcharcos@socib.es>

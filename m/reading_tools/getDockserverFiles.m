@@ -56,6 +56,14 @@ function [xbds, logs] = getDockserverFiles(dockserver, xbd_dir, log_dir, varargi
 %      The function receives a struct in the format returned by function DIR
 %      and should return a date in a format comparable to START and FINAL.
 %      Default value: date from file name (see note on date filtering)
+%    REMOTE_BASE_DIR: Root directory where the data live in the dockserver.
+%    REMOTE_XBD_DIR: Path relative to REMOTE_BASE_DIR to the xbd files.
+%    REMOTE_LOG_DIR: Path relative to REMOTE_BASE_DIR to the log files.
+%    GLIDER: Name of the glider. It is used to build the directory path in
+%      the remote server relative to REMOTE_BASE_DIR. If Glider is defined,
+%      data path will be REMOTE_BASE_DIR/GLIDER/REMOTE_XBD_DIR or
+%      REMOTE_BASE_DIR/GLIDER/REMOTE_LOG_DIR. Otherwise, XBD and LOG paths
+%      are directly under REMOTE_BASE_DIR.%
 %
 %  Notes:
 %    By default, date filtering is done based on the mission date computed
