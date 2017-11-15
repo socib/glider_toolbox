@@ -161,7 +161,11 @@ function [] = gliderDataProcessing(varargin)
         if strcmp(config.processing_mode, 'rt')
             [config.db_query, config.db_fields] = configRTDeploymentInfoQueryDB();
         elseif strcmp(config.processing_mode, 'dt')
-            [config.db_query, config.db_fields] = configDTDeploymentInfoQueryDB();
+            if ~isfield(config.db_access, 'deployment_ids')
+                error('glider_toolbox:gliderDataProcessing:MissingConfiguration',...
+                          'Delayed mode requires deployment ids');
+            end
+            [config.db_query, config.db_fields] = configDTDeploymentInfoQueryDB('deployment_ids', config.db_access.deployment_ids);
         else
             error('glider_toolbox:gliderDataProcessing:InvalidConfiguration',...
               'Configuration file has wrong processing mode');
@@ -224,7 +228,8 @@ function [] = gliderDataProcessing(varargin)
     for deployment_idx = 1:numel(options.deployment_list)
       disp(['Processing deployment ' num2str(deployment_idx) '...']);
       deployment = options.deployment_list(deployment_idx);
-            
+      data_res = struct();
+      
       %% Define paths for processing
       data_paths = createFStruct(config.local_paths, deployment);
       
@@ -232,14 +237,20 @@ function [] = gliderDataProcessing(varargin)
       startLogging(data_paths.processing_log, options.glider_toolbox_ver, deployment);
       
       %% Process data
-      [netcdf_products, figure_products, ~, ~] = ...
-          deploymentDataProcessing(data_paths, deployment, config, ...
+      try
+        [netcdf_products, figure_products, ~, data_res] = ...
+            deploymentDataProcessing(data_paths, deployment, config, ...
                                         'data_result', 'postprocessed');
+      catch exception
+        disp(['Error processing deployment ' deployment.deployment_name ':']);
+        disp(getReport(exception, 'extended'));
+      end
       
-      %% Define public paths
-      public_paths = createFStruct(config.public_paths, deployment);
-                                          
-      organizePublicData(public_paths, netcdf_products, figure_products);
+      %% Define public paths and copy data to public
+      if ~isempty(fieldnames(data_res))
+          public_paths = createFStruct(config.public_paths, deployment);
+          organizePublicData(public_paths, netcdf_products, figure_products);
+      end
       
       %% Stop deployment processing logging.
       disp(['Deployment processing end time: ' ...

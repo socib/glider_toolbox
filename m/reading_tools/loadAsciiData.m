@@ -59,7 +59,7 @@ function [meta_raw, data_raw, source_files] = loadAsciiData( input_path, glider_
     load_start = utc2posixtime(start_utc);
     load_final = posixtime();
     if ~isnan(options.end_utc)
-        load_final = utc2posixtime(deployment.deployment_end);
+        load_final = utc2posixtime(options.end_utc);
     end
     try
         switch glider_type
