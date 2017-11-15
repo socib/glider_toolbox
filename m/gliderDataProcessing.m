@@ -27,6 +27,7 @@ function [] = gliderDataProcessing(varargin)
 %     PROCESSING_MODE
 %     CONFIG
 %     DEPLOYMENT_LIST
+%     PUBLIC_EXCEPTIONS
 %
 %  Output: None
 %
@@ -97,6 +98,7 @@ function [] = gliderDataProcessing(varargin)
     %TODO: Remove the default path and set it to empty. I am using this for testing
     options.config            = '/home/mcharcos/gtb_versions/glider_toolbox_scbd077_db01_ego/config/configMain.txt';
     options.deployment_list    = [];
+    options.public_exceptions  = [];
     
     %% Parse optional arguments.
     % Get option key-value pairs in any accepted call signature.
