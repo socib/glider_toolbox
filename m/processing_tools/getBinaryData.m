@@ -144,8 +144,9 @@ function [ ] = getBinaryData( output_path, log_dir, glider_type, file_options, d
           end  
           new_xbds = [new_xbds{:}];
           new_logs = [new_logs{:}];
-          disp(['Binary data files downloaded: '  num2str(numel(new_xbds)) '.']);
-          disp(['Surface log files downloaded: '  num2str(numel(new_logs)) '.']);
+          disp(['Destination folder of Slocum files: ' output_path]);
+          disp(['      - Binary data files downloaded: '  num2str(numel(new_xbds)) '.']);
+          disp(['      - Surface log files downloaded: '  num2str(numel(new_logs)) '.']);
         case {'seaglider'}
           new_engs = cell(size(basestations));
           new_logs = cell(size(basestations));
@@ -169,8 +170,9 @@ function [ ] = getBinaryData( output_path, log_dir, glider_type, file_options, d
           end  
           new_engs = [new_engs{:}];
           new_logs = [new_logs{:}];
-          disp(['Engineering data files downloaded: '  num2str(numel(new_engs)) '.']);
-          disp(['Dive log data files downloaded: '  num2str(numel(new_logs)) '.']);
+          disp(['Destination folder of Seaglider files: ' output_path]);
+          disp(['       - Engineering data files downloaded: '  num2str(numel(new_engs)) '.']);
+          disp(['       - Dive log data files downloaded: '  num2str(numel(new_logs)) '.']);
         case {'seaexplorer'}
           warning('glider_toolbox:getBinaryData:NotImplemented', ...
                   'Real time file retrieval not implemented for SeaExplorer')

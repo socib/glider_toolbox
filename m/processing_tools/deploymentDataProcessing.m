@@ -578,7 +578,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
     end
     
     
-    if ~isempty(fieldnames(data_qc_postprocessed)) && perform_postprocessing
+    if ~isempty(fieldnames(data_postprocessed)) && perform_postprocessing
         if strcmp(options.data_result, 'postprocessed')
             meta_res = meta_postprocessed;
             data_res = data_postprocessed;

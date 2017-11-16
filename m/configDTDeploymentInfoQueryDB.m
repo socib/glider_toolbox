@@ -74,7 +74,11 @@ function [sql_query, deployment_fields] = configDTDeploymentInfoQueryDB(varargin
       end
   end
   % Select the identifiers of deployments to process.
-  deployment_ids = {options.deployment_ids};
+  if iscell(options.deployment_ids)
+    deployment_ids = options.deployment_ids;  
+  else
+    deployment_ids = {options.deployment_ids};
+  end
   
   % Select the deployment fields.
   % First column is deployment field

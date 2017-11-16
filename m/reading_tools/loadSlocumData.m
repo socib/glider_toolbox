@@ -146,6 +146,7 @@ function [meta, data] = loadSlocumData(dbadir, navregexp, sciregexp, varargin)
   dba_nav_sizes = [dbadir_contents(dba_nav_sel).bytes];
   dba_sci_names = {dbadir_contents(dba_sci_sel).name};
   dba_sci_sizes = [dbadir_contents(dba_sci_sel).bytes];
+  disp(['Ascii files directory: ' dbadir]);
   disp(['Navigation data files found: ' num2str(numel(dba_nav_names)) ...
         ' (' num2str(sum(dba_nav_sizes)*2^-10) ' kB).']);
   disp(['Scientific data files found: ' num2str(numel(dba_sci_names)) ...

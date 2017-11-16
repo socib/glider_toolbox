@@ -107,6 +107,7 @@ function [] = convertBinaryData( input_path, output_path, glider_type, varargin)
           & ~cellfun(@isempty, regexp({bin_dir_contents.name}, options.xbd_name_pattern));
         xbd_names = {bin_dir_contents(xbd_select).name};
         xbd_sizes = [bin_dir_contents(xbd_select).bytes];
+        disp(['Binary files path: ' input_path]);
         disp(['Binary files found: ' num2str(numel(xbd_names)) ...
              ' (' num2str(sum(xbd_sizes)*2^-10) ' kB).']);
         new_files = cell(size(xbd_names));

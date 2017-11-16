@@ -254,7 +254,7 @@ function [] = gliderDataProcessing(varargin)
       %% Define public paths and copy data to public
       if ~isempty(fieldnames(netcdf_products)) || ~isempty(fieldnames(figure_products))
           % remove netcdf exceptions
-          if ~isempty(fieldnames(netcdf_products)) && ~isempty(fieldnames(options.public_netcdfs_exceptions))
+          if ~isempty(fieldnames(netcdf_products)) && ~isempty(options.public_netcdfs_exceptions)
               except_list = fieldnames(options.public_netcdfs_exceptions);
               for count_except=1:numel(except_list)
                   if isfield(netcdf_products,except_list(count_except))
@@ -264,7 +264,7 @@ function [] = gliderDataProcessing(varargin)
           end
           
           % remove figure exceptions
-          if ~isempty(fieldnames(figure_products)) && ~isempty(fieldnames(options.public_figures_exceptions))
+          if ~isempty(fieldnames(figure_products)) && ~isempty(options.public_figures_exceptions)
               except_list = fieldnames(options.public_figures_exceptions);
               for count_except=1:numel(except_list)
                   if isfield(figure_products,except_list(count_except))
