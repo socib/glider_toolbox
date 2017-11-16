@@ -623,8 +623,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
     end
   end
   if ~isfield(data_pre, 'time_gps')
-    error('glider_toolbox:preprocessGliderData:MissingSensorTime', ...
-          'No gps time/geolocation sensor present in data set.');
+    disp('WARN: No gps time/geolocation sensor present in data set.');
   end
   
   

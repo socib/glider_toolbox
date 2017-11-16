@@ -275,19 +275,19 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
       netcdf_l2_file     = '';
       netcdf_egol1_file  = '';
       
-      if isfield(data_paths,'figure_path')
+      if isfield(data_paths,'figure_path') && ~isempty(data_paths.figure_path)
         figure_dir         = fullfile(data_paths.base_dir, data_paths.figure_path);
       end
-      if isfield(data_paths,'netcdf_l0')
+      if isfield(data_paths,'netcdf_l0') && ~isempty(data_paths.netcdf_l0)
         netcdf_l0_file     = fullfile(data_paths.base_dir, data_paths.netcdf_l0);
       end
-      if isfield(data_paths,'netcdf_l1')
+      if isfield(data_paths,'netcdf_l1') && ~isempty(data_paths.netcdf_l1)
         netcdf_l1_file     = fullfile(data_paths.base_dir, data_paths.netcdf_l1);
       end
-      if isfield(data_paths,'netcdf_l2')
+      if isfield(data_paths,'netcdf_l2') && ~isempty(data_paths.netcdf_l2)
         netcdf_l2_file     = fullfile(data_paths.base_dir, data_paths.netcdf_l2);
       end
-      if isfield(data_paths,'netcdf_egol1')
+      if isfield(data_paths,'netcdf_egol1') && ~isempty(data_paths.netcdf_egol1)
         netcdf_egol1_file     = fullfile(data_paths.base_dir, data_paths.netcdf_egol1);
       end
   else
@@ -379,9 +379,8 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
                            'cache', cache_dir, ...
                            'cmdname', fullfile(config.wrcprogs.base_dir, config.wrcprogs.dbd2asc))
       catch exception
-        disp(['Error generating Ascii data from ' binary_dir ':']);
-        disp(getReport(exception, 'extended'));
-        return;
+          error('glider_toolbox:deploymentDataProcessing:ProcessError', ...
+                'Error generating Ascii data from %s: %s', binary_dir, getReport(exception, 'extended'));
       end
   else
       disp('Skip binary conversion due to request of no binary format conversion');
@@ -392,9 +391,8 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
     [meta_raw, data_raw, source_files] = loadAsciiData( ascii_dir, glider_type, deployment.deployment_start, ...
                  processing_config.file_options, 'end_utc', deployment.deployment_end);
   catch exception
-    disp(['Error loading Ascii data from ' ascii_dir ':']);
-    disp(getReport(exception, 'extended'));
-    return;
+      error('glider_toolbox:deploymentDataProcessing:ProcessError', ...
+            'Error loading Ascii data from %s: %s', ascii_dir, getReport(exception, 'extended'));
   end
   
   if strcmp(options.data_result, 'raw')
@@ -477,9 +475,8 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
       [data_preprocessed, meta_preprocessed] = ...
         preprocessGliderData(data_raw, meta_raw, processing_config.preprocessing_options);
     catch exception
-      disp('Error preprocessing glider deployment data:');
-      disp(getReport(exception, 'extended'));
-      return;
+      error('glider_toolbox:deploymentDataProcessing:ProcessError', ...
+            'Error preprocessing glider deployment data: %s', getReport(exception, 'extended'));
     end
   end
 
@@ -495,9 +492,8 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
       [data_processed, meta_processed] = ...
         processGliderData(data_preprocessed, meta_preprocessed, processing_config.processing_options);
     catch exception
-      disp('Error processing glider deployment data:');
-      disp(getReport(exception, 'extended'));
-      return;
+      error('glider_toolbox:deploymentDataProcessing:ProcessError', ...
+            'Error processing glider deployment data: %s', getReport(exception, 'extended'));
     end
   end
   
@@ -514,9 +510,8 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
       [data_qc_processed, meta_qc_processed] = ...
         processQCGliderData(data_processed, meta_processed); %, processing_config.postprocessing_options);
     catch exception
-      disp('Error performing QC of processed data:');
-      disp(getReport(exception, 'extended'));
-      return;
+      error('glider_toolbox:deploymentDataProcessing:ProcessError', ...
+            'Error performing QC of processed data: %s', getReport(exception, 'extended'));
     end
   end
     
@@ -565,12 +560,13 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
   %  This step is performed when special format types are needed. 
   %  It calculates special parameters or rename as specified by the format
   %  definition
+  perform_postprocessing = false;
   if ~isempty(netcdf_egol1_file) || ...
         strcmp(options.data_result, 'postprocessed')  || ...
         strcmp(options.data_result, 'qc_postprocessed')
-     perform_postprocessing = 1; 
+     perform_postprocessing = true; 
   end
-  if ~isempty(fieldnames(data_qc_processed)) && ~isempty(perform_postprocessing)
+  if ~isempty(fieldnames(data_qc_processed)) && perform_postprocessing
     disp('Post processing processed glider data...');
     try
       [data_postprocessed, meta_postprocessed] = ...
@@ -578,10 +574,11 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
     catch exception
       disp('Error post processing glider deployment data:');
       disp(getReport(exception, 'extended'));
+      perform_postprocessing = false;
     end
     
     
-    if ~isempty(fieldnames(data_qc_postprocessed))
+    if ~isempty(fieldnames(data_qc_postprocessed)) && perform_postprocessing
         if strcmp(options.data_result, 'postprocessed')
             meta_res = meta_postprocessed;
             data_res = data_postprocessed;
@@ -603,7 +600,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
     end
   end
   
-  if ~isempty(fieldnames(data_qc_postprocessed)) && ~isempty(perform_postprocessing)
+  if ~isempty(fieldnames(data_qc_postprocessed)) && perform_postprocessing
     %% Generate L1 NetCDF-EGO file (processed data), if needed and possible.
     if ~isempty(fieldnames(data_qc_postprocessed)) && ~isempty(netcdf_egol1_file)
     netcdf_egol1_options = processing_config.netcdf_egol1_options;
@@ -644,9 +641,8 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
       [data_gridded, meta_gridded] = ...
         gridGliderData(data_processed, meta_processed, processing_config.gridding_options);
     catch exception
-      disp('Error gridding glider deployment data:');
-      disp(getReport(exception, 'extended'));
-      return;
+      error('glider_toolbox:deploymentDataProcessing:ProcessError', ...
+            'Error gridding glider deployment data: %s', getReport(exception, 'extended'));
     end
   end
   
