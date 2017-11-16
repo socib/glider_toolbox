@@ -485,9 +485,6 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
           [variable_data(:).(new_var_name)] = deal(variable_data(:).(var_name));
           variable_data = rmfield(variable_data,var_name);
         end   
-        %for att_idx = 1:numel(global_meta.attributes)
-        %  global_meta.attributes(att_idx).name = upper(global_meta.attributes(att_idx).name);
-        %end  
         disp('.... done converting attribute names for EGO format');
     otherwise
       ;

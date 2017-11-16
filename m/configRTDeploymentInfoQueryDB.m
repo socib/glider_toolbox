@@ -80,6 +80,12 @@ function [sql_query, deployment_fields] = configRTDeploymentInfoQueryDB()
     'publisher_email'              'deployment_publisher_email'
     'publisher_url'                'deployment_publisher_url'
     'summary'                      'deployment_description'
+    % fields added for the EGO format
+    'citation'                     'deployment_acknowledgement'
+    'wmo_platform_code'            'platform_wmo_platform_code'
+    'platform_code'                'platform_platform_code'
+    'deployment_label'             'deployment_name'
+    'id'                           'deployment_name'
   };
 
   deployment_fields = fields_map(:,1)';
