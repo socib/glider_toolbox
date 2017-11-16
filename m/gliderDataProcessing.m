@@ -239,7 +239,7 @@ function [] = gliderDataProcessing(varargin)
       data_paths = createFStruct(config.local_paths, deployment);
       
       %% Start deployment processing logging.
-      startLogging(data_paths.processing_log, options.glider_toolbox_ver, deployment);
+      startLogging(fullfile(data_paths.base_dir,data_paths.processing_log), options.glider_toolbox_ver, deployment);
       
       %% Process data
       try
