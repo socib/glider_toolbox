@@ -73,8 +73,38 @@ function ncl1_info = configDTOutputNetCDFEGOL1()
   %% Define preset dimensions.
   time_dimension = struct('name', {'TIME'}, ...
                           'length', {0});
-  time_gps = struct('name', {'TIME_GPS'}, ...
+  time_gps_dimension = struct('name', {'TIME_GPS'}, ...
                           'length', {1});
+  n_history_dimension = struct('name', {'N_HISTORY'}, ...
+                          'length', {1});
+  n_param_dimension = struct('name', {'N_PARAM'}, ...
+                          'length', {1});
+  n_trans_system_dimension = struct('name', {'N_TRANS_SYSTEM'}, ...
+                          'length', {1});
+  n_positioning_system_dimension = struct('name', {'N_POSITIONING_SYSTEM'}, ...
+                          'length', {1});
+  n_derivation_dimension = struct('name', {'N_DERIVATION'}, ...
+                          'length', {1});
+  date_time_dimension = struct('name', {'DATE_TIME'}, ...
+                          'length', {14});
+  string1024_dimension = struct('name', {'STRING1024'}, ...
+                          'length', {1024});
+  string512_dimension = struct('name', {'STRING512'}, ...
+                          'length', {512});
+  string256_dimension = struct('name', {'STRING256'}, ...
+                          'length', {256});
+  string64_dimension = struct('name', {'STRING64'}, ...
+                          'length', {64});
+  string32_dimension = struct('name', {'STRING32'}, ...
+                          'length', {32});
+  string16_dimension = struct('name', {'STRING16'}, ...
+                          'length', {16});
+  string8_dimension = struct('name', {'STRING8'}, ...
+                          'length', {8});
+  string4_dimension = struct('name', {'STRING4'}, ...
+                          'length', {4});
+  string2_dimension = struct('name', {'STRING2'}, ...
+                          'length', {2});
                         
   %% Define variable information.
   % To define the variable attributes easily and readably, add the corresponding
@@ -91,7 +121,28 @@ function ncl1_info = configDTOutputNetCDFEGOL1()
                 'phase', 'phase_number', 'positioning_method', ...
                 'cndc', 'temp', 'pres', 'psal', 'chla', ...
                 'temp_doxy', 'molar_doxy', ...
-                'temp_spectrophotometer_nitrate'}}, ...
+                'temp_spectrophotometer_nitrate', ...
+                'n_history', 'history_institution', 'history_step', 'history_software', ...
+                'history_software_release', 'history_reference', 'history_date', 'history_action', ...
+                'history_parameter', 'history_previous_value', 'history_start_time_index', ...
+                'history_stop_time_index', 'history_qctest', ...
+                'n_param', 'n_derivation', 'n_positioning_system', 'n_trans_system', ...
+                'trans_system', 'trans_system_id', 'trans_frequency', 'positioning_system', ...
+                'platform_family', 'platform_type', 'platform_maker', ...
+                'firmware_version_navigation', 'firmware_version_science', 'manual_version', ...
+                'glider_serial_no', 'standard_format_id', 'dac_format_id', 'wmo_inst_type', ...
+                'project_name', 'data_center', 'pi_name', 'anomaly', ...
+                'battery_type', 'battery_packs', 'special_features', ...
+                'glider_owner', 'operating_institution', 'customization', ...
+                'deployment_start_date', 'deployment_start_latitude', 'deployment_start_longitude', ...
+                'deployment_start_qc', 'deployment_platform', ...
+                'deployment_cruise_id', 'deployment_reference_station_id', ...
+                'deployment_end_date', 'deployment_end_latitude', 'deployment_end_longitude', ...
+                'deployment_end_qc', 'deployment_end_status', 'deployment_operator', ...
+                'sensor', 'sensor_maker', 'sensor_model', 'sensor_no', ...
+                'sensor_units', 'sensor_accuracy', 'sensor_resolution', ...
+                'derivation_parameter', 'derivation_equation', 'derivation_coefficient', ...
+                'derivation_comment', 'derivation_date'}}, ...
               'socib', ...  
               {{'heading','roll', 'pitch', ...
                 'waypoint_latitude', 'waypoint_longitude', ...
@@ -215,9 +266,88 @@ function ncl1_info = configDTOutputNetCDFEGOL1()
   %% Set GPS dimessions
   % GPS variables are a special case. We could generalize this but it is a
   % simple way to make it work for now
-  ncl1_info.variables.time_gps.dimensions = {time_gps.name};
-  ncl1_info.variables.latitude_gps.dimensions = {time_gps.name};
-  ncl1_info.variables.longitude_gps.dimensions = {time_gps.name};
+  ncl1_info.variables.time_gps.dimensions = {time_gps_dimension.name};
+  ncl1_info.variables.latitude_gps.dimensions = {time_gps_dimension.name};
+  ncl1_info.variables.longitude_gps.dimensions = {time_gps_dimension.name};
+  
+  %% Set history dimensions 
+  ncl1_info.variables.history_institution.dimensions = {n_history_dimension.name, string2_dimension.name};
+  ncl1_info.variables.history_step.dimensions = {n_history_dimension.name, string4_dimension.name};
+  ncl1_info.variables.history_software.dimensions = {n_history_dimension.name, string8_dimension.name};
+  ncl1_info.variables.history_software_release.dimensions = {n_history_dimension.name, string4_dimension.name};
+  ncl1_info.variables.history_reference.dimensions = {n_history_dimension.name, string64_dimension.name};
+  ncl1_info.variables.history_date.dimensions = {n_history_dimension.name, date_time_dimension.name};
+  ncl1_info.variables.history_action.dimensions = {n_history_dimension.name, string64_dimension.name};
+  ncl1_info.variables.history_parameter.dimensions = {n_history_dimension.name, string16_dimension.name};
+  ncl1_info.variables.history_previous_value.dimensions = {n_history_dimension.name};
+  ncl1_info.variables.history_start_time_index.dimensions = {n_history_dimension.name};
+  ncl1_info.variables.history_stop_time_index.dimensions = {n_history_dimension.name};
+  ncl1_info.variables.history_qctest.dimensions = {n_history_dimension.name, string16_dimension.name};
+  
+  %% Set glider metadata dimensions
+  ncl1_info.variables.trans_system.dimensions = {n_trans_system_dimension.name, string16_dimension.name};
+  ncl1_info.variables.trans_system_id.dimensions = {n_trans_system_dimension.name, string32_dimension.name};
+  ncl1_info.variables.trans_frequency.dimensions = {n_trans_system_dimension.name, string16_dimension.name};
+  
+  ncl1_info.variables.positioning_system.dimensions = {n_positioning_system_dimension.name, string8_dimension.name};
+  
+  ncl1_info.variables.platform_family.dimensions = {string256_dimension.name};
+  ncl1_info.variables.platform_type.dimensions = {string32_dimension.name};
+  ncl1_info.variables.platform_maker.dimensions = {string256_dimension.name};
+  ncl1_info.variables.firmware_version_navigation.dimensions = {string16_dimension.name};
+  ncl1_info.variables.firmware_version_science.dimensions = {string16_dimension.name};
+  ncl1_info.variables.manual_version.dimensions = {string16_dimension.name};
+  
+  ncl1_info.variables.glider_serial_no.dimensions = {string16_dimension.name};
+  ncl1_info.variables.standard_format_id.dimensions = {string16_dimension.name};
+  ncl1_info.variables.dac_format_id.dimensions = {string16_dimension.name};
+  ncl1_info.variables.wmo_inst_type.dimensions = {string4_dimension.name};
+  ncl1_info.variables.project_name.dimensions = {string64_dimension.name};
+  ncl1_info.variables.data_center.dimensions = {string2_dimension.name};
+  ncl1_info.variables.pi_name.dimensions = {string64_dimension.name};
+  ncl1_info.variables.anomaly.dimensions = {string256_dimension.name};
+  ncl1_info.variables.battery_type.dimensions = {string64_dimension.name};
+  ncl1_info.variables.battery_packs.dimensions = {string64_dimension.name};
+  ncl1_info.variables.special_features.dimensions = {string1024_dimension.name};
+  ncl1_info.variables.glider_owner.dimensions = {string64_dimension.name};
+  ncl1_info.variables.operating_institution.dimensions = {string64_dimension.name};
+  ncl1_info.variables.customization.dimensions = {string1024_dimension.name};
+  ncl1_info.variables.deployment_start_date.dimensions = {date_time_dimension.name};
+  ncl1_info.variables.deployment_platform.dimensions = {string32_dimension.name};
+  ncl1_info.variables.deployment_cruise_id.dimensions = {string32_dimension.name};
+  ncl1_info.variables.deployment_reference_station_id.dimensions = {string256_dimension.name};
+  ncl1_info.variables.deployment_end_date.dimensions = {date_time_dimension.name};
+  ncl1_info.variables.deployment_operator.dimensions = {string256_dimension.name};
+  
+  ncl1_info.variables.sensor.dimensions = {n_param_dimension.name, string64_dimension.name};
+  ncl1_info.variables.sensor_maker.dimensions = {n_param_dimension.name, string256_dimension.name};
+  ncl1_info.variables.sensor_model.dimensions = {n_param_dimension.name, string256_dimension.name};
+  ncl1_info.variables.sensor_no.dimensions = {n_param_dimension.name, string16_dimension.name};
+  ncl1_info.variables.sensor_units.dimensions = {n_param_dimension.name, string16_dimension.name};
+  ncl1_info.variables.sensor_accuracy.dimensions = {n_param_dimension.name, string32_dimension.name};
+  ncl1_info.variables.sensor_resolution.dimensions = {n_param_dimension.name, string32_dimension.name};
+                    
+  ncl1_info.variables.derivation_parameter.dimensions = {n_derivation_dimension.name, string64_dimension.name};
+  ncl1_info.variables.derivation_equation.dimensions = {n_derivation_dimension.name, string256_dimension.name};
+  ncl1_info.variables.derivation_coefficient.dimensions = {n_derivation_dimension.name, string512_dimension.name};
+  ncl1_info.variables.derivation_comment.dimensions = {n_derivation_dimension.name, string256_dimension.name};
+  ncl1_info.variables.derivation_date.dimensions = {n_derivation_dimension.name, date_time_dimension.name};
+  
+  % Note: The dimension length will be set by generateOutputNetCDF
+  %       depending on the number of items in each of these variables
+  
+  %% Set other EGO dimensions
+  ncl1_info.dimensions(end+1) = date_time_dimension;
+  ncl1_info.dimensions(end+1) = string1024_dimension;  
+  ncl1_info.dimensions(end+1) = string512_dimension;   
+  ncl1_info.dimensions(end+1) = string256_dimension;    
+  ncl1_info.dimensions(end+1) = string64_dimension;  
+  ncl1_info.dimensions(end+1) = string32_dimension;  
+  ncl1_info.dimensions(end+1) = string16_dimension;  
+  ncl1_info.dimensions(end+1) = string8_dimension;  
+  ncl1_info.dimensions(end+1) = string4_dimension;  
+  ncl1_info.dimensions(end+1) = string2_dimension; 
+  
   
   %% Set coordinates for EGO (uppercase) and DM_indicator to R
   var_list = fieldnames(ncl1_info.variables);

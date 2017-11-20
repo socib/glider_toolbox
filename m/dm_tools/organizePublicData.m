@@ -52,6 +52,8 @@ function [ ] = organizePublicData( output_path, outputs, figures )
   if isfield(output_path, 'netcdf_l0') && ~isempty(output_path.netcdf_l0)
     public_paths.netcdf_l0 = fullfile(output_path.base_dir, output_path.netcdf_l0);
   end 
+  %Note: The L0 engineering files are not added here in purpose in order to
+  %      avoid making the engineering files on purpose.
   if isfield(output_path, 'netcdf_l1') && ~isempty(output_path.netcdf_l1)
     public_paths.netcdf_l1 = fullfile(output_path.base_dir, output_path.netcdf_l1);
   end
@@ -71,6 +73,7 @@ function [ ] = organizePublicData( output_path, outputs, figures )
   %% Copy selected products to corresponding public location, if needed.
   if ~isempty(fieldnames(outputs))
     disp('Copying public outputs...');
+    strloglist = '';
     output_name_list = fieldnames(outputs);
     for output_name_idx = 1:numel(output_name_list)
       output_name = output_name_list{output_name_idx};
@@ -91,6 +94,10 @@ function [ ] = organizePublicData( output_path, outputs, figures )
           if success
             disp(['Public output ' output_name ' succesfully copied: ' ...
                   output_public_file '.']);
+            if ~isempty(strloglist)
+                strloglist = strcat(strloglist,{', '});
+            end
+            strloglist = strcat(strloglist,output_public_file);
           else
             disp(['Error creating public copy of deployment product ' ...
                   output_name ': ' output_public_file '.']);
@@ -102,6 +109,9 @@ function [ ] = organizePublicData( output_path, outputs, figures )
           disp(message);
         end
       end
+    end
+    if ~isempty(strloglist)
+        disp(strcat({'__SCB_LOG_MSG_UPDATED_PUBLIC_FILES__ ['}, strloglist, ']'));
     end
   end
 

@@ -1,4 +1,4 @@
-function version = configGliderToolboxVersion()
+function version = configGliderToolboxVersion(varargin)
 %CONFIGGLIDERTOOLBOXVERSION  Configure version of the currently toolbox in use.
 %
 %  Syntax:
@@ -7,6 +7,12 @@ function version = configGliderToolboxVersion()
 %  Description:
 %    VERSION = CONFIGGLIDERTOOLBOXVERSION() should return the identifier
 %    of the current version of the toolbox (see note on versions below).
+%    Optionally, users may call configGliderToolboxVersion(format) to get a
+%    different format of the version as shown in the following example:
+%       - default: 1.2.3
+%       - main:    1.2
+%       - short:   123 (less than 4 characters)
+%    the short format of the version (less than 4 characters)
 %
 %  Notes:
 %    It is highly recommended to modify the returned version when using a forked
@@ -39,8 +45,19 @@ function version = configGliderToolboxVersion()
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  narginchk(0, 0);
+  narginchk(0, 1);
 
   version = '1.3.0';
+  
+  if nargin > 0 
+      switch varargin{1}
+          case 'short'
+             version = '130';
+          case 'main'
+             version = '1.3';
+          otherwise
+              ;
+      end
+  end
 
 end

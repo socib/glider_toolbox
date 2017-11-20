@@ -122,6 +122,7 @@ function [sql_query, deployment_fields] = configDTDeploymentInfoQueryDB(varargin
     'platform_code'                'platform_platform_code'
     'deployment_label'             'deployment_name'
     'id'                           'deployment_name'
+    'deployment_cruise_id'         'deployment_cruise_id'
   };
 
   deployment_fields = fields_map(:,1)';

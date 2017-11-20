@@ -309,7 +309,7 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
       latitude_units = 'degree_north';
     end
     switch (options.netcdf_format)
-        case 'EGO'
+        case 'EGO' % TODO: add to convert2NetCDFEGO
             dyn_atts.geospatial_lon_min = num2str(min(longitude_data));
             dyn_atts.geospatial_lon_max = num2str(max(longitude_data));
             dyn_atts.geospatial_lat_min = num2str(min(latitude_data));
@@ -470,21 +470,12 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
   %% Convert variable data and metadata for requested format (Uppercase)
   switch (options.netcdf_format)
     case 'EGO'
-        % Make all attributes uppercase
-        meta_var_name_list = fieldnames(variable_meta);
-        for var_name_idx = 1:numel(meta_var_name_list)
-          var_name = meta_var_name_list{var_name_idx};
-          new_var_name = upper(var_name);
-          [variable_meta(:).(new_var_name)] = deal(variable_meta(:).(var_name));
-          variable_meta = rmfield(variable_meta,var_name);
-        end   
-        data_var_name_list = fieldnames(variable_data);
-        for var_name_idx = 1:numel(data_var_name_list)
-          var_name = data_var_name_list{var_name_idx};
-          new_var_name = upper(var_name);
-          [variable_data(:).(new_var_name)] = deal(variable_data(:).(var_name));
-          variable_data = rmfield(variable_data,var_name);
-        end   
+        try
+            [ variable_data, variable_meta ] = convert2NetCDFEGO( variable_data, variable_meta );
+        catch exception
+            error('glider_toolbox:generateOutputNetCDF:NetCDFConversionError', ...
+                  'Problem with EGO conversion: %s.', getReport(exception, 'extended')); 
+        end
         disp('.... done converting attribute names for EGO format');
     otherwise
       ;

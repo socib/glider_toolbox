@@ -52,10 +52,11 @@ function [] = gliderDataProcessing(varargin)
 %        or delayed time (dt or DT).
 %      PUBLIC_NETCDFS_EXCEPTIONS: Describes the netCDF files that must not
 %        be copied to the public location. By default all products will be
-%        copied.
+%        copied. Values can be: netcdf_l0, netcdf_eng, netcdf_l1,
+%        netcdf_egol1 or netcdf_l2.
 %      PUBLIC_FIGURES_EXCEPTIONS: Describes the figues that must not
 %        be copied to the public location. By default all figures will be
-%        copied.
+%        copied. Values depend on the configuration file definitions.
 %
 %  See also:
 %    DEPLOYMENTDATAPROCESSING
@@ -249,32 +250,35 @@ function [] = gliderDataProcessing(varargin)
       catch exception
         disp(['Error processing deployment ' deployment.deployment_name ':']);
         disp(getReport(exception, 'extended'));
+        continue;
       end
       
       %% Define public paths and copy data to public
       if ~isempty(fieldnames(netcdf_products)) || ~isempty(fieldnames(figure_products))
           % remove netcdf exceptions
           if ~isempty(fieldnames(netcdf_products)) && ~isempty(options.public_netcdfs_exceptions)
-              except_list = fieldnames(options.public_netcdfs_exceptions);
+              except_list = options.public_netcdfs_exceptions;
               for count_except=1:numel(except_list)
-                  if isfield(netcdf_products,except_list(count_except))
-                      netcdf_products = rmfield(netcdf_products,except_list(count_except));
+                  if isfield(netcdf_products,except_list{count_except})
+                      netcdf_products = rmfield(netcdf_products,except_list{count_except});
                   end
               end
           end
           
           % remove figure exceptions
           if ~isempty(fieldnames(figure_products)) && ~isempty(options.public_figures_exceptions)
-              except_list = fieldnames(options.public_figures_exceptions);
+              except_list = options.public_figures_exceptions;
               for count_except=1:numel(except_list)
-                  if isfield(figure_products,except_list(count_except))
-                      figure_products = rmfield(figure_products,except_list(count_except));
+                  if isfield(figure_products,except_list{count_except})
+                      figure_products = rmfield(figure_products,except_list{count_except});
                   end
               end
           end
           
           public_paths = createFStruct(config.public_paths, deployment);
+          
           organizePublicData(public_paths, netcdf_products, figure_products);
+   
       end
       
       %% Stop deployment processing logging.

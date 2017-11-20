@@ -111,6 +111,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
 %      were created along the process. The structure may contain
 %      (optionally) these fields
 %       - netcdf_l0:    L0 level NetCDF file
+%       - netcdf_eng:   Engineering L0 level NetCDF file
 %       - netcdf_l1:    L1 level NetCDF file
 %       - netcdf_l2:    L2 level NetCDF file
 %       - netcdf_egol0: L1 level NetCDF-EGO file
@@ -271,6 +272,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
       ascii_dir          = fullfile(data_paths.base_dir, data_paths.ascii_path);
       figure_dir         = '';
       netcdf_l0_file     = '';
+      netcdf_eng_file     = '';
       netcdf_l1_file     = '';
       netcdf_l2_file     = '';
       netcdf_egol1_file  = '';
@@ -280,6 +282,9 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
       end
       if isfield(data_paths,'netcdf_l0') && ~isempty(data_paths.netcdf_l0)
         netcdf_l0_file     = fullfile(data_paths.base_dir, data_paths.netcdf_l0);
+      end
+      if isfield(data_paths,'netcdf_eng') && ~isempty(data_paths.netcdf_eng)
+        netcdf_eng_file     = fullfile(data_paths.base_dir, data_paths.netcdf_eng);
       end
       if isfield(data_paths,'netcdf_l1') && ~isempty(data_paths.netcdf_l1)
         netcdf_l1_file     = fullfile(data_paths.base_dir, data_paths.netcdf_l1);
@@ -310,9 +315,9 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
           'Empty configuration file');
   end
   
-  source_files = {};
-  meta_raw = struct();
-  data_raw = struct();
+  %source_files = {};
+  %meta_raw = struct();
+  %data_raw = struct();
   meta_preprocessed = struct();
   data_preprocessed = struct();
   meta_processed = struct();
@@ -363,8 +368,13 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
          %DSbin_options.basestations = config.basestations;
          DSbin_options.glider = glider_serial;
       end
-      getBinaryData(output_path, log_dir, glider_type, ...
+      try
+        getBinaryData(output_path, log_dir, glider_type, ...
                     processing_config.file_options, config.dockservers.server, DSbin_options);
+      catch exception
+                error('glider_toolbox:deploymentDataProcessing:CallFailed', ...
+                      'Error getting remote files:%s', getReport(exception, 'extended'));
+      end
   end
   
   %% Convert binary data to ascii format
@@ -462,6 +472,58 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
       disp('Skip generation of NetCDF L0 outputs');
   end
 
+  %% Generate Engineering L0 NetCDF file (raw/preprocessed data), if needed and possible.
+  if ~isempty(fieldnames(data_raw)) && ~isempty(netcdf_eng_file)
+    disp('Generating Engineering NetCDF L0 output...');
+    netcdf_eng_options = processing_config.netcdf_eng_options;
+    try
+      switch glider_type
+        case {'slocum_g1' 'slocum_g2'}
+          outputs.netcdf_eng = generateOutputNetCDF( ...
+            netcdf_eng_file, data_raw, meta_raw, deployment, ...
+            netcdf_eng_options.variables, ...
+            netcdf_eng_options.dimensions, ...
+            netcdf_eng_options.attributes, ...
+            'time', {'m_present_time' 'sci_m_present_time'}, ...
+            'position', {'m_gps_lon' 'm_gps_lat'; 'm_lon' 'm_lat'}, ...
+            'position_conversion', @nmea2deg, ...
+            'vertical',            {'m_depth' 'sci_water_pressure'}, ...
+            'vertical_conversion', {[]        @(z)(z * 10)}, ...
+            'vertical_positive',   {'down'} );
+        case 'seaglider'
+          outputs.netcdf_eng = generateOutputNetCDF( ...
+            netcdf_eng_file, data_raw, meta_raw, deployment, ...
+            netcdf_eng_options.variables, ...
+            netcdf_eng_options.dimensions, ...
+            netcdf_eng_options.attributes, ...
+            'time', {'elaps_t'}, ...
+            'time_conversion', @(t)(t + meta_raw.start_secs), ... 
+            'position', {'GPSFIX_fixlon' 'GPSFIX_fixlat'}, ...
+            'position_conversion', @nmea2deg, ...
+            'vertical',            {'depth'}, ...
+            'vertical_conversion', {@(z)(z * 10)}, ... 
+            'vertical_positive',   {'down'} );
+        case {'seaexplorer'}
+          outputs.netcdf_eng = generateOutputNetCDF( ...
+              netcdf_eng_file, data_raw, meta_raw, deployment, ...
+              netcdf_eng_options.variables, ...
+              netcdf_eng_options.dimensions, ...
+              netcdf_eng_options.attributes, ...
+              'time', {'Timestamp' 'PLD_REALTIMECLOCK'}, ...
+              'position', {'NAV_LONGITUDE' 'NAV_LATITUDE'; 'Lon' 'Lat'}, ...
+              'position_conversion', @nmea2deg, ...
+              'vertical',            {'Depth' 'SBD_PRESSURE'}, ...
+              'vertical_conversion', {[]        @(z)(z * 10)}, ...
+              'vertical_positive',   {'down'} );      
+      end
+      disp(['Output NetCDF L0 (raw data) generated: ' outputs.netcdf_eng '.']);
+    catch exception
+      disp(['Error generating Engineering NetCDF L0 (raw data) output ' netcdf_eng_file ':']);
+      disp(getReport(exception, 'extended'));
+    end
+  elseif isempty(netcdf_eng_file)
+      disp('Skip generation of Engineering NetCDF L0 outputs');
+  end
 
   %% Preprocess raw glider data.
   if ~isempty(fieldnames(data_raw))
@@ -537,7 +599,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
             netcdf_l1_file ':']);
       disp(getReport(exception, 'extended'));
     end
-  elseif isempty(netcdf_l0_file)
+  elseif isempty(netcdf_l1_file)
       disp('Skip generation of NetCDF L1 outputs');
   end
 
@@ -570,7 +632,8 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
     disp('Post processing processed glider data...');
     try
       [data_postprocessed, meta_postprocessed] = ...
-        postProcessGliderData(data_qc_processed, meta_qc_processed); %, processing_config.postprocessing_options);
+        postProcessGliderData(data_qc_processed, meta_qc_processed, ...
+                              'deployment', deployment); %, processing_config.postprocessing_options);
     catch exception
       disp('Error post processing glider deployment data:');
       disp(getReport(exception, 'extended'));
@@ -621,7 +684,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
             netcdf_l1_file ':']);
       disp(getReport(exception, 'extended'));
     end
-    elseif isempty(netcdf_l0_file)
+    elseif isempty(netcdf_egol1_file)
       disp('Skip generation of NetCDF-EGO L1 outputs');      
     end
   end
@@ -668,7 +731,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
             netcdf_l2_file ':']);
       disp(getReport(exception, 'extended'));
     end
-  elseif isempty(netcdf_l0_file)
+  elseif isempty(netcdf_l2_file)
       disp('Skip generation of NetCDF L2 outputs');
   end
 

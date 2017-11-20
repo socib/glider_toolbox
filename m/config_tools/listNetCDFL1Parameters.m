@@ -1819,6 +1819,426 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'glider_original_parameter_name'                [] 
     'sources'                                       [] };
 
+  %% History parameters
+  var_attr_list.ego.n_history = {
+    'long_name'            'Number of history records'
+    'standard_name'        'n_history'};
+  
+  var_attr_list.ego.history_institution = {
+    'long_name'               'Institution which performed action'
+    'standard_name'           'history_institution'
+    'conventions'             'EGO reference table 4'
+    'coordinates'             'n_history string2'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.history_step = {
+    'long_name'               'Step in data processing'
+    'standard_name'           'history_step'
+    'conventions'             'EGO reference table 12'
+    'coordinates'             'n_history string4'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.history_software = {
+    'long_name'               'Name of software which performed action'
+    'standard_name'           'history_software'
+    'conventions'             'SOCIB glider toolbox'
+    'coordinates'             'n_history string8'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.history_software_release = {
+    'long_name'               'Version release of software which performed action'
+    'standard_name'           'history_software_release'
+    'conventions'             'SOCIB glider toolbox'
+    'coordinates'             'n_history string4'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.history_reference = {
+    'long_name'               'Reference of database'
+    'standard_name'           'history_reference'
+    'conventions'             'SOCIB glider toolbox'
+    'coordinates'             'n_history string64'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.history_date = {
+    'long_name'               'Date the history record was created'
+    'standard_name'           'history_date'
+    'conventions'             'YYYYMMDDHHMISS'
+    'coordinates'             'n_history date_time'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.history_action = {
+    'long_name'               'Action performed on data'
+    'standard_name'           'history_action'
+    'conventions'             'EGO reference table 7'
+    'coordinates'             'n_history string64'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.history_parameter = {
+    'long_name'               'Parameter action is performed on'
+    'standard_name'           'history_parameter'
+    'conventions'             'EGO reference table 3'
+    'coordinates'             'n_history string16'
+    '_FillValue'              ''};
+  
+  var_attrtype_list.ego.history_previous_value = 'single';
+  var_attr_list.ego.history_previous_value  = {
+    'long_name'               'Parameter/flag previous value before action'
+    'standard_name'           'history_previous_value'
+    'conventions'             'EGO reference table 3'
+    '_FillValue'              ''};
+  
+  var_attrtype_list.ego.history_start_time_index = 'int32';
+  var_attr_list.ego.history_start_time_index = {
+    'long_name'               'Start time index action applied on'
+    'standard_name'           'history_start_time_index'
+    'coordinates'             'n_history'
+    '_FillValue'              99999};
+  
+  var_attrtype_list.ego.history_stop_time_index = 'int32';
+  var_attr_list.ego.history_stop_time_index = {
+    'long_name'               'Stop time index action applied on'
+    'standard_name'           'history_stop_time_index'
+    'coordinates'             'n_history'
+    '_FillValue'              99999};
+  
+  var_attr_list.ego.history_qctest = {
+    'long_name'               'Documentation of tests performed, tests failed (in hex form)'
+    'standard_name'           'history_qctest'
+    'conventions'             'Write tests performed when ACTION=QCP$; tests failed when ACTION=QCF$'
+    'coordinates'             'n_history string16'
+    '_FillValue'              ''};
+
+  %% Glider characteristics parameter
+  var_attr_list.ego.n_param = {
+    'long_name'            'Number of parameters measured or calculated during glider deployment'
+    'standard_name'        'n_param'};
+  var_attr_list.ego.n_derivation = {
+    'long_name'            'Maximum number of calibrations for a parameter'
+    'standard_name'        'n_derivation'};
+  var_attr_list.ego.n_positioning_system = {
+    'long_name'            'Number of positioning systems'
+    'standard_name'        'n_positioning_system'};
+  var_attr_list.ego.n_trans_system = {
+    'long_name'            'Number of transmission systems'
+    'standard_name'        'n_trans_system'};
+  
+  var_attr_list.ego.trans_system = {
+    'long_name'               'Telecommunication system used'
+    'standard_name'           'trans_system'
+    'conventions'             'Write tests performed when ACTION=QCP$; tests failed when ACTION=QCF$'
+    'coordinates'             'n_trans_system string16'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.trans_system_id = {
+    'long_name'               'Program identifier used by the transmission system'
+    'standard_name'           'trans_system_id'
+    'coordinates'             'n_trans_system string32'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.trans_frequency = {
+    'long_name'               'Frequency of transmission from the glider'
+    'standard_name'           'trans_frequency'
+    'units'                   'hertz'
+    'coordinates'             'n_trans_system string16'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.positioning_system = {
+    'long_name'               'Positioning system'
+    'standard_name'           'positioning_system'
+    'coordinates'             'n_positioning_system string8'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.platform_family = {
+    'long_name'               'Category of instrument'
+    'standard_name'           'platform_family'
+    'conventions'             'EGO reference table 22'
+    'coordinates'             'string256'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.platform_type = {
+    'long_name'               'Type of glider'
+    'standard_name'           'platform_type'
+    'conventions'             'EGO reference table XX'
+    'coordinates'             'string32'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.platform_maker = {
+    'long_name'               'Name of the manufacturer'
+    'standard_name'           'platform_maker'
+    'coordinates'             'string256'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.firmware_version_navigation = {
+    'long_name'               'Firmware version of the navigation controller board'
+    'standard_name'           'firmware_version_navigation'
+    'coordinates'             'string16'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.firmware_version_science = {
+    'long_name'               'Firmware version of the scientific sensor controller board'
+    'standard_name'           'firmware_version_science'
+    'coordinates'             'string16'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.manual_version = {
+    'long_name'               'Manual version of the glider'
+    'standard_name'           'manual_version'
+    'coordinates'             'string16'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.glider_serial_no = {
+    'long_name'               'Serial number of the glider'
+    'standard_name'           'glider_serial_no'
+    'coordinates'             'string16'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.standard_format_id = {
+    'long_name'               'Standard format number which describes the data format type of each glider'
+    'standard_name'           'standard_format_id'
+    'coordinates'             'string16'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.dac_format_id = {
+    'long_name'               'Format number used by the DAC to describe the data format type for each glider'
+    'standard_name'           'dac_format_id'
+    'coordinates'             'string16'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.wmo_inst_type = {
+    'long_name'               'Coded instrument type'
+    'standard_name'           'wmo_inst_type'
+    'conventions'             'EGO reference table 8'
+    'coordinates'             'string4'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.project_name = {
+    'long_name'               'Program under which the glider was deployed'
+    'standard_name'           'project_name'
+    'coordinates'             'string64'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.data_center = {
+    'long_name'               'Data center in charge of the glider real-time processing'
+    'standard_name'           'data_center'
+    'conventions'             'EGO reference table 4'
+    'coordinates'             'string4'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.pi_name = {
+    'long_name'               'Name of the principal investigator'
+    'standard_name'           'pi_name'
+    'coordinates'             'string64'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.anomaly = {
+    'long_name'               'Describe any anomalies or problems the glider may have had'
+    'standard_name'           'anomaly'
+    'coordinates'             'string256'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.battery_type = {
+    'long_name'               'Type of battery packs in the glider'
+    'standard_name'           'battery_type'
+    'coordinates'             'string64'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.battery_packs = {
+    'long_name'               'Configuration of battery packs in the glider'
+    'standard_name'           'battery_packs'
+    'coordinates'             'string64'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.special_features = {
+    'long_name'               'Extra features of the glider (algorithms, compressee etc.)'
+    'standard_name'           'special_features'
+    'coordinates'             'string1024'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.glider_owner = {
+    'long_name'               'Glider owner'
+    'standard_name'           'glider_owner'
+    'coordinates'             'string64'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.operating_institution = {
+    'long_name'               'Operating institution of the glider'
+    'standard_name'           'operating_institution'
+    'coordinates'             'string64'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.customization = {
+    'long_name'               'Glider customization, i.e. (institution and modifications)'
+    'standard_name'           'customization'
+    'coordinates'             'string1024'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.deployment_start_date = {
+    'long_name'               'Date (UTC) of deployment'
+    'standard_name'           'deployment_start_date'
+    'conventions'             'YYYYMMDDHHMISS'
+    'coordinates'             'date_time'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.deployment_start_latitude = {
+    'long_name'               'Latitude of the glider when deployed'
+    'standard_name'           'deployment_start_latitude'
+    'units'                   'degree_north'
+    'valid_min'               -90
+    'valid_max'               90
+    '_FillValue'              99999};
+  
+  var_attr_list.ego.deployment_start_longitude = {
+    'long_name'               'Longitude of the glider when deployed'
+    'standard_name'           'deployment_start_longitude'
+    'units'                   'degree_east'
+    'valid_min'               -180
+    'valid_max'               180
+    '_FillValue'              99999};
+  
+  var_attrtype_list.ego.deployment_start_qc = 'int8';
+  var_attr_list.ego.deployment_start_qc = {
+    'long_name'               'Quality on DEPLOYMENT_START date, time and location'
+    'standard_name'           'deployment_start_date'
+    'conventions'             'EGO reference table 2'
+    'flag_values'             '0,1,2,3,4,5,8,9'
+    'flag_meanings'           'no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed interpolated_value missing_value'
+    '_FillValue'              -128};
+  
+  var_attr_list.ego.deployment_platform = {
+    'long_name'               'Identifier of the deployment platform'
+    'standard_name'           'deployment_platform'
+    'coordinates'             'string32'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.deployment_cruise_id = {
+    'long_name'               'Identifier of the cruise used to verify the parameter measurements'
+    'standard_name'           'deployment_cruise_id'
+    'coordinates'             'string32'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.deployment_reference_station_id = {
+    'long_name'               'Identifier of the station used to verify the parameter measurements'
+    'standard_name'           'deployment_reference_station_id'
+    'coordinates'             'string256'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.deployment_end_date = {
+    'long_name'               'Date (UTC) of glider recovery'
+    'standard_name'           'deployment_end_date'
+    'conventions'             'YYYYMMDDHHMISS'
+    'coordinates'             'date_time'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.deployment_end_latitude = {
+    'long_name'               'Latitude of the glider recovery'
+    'standard_name'           'deployment_end_latitude'
+    'units'                   'degree_north'
+    'valid_min'               -90
+    'valid_max'               90
+    '_FillValue'              99999};
+  
+  var_attr_list.ego.deployment_end_longitude = {
+    'long_name'               'Longitude of the glider recovery'
+    'standard_name'           'deployment_end_longitude'
+    'units'                   'degree_east'
+    'valid_min'               -180
+    'valid_max'               180
+    '_FillValue'              99999};
+  
+  var_attrtype_list.ego.deployment_end_qc = 'int8';
+  var_attr_list.ego.deployment_end_qc = {
+    'long_name'               'Quality on DEPLOYMENT_END date, time and location'
+    'standard_name'           'deployment_end_qc'
+    'conventions'             'EGO reference table 2'
+    'flag_values'             '0,1,2,3,4,5,8,9'
+    'flag_meanings'           'no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed interpolated_value missing_value'
+    '_FillValue'              -128};
+  
+  var_attr_list.ego.deployment_end_status = {
+    'long_name'               'Status of the end of the mission of the glider'
+    'standard_name'           'deployment_end_status'
+    'conventions'             'R:Retrieved, L:lost'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.deployment_operator = {
+    'long_name'               'Name of the person in charge of the glider deployment'
+    'standard_name'           'deployment_operator'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.sensor = {
+    'long_name'               'List of sensors on the glider'
+    'standard_name'           'sensor'
+    'conventions'             'EGO reference table 3'
+    'coordinates'             'n_param, string64'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.sensor_maker = {
+    'long_name'               'Name of sensor manufacturer'
+    'standard_name'           'sensor_maker'
+    'coordinates'             'n_param, string256'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.sensor_model = {
+    'long_name'               'Model of sensors'
+    'standard_name'           'sensor_model'
+    'coordinates'             'n_param, string256'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.sensor_no = {
+    'long_name'               'Serial number of sensor'
+    'standard_name'           'sensor_no'
+    'coordinates'             'n_param, string16'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.sensor_units = {
+    'long_name'               'Units of the parameter measured by the sensor'
+    'standard_name'           'sensor_units'
+    'coordinates'             'n_param, string16'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.sensor_accuracy = {
+    'long_name'               'Accuracy of the parameter measured by the sensor'
+    'standard_name'           'sensor_accuracy'
+    'coordinates'             'n_param, string32'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.sensor_resolution = {
+    'long_name'               'Resolution of the parameter measured by the sensor'
+    'standard_name'           'sensor_resolution'
+    'coordinates'             'n_param, string32'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.derivation_parameter = {
+    'long_name'               'List of parameters with derivation or calibration information'
+    'standard_name'           'derivation_parameter'
+    'conventions'             'EGO reference table 3'
+    'coordinates'             'n_derivation, string64'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.derivation_equation = {
+    'long_name'               'Derivation or calibration equation for this parameter'
+    'standard_name'           'derivation_equation'
+    'coordinates'             'n_derivation, string256'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.derivation_coefficient = {
+    'long_name'               'Derivation or calibration coefficients for this equation'
+    'standard_name'           'derivation_coefficient'
+    'coordinates'             'n_derivation, string512'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.derivation_comment = {
+    'long_name'               'Comment applying to this parameter derivation or calibration'
+    'standard_name'           'derivation_comment'
+    'coordinates'             'n_derivation, string256'
+    '_FillValue'              ''};
+  
+  var_attr_list.ego.derivation_date = {
+    'long_name'               'Date (UTC) of derivation or calibration'
+    'standard_name'           'derivation_date'
+    'coordinates'             'n_derivation, date_time'
+    'conventions'             'YYYYMMDDHHMISS'
+    '_FillValue'              ''};
 
   %% Quality control
   var_attrtype_default = 'int8';

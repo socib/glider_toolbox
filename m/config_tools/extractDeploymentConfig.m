@@ -82,21 +82,24 @@ function [ glider_type, processing_config ] = extractDeploymentConfig( glider_mo
       processing_config.preprocessing_options = config.preprocessing_options_slocum;
       processing_config.processing_options    = config.processing_options_slocum_g1;
       processing_config.netcdf_l0_options     = config.output_netcdf_l0_slocum;
+      processing_config.netcdf_eng_options     = config.output_netcdf_eng_slocum;
     case 'slocum_g2'
       processing_config.file_options          = config.file_options_slocum;
       processing_config.preprocessing_options = config.preprocessing_options_slocum;
       processing_config.processing_options    = config.processing_options_slocum_g2;
       processing_config.netcdf_l0_options     = config.output_netcdf_l0_slocum;
+      processing_config.netcdf_eng_options     = config.output_netcdf_eng_slocum;
     case 'seaglider'
       processing_config.file_options          = config.file_options_seaglider;
       processing_config.preprocessing_options = config.preprocessing_options_seaglider;
       processing_config.processing_options    = config.processing_options_seaglider;
-      processing_config.netcdf_l0_options     = config.output_netcdf_l0_seaglider;
+      processing_config.netcdf_eng_options     = config.output_netcdf_eng_seaglider;
     case 'seaexplorer' 
       processing_config.file_options          = config.file_options_seaexplorer;
       processing_config.preprocessing_options = config.preprocessing_options_seaexplorer;
       processing_config.processing_options    = config.processing_options_seaexplorer;
       processing_config.netcdf_l0_options     = config.output_netcdf_l0_seaexplorer;
+      processing_config.netcdf_eng_options     = config.output_netcdf_eng_seaexplorer;
   end
   
   processing_config.gridding_options     = config.gridding_options;

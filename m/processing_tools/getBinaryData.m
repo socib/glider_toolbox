@@ -112,7 +112,7 @@ function [ ] = getBinaryData( output_path, log_dir, glider_type, file_options, d
   % a binary file is deduced from its name only up to day precission.
   % Deployment end time may be undefined.
   disp('Download deployment new data...');
-  download_start = datenum(datestr(start_utc,'yyyy-mm-dd'),'yyyy-mm-dd');
+  download_start = datenum(datestr(options.start_utc,'yyyy-mm-dd'),'yyyy-mm-dd');
   if isnan(options.end_utc)
     download_final = posixtime2utc(posixtime());
   else
@@ -138,8 +138,8 @@ function [ ] = getBinaryData( output_path, log_dir, glider_type, file_options, d
                                    'start', download_start, ...
                                    'final', download_final);
             catch exception
-              disp(['Error getting dockserver files from ' dockserver.host ':']);
-              disp(getReport(exception, 'extended'));
+                error('glider_toolbox:getBinaryData:CallFailed', ...
+                      'Error getting dockserver files from %s:%s', dockserver.host, getReport(exception, 'extended'));
             end
           end  
           new_xbds = [new_xbds{:}];
@@ -164,8 +164,8 @@ function [ ] = getBinaryData( output_path, log_dir, glider_type, file_options, d
                                    'start', download_start, ...
                                    'final', download_final);
             catch exception
-              disp(['Error getting basestation files from ' basestation.host ':']);
-              disp(getReport(exception, 'extended'));
+                error('glider_toolbox:getBinaryData:CallFailed', ...
+                      'Error getting basestation files from %s:%s', basestation.host, getReport(exception, 'extended'));
             end
           end  
           new_engs = [new_engs{:}];
@@ -174,7 +174,7 @@ function [ ] = getBinaryData( output_path, log_dir, glider_type, file_options, d
           disp(['       - Engineering data files downloaded: '  num2str(numel(new_engs)) '.']);
           disp(['       - Dive log data files downloaded: '  num2str(numel(new_logs)) '.']);
         case {'seaexplorer'}
-          warning('glider_toolbox:getBinaryData:NotImplemented', ...
+          error('glider_toolbox:getBinaryData:NotImplemented', ...
                   'Real time file retrieval not implemented for SeaExplorer')
         otherwise
       end
@@ -182,8 +182,8 @@ function [ ] = getBinaryData( output_path, log_dir, glider_type, file_options, d
       %TODO: For delayed mode, implement retrieval/softlinks and rename of binary
       %files
   else
-      error('glider_toolbox:main_glider_data_processing_dt:NotImplemented', ...
-            'Dockserver type is not allows');
+      error('glider_toolbox:getBinaryData:NotImplemented', ...
+            'Dockserver type is not allowed');
   end
 end
 
