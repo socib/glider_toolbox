@@ -740,7 +740,8 @@ for deployment_idx = 1:numel(deployment_list)
       end
     end
     if ~isempty(strloglist)
-        disp(strcat({'__SCB_LOG_MSG_UPDATED_PUBLIC_FILES__ ['}, strloglist, ']'));
+        strloglist = strcat({'__SCB_LOG_MSG_UPDATED_PUBLIC_FILES__ ['}, strloglist, ']'); 
+        disp(strloglist{1});
     end
   end
 
