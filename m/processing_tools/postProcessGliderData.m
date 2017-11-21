@@ -434,7 +434,7 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
 
     meta_conv.deployment_end_date.sources = 'postProcessGliderData';
     meta_conv.deployment_end_date.method  = 'postProcessGliderData';
-    if isfield(options.deployment, 'deployment_end')
+    if isfield(options.deployment, 'deployment_end') && ~isnan(options.deployment.deployment_end)
         data_conv.deployment_end_date      = datestr(options.deployment.deployment_end, 'yyyymmddHHMMSS'); 
     else
         data_conv.deployment_end_date      = 'yyyymmddHHMMSS'; % TODO: verify value
