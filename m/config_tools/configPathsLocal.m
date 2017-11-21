@@ -66,5 +66,6 @@ function local_paths = configPathsLocal(glider_toolbox_dir)
   local_paths.netcdf_l1      = fullfile('netcdf', 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L1_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.nc');
   local_paths.netcdf_l2      = fullfile('netcdf', 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L2_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.nc');
   local_paths.processing_log = fullfile('dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.log');
-    
+  local_paths.config_record  = fullfile('dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.config');
+   
 end

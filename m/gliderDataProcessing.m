@@ -242,6 +242,34 @@ function [] = gliderDataProcessing(varargin)
       %% Start deployment processing logging.
       startLogging(fullfile(data_paths.base_dir,data_paths.processing_log), options.glider_toolbox_ver, deployment);
       
+      %% Copy configuration file to data folder
+      if ~isempty(options.config) && ischar(options.config)
+          config_record = fullfile(data_paths.base_dir,data_paths.config_record);
+          config_record_dir = fileparts(config_record);
+          [status, attrout] = fileattrib(config_record_dir);
+          if ~status
+            [status, message] = mkdir(config_record_dir);
+          elseif ~attrout.directory
+            status = false;
+            message = 'not a directory';
+          end
+          if status
+            [success, message] = copyfile(options.config, config_record);
+            if success
+              disp(['Configuration file succesfully copied: ' config_record '.']);
+            else
+              disp(['Error copying configuration file to local data ' ...
+                    config_record ': ' options.config '.']);
+              disp(message);
+            end
+          else
+            disp(['Error creating output directory ' config_record_dir ':']);
+            disp(message);
+          end
+      end
+    
+      
+      
       %% Process data
       try
         [netcdf_products, figure_products, ~, ~] = ...

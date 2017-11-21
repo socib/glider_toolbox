@@ -180,28 +180,29 @@ required_deployment_numparam = {'deployment_id', ...
 glider_toolbox_dir = configGliderToolboxPath();
 glider_toolbox_ver = configGliderToolboxVersion();
 
-config = setupConfiguration(glider_toolbox_dir, ...
-                            'fconfig', fullfile(glider_toolbox_dir, 'config', configuration_file));
+fconfig = fullfile(glider_toolbox_dir, 'config', configuration_file);
+config = setupConfiguration(glider_toolbox_dir, 'fconfig', fconfig);
 deployment_file = fullfile(glider_toolbox_dir, 'config', deployment_file);
 
 %% Configure deployment data and binary paths.
 % This is necessary since we changed the configuration setup
-config.paths_public.netcdf_l0 = fullfile(config.public_paths.base_dir,config.public_paths.netcdf_l0);
-config.paths_public.netcdf_l1 = fullfile(config.public_paths.base_dir,config.public_paths.netcdf_l1);
-config.paths_public.netcdf_l2 = fullfile(config.public_paths.base_dir,config.public_paths.netcdf_l2);
-config.paths_public.figure_dir = fullfile(config.public_paths.base_html_dir,config.public_paths.figure_dir);
-config.paths_public.figure_url = fullfile(config.public_paths.base_url,config.public_paths.figure_dir);
+config.paths_public.netcdf_l0   = fullfile(config.public_paths.base_dir,config.public_paths.netcdf_l0);
+config.paths_public.netcdf_l1   = fullfile(config.public_paths.base_dir,config.public_paths.netcdf_l1);
+config.paths_public.netcdf_l2   = fullfile(config.public_paths.base_dir,config.public_paths.netcdf_l2);
+config.paths_public.figure_dir  = fullfile(config.public_paths.base_html_dir,config.public_paths.figure_dir);
+config.paths_public.figure_url  = fullfile(config.public_paths.base_url,config.public_paths.figure_dir);
 config.paths_public.figure_info = fullfile(config.public_paths.base_html_dir,config.public_paths.figure_info);
 
-config.paths_local.binary_path = fullfile(config.local_paths.base_dir,config.local_paths.binary_path);
-config.paths_local.cache_path = fullfile(config.local_paths.base_dir,config.local_paths.cache_path);
-config.paths_local.log_path = fullfile(config.local_paths.base_dir,config.local_paths.log_path);
-config.paths_local.ascii_path = fullfile(config.local_paths.base_dir,config.local_paths.ascii_path);
-config.paths_local.figure_path = fullfile(config.local_paths.base_dir,config.local_paths.figure_path);
-config.paths_local.netcdf_l0 = fullfile(config.local_paths.base_dir,config.local_paths.netcdf_l0);
-config.paths_local.netcdf_l1 = fullfile(config.local_paths.base_dir,config.local_paths.netcdf_l1);
-config.paths_local.netcdf_l2 = fullfile(config.local_paths.base_dir,config.local_paths.netcdf_l2);
+config.paths_local.binary_path    = fullfile(config.local_paths.base_dir,config.local_paths.binary_path);
+config.paths_local.cache_path     = fullfile(config.local_paths.base_dir,config.local_paths.cache_path);
+config.paths_local.log_path       = fullfile(config.local_paths.base_dir,config.local_paths.log_path);
+config.paths_local.ascii_path     = fullfile(config.local_paths.base_dir,config.local_paths.ascii_path);
+config.paths_local.figure_path    = fullfile(config.local_paths.base_dir,config.local_paths.figure_path);
+config.paths_local.netcdf_l0      = fullfile(config.local_paths.base_dir,config.local_paths.netcdf_l0);
+config.paths_local.netcdf_l1      = fullfile(config.local_paths.base_dir,config.local_paths.netcdf_l1);
+config.paths_local.netcdf_l2      = fullfile(config.local_paths.base_dir,config.local_paths.netcdf_l2);
 config.paths_local.processing_log = fullfile(config.local_paths.base_dir,config.local_paths.processing_log);
+config.paths_local.config_record  = fullfile(config.local_paths.base_dir,config.local_paths.config_record);
 
 config.wrcprogs.dbd2asc             = fullfile(config.wrcprogs.base_dir, config.wrcprogs.dbd2asc);
 config.wrcprogs.dba_merge           = fullfile(config.wrcprogs.base_dir, config.wrcprogs.dba_merge);
@@ -280,6 +281,7 @@ for deployment_idx = 1:numel(deployment_list)
   disp(['Processing deployment ' num2str(deployment_idx) '...']);
   deployment = deployment_list(deployment_idx);
   processing_log = strfstruct(config.paths_local.processing_log, deployment);
+  config_record  = strfstruct(config.paths_local.config_record, deployment);
   binary_dir = strfstruct(config.paths_local.binary_path, deployment);
   cache_dir = strfstruct(config.paths_local.cache_path, deployment);
   log_dir = strfstruct(config.paths_local.log_path, deployment);
@@ -380,6 +382,30 @@ for deployment_idx = 1:numel(deployment_list)
 
   %% Report toolbox version:    
   disp(['Toolbox version: ' glider_toolbox_ver]);
+  
+  %% Copy configuration file to data folder
+  config_record_dir = fileparts(config_record);
+  [status, attrout] = fileattrib(config_record_dir);
+  if ~status
+    [status, message] = mkdir(config_record_dir);
+  elseif ~attrout.directory
+    status = false;
+    message = 'not a directory';
+  end
+  if status
+    [success, message] = copyfile(fconfig, config_record);
+    if success
+      disp(['Configuration file succesfully copied: ' config_record '.']);
+    else
+      disp(['Error copying configuration file to local data ' ...
+            config_record ': ' fconfig '.']);
+      disp(message);
+    end
+  else
+    disp(['Error creating output directory ' config_record_dir ':']);
+    disp(message);
+  end
+   
 
 
   %% Report deployment information.
@@ -675,6 +701,7 @@ for deployment_idx = 1:numel(deployment_list)
   %% Copy selected products to corresponding public location, if needed.
   if ~isempty(fieldnames(outputs))
     disp('Copying public outputs...');
+    strloglist = '';
     output_name_list = fieldnames(outputs);
     for output_name_idx = 1:numel(output_name_list)
       output_name = output_name_list{output_name_idx};
@@ -696,6 +723,10 @@ for deployment_idx = 1:numel(deployment_list)
           if success
             disp(['Public output ' output_name ' succesfully copied: ' ...
                   output_public_file '.']);
+            if ~isempty(strloglist)
+                strloglist = strcat(strloglist,{', '});
+            end
+            strloglist = strcat(strloglist,output_public_file);
           else
             disp(['Error creating public copy of deployment product ' ...
                   output_name ': ' output_public_file '.']);
@@ -707,6 +738,9 @@ for deployment_idx = 1:numel(deployment_list)
           disp(message);
         end
       end
+    end
+    if ~isempty(strloglist)
+        disp(strcat({'__SCB_LOG_MSG_UPDATED_PUBLIC_FILES__ ['}, strloglist, ']'));
     end
   end
 
