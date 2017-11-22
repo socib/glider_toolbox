@@ -121,6 +121,7 @@
     local_paths.figure_path       = figures
     local_paths.processing_log    = processing.log
     local_paths.netcdf_l0         = netcdf/netcdf_L0.nc
+    local_paths.netcdf_eng        = netcdf/netcdf_ENG.nc
     local_paths.netcdf_l1         = netcdf/netcdf_L1.nc
     local_paths.netcdf_egol1      = netcdf/netcdf_EGO_L1.nc
     local_paths.netcdf_l2         = netcdf/netcdf_L2.nc

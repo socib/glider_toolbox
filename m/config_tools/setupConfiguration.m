@@ -235,8 +235,8 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     
     
     %% Configure external tools.
-    config.wrcprogs = configExternalLibs(glider_toolbox_dir);
-    config.wrcprogs.status = 'configExternalLibs';
+    config.wrcprogs = configWRCPrograms(glider_toolbox_dir);
+    config.wrcprogs.status = 'configWRCPrograms';
 
     if ~isempty(readconfig) && isfield(readconfig, 'wrcprogs')
         if isfield(readconfig.wrcprogs, 'fconfig') 

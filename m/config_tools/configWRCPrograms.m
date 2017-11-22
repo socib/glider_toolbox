@@ -1,17 +1,17 @@
-function wrcprogs = configExternalLibs(glider_toolbox_dir)
-%  CONFIGEXTERNALLIBS  Configure path of the Slocum glider programs provided by WRC.
+function wrcprogs = configWRCPrograms(glider_toolbox_dir)
+%  CONFIGWRCPROGRAMS  Configure path of the Slocum glider programs provided by WRC.
 %
 %  Syntax:
-%    WRCPROGS = CONFIGEXTERNALLIBS()
+%    WRCPROGS = CONFIGWRCPROGRAMS()
 %
 %  Description:
-%    WRCPROGS = CONFIGEXTERNALLIBS() should return a struct with the path to
+%    WRCPROGS = CONFIGWRCPROGRAMS() should return a struct with the path to
 %    the executables provided by the Webb Research Company to deal with Slocum
 %    glider data files. This function replaces the configWRCPrograms and
 %    assumes that the external libraries are installed under the
-%    GLIDER_TOOLBOX_DIR/ext_lib/bin. Contrary to configWRCPrograms, this
+%    GLIDER_TOOLBOX_DIR/ext_lib/bin. Contrary as in previous versions, this
 %    function must not be edited. Users must use the configuration files to
-%    overwrite the values returned by CONFIGEXTERNALLIBS if their external
+%    overwrite the values returned by CONFIGWRCPROGRAMS if their external
 %    libraries live in a different path. Read SETUPCONFIGURATION for more
 %    details.
 %
@@ -23,7 +23,7 @@ function wrcprogs = configExternalLibs(glider_toolbox_dir)
 %    XBD2DBA function.
 %
 %  Examples:
-%    wrcprogs = configExternalLibs()
+%    wrcprogs = configWRCPrograms()
 %
 %  See also:
 %    XBD2DBA
