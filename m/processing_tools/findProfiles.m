@@ -122,7 +122,7 @@ function [profile_index, profile_direction] = findProfiles(varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(1, 14, nargin, 'struct'));
+  narginchk(1, 14);
   
   
   %% Set options and default values.

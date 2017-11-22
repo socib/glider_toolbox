@@ -91,7 +91,7 @@ function good = sxgoodfix(longitude, latitude, state)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(3, 3, nargin, 'struct'));
+  narginchk(3, 3);
 
   good = (state == 116) ...
        & ~(isnan(longitude) | isnan(latitude)) ...

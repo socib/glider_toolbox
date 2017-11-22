@@ -80,7 +80,7 @@ function object = loadjson(json, varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(1, 2, nargin, 'struct'));
+  narginchk(1, 2);
   
   if nargin > 1
     filename = varargin{1};

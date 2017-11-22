@@ -42,7 +42,7 @@ function [sql_query, deployment_fields] = configRTDeploymentInfoQueryDB()
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(0, 0, nargin, 'struct'));
+  narginchk(0, 0);
 
   % Select the deployment fields.
   % First column is deployment field
@@ -55,6 +55,38 @@ function [sql_query, deployment_fields] = configRTDeploymentInfoQueryDB()
     'glider_name'            'platform_name'
     'glider_serial'          'instrument_serial'
     'glider_model'           'instrument_model'
+    'glider_instrument_name' 'instrument_name'
+    'glider_deployment_code' 'deployment_code'
+    % Optional fields for global attributes.
+    'abstract'                     'deployment_description'
+    'acknowledgement'              'deployment_acknowledgement'
+    'author'                       'deployment_author'
+    'author_email'                 'deployment_author_email'
+    'creator'                      'deployment_author'
+    'creator_email'                'deployment_author_email'
+    'creator_url'                  'deployment_author_url'
+    'data_center'                  'deployment_data_center'
+    'data_center_email'            'deployment_data_center_email'
+    'institution'                  'institution_name'
+    'institution_references'       'institution_references'
+    'instrument'                   'instrument_name'
+    'instrument_manufacturer'      'instrument_manufacturer'
+    'instrument_model'             'instrument_model'
+    'license'                      'deployment_license'
+    'principal_investigator'       'deployment_principal_investigator'
+    'principal_investigator_email' 'deployment_principal_investigator_email'
+    'project'                      'deployment_project'
+    'publisher'                    'deployment_publisher_name'
+    'publisher_email'              'deployment_publisher_email'
+    'publisher_url'                'deployment_publisher_url'
+    'summary'                      'deployment_description'
+    % fields added for the EGO format
+    'citation'                     'deployment_acknowledgement'
+    'wmo_platform_code'            'platform_wmo_platform_code'
+    'platform_code'                'platform_platform_code'
+    'deployment_label'             'deployment_name'
+    'id'                           'deployment_name'
+    'deployment_cruise_id'         'deployment_cruise_id'
   };
 
   deployment_fields = fields_map(:,1)';

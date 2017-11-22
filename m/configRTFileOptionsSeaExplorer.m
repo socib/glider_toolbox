@@ -49,8 +49,8 @@ function seaexplorer_options = configRTFileOptionsSeaExplorer()
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(0, 0, nargin, 'struct'));
-  
+  narginchk(0, 0);
+
   % Glider (.gli) files to use:
   seaexplorer_options.gli_name_pattern = '^.*\.gli(\..*)?$';
   

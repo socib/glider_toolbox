@@ -41,7 +41,7 @@ function [eastward, northward] = sgcur2cart(speed, direction)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(2, 2, nargin, 'struct'));
+  narginchk(2, 2);
   
   [northward, eastward] = pol2cart(deg2rad(direction), speed);
 

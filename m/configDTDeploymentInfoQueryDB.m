@@ -1,4 +1,4 @@
-function [sql_query, deployment_fields] = configDTDeploymentInfoQueryDB()
+function [sql_query, deployment_fields] = configDTDeploymentInfoQueryDB(varargin)
 %CONFIGDTDEPLOYMENTINFOQUERYDB  Configure the query to retrieve delayed time glider deployment information.
 %
 %  Syntax:
@@ -24,7 +24,7 @@ function [sql_query, deployment_fields] = configDTDeploymentInfoQueryDB()
 %
 %  Authors:
 %    Joan Pau Beltran  <joanpau.beltran@socib.cat>
-
+%
 %  Copyright (C) 2013-2016
 %  ICTS SOCIB - Servei d'observacio i prediccio costaner de les Illes Balears
 %  <http://www.socib.es>
@@ -42,10 +42,43 @@ function [sql_query, deployment_fields] = configDTDeploymentInfoQueryDB()
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(0, 0, nargin, 'struct'));
-
+  narginchk(0, 2);
+  
+  options.deployment_ids = {'1' '2'};
+    
+  %% Parse optional arguments.
+  % Get option key-value pairs in any accepted call signature.
+  argopts = varargin;
+  if isscalar(argopts) && isstruct(argopts{1})
+      % Options passed as a single option struct argument:
+      % field names are option keys and field values are option values.
+      opt_key_list = fieldnames(argopts{1});
+      opt_val_list = struct2cell(argopts{1});
+  elseif mod(numel(argopts), 2) == 0
+      % Options passed as key-value argument pairs.
+      opt_key_list = argopts(1:2:end);
+      opt_val_list = argopts(2:2:end);
+  else
+      error('glider_toolbox:gliderDataProcessing:InvalidOptions', ...
+            'Invalid optional arguments (neither key-value pairs nor struct).');
+  end
+  % Overwrite default options with values given in extra arguments.
+  for opt_idx = 1:numel(opt_key_list)
+      opt = lower(opt_key_list{opt_idx});
+      val = opt_val_list{opt_idx};
+      if isfield(options, opt)
+        options.(opt) = val;
+      else
+        error('glider_toolbox:gliderDataProcessing:InvalidOption', ...
+              'Invalid option: %s.', opt);
+      end
+  end
   % Select the identifiers of deployments to process.
-  deployment_ids = {'1' '2'};
+  if iscell(options.deployment_ids)
+    deployment_ids = options.deployment_ids;  
+  else
+    deployment_ids = {options.deployment_ids};
+  end
   
   % Select the deployment fields.
   % First column is deployment field
@@ -58,6 +91,38 @@ function [sql_query, deployment_fields] = configDTDeploymentInfoQueryDB()
     'glider_name'            'platform_name'
     'glider_serial'          'instrument_serial'
     'glider_model'           'instrument_model'
+    'glider_instrument_name' 'instrument_name'
+    'glider_deployment_code' 'deployment_code'
+    % Optional fields for global attributes.
+    'abstract'                     'deployment_description'
+    'acknowledgement'              'deployment_acknowledgement'
+    'author'                       'deployment_author'
+    'author_email'                 'deployment_author_email'
+    'creator'                      'deployment_author'
+    'creator_email'                'deployment_author_email'
+    'creator_url'                  'deployment_author_url'
+    'data_center'                  'deployment_data_center'
+    'data_center_email'            'deployment_data_center_email'
+    'institution'                  'institution_name'
+    'institution_references'       'institution_references'
+    'instrument'                   'instrument_name'
+    'instrument_manufacturer'      'instrument_manufacturer'
+    'instrument_model'             'instrument_model'
+    'license'                      'deployment_license'
+    'principal_investigator'       'deployment_principal_investigator'
+    'principal_investigator_email' 'deployment_principal_investigator_email'
+    'project'                      'deployment_project'
+    'publisher'                    'deployment_publisher_name'
+    'publisher_email'              'deployment_publisher_email'
+    'publisher_url'                'deployment_publisher_url'
+    'summary'                      'deployment_description'
+    % fields added for the EGO format
+    'citation'                     'deployment_acknowledgement'
+    'wmo_platform_code'            'platform_wmo_platform_code'
+    'platform_code'                'platform_platform_code'
+    'deployment_label'             'deployment_name'
+    'id'                           'deployment_name'
+    'deployment_cruise_id'         'deployment_cruise_id'
   };
 
   deployment_fields = fields_map(:,1)';

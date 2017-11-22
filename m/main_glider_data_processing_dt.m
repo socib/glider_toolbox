@@ -166,62 +166,105 @@
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+% Configuration and deployment files
+configuration_file = 'configMainDT.txt';
+deployment_file    = 'deploymentDT.txt';
+
+% required parameters of deployment structure
+required_deployment_strparam = {'deployment_name', 'glider_name', ...
+                       'glider_serial', 'glider_model'};
+required_deployment_numparam = {'deployment_id', ...
+                       'deployment_start', 'deployment_end'};
 
 %% Configure toolbox and configuration file path.
 glider_toolbox_dir = configGliderToolboxPath();
 glider_toolbox_ver = configGliderToolboxVersion();
 
+fconfig = fullfile(glider_toolbox_dir, 'config', configuration_file);
+config = setupConfiguration(glider_toolbox_dir, 'fconfig', fconfig);
+deployment_file = fullfile(glider_toolbox_dir, 'config', deployment_file);
 
-%% Configure external programs paths.
-config.wrcprogs = configWRCPrograms();
+%% Configure deployment data and binary paths.
+% This is necessary since we changed the configuration setup
+config.paths_public.netcdf_l0   = fullfile(config.public_paths.base_dir,config.public_paths.netcdf_l0);
+config.paths_public.netcdf_l1   = fullfile(config.public_paths.base_dir,config.public_paths.netcdf_l1);
+config.paths_public.netcdf_l2   = fullfile(config.public_paths.base_dir,config.public_paths.netcdf_l2);
+config.paths_public.figure_dir  = fullfile(config.public_paths.base_html_dir,config.public_paths.figure_dir);
+config.paths_public.figure_url  = fullfile(config.public_paths.base_url,config.public_paths.figure_dir);
+config.paths_public.figure_info = fullfile(config.public_paths.base_html_dir,config.public_paths.figure_info);
 
+config.paths_local.binary_path    = fullfile(config.local_paths.base_dir,config.local_paths.binary_path);
+config.paths_local.cache_path     = fullfile(config.local_paths.base_dir,config.local_paths.cache_path);
+config.paths_local.log_path       = fullfile(config.local_paths.base_dir,config.local_paths.log_path);
+config.paths_local.ascii_path     = fullfile(config.local_paths.base_dir,config.local_paths.ascii_path);
+config.paths_local.figure_path    = fullfile(config.local_paths.base_dir,config.local_paths.figure_path);
+config.paths_local.netcdf_l0      = fullfile(config.local_paths.base_dir,config.local_paths.netcdf_l0);
+config.paths_local.netcdf_l1      = fullfile(config.local_paths.base_dir,config.local_paths.netcdf_l1);
+config.paths_local.netcdf_l2      = fullfile(config.local_paths.base_dir,config.local_paths.netcdf_l2);
+config.paths_local.processing_log = fullfile(config.local_paths.base_dir,config.local_paths.processing_log);
+config.paths_local.config_record  = fullfile(config.local_paths.base_dir,config.local_paths.config_record);
 
-%% Configure deployment data paths.
-config.paths_public = configDTPathsPublic();
-config.paths_local = configDTPathsLocal();
-
-
-%% Configure figure outputs.
-[config.figures_processed, config.figures_gridded] = configFigures();
-
-
-%% Configure NetCDF outputs.
-config.output_netcdf_l0_slocum = configDTOutputNetCDFL0Slocum();
-config.output_netcdf_l0_seaglider = configDTOutputNetCDFL0Seaglider();
-config.output_netcdf_l0_seaexplorer = configDTOutputNetCDFL0SeaExplorer();
-config.output_netcdf_l1 = configDTOutputNetCDFL1();
-config.output_netcdf_l2 = configDTOutputNetCDFL2();
-
-
-%% Configure processing options.
-config.preprocessing_options_slocum = configDataPreprocessingSlocum();
-config.preprocessing_options_seaglider = configDataPreprocessingSeaglider();
-config.preprocessing_options_seaexplorer = configDataPreprocessingSeaExplorer();
-config.processing_options_slocum_g1 = configDataProcessingSlocumG1();
-config.processing_options_slocum_g2 = configDataProcessingSlocumG2();
-config.processing_options_seaglider = configDataProcessingSeaglider();
-config.processing_options_seaexplorer = configDataProcessingSeaExplorer();
-config.gridding_options = configDataGridding();
-
-
-%% Configure file download and conversion and data loading.
-config.file_options_slocum = configDTFileOptionsSlocum();
-config.file_options_seaglider = configDTFileOptionsSeaglider();
-config.file_options_seaexplorer = configDTFileOptionsSeaExplorer();
-
+config.wrcprogs.dbd2asc             = fullfile(config.wrcprogs.base_dir, config.wrcprogs.dbd2asc);
+config.wrcprogs.dba_merge           = fullfile(config.wrcprogs.base_dir, config.wrcprogs.dba_merge);
+config.wrcprogs.dba_sensor_filter   = fullfile(config.wrcprogs.base_dir, config.wrcprogs.dba_sensor_filter);
+config.wrcprogs.dba_time_filter     = fullfile(config.wrcprogs.base_dir, config.wrcprogs.dba_time_filter);
+config.wrcprogs.dba2_orig_matlab    = fullfile(config.wrcprogs.base_dir, config.wrcprogs.dba2_orig_matlab);
+config.wrcprogs.rename_dbd_files    = fullfile(config.wrcprogs.base_dir, config.wrcprogs.rename_dbd_files);
 
 %% Configure data base deployment information source.
-config.db_access = configDBAccess();
-[config.db_query, config.db_fields] = configDTDeploymentInfoQueryDB();
+if ~isfield(config.db_access, 'deployment_ids')
+    error('glider_toolbox:main_glider_dataprocessing_dt:MissingConfiguration',...
+              'Delayed mode requires deployment ids');
+end
+[config.db_query, config.db_fields] = configDTDeploymentInfoQueryDB('deployment_ids', config.db_access.deployment_ids);
 
 
 %% Get list of deployments to process from database.
-disp('Querying information of glider deployments...');
-deployment_list = getDeploymentInfoDB( ...
-  config.db_query, config.db_access.name, ...
-  'user', config.db_access.user, 'pass', config.db_access.pass, ...
-  'server', config.db_access.server, 'driver', config.db_access.driver, ...
-  'fields', config.db_fields);
+% If the active parameter is set and set to 0 then the deployments will be
+% gathered from the deployment file under config
+user_db_access = 1;
+deployment_list = '';
+if ~isempty(config.db_access) && isfield(config.db_access, 'active')
+    user_db_access = config.db_access.active;
+end
+if user_db_access  
+    disp('Querying information of glider deployments...');
+    deployment_list = getDeploymentInfoDB( ...
+      config.db_query, config.db_access.name, ...
+      'user', config.db_access.user, 'pass', config.db_access.pass, ...
+      'server', config.db_access.server, 'driver', config.db_access.driver, ...
+      'fields', config.db_fields);
+else
+    disp(['Reading information of glider deployments from ' deployment_file '...']);
+    try
+        read_deployment = readConfigFile(deployment_file);
+        deployment_list = read_deployment.deployment_list;
+        
+        %Check/modify format of deployment_list 
+        for i=1:numel(required_deployment_strparam)
+           fieldname = required_deployment_strparam(i);
+           if ~isfield( deployment_list, fieldname{1})
+               disp(['ERROR: Deployment definition does not contain ' fieldname{1}]);
+               return;
+           end
+        end
+        for i=1:numel(required_deployment_numparam)
+           fieldname = required_deployment_numparam(i);
+           if ~isfield( deployment_list, fieldname{1})
+               disp(['ERROR: Deployment definition does not contain ' fieldname{1}]);
+               return;
+           else
+               for j=1:numel(deployment_list)  
+                   deployment_list(j).(fieldname{1}) = str2num(deployment_list(j).(fieldname{1}));
+               end
+           end
+        end
+    catch exception
+        disp(['Error reading deployment file ' deployment_file]);
+        disp(getReport(exception, 'extended'));
+    end    
+end
+
 if isempty(deployment_list)
   disp('Selected glider deployments are not available.');
   return
@@ -238,6 +281,7 @@ for deployment_idx = 1:numel(deployment_list)
   disp(['Processing deployment ' num2str(deployment_idx) '...']);
   deployment = deployment_list(deployment_idx);
   processing_log = strfstruct(config.paths_local.processing_log, deployment);
+  config_record  = strfstruct(config.paths_local.config_record, deployment);
   binary_dir = strfstruct(config.paths_local.binary_path, deployment);
   cache_dir = strfstruct(config.paths_local.cache_path, deployment);
   log_dir = strfstruct(config.paths_local.log_path, deployment);
@@ -303,8 +347,8 @@ for deployment_idx = 1:numel(deployment_list)
   gridding_options = config.gridding_options;
   netcdf_l1_options = config.output_netcdf_l1;
   netcdf_l2_options = config.output_netcdf_l2;
-  figproc_options = config.figures_processed;
-  figgrid_options = config.figures_gridded;
+  figproc_options = config.figures_processed.options;
+  figgrid_options = config.figures_gridded.options;
 
 
   %% Start deployment processing logging.
@@ -338,6 +382,30 @@ for deployment_idx = 1:numel(deployment_list)
 
   %% Report toolbox version:    
   disp(['Toolbox version: ' glider_toolbox_ver]);
+  
+  %% Copy configuration file to data folder
+  config_record_dir = fileparts(config_record);
+  [status, attrout] = fileattrib(config_record_dir);
+  if ~status
+    [status, message] = mkdir(config_record_dir);
+  elseif ~attrout.directory
+    status = false;
+    message = 'not a directory';
+  end
+  if status
+    [success, message] = copyfile(fconfig, config_record);
+    if success
+      disp(['Configuration file succesfully copied: ' config_record '.']);
+    else
+      disp(['Error copying configuration file to local data ' ...
+            config_record ': ' fconfig '.']);
+      disp(message);
+    end
+  else
+    disp(['Error creating output directory ' config_record_dir ':']);
+    disp(message);
+  end
+   
 
 
   %% Report deployment information.
@@ -633,6 +701,7 @@ for deployment_idx = 1:numel(deployment_list)
   %% Copy selected products to corresponding public location, if needed.
   if ~isempty(fieldnames(outputs))
     disp('Copying public outputs...');
+    strloglist = '';
     output_name_list = fieldnames(outputs);
     for output_name_idx = 1:numel(output_name_list)
       output_name = output_name_list{output_name_idx};
@@ -654,6 +723,10 @@ for deployment_idx = 1:numel(deployment_list)
           if success
             disp(['Public output ' output_name ' succesfully copied: ' ...
                   output_public_file '.']);
+            if ~isempty(strloglist)
+                strloglist = strcat(strloglist,{', '});
+            end
+            strloglist = strcat(strloglist,output_public_file);
           else
             disp(['Error creating public copy of deployment product ' ...
                   output_name ': ' output_public_file '.']);
@@ -665,6 +738,10 @@ for deployment_idx = 1:numel(deployment_list)
           disp(message);
         end
       end
+    end
+    if ~isempty(strloglist)
+        strloglist = strcat({'__SCB_LOG_MSG_UPDATED_PUBLIC_FILES__ ['}, strloglist, ']'); 
+        disp(strloglist{1});
     end
   end
 

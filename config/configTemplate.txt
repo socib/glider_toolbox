@@ -1,0 +1,204 @@
+##
+# This file defines the configuration parameters for glider toolbox. 
+# Users can add any parameter of the configuration to overwrite the default values. 
+# Comments may be used by adding a # at the beginning of the line. The format
+# to define a parameter is 
+#
+#        parameter_group.parameter_name = value
+#  or
+#        parameter_group.parameter_name = value1|value2|value3  (for arrays) 
+#
+# Empty values are defined with no content after the equal symbol. 
+# Configuratble groups and parameters are the as follow:
+#
+#       - processing_mode: Must be rt or dt for real time mode or delayed
+#           mode. If set, the value will overwrite the input option.
+#       - wrcprogs: External libraries 
+#           -- wrcprogs.base_dir: Location of binary files relative to base_dir           
+#           -- wrcprogs.dbd2asc: File name of binary to ascii script relative to base_dir
+#           -- wrcprogs.dba_merge: File name of dba merge scrip relative to base_dir 
+#           -- wrcprogs.dba_sensor_filter: File name of sensor filter script relative to base_dir
+#           -- wrcprogs.dba_time_filter: File name of time filter script relative to base_dir 
+#           -- wrcprogs.dba2_orig_matlab: File name of orig matlab script relative to base_dir
+#           -- wrcprogs.rename_dbd_files: File name of CF2 Persistor
+#                        file rename script relative to base_dir
+#       - local_paths: Definition of data folder structure 
+#           -- local_paths.status: File name or configuration function 
+#           -- local_paths.base_dir: Base directory containing the other folders
+#           -- local_paths.binary_path: Directory for binary files under relative to base_dir
+#           -- local_paths.cache_path: Directory for cache of db2asc files relative to base_dir
+#           -- local_paths.log_path: Directory for log files relative to base_dir
+#           -- local_paths.ascii_path: Directory for ascii files relative to base_dir
+#           -- local_paths.figure_path: Directory for figure files relative to base_dir
+#           -- local_paths.netcdf_l0: File name for L0 products relative to base_dir
+#           -- local_paths.netcdf_l1: File name for L1 products relative to base_dir
+#           -- local_paths.netcdf_l2: File name for L2 products relative to base_dir
+#           -- local_paths.processing_log: File name for log file relative to base_dir
+#       - public_paths: Definition of public paths and urls 
+#           -- public_paths.status: File name or configuration function 
+#           -- public_paths.base_dir: Base directory containing the other folders
+#           -- public_paths.netcdf_l0: File name for L0 products relative to base_dir
+#           -- public_paths.netcdf_l1: File name for L1 products relative to base_dir
+#           -- public_paths.netcdf_egol1: File name for EGO L1 products relative to base_dir
+#           -- public_paths.netcdf_l2: File name for L2 products relative to base_dir
+#           -- public_paths.figure_dir: Directory for public figures
+#           -- public_paths.base_url: URL of public access for json creation
+#           -- public_paths.figure_url: URL for public figures for json creation
+#           -- public_paths.figure_info: json name format
+#       - db_access: Definition of database access (configDBAccess)
+#           -- db_access.status: File name or configuration function 
+#           -- db_access.active: Indicates the use of database  
+#           -- db_access.server: DB server name/ip
+#           -- db_access.name: DB name
+#           -- db_access.user: DB user name for access
+#           -- db_access.pass: DB password for access
+#           -- db_access.driver: DB drivers
+#       - dockservers: Definition of dockserver access (configDockservers)
+#           -- dockservers.status: File name or configuration function 
+#           -- dockservers.active: Indicates the use of dockserver
+#           -- dockservers.remote_base_dir: Directory in remote server
+#           -- dockservers.remote_xbd_dir: Directory of xdb files relative to base_dir 
+#           -- dockservers.remote_log_dir: Directory of log files relative to base_dir
+#           -- dockservers.server(1).url: Dockserver url
+#           -- dockservers.server(1).host: Dockserver host name
+#           -- dockservers.server(1).user: User for dockserver access
+#           -- dockservers.server(1).pass: Password for dockserver access
+#           -- dockservers.server(1).conn: Communication protocol to access
+#       - file_options_slocum: Options for creating files from Slocum data (configXTFileOptionsSlocum)
+#           -- file_options_slocum.status: File name or configuration function 
+#           -- file_options_slocum.format_conversion: Indicates the use of
+#                        binary to ascii conversion
+#           -- file_options_slocum.xbd_name_pattern: Pattern to indentify
+#                        valid binary files
+#           -- file_options_slocum.dba_name_replace: Pattern for creating
+#                        ascii file names
+#           -- file_options_slocum.dba_name_pattern_nav: Navigation file pattern
+#           -- file_options_slocum.dba_name_pattern_sci: Science file pattern
+#           -- file_options_slocum.dba_time_sensor_nav: Navigation files
+#                         time parameter
+#           -- file_options_slocum.dba_time_sensor_sci: Science files
+#                         time parameter
+#           -- file_options_slocum.dba_sensors: Name of parameters to
+#                         consider from binary files (array)
+#           -- file_options_slocum.add2dba_sensors: Appends the specified parameters
+#                         to file_options_slocum.dba_sensors.
+#       - FIGURES_PROCESSED and FIGURES_GRIDDED: Definitions for figure
+#                 creation (configFigures). The default parameters are
+#                 explained in configFigures but potentially it allows any
+3                 figure in the configuration file
+#
+# Notice that no ; or quotes are needed to define the variables. This would create
+# an error in the processing. 
+#
+##
+
+########################
+# Processing mode
+
+    processing_mode = rt 
+    
+########################
+# WRC_PROGS parameters 
+#   Description: Webb Research Company to deal with Slocum glider data files.
+
+    wrcprogs.base_dir          = /path/to/bin/files
+    wrcprogs.dbd2asc           = dbd2asc
+    wrcprogs.dba_merge         = dba_merge
+    wrcprogs.dba_sensor_filter = dba_sensor_filter
+    wrcprogs.dba_time_filter   = dba_time_filter
+    wrcprogs.dba2_orig_matlab  = dba2_orig_matlab
+    wrcprogs.rename_dbd_files  = rename_dbd_files
+
+########################
+# Local Paths
+#   Description: Defines paths for input or produced files
+    
+    local_paths.base_dir          = /path/to/data/root
+    local_paths.binary_path       = binary
+    local_paths.cache_path        = binary
+    local_paths.log_path          = log
+    local_paths.ascii_path        = ascii
+    local_paths.figure_path       = figures
+    local_paths.processing_log    = processing.log
+    local_paths.netcdf_l0         = netcdf/netcdf_L0.nc
+    local_paths.netcdf_eng        = netcdf/netcdf_ENG.nc
+    local_paths.netcdf_l1         = netcdf/netcdf_L1.nc
+    local_paths.netcdf_egol1      = netcdf/netcdf_EGO_L1.nc
+    local_paths.netcdf_l2         = netcdf/netcdf_L2.nc
+
+########################
+# Public Paths
+#   Definition: Defines the public paths for copying data products 
+
+    public_paths.base_dir          = /path/to/public/data/root
+    public_paths.base_url          = http://your.public.url/path/to/data
+    public_paths.base_html_dir     = /your/public/url/path/to/data
+    public_paths.figure_dir        = ${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/figures
+    public_paths.figure_info       = ${DEPLOYMENT_ID,#d}_figures.json
+
+    # paths are relative to public_paths.base_dir
+    public_paths.netcdf_l0      = netcdf/netcdf_L0.nc
+    public_paths.netcdf_l1      = netcdf/netcdf_L1.nc
+    public_paths.netcdf_l2      = netcdf/netcdf_L2.nc
+    public_paths.netcdf_egol1   = netcdf/netcdf_EGO_L1.nc
+
+#########################
+# Database
+#   Definition: Database access information
+
+    db_access.active    = 1
+    db_access.server    = jdbc:postgresql://mydb.myportal.mydomain:5433/my_data_base
+    db_access.name      = my_data_base
+    db_access.user      = db_user
+    db_access.pass      = top_secret
+    db_access.driver    = org.postgresql.Driver
+
+#########################
+# Dockservers
+#   Definition: Definition of dockserver access
+
+    dockservers.active           = 0
+    dockservers.remote_base_dir  = /var/opt/gmc/gliders
+    dockservers.remote_xbd_dir   = from-glider
+    dockservers.remote_log_dir   = logs
+    dockservers.server(1).url    = http://mydockserver01.myportal.mydomain
+    dockservers.server(1).host   = xxx.xxx.xxx.xxx
+    dockservers.server(1).user   = dock_user
+    dockservers.server(1).pass   = top_secret
+    dockservers.server(2).url    = http://mydockserver01.myportal.mydomain
+    dockservers.server(2).host   = xxx.xxx.xxx.xxx
+    dockservers.server(2).user   = dock_user
+    dockservers.server(2).pass   = top_secret
+
+#########################
+# Slocum file options
+#   Definition: Options for creating files from Slocum data
+#   Note: The | is used for parsing the configuration file, therefore, the pattern
+#         should not use this symbol. To use this symbol, you can define 
+#         the file options slocum in a different file and define the array delimiter
+#         to be used by setupConfiguration to parse this other file without. 
+#         In order to configure this group, define the following:
+#             file_options_slocum.array_delimiter = /
+#             file_options_slocum.fconfig = config/config_file_options_file.txt
+#         and define the parameters below in config_file_options_file.txt using
+#         / (or other choosen symbol) for the dba_sensors if needed
+
+    file_options_slocum.format_conversion    = ^\w+_(freewave)_\d{8}T\d{6}\.log$
+    file_options_slocum.xbd_name_pattern     = ^(\w+-\d{4}-\d+-\d+-\d+)\.([smdtne]bd)$
+    file_options_slocum.dba_name_replace     = $1-$2.dba
+    file_options_slocum.dba_name_pattern_nav = ^.*-[smd]bd\.dba$
+    file_options_slocum.dba_name_pattern_sci = ^.*-[tne]bd\.dba
+    file_options_slocum.dba_time_sensor_nav  = m_present_time
+    file_options_slocum.dba_time_sensor_sci  = sci_m_present_time
+    file_options_slocum.dba_sensors          = m_present_time|m_lat|m_lon|m_gps_lat|m_gps_lon|m_gps_status
+    file_options_slocum.add2dba_sensors      = sci_oxy4_oxygen|m_lat|sci_oxy4_saturation|sci_oxy4_temp|sci_oxy4_timestamp
+
+#########################
+# Processed and gridded figure options
+#   Definition: List of figures to be produced
+#   Note: Refer to the configFigure description for details
+#         Only a few examples are shown here
+
+    figures_proc.current_map.plotopts.coastfile     = private/coast_wmed_h
+    figures_proc.oxygen_saturation.prntopts.comment = My own comment about oxygen saturation
+    

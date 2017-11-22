@@ -97,7 +97,7 @@ function [var_data, var_meta, global_meta] = loadnc(url, var_names, field_names)
   % Consider make the variable persistent.
   ISOCTAVE = exist('OCTAVE_VERSION','builtin');
 
-  error(nargchk(1, 3, nargin, 'struct'));
+  narginchk(1, 3);
 
   if ISOCTAVE
     % Open the resource.

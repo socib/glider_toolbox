@@ -105,7 +105,7 @@ function [meta, data] = dbamerge(meta_nav, data_nav, meta_sci, data_sci, varargi
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(4, 14, nargin, 'struct'));
+  narginchk(4, 14);
   
   
   %% Set options and default values.

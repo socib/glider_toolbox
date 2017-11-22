@@ -121,7 +121,7 @@ function str = strfstruct(pattern, repstruct)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(2, 2, nargin, 'struct'));
+  narginchk(2, 2);
 
   repflds = fieldnames(repstruct);
   repvals = struct2cell(repstruct);

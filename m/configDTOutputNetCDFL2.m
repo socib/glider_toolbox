@@ -66,7 +66,7 @@ function ncl2_info = configDTOutputNetCDFL2()
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(0, 0, nargin, 'struct'));
+  narginchk(0, 0);
 
   %% Define variable information.
   % To define the variable attributes easily and readably, add the corresponding

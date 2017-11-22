@@ -1,0 +1,10 @@
+# Ignore everything in this directory
+*
+# Except this file
+!.gitignore
+configMainDT.txt
+configMainRT.txt
+configTemplate.txt
+deploymentDT.txt
+deploymentRT.txt
+

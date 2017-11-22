@@ -47,7 +47,7 @@ function d = posixtime2utc(s)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(1, 1, nargin, 'struct'));
+  narginchk(1, 1);
   
   d = 719529 + s / 86400;
   

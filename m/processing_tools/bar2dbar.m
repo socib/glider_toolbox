@@ -35,7 +35,7 @@ function dbar = bar2dbar(bar)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(nargin, 1, 1, 'struct'));
+  narginchk(1, 1);
 
   dbar = bar * 10;
 
