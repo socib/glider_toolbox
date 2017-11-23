@@ -119,6 +119,7 @@ function ncl1_info = configRTOutputNetCDFEGO()
               {{'time', 'time_gps', 'juld', ...
                 'depth', 'latitude', 'longitude', ...
                 'latitude_gps', 'longitude_gps', ...
+                'time_gps_qc', 'position_gps_qc', ...
                 'phase', 'phase_number', 'positioning_method', ...
                 'cndc', 'temp', 'pres', 'psal', 'chla', ...
                 'temp_doxy', 'molar_doxy', ...
@@ -196,7 +197,7 @@ function ncl1_info = configRTOutputNetCDFEGO()
     'cdm_data_type'                'Trajectory'
     'citation'                     '' % deployment_citation
     'comment'                      'Data regularized, corrected and/or derived from raw glider data.'
-    'Conventions'                  'CF-1.4 EGO-1.0'
+    'Conventions'                  'CF-1.4 EGO-1.2'
     'creator'                      '' % deployment_author
     'creator_email'                '' % deployment_author_email
     'creator_url'                  '' % deployment_author_url
@@ -210,7 +211,7 @@ function ncl1_info = configRTOutputNetCDFEGO()
     'deployment_label'             ''
     'distribution_statement'       'see citation'
     'featureType'                  'trajectory'
-    'format_version'               '1.0'
+    'format_version'               '1.2'
     'geospatial_lat_max'           'undefined'
     'geospatial_lat_min'           'undefined'
     'geospatial_lat_units'         'undefined'

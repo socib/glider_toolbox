@@ -423,7 +423,7 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
     meta_conv.deployment_cruise_id.sources = 'postProcessGliderData';
     meta_conv.deployment_cruise_id.method  = 'postProcessGliderData';
     if isfield(options.deployment, 'deployment_cruise_id')
-        data_conv.deployment_cruise_id      = options.deployment.deployment_cruise_id; % TODO: not really this one
+        data_conv.deployment_cruise_id      = num2str(options.deployment.deployment_cruise_id); % TODO: not really this one
     else
         data_conv.deployment_cruise_id         = 'N/A';    % TODO: verify value
     end

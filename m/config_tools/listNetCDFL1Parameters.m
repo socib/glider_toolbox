@@ -122,9 +122,19 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'sdn_uom_urn'          'SDN:P061::UTBB'
     'coordinates'          'time_gps'
     'comment'              'None'
-    '_FillValue'           -128
+    '_FillValue'           -1
     'glider_original_parameter_name'                [] 
     'sources'                [] };
+
+  var_attr_list.ego.time_gps_qc = {
+    'long_name'            'Quality flag'
+    'standard_name'        'time_gps_qc'
+    'conventions'          'EGO reference table 2'
+    'valid_min'            0
+    'valid_max'            9
+    'flag_values'          '0, 1, 2, 3, 4, 5, 8, 9'
+    'flag_meanings'        'no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed interpolated_value missing_value'
+    '_FillValue'           -128};
 
   var_attr_list.ego.juld = {
     'long_name'            'Julian 1950 time'
@@ -139,7 +149,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'sdn_uom_urn'          'SDN:P061::UTAA'
     'coordinates'          'time latitude longitude depth'
     'comment'              'None'
-    '_FillValue'           default_fill_value
+    '_FillValue'           999999
     'comment'              ''
     'glider_original_parameter_name'                [] 
     'sources'                [] };
@@ -176,9 +186,9 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
 
   %% Geolocation
   var_attr_list.ego.latitude = {
-    'long_name'                   'Gps fixed latitude'
+    'long_name'                   'Measurement latitude'
     'standard_name'               'latitude'
-    'units'                       'degrees_north'
+    'units'                       'degree_north'
     'axis'                        'Y'
     'coordinates'                 'time latitude longitude depth'
     'valid_min'                   -90.0
@@ -200,10 +210,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'filling'                                       [] };
 
   var_attr_list.ego.longitude = {
-    'long_name'                    'Gps fixed longitude'
+    'long_name'                    'Measurement longitude'
     'standard_name'                'longitude'
     'axis'                         'X'
-    'units'                        'degrees_east'
+    'units'                        'degree_east'
     'coordinates'                  'time latitude longitude depth'
     'valid_min'                    -180.0
     'valid_max'                    180.0
@@ -255,7 +265,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
   var_attr_list.ego.latitude_gps = {
     'long_name'                    'Gps fixed latitude'
     'standard_name'                'latitude'
-    'units'                        'degrees_north'
+    'units'                        'degree_north'
     'axis'                         'Y'
     'coordinates'                  'TIME_GPS LATITUDE LONGITUDE DEPTH'
     'valid_min'                    -90.0
@@ -279,7 +289,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'long_name'                    'Gps fixed longitude'
     'standard_name'                'longitude'
     'axis'                         'X'
-    'units'                        'degrees_east'
+    'units'                        'degree_east'
     'coordinates'                  'TIME_GPS LATITUDE LONGITUDE DEPTH'
     'valid_min'                    -180.0
     'valid_max'                    180.0
@@ -297,6 +307,17 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'position_bad'                                  []
     'conversion'                                    []
     'filling'                                       [] };
+
+
+  var_attr_list.ego.position_gps_qc = {
+    'long_name'            'Quality flag'
+    'standard_name'        'time_gps_qc'
+    'conventions'          'EGO reference table 2'
+    'valid_min'            0
+    'valid_max'            9
+    'flag_values'          '0, 1, 2, 3, 4, 5, 8, 9'
+    'flag_meanings'        'no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed interpolated_value missing_value'
+    '_FillValue'           -128};
       
   %% Motion and orientation
   var_attr_list.socib.heading = {
@@ -304,10 +325,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'heading'
     'units'                   'rad'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -326,10 +347,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'          'roll'
     'units'                  'rad'
     'coordinates'            'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -348,10 +369,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'pitch'
     'units'                   'rad'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -505,10 +526,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name' 'sea_water_conductivity'
     'units'         'S m-1'
     'coordinates'   'time depth latitude longitude'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -562,10 +583,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'sea_water_temperature'
     'units'                   'Celsius'
     'coordinates'             'time depth latitude longitude'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -620,10 +641,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'pressure'
     'units'                   'dbar'
     'coordinates'             'time depth latitude longitude'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -647,10 +668,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'units'                   'seconds since 1970-01-01 00:00:00 +00:00'
     'comment'                 'CTD time stamp'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -669,10 +690,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'units'                   'm'
     'comment'                 'depth derived from CTD pressure sensor'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -691,10 +712,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'sea_water_temperature'
     'units'                   'Celsius'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -717,10 +738,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'sea_water_temperature'
     'units'                   'Celsius'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -743,10 +764,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'sea_water_conductivity'
     'units'                   'S m-1'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -769,10 +790,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'sea_water_conductivity'
     'units'                   'S m-1'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -826,10 +847,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'sea_water_salinity'
     'units'                   'PSU'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -847,10 +868,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'sea_water_salinity'
     'units'                   'PSU'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -868,10 +889,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'sea_water_salinity'
     'units'                   'PSU'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -889,10 +910,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'sea_water_salinity'
     'units'                   'PSU'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -911,10 +932,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'sea_water_density'
     'units'                   'kg m-3'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -932,10 +953,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'sea_water_density'
     'units'                   'kg m-3'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -953,10 +974,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'sea_water_density'
     'units'                   'kg m-3'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -974,10 +995,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'sea_water_density'
     'units'                   'kg m-3'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -996,10 +1017,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'sea_water_potential_temperature'
     'units'                   'Celsius'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1016,10 +1037,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'sea_water_potential_density'
     'units'                   'kg m-3'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1037,10 +1058,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'blue_backscattering'
     'units'                   '1'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1057,10 +1078,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'green_backscattering'
     'units'                   '1'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1077,10 +1098,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'red_backscattering'
     'units'                   '1'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1097,10 +1118,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           '700nm_backscatter'
     'units'                   '1'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1117,10 +1138,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'backscattering'
     'units'                   '1'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1137,10 +1158,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'sea_water_turbidity'
     'units'                   'NTU'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1159,10 +1180,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'long_name'               '650 nm wavelength scattering'
     'units'                   '1'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1207,10 +1228,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'concentration_of_chlorophyll_in_sea_water'
     'units'                   'mg m-3'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1230,10 +1251,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'concentration_of_coloured_dissolved_organic_matter'
     'units'                   'ppb'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1277,10 +1298,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'temperature_of_optic_sensor_in_sea_water'
     'units'                   'Celsius'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1301,10 +1322,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'units'                   'seconds since 1970-01-01 00:00:00 +00:00'
     'comment'                 'optic sensor time stamp'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1323,10 +1344,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'mole_concentration_of_dissolved_molecular_oxygen_in_sea_water'
     'units'                   'umol l-1'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1369,10 +1390,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'fractional_saturation_of_oxygen_in_sea_water'
     'units'                   '1'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1392,10 +1413,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'frequency_output_of_sensor_for_oxygen_in_sea_water'
     'units'                   'Hz'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1416,10 +1437,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'units'                   'seconds since 1970-01-01 00:00:00 +00:00'
     'comment'                 'oxygen sensor time stamp'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1460,10 +1481,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name' 'temperature_of_sensor_for_oxygen_in_sea_water'
     'units'         'Celsius'
     'coordinates'   'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1484,10 +1505,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'downwelling_spectral_spherical_irradiance_in_sea_water'
     'units'                   'uW cm-2 nm-1'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1504,10 +1525,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'downwelling_spectral_spherical_irradiance_in_sea_water'
     'units'                   'uW cm-2 nm-1'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1524,10 +1545,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'downwelling_spectral_spherical_irradiance_in_sea_water'
     'units'                   'uW cm-2 nm-1'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1544,10 +1565,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'downwelling_spectral_spherical_irradiance_in_sea_water'
     'units'                   'uW cm-2 nm-1'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1564,10 +1585,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'eastward_water_velocity'
     'units'                   'm s-1'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1586,10 +1607,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'sea_water_sound_velocity'
     'units'                   'm s-1'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1606,10 +1627,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'northward_water_velocity'
     'units'                   'm s-1'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1628,10 +1649,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'fluorescence_excitation_270nm_emission_340nm'
     'units'                   'counts'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1650,10 +1671,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'fluorescence_excitation_255nm_emission_360nm'
     'units'                   'counts'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1672,10 +1693,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'fluorescence_monitoring_270_340nm'
     'units'                   'counts'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1694,10 +1715,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'fluorescence_monitoring_255_360nm'
     'units'                   'counts'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1716,10 +1737,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'fluorescence_excitation_260nm_emission_315nm'
     'units'                   'counts'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1738,10 +1759,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'fluorescence_excitation_270nm_emission_376nm'
     'units'                   'counts'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1760,10 +1781,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'fluorescence_monitoring_260_315nm'
     'units'                   'counts'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1782,10 +1803,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'fluorescence_monitoring_270_376nm'
     'units'                   'counts'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1804,10 +1825,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'methane_concentration'
     'units'                   'mg m-3'
     'coordinates'             'time latitude longitude depth'
-    'sensor_mount'            ''
-    'sensor_orientation'      ''
-    'sensor_name'             ''
-    'sensor_serial_number'    ''
+    'sensor_mount'            ' '
+    'sensor_orientation'      ' '
+    'sensor_name'             ' '
+    'sensor_serial_number'    ' '
     'ancillary_variable'      ''
     'accuracy'                ''
     'precision'               ''
@@ -1829,63 +1850,63 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'history_institution'
     'conventions'             'EGO reference table 4'
     'coordinates'             'n_history string2'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.history_step = {
     'long_name'               'Step in data processing'
     'standard_name'           'history_step'
     'conventions'             'EGO reference table 12'
     'coordinates'             'n_history string4'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.history_software = {
     'long_name'               'Name of software which performed action'
     'standard_name'           'history_software'
-    'conventions'             'SOCIB glider toolbox'
+    'conventions'             'Institution dependent'
     'coordinates'             'n_history string8'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.history_software_release = {
-    'long_name'               'Version release of software which performed action'
+    'long_name'               'Version/release of software which performed action'
     'standard_name'           'history_software_release'
-    'conventions'             'SOCIB glider toolbox'
+    'conventions'             'Institution dependent'
     'coordinates'             'n_history string4'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.history_reference = {
     'long_name'               'Reference of database'
     'standard_name'           'history_reference'
-    'conventions'             'SOCIB glider toolbox'
+    'conventions'             'Institution dependent'
     'coordinates'             'n_history string64'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.history_date = {
     'long_name'               'Date the history record was created'
     'standard_name'           'history_date'
     'conventions'             'YYYYMMDDHHMISS'
     'coordinates'             'n_history date_time'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.history_action = {
     'long_name'               'Action performed on data'
     'standard_name'           'history_action'
     'conventions'             'EGO reference table 7'
     'coordinates'             'n_history string64'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.history_parameter = {
     'long_name'               'Parameter action is performed on'
     'standard_name'           'history_parameter'
     'conventions'             'EGO reference table 3'
     'coordinates'             'n_history string16'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attrtype_list.ego.history_previous_value = 'single';
   var_attr_list.ego.history_previous_value  = {
-    'long_name'               'Parameter/flag previous value before action'
+    'long_name'               'Parameter or flag previous value before action'
     'standard_name'           'history_previous_value'
     'conventions'             'EGO reference table 3'
-    '_FillValue'              ''};
+    '_FillValue'              99999};
   
   var_attrtype_list.ego.history_start_time_index = 'int32';
   var_attr_list.ego.history_start_time_index = {
@@ -1906,7 +1927,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'history_qctest'
     'conventions'             'Write tests performed when ACTION=QCP$; tests failed when ACTION=QCF$'
     'coordinates'             'n_history string16'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
 
   %% Glider characteristics parameter
   var_attr_list.ego.n_param = {
@@ -1927,157 +1948,157 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'trans_system'
     'conventions'             'Write tests performed when ACTION=QCP$; tests failed when ACTION=QCF$'
     'coordinates'             'n_trans_system string16'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.trans_system_id = {
     'long_name'               'Program identifier used by the transmission system'
     'standard_name'           'trans_system_id'
     'coordinates'             'n_trans_system string32'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.trans_frequency = {
     'long_name'               'Frequency of transmission from the glider'
     'standard_name'           'trans_frequency'
     'units'                   'hertz'
     'coordinates'             'n_trans_system string16'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.positioning_system = {
     'long_name'               'Positioning system'
     'standard_name'           'positioning_system'
     'coordinates'             'n_positioning_system string8'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.platform_family = {
     'long_name'               'Category of instrument'
     'standard_name'           'platform_family'
     'conventions'             'EGO reference table 22'
     'coordinates'             'string256'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.platform_type = {
     'long_name'               'Type of glider'
     'standard_name'           'platform_type'
     'conventions'             'EGO reference table XX'
     'coordinates'             'string32'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.platform_maker = {
     'long_name'               'Name of the manufacturer'
     'standard_name'           'platform_maker'
     'coordinates'             'string256'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.firmware_version_navigation = {
     'long_name'               'Firmware version of the navigation controller board'
     'standard_name'           'firmware_version_navigation'
     'coordinates'             'string16'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.firmware_version_science = {
-    'long_name'               'Firmware version of the scientific sensor controller board'
+    'long_name'               'Firmware version of the scientific sensors controller board'
     'standard_name'           'firmware_version_science'
     'coordinates'             'string16'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.manual_version = {
     'long_name'               'Manual version of the glider'
     'standard_name'           'manual_version'
     'coordinates'             'string16'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.glider_serial_no = {
     'long_name'               'Serial number of the glider'
     'standard_name'           'glider_serial_no'
     'coordinates'             'string16'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.standard_format_id = {
-    'long_name'               'Standard format number which describes the data format type of each glider'
+    'long_name'               'Standard format number which describes the data format type for each glider'
     'standard_name'           'standard_format_id'
     'coordinates'             'string16'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.dac_format_id = {
     'long_name'               'Format number used by the DAC to describe the data format type for each glider'
     'standard_name'           'dac_format_id'
     'coordinates'             'string16'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.wmo_inst_type = {
     'long_name'               'Coded instrument type'
     'standard_name'           'wmo_inst_type'
     'conventions'             'EGO reference table 8'
     'coordinates'             'string4'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.project_name = {
     'long_name'               'Program under which the glider was deployed'
     'standard_name'           'project_name'
     'coordinates'             'string64'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.data_center = {
     'long_name'               'Data center in charge of the glider real-time processing'
     'standard_name'           'data_center'
     'conventions'             'EGO reference table 4'
     'coordinates'             'string4'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.pi_name = {
-    'long_name'               'Name of the principal investigator'
+    'long_name'               'Name of the Principal Investigator'
     'standard_name'           'pi_name'
     'coordinates'             'string64'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.anomaly = {
     'long_name'               'Describe any anomalies or problems the glider may have had'
     'standard_name'           'anomaly'
     'coordinates'             'string256'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.battery_type = {
     'long_name'               'Type of battery packs in the glider'
     'standard_name'           'battery_type'
     'coordinates'             'string64'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.battery_packs = {
     'long_name'               'Configuration of battery packs in the glider'
     'standard_name'           'battery_packs'
     'coordinates'             'string64'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.special_features = {
     'long_name'               'Extra features of the glider (algorithms, compressee etc.)'
     'standard_name'           'special_features'
     'coordinates'             'string1024'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.glider_owner = {
     'long_name'               'Glider owner'
     'standard_name'           'glider_owner'
     'coordinates'             'string64'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.operating_institution = {
     'long_name'               'Operating institution of the glider'
     'standard_name'           'operating_institution'
     'coordinates'             'string64'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.customization = {
-    'long_name'               'Glider customization, i.e. (institution and modifications)'
+    'long_name'               'Glider customization, i.e. (institutionand modifications)'
     'standard_name'           'customization'
     'coordinates'             'string1024'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.deployment_start_date = {
-    'long_name'               'Date (UTC) of deployment'
+    'long_name'               'Date (UTC) of the deployment'
     'standard_name'           'deployment_start_date'
     'conventions'             'YYYYMMDDHHMISS'
     'coordinates'             'date_time'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.deployment_start_latitude = {
     'long_name'               'Latitude of the glider when deployed'
@@ -2100,7 +2121,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'long_name'               'Quality on DEPLOYMENT_START date, time and location'
     'standard_name'           'deployment_start_date'
     'conventions'             'EGO reference table 2'
-    'flag_values'             '0,1,2,3,4,5,8,9'
+    'flag_values'             '0, 1, 2, 3, 4, 5, 8, 9'
     'flag_meanings'           'no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed interpolated_value missing_value'
     '_FillValue'              -128};
   
@@ -2108,26 +2129,26 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'long_name'               'Identifier of the deployment platform'
     'standard_name'           'deployment_platform'
     'coordinates'             'string32'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.deployment_cruise_id = {
-    'long_name'               'Identifier of the cruise used to verify the parameter measurements'
+    'long_name'               'Identifier of the cruise that deployed the glider'
     'standard_name'           'deployment_cruise_id'
     'coordinates'             'string32'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.deployment_reference_station_id = {
-    'long_name'               'Identifier of the station used to verify the parameter measurements'
+    'long_name'               'Identifier of stations used to verify the parameter measurements'
     'standard_name'           'deployment_reference_station_id'
     'coordinates'             'string256'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.deployment_end_date = {
-    'long_name'               'Date (UTC) of glider recovery'
+    'long_name'               'Date (UTC) of the glider recovery'
     'standard_name'           'deployment_end_date'
     'conventions'             'YYYYMMDDHHMISS'
     'coordinates'             'date_time'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.deployment_end_latitude = {
     'long_name'               'Latitude of the glider recovery'
@@ -2150,95 +2171,95 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'long_name'               'Quality on DEPLOYMENT_END date, time and location'
     'standard_name'           'deployment_end_qc'
     'conventions'             'EGO reference table 2'
-    'flag_values'             '0,1,2,3,4,5,8,9'
+    'flag_values'             '0, 1, 2, 3, 4, 5, 8, 9'
     'flag_meanings'           'no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed interpolated_value missing_value'
     '_FillValue'              -128};
   
   var_attr_list.ego.deployment_end_status = {
-    'long_name'               'Status of the end of the mission of the glider'
+    'long_name'               'Status of the end of mission of the glider'
     'standard_name'           'deployment_end_status'
-    'conventions'             'R:Retrieved, L:lost'
-    '_FillValue'              ''};
+    'conventions'             'R: retrieved, L: lost'
+    '_FillValue'              ' '};
   
   var_attr_list.ego.deployment_operator = {
     'long_name'               'Name of the person in charge of the glider deployment'
     'standard_name'           'deployment_operator'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.sensor = {
     'long_name'               'List of sensors on the glider'
     'standard_name'           'sensor'
     'conventions'             'EGO reference table 3'
     'coordinates'             'n_param, string64'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.sensor_maker = {
-    'long_name'               'Name of sensor manufacturer'
+    'long_name'               'Name of the sensor manufacturer'
     'standard_name'           'sensor_maker'
     'coordinates'             'n_param, string256'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.sensor_model = {
-    'long_name'               'Model of sensors'
+    'long_name'               'Model of the sensor'
     'standard_name'           'sensor_model'
     'coordinates'             'n_param, string256'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.sensor_no = {
     'long_name'               'Serial number of sensor'
     'standard_name'           'sensor_no'
     'coordinates'             'n_param, string16'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.sensor_units = {
     'long_name'               'Units of the parameter measured by the sensor'
     'standard_name'           'sensor_units'
     'coordinates'             'n_param, string16'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.sensor_accuracy = {
     'long_name'               'Accuracy of the parameter measured by the sensor'
     'standard_name'           'sensor_accuracy'
     'coordinates'             'n_param, string32'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.sensor_resolution = {
     'long_name'               'Resolution of the parameter measured by the sensor'
     'standard_name'           'sensor_resolution'
     'coordinates'             'n_param, string32'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.derivation_parameter = {
     'long_name'               'List of parameters with derivation or calibration information'
     'standard_name'           'derivation_parameter'
     'conventions'             'EGO reference table 3'
     'coordinates'             'n_derivation, string64'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.derivation_equation = {
     'long_name'               'Derivation or calibration equation for this parameter'
     'standard_name'           'derivation_equation'
     'coordinates'             'n_derivation, string256'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.derivation_coefficient = {
-    'long_name'               'Derivation or calibration coefficients for this equation'
+    'long_name'               'Derivation or calibration coeffcicients for this equation'
     'standard_name'           'derivation_coefficient'
     'coordinates'             'n_derivation, string512'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.derivation_comment = {
     'long_name'               'Comment applying to this parameter derivation or calibration'
     'standard_name'           'derivation_comment'
     'coordinates'             'n_derivation, string256'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
   
   var_attr_list.ego.derivation_date = {
     'long_name'               'Date (UTC) of derivation or calibration'
     'standard_name'           'derivation_date'
     'coordinates'             'n_derivation, date_time'
     'conventions'             'YYYYMMDDHHMISS'
-    '_FillValue'              ''};
+    '_FillValue'              ' '};
 
   %% Quality control
   var_attrtype_default = 'int8';
