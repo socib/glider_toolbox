@@ -187,6 +187,7 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     narginchk(1, 5);
     options.processing_mode = 'rt';  
     options.fconfig = '';
+    options.array_delimiter = '|';
     
     %% Parse optional arguments.
     % Get option key-value pairs in any accepted call signature.
@@ -219,7 +220,7 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     %% Read configuration file
     readconfig = struct([]);
     if ~strcmp(options.fconfig, '')
-        readconfig = readConfigFile(options.fconfig);
+        readconfig = readConfigFile(options.fconfig,'array_delimiter', options.array_delimiter);
         config.status = options.fconfig;
         disp(['Configuration file ' options.fconfig]);
     else 
@@ -245,7 +246,8 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
           if isfield(config.wrcprogs, 'array_delimiter')
             array_delimiter = config.wrcprogs.array_delimiter;
           end
-          config_wrcprogs = readConfigFile(readconfig.wrcprogs.fconfig, 'array_delimiter', array_delimiter);
+          config_read_fconfig = readConfigFile(readconfig.wrcprogs.fconfig, 'array_delimiter', array_delimiter);
+          config_wrcprogs = config_read_fconfig.wrcprogs;
         else
           config.wrcprogs.status = options.fconfig;
           config_wrcprogs = readconfig.wrcprogs;
@@ -268,7 +270,8 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
             if isfield(config.local_paths, 'array_delimiter')
               array_delimiter = config.local_paths.array_delimiter;
             end
-            config_localpaths = readConfigFile(readconfig.local_paths.fconfig, 'array_delimiter', array_delimiter);
+            config_read_fconfig = readConfigFile(readconfig.local_paths.fconfig, 'array_delimiter', array_delimiter);
+            config_localpaths = config_read_fconfig.local_paths;
         else
             config.local_paths.status = options.fconfig;
             config_localpaths = readconfig.local_paths;
@@ -290,7 +293,8 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
             if isfield(config.public_paths, 'array_delimiter')
               array_delimiter = config.public_paths.array_delimiter;
             end
-            config_publicpaths = readConfigFile(readconfig.public_paths.fconfig, 'array_delimiter', array_delimiter);
+            config_read_fconfig = readConfigFile(readconfig.public_paths.fconfig, 'array_delimiter', array_delimiter);
+            config_publicpaths = config_read_fconfig.public_paths;
         else
             config.public_paths.status = options.fconfig;
             config_publicpaths = readconfig.public_paths;
@@ -312,7 +316,8 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
           if isfield(config.db_access, 'array_delimiter')
             array_delimiter = config.db_access.array_delimiter;
           end
-          config_db_access = readConfigFile(readconfig.db_access.fconfig, 'array_delimiter', array_delimiter);
+          config_read_fconfig = readConfigFile(readconfig.db_access.fconfig, 'array_delimiter', array_delimiter);
+          config_db_access = config_read_fconfig.db_access;
         else
           config.db_access.status = options.fconfig;
           config_db_access = readconfig.db_access;
@@ -338,7 +343,9 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
           if isfield(config.dockservers, 'array_delimiter')
             array_delimiter = config.dockservers.array_delimiter;
           end
-          config_dockservers = readConfigFile(readconfig.dockservers.fconfig, 'array_delimiter', array_delimiter);
+          config_read_fconfig = readConfigFile(readconfig.dockservers.fconfig, 'array_delimiter', array_delimiter);
+          config_dockservers = config_read_fconfig.dockservers;
+          
         else
           config.dockservers.status = options.fconfig;
           config_dockservers = readconfig.dockservers;
@@ -368,7 +375,8 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
           if isfield(config.figures_processed, 'array_delimiter')
             array_delimiter = config.figures_processed.array_delimiter;
           end
-          config_figures_processed = readConfigFile(readconfig.figures_processed.fconfig, 'array_delimiter', array_delimiter);
+          config_read_fconfig = readConfigFile(readconfig.figures_processed.fconfig, 'array_delimiter', array_delimiter);
+          config_figures_processed = config_read_fconfig.figures_processed;
         else
           config.figures_processed.status = options.fconfig;
           config_figures_processed = readconfig.figures_processed;
@@ -391,7 +399,8 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
           if isfield(config.figures_gridded, 'array_delimiter')
             array_delimiter = config.figures_gridded.array_delimiter;
           end
-          config_figures_gridded = readConfigFile(readconfig.figures_gridded.fconfig, 'array_delimiter', array_delimiter);
+          config_read_fconfig = readConfigFile(readconfig.figures_gridded.fconfig, 'array_delimiter', array_delimiter);
+          config_figures_gridded = config_read_fconfig.config_figures_gridded;
         else
           config.figures_gridded.status = options.fconfig;
           config_figures_gridded = readconfig.figures_gridded;
@@ -462,7 +471,8 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
           if isfield(config.file_options_slocum, 'array_delimiter')
             array_delimiter = config.file_options_slocum.array_delimiter;
           end
-          config_file_options_slocum = readConfigFile(readconfig.file_options_slocum.fconfig, 'array_delimiter', array_delimiter);
+          config_read_fconfig = readConfigFile(readconfig.file_options_slocum.fconfig, 'array_delimiter', array_delimiter);
+          config_file_options_slocum = config_read_fconfig.file_options_slocum;
         else
           config.file_options_slocum.status = options.fconfig;
           config_file_options_slocum = readconfig.file_options_slocum;
