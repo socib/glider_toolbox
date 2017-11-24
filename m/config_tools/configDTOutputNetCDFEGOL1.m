@@ -132,7 +132,7 @@ function ncl1_info = configDTOutputNetCDFEGOL1()
                 'platform_family', 'platform_type', 'platform_maker', ...
                 'firmware_version_navigation', 'firmware_version_science', 'manual_version', ...
                 'glider_serial_no', 'standard_format_id', 'dac_format_id', 'wmo_inst_type', ...
-                'project_name', 'data_center', 'pi_name', 'anomaly', ...
+                'project_name', 'data_centre', 'pi_name', 'anomaly', ...
                 'battery_type', 'battery_packs', 'special_features', ...
                 'glider_owner', 'operating_institution', 'customization', ...
                 'deployment_start_date', 'deployment_start_latitude', 'deployment_start_longitude', ...
@@ -140,7 +140,7 @@ function ncl1_info = configDTOutputNetCDFEGOL1()
                 'deployment_cruise_id', 'deployment_reference_station_id', ...
                 'deployment_end_date', 'deployment_end_latitude', 'deployment_end_longitude', ...
                 'deployment_end_qc', 'deployment_end_status', 'deployment_operator', ...
-                'sensor', 'sensor_maker', 'sensor_model', 'sensor_no', ...
+                'sensor', 'sensor_maker', 'sensor_model', 'sensor_serial_no', ...
                 'sensor_units', 'sensor_accuracy', 'sensor_resolution', ...
                 'derivation_parameter', 'derivation_equation', 'derivation_coefficient', ...
                 'derivation_comment', 'derivation_date'}}, ...
@@ -268,8 +268,10 @@ function ncl1_info = configDTOutputNetCDFEGOL1()
   % GPS variables are a special case. We could generalize this but it is a
   % simple way to make it work for now
   ncl1_info.variables.time_gps.dimensions = {time_gps_dimension.name};
+  ncl1_info.variables.time_gps_qc.dimensions = {time_gps_dimension.name};
   ncl1_info.variables.latitude_gps.dimensions = {time_gps_dimension.name};
   ncl1_info.variables.longitude_gps.dimensions = {time_gps_dimension.name};
+  ncl1_info.variables.position_gps_qc.dimensions = {time_gps_dimension.name};
   
   %% Set history dimensions 
   ncl1_info.variables.history_institution.dimensions = {n_history_dimension.name, string2_dimension.name};
@@ -304,7 +306,7 @@ function ncl1_info = configDTOutputNetCDFEGOL1()
   ncl1_info.variables.dac_format_id.dimensions = {string16_dimension.name};
   ncl1_info.variables.wmo_inst_type.dimensions = {string4_dimension.name};
   ncl1_info.variables.project_name.dimensions = {string64_dimension.name};
-  ncl1_info.variables.data_center.dimensions = {string2_dimension.name};
+  ncl1_info.variables.data_centre.dimensions = {string2_dimension.name};
   ncl1_info.variables.pi_name.dimensions = {string64_dimension.name};
   ncl1_info.variables.anomaly.dimensions = {string256_dimension.name};
   ncl1_info.variables.battery_type.dimensions = {string64_dimension.name};
@@ -323,7 +325,7 @@ function ncl1_info = configDTOutputNetCDFEGOL1()
   ncl1_info.variables.sensor.dimensions = {n_param_dimension.name, string64_dimension.name};
   ncl1_info.variables.sensor_maker.dimensions = {n_param_dimension.name, string256_dimension.name};
   ncl1_info.variables.sensor_model.dimensions = {n_param_dimension.name, string256_dimension.name};
-  ncl1_info.variables.sensor_no.dimensions = {n_param_dimension.name, string16_dimension.name};
+  ncl1_info.variables.sensor_serial_no.dimensions = {n_param_dimension.name, string16_dimension.name};
   ncl1_info.variables.sensor_units.dimensions = {n_param_dimension.name, string16_dimension.name};
   ncl1_info.variables.sensor_accuracy.dimensions = {n_param_dimension.name, string32_dimension.name};
   ncl1_info.variables.sensor_resolution.dimensions = {n_param_dimension.name, string32_dimension.name};
@@ -354,14 +356,17 @@ function ncl1_info = configDTOutputNetCDFEGOL1()
   var_list = fieldnames(ncl1_info.variables);
   for idx_var = 1:numel(var_list)
      var_name = var_list(idx_var);
-     attr_list = ncl1_info.variables.(var_name{1}).attributes;
-     for idx_attr = 1:numel(attr_list)
-         if  strcmp(attr_list(idx_attr).name, 'coordinates')
-           ncl1_info.variables.(var_name{1}).attributes(idx_attr).value = upper(attr_list(idx_attr).value);
-        end
-         if  strcmp(attr_list(idx_attr).name, 'DM_indicator')
-           ncl1_info.variables.(var_name{1}).attributes(idx_attr).value = 'R';
-        end
+     if isfield(ncl1_info.variables, var_name{1}) && ...
+             isfield(ncl1_info.variables.(var_name{1}), 'attributes')
+         attr_list = ncl1_info.variables.(var_name{1}).attributes;
+         for idx_attr = 1:numel(attr_list)
+             if  strcmp(attr_list(idx_attr).name, 'coordinates')
+               ncl1_info.variables.(var_name{1}).attributes(idx_attr).value = upper(attr_list(idx_attr).value);
+            end
+             if  strcmp(attr_list(idx_attr).name, 'DM_indicator')
+               ncl1_info.variables.(var_name{1}).attributes(idx_attr).value = 'R';
+            end
+         end
      end
   end
   
