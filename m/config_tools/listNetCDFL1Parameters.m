@@ -2038,9 +2038,9 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'coordinates'             'string64'
     '_FillValue'              ' '};
   
-  var_attr_list.ego.data_center = {
-    'long_name'               'Data center in charge of the glider real-time processing'
-    'standard_name'           'data_center'
+  var_attr_list.ego.data_centre = {
+    'long_name'               'Data centre in charge of glider real-time processing'
+    'standard_name'           'data_centre'
     'conventions'             'EGO reference table 4'
     'coordinates'             'string4'
     '_FillValue'              ' '};
@@ -2205,9 +2205,9 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'coordinates'             'n_param, string256'
     '_FillValue'              ' '};
   
-  var_attr_list.ego.sensor_no = {
-    'long_name'               'Serial number of sensor'
-    'standard_name'           'sensor_no'
+  var_attr_list.ego.sensor_serial_no = {
+    'long_name'               'Serial number of the sensor'
+    'standard_name'           'sensor_serial_no'
     'coordinates'             'n_param, string16'
     '_FillValue'              ' '};
   

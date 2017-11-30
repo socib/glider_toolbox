@@ -62,11 +62,27 @@ function [ data_qc, meta_qc ] = postProcessQCGliderData( data_proc, meta_proc, v
         %TODO: Complete ancillary_variable ??
     end
 
+    %% Time GPS Quality control
+    if isfield(data_qc, 'time_gps')
+        meta_qc.time_gps_qc.sources = 'time_gps'; 
+        meta_qc.time_gps_qc.method = 'default0';
+        data_qc.time_gps_qc = zeros(size(data_qc.time_gps));
+        %TODO: Complete ancillary_variable ??
+    end
+
     %% Geospatial Quality control
     if isfield(data_qc, 'latitude') && isfield(data_qc, 'longitude')
         meta_qc.position_qc.sources = 'latitude longitude'; 
         meta_qc.position_qc.method = 'default0';
-        data_qc.position_qc = zeros(size(data_qc.latitude));
+        data_qc.position_qc = zeros(size(data_qc.latitude_gps));
+        %TODO: Complete ancillary_variable ??
+    end
+
+    %% Geospatial GPS Quality control
+    if isfield(data_qc, 'latitude_gps') && isfield(data_qc, 'longitude_gps')
+        meta_qc.position_gps_qc.sources = 'latitude_gps longitude_gps'; 
+        meta_qc.position_gps_qc.method = 'default0';
+        data_qc.position_gps_qc = zeros(size(data_qc.latitude_gps));
         %TODO: Complete ancillary_variable ??
     end
     

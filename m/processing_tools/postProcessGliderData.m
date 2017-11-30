@@ -339,12 +339,12 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
         data_conv.project_name     = 'N/A';    % TODO: verify value
     end
     
-    meta_conv.data_center.sources = 'postProcessGliderData';
-    meta_conv.data_center.method  = 'postProcessGliderData';
+    meta_conv.data_centre.sources = 'postProcessGliderData';
+    meta_conv.data_centre.method  = 'postProcessGliderData';
     if isfield(options.deployment, 'data_center')
-        data_conv.data_center      = options.deployment.data_center(1:2);
+        data_conv.data_centre      = options.deployment.data_center(1:2);
     else
-        data_conv.data_center      = 'SO';
+        data_conv.data_centre      = 'SO';
     end
 
     meta_conv.pi_name.sources = 'postProcessGliderData';
@@ -484,9 +484,9 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
     meta_conv.sensor_model.method  = 'postProcessGliderData';
     data_conv.sensor_model         = 'N/A';    % TODO: verify value
 
-    meta_conv.sensor_no.sources = 'postProcessGliderData';
-    meta_conv.sensor_no.method  = 'postProcessGliderData';
-    data_conv.sensor_no         = 'N/A';    % TODO: verify value
+    meta_conv.sensor_serial_no.sources = 'postProcessGliderData';
+    meta_conv.sensor_serial_no.method  = 'postProcessGliderData';
+    data_conv.sensor_serial_no         = 'N/A';    % TODO: verify value
 
     meta_conv.sensor_units.sources = 'postProcessGliderData';
     meta_conv.sensor_units.method  = 'postProcessGliderData';
