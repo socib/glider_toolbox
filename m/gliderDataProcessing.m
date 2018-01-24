@@ -99,8 +99,7 @@ function [] = gliderDataProcessing(varargin)
     
     options.glider_toolbox_dir = '';
     options.processing_mode = 'rt';  
-    %TODO: Remove the default path and set it to empty. I am using this for testing
-    options.config            = '/home/mcharcos/gtb_versions/glider_toolbox_scbd077_db01_ego/config/configMain.txt';
+    options.config            = '';
     options.deployment_list    = [];
     options.public_netcdfs_exceptions  = [];
     options.public_figures_exceptions  = [];
