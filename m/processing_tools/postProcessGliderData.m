@@ -65,15 +65,16 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
     
     options.time = {'time'};
     options.param_convert = ...
-        struct('cndc',                           'conductivity', ...
-               'psal',                           'salinity', ...
-               'temp',                           'temperature', ...
-               'pres',                           'pressure', ...
-               'molar_doxy',                     'oxygen_concentration', ...
-               'oxygen_saturation',              'sci_oxy3835_saturation', ...
-               'temp_doxy',                      'temperature_oxygen', ...
-               'chla',                           'chlorophyll', ...
-               'temp_spectrophotometer_nitrate', 'temperature_optics');
+        struct('oxygen_saturation',              'sci_oxy3835_saturation');
+%         struct('cndc',                           'conductivity', ...
+%                'psal',                           'salinity', ...
+%                'temp',                           'temperature', ...
+%                'pres',                           'pressure', ...
+%                'molar_doxy',                     'oxygen_concentration', ...
+%                'oxygen_saturation',              'sci_oxy3835_saturation', ...
+%                'temp_doxy',                      'temperature_oxygen', ...
+%                'chla',                           'chlorophyll', ...
+%                'temp_spectrophotometer_nitrate', 'temperature_optics');
     options.deployment = struct();
     
     %% Get options from extra arguments.
@@ -276,12 +277,19 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
 
     meta_conv.platform_type.sources = 'postProcessGliderData';
     meta_conv.platform_type.method  = 'postProcessGliderData';
+    if isfield(options.deployment, 'platform_type')
+        data_conv.platform_type         = options.deployment.platform_type; 
+    elseif isfield(options.deployment, 'glider_model')
+        data_conv.platform_type         = options.deployment.glider_model; 
+    else
+        data_conv.platform_type         = 'N/A';         
+    end
+    
     meta_conv.platform_maker.sources = 'postProcessGliderData';
     meta_conv.platform_maker.method  = 'postProcessGliderData';
-    data_conv.platform_maker         = 'N/A';
-    if isfield(options.deployment, 'glider_model')
-        data_conv.platform_type         = options.deployment.glider_model; 
-        
+    if isfield(options.deployment, 'platform_maker')
+        data_conv.platform_maker         = options.deployment.platform_maker; 
+    elseif isfield(options.deployment, 'glider_model')
         if ~isempty(regexpi(options.deployment.glider_model, '.*slocum.*g1.*', 'match', 'once'))
         	data_conv.platform_maker         = 'Webb Research Corporation';
         elseif ~isempty(regexpi(options.deployment.glider_model, '.*slocum.*g2.*', 'match', 'once'))
@@ -292,7 +300,7 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
         	data_conv.platform_maker         = 'Alseamar';
         end
     else
-        data_conv.platform_type         = 'N/A';         % TODO: verify value
+        data_conv.platform_maker         = 'N/A';
     end
     
     meta_conv.firmware_version_navigation.sources = 'postProcessGliderData';
@@ -373,12 +381,20 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
 
     meta_conv.glider_owner.sources = 'postProcessGliderData';
     meta_conv.glider_owner.method  = 'postProcessGliderData';
-    data_conv.glider_owner         = 'SOCIB';    % TODO: verify value
-
+    if isfield(options.deployment, 'glider_owner')
+        data_conv.glider_owner         = options.deployment.glider_owner;
+    else
+        data_conv.glider_owner         = 'N/A';    
+    end
+    
     meta_conv.operating_institution.sources = 'postProcessGliderData';
     meta_conv.operating_institution.method  = 'postProcessGliderData';
-    data_conv.operating_institution         = 'SOCIB';    % TODO: verify value
-
+    if isfield(options.deployment, 'operating_institution')
+        data_conv.operating_institution  = options.deployment.operating_institution;
+    else
+        data_conv.operating_institution  = 'N/A';    
+    end
+    
     meta_conv.customization.sources = 'postProcessGliderData';
     meta_conv.customization.method  = 'postProcessGliderData';
     data_conv.customization         = 'None';    % TODO: verify value

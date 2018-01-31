@@ -45,7 +45,7 @@ function [] = gliderDataProcessing(varargin)
 %        information of the deployments to be processed. By default the list
 %        is built using the database when defined. However, the database
 %        query is skipped when the deployment list is input. The structure of
-%        the deployment list must contai: deployment_id, deployment_name,
+%        the deployment list must contain: deployment_id, deployment_name,
 %        deployment_start, deployment_end, glider_name, glider_serial and
 %        glider_model
 %      PROCESSING_MODE: Defines the processing mode, either real time (rt or RT)
@@ -100,7 +100,7 @@ function [] = gliderDataProcessing(varargin)
     options.glider_toolbox_dir = '';
     options.processing_mode = 'rt';  
     %TODO: Remove the default path and set it to empty. I am using this for testing
-    options.config            = '/home/mcharcos/gtb_versions/glider_toolbox_scbd077_db01_ego/config/configMain.txt';
+    options.config            = '';
     options.deployment_list    = [];
     options.public_netcdfs_exceptions  = [];
     options.public_figures_exceptions  = [];
