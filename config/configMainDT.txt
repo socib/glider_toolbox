@@ -20,23 +20,42 @@
 
 ########################
 # Paths to local and public data
-    
-    local_paths.base_dir = /path/to/local/folders
-    
-    public_paths.base_dir          = /path/to/public/folders
-    public_paths.base_url          = http://your.public.url/path/to/data
-    public_paths.base_html_dir     = /your/public/url/path/to/data
+#   By default data will be processed locally in glider_data folder
+#   If you would like to change the path for the output products you should
+#   define the following variable:
+#
+#        local_paths.base_dir = /path/to/local/folders
+#
+#   The glider toolbox also provides functionality to copy data to a public area
+#   By definining the following variables you define the filesystem path where
+#   the netcdf are copied, where the figures are copied and the url that will
+#   be input in the json refering to the figures. This is mainly used in the infrastructure
+#   of SOCIB and is a very specific need that is likely not necessary by the general user.
+#
+#        public_paths.base_dir          = /path/to/public/folders
+#        public_paths.base_url          = http://your.public.url/path/to/data
+#        public_paths.base_html_dir     = /your/public/url/path/to/data
+
 
 #########################
 # Database
+#   By default the glider toolbox does not use a database. In other words, the active parameter
+#   is turned off. Refer to the Quickstart manual for details. If you would like to use it
+#   you can define the necessary values for the db_access configuration as follow:
+#
+#        db_access.active    = 1
+#        db_access.server    = jdbc:postgresql://mydb.myportal.mydomain:5433/my_data_base
+#        db_access.name      = my_data_base
+#        db_access.user      = db_user
+#        db_access.pass      = top_secret
+#        db_access.driver    = org.postgresql.Driver
+#
+#   We recommend that you use a referenced file to define private variables since this configuration
+#   file is copied with the data to allow tracking the configuration for specific products.
+#   You can create a file with the above values and add the following line to this file
+#
+#        db_access.fconfig   = /path/to/private/file
 
-    db_access.active    = 0
-    db_access.server    = jdbc:postgresql://mydb.myportal.mydomain:5433/my_data_base
-    db_access.name      = my_data_base
-    db_access.user      = db_user
-    db_access.pass      = top_secret
-    db_access.driver    = org.postgresql.Driver
-    db_access.deployment_ids = id1|id2|id3...
 
 #########################
 # Slocum file options
