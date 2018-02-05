@@ -364,7 +364,7 @@ function ncl1_info = configDTOutputNetCDFEGOL1()
                ncl1_info.variables.(var_name{1}).attributes(idx_attr).value = upper(attr_list(idx_attr).value);
             end
              if  strcmp(attr_list(idx_attr).name, 'DM_indicator')
-               ncl1_info.variables.(var_name{1}).attributes(idx_attr).value = 'R';
+               ncl1_info.variables.(var_name{1}).attributes(idx_attr).value = 'D';
             end
          end
      end

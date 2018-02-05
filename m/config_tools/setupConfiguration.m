@@ -242,12 +242,8 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     if ~isempty(readconfig) && isfield(readconfig, 'wrcprogs')
         % Read values from configuration file and overwrite default values
         % with the one found in the file
+        config.wrcprogs = readconfig.wrcprogs;
         config.wrcprogs.status = options.fconfig;
-        config_wrcprogs = readconfig.wrcprogs;
-        fields = fieldnames(config_wrcprogs);
-        for i = 1:numel(fields)
-            config.wrcprogs.(fields{i}) = config_wrcprogs.(fields{i});
-        end
         
         % When another configuration file is referred, it is read and
         % values are overwritten with the one in the referred file
@@ -258,11 +254,11 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
           end
           config_read_fconfig = readConfigFile(readconfig.wrcprogs.fconfig, 'array_delimiter', array_delimiter);
           config_wrcprogs = config_read_fconfig.wrcprogs;
-        end
         
-        fields = fieldnames(config_wrcprogs);
-        for i = 1:numel(fields)
-            config.wrcprogs.(fields{i}) = config_wrcprogs.(fields{i});
+          fields = fieldnames(config_wrcprogs);
+          for i = 1:numel(fields)
+              config.wrcprogs.(fields{i}) = config_wrcprogs.(fields{i});
+          end
         end
     end
   
@@ -274,12 +270,8 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     if ~isempty(readconfig) && isfield(readconfig, 'local_paths')
         % Read values from configuration file and overwrite default values
         % with the one found in the file
+        config.local_paths = readconfig.local_paths;
         config.local_paths.status = options.fconfig;
-        config_localpaths = readconfig.local_paths;
-        fields = fieldnames(config_localpaths);
-        for i = 1:numel(fields)
-            config.local_paths.(fields{i}) = config_localpaths.(fields{i});
-        end
         
         % When another configuration file is referred, it is read and
         % values are overwritten with the one in the referred file
@@ -290,9 +282,9 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
             end
             config_read_fconfig = readConfigFile(readconfig.local_paths.fconfig, 'array_delimiter', array_delimiter);
             config_localpaths = config_read_fconfig.local_paths;
-        end
-        for i = 1:numel(fields)
-            config.local_paths.(fields{i}) = config_localpaths.(fields{i});
+            for i = 1:numel(fields)
+                config.local_paths.(fields{i}) = config_localpaths.(fields{i});
+            end
         end
     end
      
@@ -303,12 +295,8 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     if ~isempty(readconfig) && isfield(readconfig, 'public_paths')
         % Read values from configuration file and overwrite default values
         % with the one found in the file
+        config.public_paths = readconfig.public_paths;
         config.public_paths.status = options.fconfig;
-        config_publicpaths = readconfig.public_paths;
-        fields = fieldnames(config_publicpaths);
-        for i = 1:numel(fields)
-            config.public_paths.(fields{i}) = config_publicpaths.(fields{i});
-        end
         
         % When another configuration file is referred, it is read and
         % values are overwritten with the one in the referred file
@@ -319,11 +307,11 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
             end
             config_read_fconfig = readConfigFile(readconfig.public_paths.fconfig, 'array_delimiter', array_delimiter);
             config_publicpaths = config_read_fconfig.public_paths;
-        end
-        
-        fields = fieldnames(config_publicpaths);
-        for i = 1:numel(fields)
-            config.public_paths.(fields{i}) = config_publicpaths.(fields{i});
+
+            fields = fieldnames(config_publicpaths);
+            for i = 1:numel(fields)
+                config.public_paths.(fields{i}) = config_publicpaths.(fields{i});
+            end
         end
     end
   
@@ -348,19 +336,19 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
         % When another configuration file is referred, it is read and
         % values are overwritten with the one in the referred file
         if isfield(readconfig.db_access, 'fconfig') 
-          array_delimiter = '';
-          if isfield(config.db_access, 'array_delimiter')
-            array_delimiter = config.db_access.array_delimiter;
-          end
-          config_read_fconfig = readConfigFile(readconfig.db_access.fconfig, 'array_delimiter', array_delimiter);
-          config_db_access = config_read_fconfig.db_access;
-        end
-        fields = fieldnames(config_db_access);
-        for i = 1:numel(fields)
-            if strcmp(fields{i},'active') == 0
-                config.db_access.(fields{i}) = config_db_access.(fields{i});
-            else
-                config.db_access.(fields{i}) = strcmp(config_db_access.(fields{i}),'1') + strcmp(config_db_access.(fields{i}),'true');
+            array_delimiter = '';
+            if isfield(config.db_access, 'array_delimiter')
+                array_delimiter = config.db_access.array_delimiter;
+            end
+            config_read_fconfig = readConfigFile(readconfig.db_access.fconfig, 'array_delimiter', array_delimiter);
+            config_db_access = config_read_fconfig.db_access;
+            fields = fieldnames(config_db_access);
+            for i = 1:numel(fields)
+                if strcmp(fields{i},'active') == 0
+                    config.db_access.(fields{i}) = config_db_access.(fields{i});
+                else
+                    config.db_access.(fields{i}) = strcmp(config_db_access.(fields{i}),'1') + strcmp(config_db_access.(fields{i}),'true');
+                end
             end
         end
     end
@@ -386,19 +374,19 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
         % When another configuration file is referred, it is read and
         % values are overwritten with the one in the referred file
         if isfield(readconfig.dockservers, 'fconfig') 
-          array_delimiter = '';
-          if isfield(config.dockservers, 'array_delimiter')
-            array_delimiter = config.dockservers.array_delimiter;
-          end
-          config_read_fconfig = readConfigFile(readconfig.dockservers.fconfig, 'array_delimiter', array_delimiter);
-          config_dockservers = config_read_fconfig.dockservers;
-        end
-        fields = fieldnames(config_dockservers);
-        for i = 1:numel(fields)
-            if strcmp(fields{i},'active') == 0
-                config.dockservers.(fields{i}) = config_dockservers.(fields{i});
-            else
-                config.dockservers.(fields{i}) = strcmp(config_dockservers.(fields{i}),'1') + strcmp(config_dockservers.(fields{i}),'true');
+            array_delimiter = '';
+            if isfield(config.dockservers, 'array_delimiter')
+                array_delimiter = config.dockservers.array_delimiter;
+            end
+            config_read_fconfig = readConfigFile(readconfig.dockservers.fconfig, 'array_delimiter', array_delimiter);
+            config_dockservers = config_read_fconfig.dockservers;
+            fields = fieldnames(config_dockservers);
+            for i = 1:numel(fields)
+                if strcmp(fields{i},'active') == 0
+                    config.dockservers.(fields{i}) = config_dockservers.(fields{i});
+                else
+                    config.dockservers.(fields{i}) = strcmp(config_dockservers.(fields{i}),'1') + strcmp(config_dockservers.(fields{i}),'true');
+                end
             end
         end
     end
@@ -434,15 +422,15 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
           end
           config_read_fconfig = readConfigFile(readconfig.figures_processed.fconfig, 'array_delimiter', array_delimiter);
           config_figures_processed = config_read_fconfig.figures_processed;
-        end
         
-        fields = fieldnames(config_figures_processed);
-        for i = 1:numel(fields)
+          fields = fieldnames(config_figures_processed);
+          for i = 1:numel(fields)
             if strcmp(fields{i},'active') == 0
                 config.figures_processed.(fields{i}) = config_figures_processed.(fields{i});
             else
                 config.figures_processed.(fields{i}) = strcmp(config_figures_processed.(fields{i}),'1') + strcmp(config_figures_processed.(fields{i}),'true');
             end
+          end
         end
     end
     
@@ -470,14 +458,15 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
           end
           config_read_fconfig = readConfigFile(readconfig.figures_gridded.fconfig, 'array_delimiter', array_delimiter);
           config_figures_gridded = config_read_fconfig.config_figures_gridded;
-        end
-        fields = fieldnames(config_figures_gridded);
-        for i = 1:numel(fields)
-            if strcmp(fields{i},'active') == 0
-                config.figures_gridded.(fields{i}) = config_figures_gridded.(fields{i});
-            else
-                config.figures_gridded.(fields{i}) = strcmp(config_figures_gridded.(fields{i}),'1') + strcmp(config_figures_gridded.(fields{i}),'true');
-            end
+          
+          fields = fieldnames(config_figures_gridded);
+          for i = 1:numel(fields)
+              if strcmp(fields{i},'active') == 0
+                  config.figures_gridded.(fields{i}) = config_figures_gridded.(fields{i});
+              else
+                  config.figures_gridded.(fields{i}) = strcmp(config_figures_gridded.(fields{i}),'1') + strcmp(config_figures_gridded.(fields{i}),'true');
+              end
+          end
         end
     end
 
@@ -551,26 +540,27 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
         % values are overwritten with the one in the referred file
         % add2dba_sensors is overwritten the previous array
         if isfield(readconfig.file_options_slocum, 'fconfig') 
-          array_delimiter = '';
-          if isfield(config.file_options_slocum, 'array_delimiter')
-            array_delimiter = config.file_options_slocum.array_delimiter;
-          end
-          config_read_fconfig = readConfigFile(readconfig.file_options_slocum.fconfig, 'array_delimiter', array_delimiter);
-          config_file_options_slocum = config_read_fconfig.file_options_slocum;
-        end
-        fields = fieldnames(config_file_options_slocum);
-        add2dba_sensors = {};
-        for i = 1:numel(fields)
-            if strcmp(fields{i},'format_conversion') == 1
-                config.file_options_slocum.(fields{i}) = strcmp(config_file_options_slocum.(fields{i}),'1') + strcmp(config_file_options_slocum.(fields{i}),'true');
-            elseif strcmp(fields{i},'add2dba_sensors') == 0
-                config.file_options_slocum.(fields{i}) = config_file_options_slocum.(fields{i});
-            else 
-                add2dba_sensors = [add2dba_sensors, config_file_options_slocum.(fields{i})];
+            array_delimiter = '';
+            if isfield(config.file_options_slocum, 'array_delimiter')
+              array_delimiter = config.file_options_slocum.array_delimiter;
             end
-        end
-        if ~isempty(add2dba_sensors)
-            config.file_options_slocum.dba_sensors = union(config.file_options_slocum.dba_sensors, add2dba_sensors);
+            config_read_fconfig = readConfigFile(readconfig.file_options_slocum.fconfig, 'array_delimiter', array_delimiter);
+            config_file_options_slocum = config_read_fconfig.file_options_slocum;
+          
+            fields = fieldnames(config_file_options_slocum);
+            add2dba_sensors = {};
+            for i = 1:numel(fields)
+                if strcmp(fields{i},'format_conversion') == 1
+                    config.file_options_slocum.(fields{i}) = strcmp(config_file_options_slocum.(fields{i}),'1') + strcmp(config_file_options_slocum.(fields{i}),'true');
+                elseif strcmp(fields{i},'add2dba_sensors') == 0
+                    config.file_options_slocum.(fields{i}) = config_file_options_slocum.(fields{i});
+                else 
+                    add2dba_sensors = [add2dba_sensors, config_file_options_slocum.(fields{i})];
+                end
+            end
+            if ~isempty(add2dba_sensors)
+                config.file_options_slocum.dba_sensors = union(config.file_options_slocum.dba_sensors, add2dba_sensors);
+            end
         end
     end
     
