@@ -242,8 +242,12 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     if ~isempty(readconfig) && isfield(readconfig, 'wrcprogs')
         % Read values from configuration file and overwrite default values
         % with the one found in the file
-        config.wrcprogs = readconfig.wrcprogs;
         config.wrcprogs.status = options.fconfig;
+        config_wrcprogs = readconfig.wrcprogs;
+        fields = fieldnames(config_wrcprogs);
+        for i = 1:numel(fields)
+            config.wrcprogs.(fields{i}) = config_wrcprogs.(fields{i});
+        end
         
         % When another configuration file is referred, it is read and
         % values are overwritten with the one in the referred file
@@ -270,8 +274,12 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     if ~isempty(readconfig) && isfield(readconfig, 'local_paths')
         % Read values from configuration file and overwrite default values
         % with the one found in the file
-        config.local_paths = readconfig.local_paths;
         config.local_paths.status = options.fconfig;
+        config_local_paths = readconfig.local_paths;
+        fields = fieldnames(config_local_paths);
+        for i = 1:numel(fields)
+            config.local_paths.(fields{i}) = config_local_paths.(fields{i});
+        end
         
         % When another configuration file is referred, it is read and
         % values are overwritten with the one in the referred file
@@ -295,8 +303,12 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     if ~isempty(readconfig) && isfield(readconfig, 'public_paths')
         % Read values from configuration file and overwrite default values
         % with the one found in the file
-        config.public_paths = readconfig.public_paths;
         config.public_paths.status = options.fconfig;
+        config_public_paths = readconfig.public_paths;
+        fields = fieldnames(config_public_paths);
+        for i = 1:numel(fields)
+            config.public_paths.(fields{i}) = config_public_paths.(fields{i});
+        end
         
         % When another configuration file is referred, it is read and
         % values are overwritten with the one in the referred file
@@ -314,7 +326,7 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
             end
         end
     end
-  
+
     %% Configure data base deployment information source.
     config.db_access = configDBAccess();
     config.db_access.status = 'configDBAccess';
