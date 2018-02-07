@@ -239,7 +239,9 @@ function [] = gliderDataProcessing(varargin)
       data_paths = createFStruct(config.local_paths, deployment);
       
       %% Start deployment processing logging.
-      startLogging(fullfile(data_paths.base_dir,data_paths.processing_log), options.glider_toolbox_ver, deployment);
+      if ~isempty(data_paths.processing_log)
+        startLogging(fullfile(data_paths.base_dir,data_paths.processing_log), options.glider_toolbox_ver, deployment);
+      end
       
       %% Copy configuration file to data folder
       if ~isempty(options.config) && ischar(options.config)
@@ -311,7 +313,9 @@ function [] = gliderDataProcessing(varargin)
       %% Stop deployment processing logging.
       disp(['Deployment processing end time: ' ...
             datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00:00')]);
-      diary('off');
+      if ~isempty(data_paths.processing_log)
+          diary('off');
+      end
     end
     
 end
