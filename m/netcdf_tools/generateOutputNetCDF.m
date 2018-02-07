@@ -55,6 +55,9 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
 %    options given in key-value pairs OPT1, VAL1... or in a struct OPTIONS 
 %    with field names as option keys and field values as option values, 
 %    to control the generation of coverage metadata:
+%      NETCDF_FORMAT: Indicates if there is a special format to produce.
+%        Currently the options are either EGO standard or other which
+%        indicates the use of SOCIB netCDF standard. 
 %      MODIFIED: modification time stamp.
 %        String with the timestamp for the 'date_modified' attribute.
 %        Default value: 
@@ -158,9 +161,16 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(6, 26, nargin, 'struct'));
+  narginchk(6, 28);
   
+  %% Define type list and available types
+  available_type = {'double', 'single', ...
+                    'int8', 'uint8', 'int16', 'uint16', ...
+                    'int32', 'uint32', 'int64', 'uint64', ...
+                    'char', 'string', 'logical'};
+                
   %% Set options and default values.
+  options.netcdf_format = '';   % in an attempt to generalize this function
   options.modified = ...
     datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00:00');
   options.time = 'time';
@@ -190,6 +200,7 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
     error('glider_toolbox:generateOutputNetCDF:InvalidOptions', ...
           'Invalid optional arguments (neither key-value pairs nor struct).');
   end
+  
   % Overwrite default options with values given in extra arguments.
   for opt_idx = 1:numel(opt_key_list)
     opt = lower(opt_key_list{opt_idx});
@@ -206,7 +217,12 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
   %% Get dynamic global attribute values.
   dyn_atts = struct();
   % Modification date:
-  dyn_atts.date_modified = options.modified;
+  switch (options.netcdf_format)
+    case 'EGO'
+      dyn_atts.date_update   = options.modified;
+    otherwise
+      dyn_atts.date_modified = options.modified;
+  end
   % Time coverage:
   time_field_list = cellstr(options.time);
   time_field_present = ...
@@ -292,10 +308,18 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
       longitude_units = 'degree_east';
       latitude_units = 'degree_north';
     end
-    dyn_atts.geospatial_lon_min = min(longitude_data);
-    dyn_atts.geospatial_lon_max = max(longitude_data);
-    dyn_atts.geospatial_lat_min = min(latitude_data);
-    dyn_atts.geospatial_lat_max = max(latitude_data);
+    switch (options.netcdf_format)
+        case 'EGO' % TODO: add to convert2NetCDFEGO
+            dyn_atts.geospatial_lon_min = num2str(min(longitude_data));
+            dyn_atts.geospatial_lon_max = num2str(max(longitude_data));
+            dyn_atts.geospatial_lat_min = num2str(min(latitude_data));
+            dyn_atts.geospatial_lat_max = num2str(max(latitude_data));    
+        otherwise
+            dyn_atts.geospatial_lon_min = min(longitude_data);
+            dyn_atts.geospatial_lon_max = max(longitude_data);
+            dyn_atts.geospatial_lat_min = min(latitude_data);
+            dyn_atts.geospatial_lat_max = max(latitude_data);    
+    end
     if longitude_units
       dyn_atts.geospatial_lon_units = longitude_units;
     end
@@ -434,9 +458,27 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
       if iscellstr(data.(data_field))
         variable_data.(data_field) = strc(data.(data_field));
       else
-        variable_data.(data_field) = data.(data_field);
+        if isfield(vars.(data_field), 'type') &&  any(strcmp(available_type,vars.(data_field).type))
+          eval(['variable_data.(data_field) = ' vars.(data_field).type '(data.(data_field));' ]);
+        else
+          variable_data.(data_field) = data.(data_field);
+        end
       end
     end
+  end
+  
+  %% Convert variable data and metadata for requested format (Uppercase)
+  switch (options.netcdf_format)
+    case 'EGO'
+        try
+            [ variable_data, variable_meta ] = convert2NetCDFEGO( variable_data, variable_meta );
+        catch exception
+            error('glider_toolbox:generateOutputNetCDF:NetCDFConversionError', ...
+                  'Problem with EGO conversion: %s.', getReport(exception, 'extended')); 
+        end
+        disp('.... done converting attribute names for EGO format');
+    otherwise
+      ;
   end
   
   

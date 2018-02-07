@@ -93,8 +93,7 @@ function data = getDeploymentInfoDB(query, dbname, varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(2, 16, nargin, 'struct'));
-
+  narginchk(2,16);
   
   %% Set options and default values.
   options.user = '';
@@ -141,6 +140,7 @@ function data = getDeploymentInfoDB(query, dbname, varargin)
   else
     access_params = {options.user options.pass options.driver options.server};
   end
+  disp(strcat({'Connecting to '}, options.server, {' ==> '}, dbname, ' ...'));
   conn = database(dbname, access_params{:});
   if (~isconnection(conn))
     error('glider_toolbox:db_tools:ConnectionError', ...

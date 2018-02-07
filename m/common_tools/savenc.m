@@ -108,7 +108,7 @@ function savenc(var_data, var_meta, global_meta, filename)
   NETCDF_TYPES = {'double' 'float'  'int'   'short' 'byte' 'char'};
   NATIVE_TYPES = {'double' 'single' 'int32' 'int16' 'int8' 'char'};
 
-  error(nargchk(3, 4, nargin, 'struct'));
+  narginchk(3, 4);
 
   if nargin < 4
     filename = global_meta.name;

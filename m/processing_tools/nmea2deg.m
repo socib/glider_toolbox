@@ -50,7 +50,7 @@ function varargout = nmea2deg(varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(1, 2, nargin, 'struct'));
+  narginchk(1, 2);
   
   for varargidx = 1:numel(varargin)
     nmea = varargin{varargidx};

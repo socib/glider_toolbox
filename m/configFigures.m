@@ -51,8 +51,8 @@ function [figures_proc, figures_grid] = configFigures()
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(0, 0, nargin, 'struct'));
-  
+  narginchk(0, 0);
+
   
   %% Get handle to current figure or create one.
   % A new figure will be created anyway when calling SET,
@@ -396,7 +396,10 @@ function [figures_proc, figures_grid] = configFigures()
   figures_grid.profiles_ctd.plotopts.xlabel(3) = setfield(default_label, 'String', 'density (kg m-1)');
   figures_grid.profiles_ctd.plotopts.ylabel(3) = setfield(default_label, 'String', 'depth (m)');
   figures_grid.profiles_ctd.plotopts.title(3) = setfield(default_title, 'String', 'Density profiles');
-  figures_grid.profiles_ctd.plotopts.axsprops(1:3) = default_axes;
+  figures_grid.profiles_ctd.plotopts.axsprops(1) = setfield(default_axes, 'Position', [0.1542 0.1000 0.1892 0.8000]);
+  figures_grid.profiles_ctd.plotopts.axsprops(2) = setfield(default_axes, 'Position', [0.4350 0.1000 0.1892 0.8000]);
+  figures_grid.profiles_ctd.plotopts.axsprops(3) = setfield(default_axes, 'Position', [0.7158 0.1000 0.1892 0.8000]);
+  %figures_grid.profiles_ctd.plotopts.axsprops(1:3) = default_axes;
   figures_grid.profiles_ctd.prntopts = default_prntopts;
   figures_grid.profiles_ctd.prntopts.filename = 'ctd_profiles';
   figures_grid.profiles_ctd.prntopts.title = 'CTD profiles';

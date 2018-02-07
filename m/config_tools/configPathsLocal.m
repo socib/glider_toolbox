@@ -1,4 +1,4 @@
-function local_paths = configDTPathsLocal()
+function local_paths = configPathsLocal(glider_toolbox_dir)
 %CONFIGDTPATHSLOCAL  Config local paths for glider deployment delayed time data and figures.
 %
 %  Syntax:
@@ -54,16 +54,18 @@ function local_paths = configDTPathsLocal()
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(0, 0, nargin, 'struct'));
-
-  local_paths.binary_path    = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/binary';
-  local_paths.cache_path     = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/binary';
-  local_paths.log_path       = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/log';
-  local_paths.ascii_path     = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/ascii';
-  local_paths.figure_path    = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/figures';
-  local_paths.netcdf_l0      = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l0.nc';
-  local_paths.netcdf_l1      = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l1.nc';
-  local_paths.netcdf_l2      = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/netcdf/${GLIDER_NAME}_${DEPLOYMENT_START,Tyyyymmdd}_l2.nc';
-  local_paths.processing_log = '/path/to/delayed_time/glider_data/${GLIDER_NAME}/${DEPLOYMENT_START,Tyyyymmdd}/processing.log';
-
+  narginchk(1, 1);
+  
+  local_paths.base_dir       = fullfile(glider_toolbox_dir, 'glider_data', '${GLIDER_NAME}', '${DEPLOYMENT_START,Tyyyymmdd}');
+  local_paths.binary_path    = fullfile('binary');
+  local_paths.cache_path     = fullfile('binary');
+  local_paths.log_path       = fullfile('log');
+  local_paths.ascii_path     = fullfile('ascii');
+  local_paths.figure_path    = fullfile('figures');
+  local_paths.netcdf_l0      = fullfile('netcdf', 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L0_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.nc');
+  local_paths.netcdf_l1      = fullfile('netcdf', 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L1_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.nc');
+  local_paths.netcdf_l2      = fullfile('netcdf', 'dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_L2_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.nc');
+  local_paths.processing_log = fullfile('dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.log');
+  local_paths.config_record  = fullfile('dep${GLIDER_DEPLOYMENT_CODE,l}_${GLIDER_NAME,l}_${GLIDER_INSTRUMENT_NAME,l}_${DEPLOYMENT_START,Tyyyy-mm-dd}_data_rt.config');
+   
 end

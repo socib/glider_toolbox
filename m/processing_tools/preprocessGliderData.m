@@ -113,6 +113,8 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %            If present and not empty, the selected depth sequence is converted 
 %            through this function. 
 %        Default value: struct('depth', {'m_depth'});
+%      GPS_LIST: gps sensor choices including time, latitude and longitude
+%        TODO: Complete description for gps_list
 %      ATTITUDE_LIST: roll and pitch sensor choices.
 %        Struct array with the roll and pitch sensor choices sequences, 
 %        in order of preference. It should have the following fields:
@@ -271,7 +273,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(2, 24, nargin, 'struct'));
+  narginchk(2, 24);
   
   
   %% Set preprocessing options.
@@ -280,7 +282,18 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
   options.sg_dive_params = {};
   options.time_list = ...
     struct('time', {'m_present_time' 'sci_m_present_time'});
+  options.time_gps_list = ...
+    struct('time', {'m_gps_utc_day' 'm_present_time' 'sci_m_present_time'});
   options.position_list = ...
+    struct('longitude',            {'m_gps_lon'    'm_lon'}, ...
+           'latitude',             {'m_gps_lat'    'm_lat'}, ...
+           'position_status',      {'m_gps_status' []}, ...
+           'position_good',        {0              []}, ...
+           'position_bad',         {[]             []}, ...
+           'time',                 {[]             []}, ...
+           'date',                 {[]             []}, ...
+           'conversion',           {@nmea2deg      @nmea2deg});
+  options.position_gps_list = ...
     struct('longitude',            {'m_gps_lon'    'm_lon'}, ...
            'latitude',             {'m_gps_lat'    'm_lat'}, ...
            'position_status',      {'m_gps_status' []}, ...
@@ -407,8 +420,40 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
   if ~isfield(data_pre, 'time')
     error('glider_toolbox:preprocessGliderData:MissingSensorTime', ...
           'No time sensor present in data set.');
-  end
+  end  
   
+  %% Select gps time coordinate sensor.
+  % Similar to time coordinator sensor
+  time_choice_list = options.time_gps_list;
+  for time_choice_idx = 1:numel(time_choice_list)
+    time_choice = time_choice_list(time_choice_idx);
+    time_field = time_choice.time;
+    time_conversion_func = [];
+    if isfield(time_choice_list, 'conversion')
+      time_conversion_func = time_choice.conversion;
+    end
+    if ismember(time_field, field_list) && any(data_raw.(time_field) > 0)
+      data_pre.time_gps = data_raw.(time_field);
+      meta_pre.time_gps.sources = time_field;
+      fprintf('Selected time sensor %d:\n', time_choice_idx); ...
+      fprintf('  time: %s\n', time_field);
+      if ~isempty(time_conversion_func)
+        if ischar(time_conversion_func)
+          time_conversion_func = str2func(time_conversion_func);
+        end
+        data_pre.time_gps = time_conversion_func(data_pre.time_gps);
+        meta_pre.time_gps.conversion = func2str(time_conversion_func);
+        fprintf('  conversion: %s\n', func2str(time_conversion_func));
+      end
+      break
+    end
+  end
+  if ~isfield(data_pre, 'time_gps')
+      warning('glider_toolbox:preprocessGliderData:MissingSensorGPSTime', ...
+          'No gps time sensor present in data set.Set to default time.');
+      data_pre.time_gps = data_pre.time;
+      meta_pre.time_gps = meta_pre.time;
+  end
   
   %% Select position coordinate sensors.
   % Find preferred valid longitude and latitude sensor available in list of 
@@ -575,7 +620,186 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
           'No longitude and latitude sensor present in data set.');
   end
   
+  %% Select gps position coordinate sensors.
+  % Similar to position coordinator sensor
+  % Could be done in a more elegant way with a for loop instead of copying
+  % pasting the code but I guaranty for this version that we do not break
+  % the SOCIB data by adding the gps data for eGO format. To be fixed in
+  % the future
+  position_choice_list = options.position_gps_list;
+  for position_choice_idx = 1:numel(position_choice_list)
+    position_choice = position_choice_list(position_choice_idx);
+    lon_field = position_choice.longitude;
+    lat_field = position_choice.latitude;
+    position_date_field = [];
+    position_time_field = [];
+    position_status_field = [];
+    position_conversion_func = [];
+    position_time_conversion_func = [];
+    position_good = [];
+    position_bad = [];
+    if isfield(position_choice_list, 'position_status')
+      position_status_field = position_choice.position_status;
+    end
+    if isfield(position_choice_list, 'position_good')
+      position_good = position_choice.position_good;
+    end
+    if isfield(position_choice_list, 'position_bad')
+      position_bad = position_choice.position_bad;
+    end
+    if isfield(position_choice_list, 'conversion')
+      position_conversion_func = position_choice.conversion;
+    end
+    if isfield(position_choice_list, 'time')
+      position_time_field = position_choice.time;
+    end
+    if isfield(position_choice_list, 'date')
+      position_date_field = position_choice.date;
+    end
+    if isfield(position_choice_list, 'time_conversion')
+      position_time_conversion_func = position_choice.time_conversion;
+    end
+    if all(ismember({lon_field lat_field}, field_list)) ...
+        && ~all(isnan(data_raw.(lon_field))) ...
+        && ~all(isnan(data_raw.(lat_field)))
+      data_pre.longitude_gps = data_raw.(lon_field);
+      data_pre.latitude_gps = data_raw.(lat_field);
+      meta_pre.longitude_gps.sources = lon_field;
+      meta_pre.latitude_gps.sources = lat_field;
+      fprintf('Selected position sensor %d:\n', position_choice_idx);
+      fprintf('  longitude: %s\n', lon_field);
+      fprintf('  latitude : %s\n', lat_field);
+      if ~isempty(position_status_field) ...
+          && ismember(position_status_field, field_list) ...
+          && ~all(isnan(data_raw.(position_status_field)))
+        data_pre.position_gps_status = data_raw.(position_status_field);
+        meta_pre.position_gps_status.sources = position_status_field;
+        fprintf('  position status: %s\n', position_status_field);
+        position_invalid = false(size(data_pre.position_gps_status));
+        if ~isempty(position_good)
+          if ischar(position_good) 
+            position_invalid = ~feval(position_good, ...
+                                      data_pre.longitude_gps, data_pre.latitude_gps, ...
+                                      data_pre.position_gps_status);
+            meta_pre.position_gps_status.position_good = position_good;
+            fprintf('  position good  : %s\n', position_good);
+          elseif isa(position_good, 'function_handle')
+            position_invalid = ~feval(position_good, ...
+                                      data_pre.longitude_gps, data_pre.latitude_gps, ...
+                                      data_pre.position_gps_status);
+            meta_pre.position_gps_status.position_good = func2str(position_good);
+            fprintf('  position good  : %s\n', func2str(position_good));
+          else
+            position_invalid = ...
+              ~ismember(data_pre.position_gps_status, position_good);
+            meta_pre.position_gps_status.position_good = position_good;
+            fprintf('  position good  : %s\n', num2str(position_good));
+          end
+        end
+        if ~isempty(position_bad)
+          if ischar(position_bad) 
+            position_invalid = position_invalid ...
+                             | feval(position_bad, ...
+                                     data_pre.longitude_gps, data_pre.latitude_gps, ...
+                                     data_pre.position_gps_status);
+            meta_pre.position_gps_status.position_bad = position_bad;
+            fprintf('  position bad   : %s\n', position_bad);
+          elseif isa(position_bad, 'function_handle')
+            position_invalid = position_invalid ...
+                             | feval(position_bad, ...
+                                     data_pre.longitude_gps, data_pre.latitude_gps, ...
+                                     data_pre.position_gps_status);
+            meta_pre.position_gps_status.position_bad = func2str(position_bad);
+            fprintf('  position bad   : %s\n', func2str(position_bad));
+          else
+            position_invalid = position_invalid ...
+                             | ismember(data_pre.position_gps_status, position_bad);
+            meta_pre.position_gps_status.position_bad = position_bad;
+            fprintf('  position bad   : %s\n', num2str(position_bad));
+          end
+        end
+        data_pre.longitude_gps(position_invalid) = nan;
+        data_pre.latitude_gps(position_invalid) = nan;
+        meta_pre.longitude_gps.sources = ...
+          {lon_field lat_field position_status_field}';
+        meta_pre.latitude_gps.sources = ...
+          {lon_field lat_field position_status_field}';
+        if isfield(meta_pre.position_gps_status, 'position_good')
+          meta_pre.longitude_gps.position_good = ...
+            meta_pre.position_gps_status.position_good;
+          meta_pre.latitude_gps.position_good = ...
+            meta_pre.position_gps_status.position_good;
+        end
+        if isfield(meta_pre.position_gps_status, 'position_bad')
+          meta_pre.longitude_gps.position_bad = ...
+            meta_pre.position_gps_status.position_bad;
+          meta_pre.latitude_gps.position_bad = ...
+            meta_pre.position_gps_status.position_bad;
+        end
+      end
+      if ~isempty(position_conversion_func)
+        if ischar(position_conversion_func)
+          position_conversion_func = str2func(position_conversion_func);
+        end
+        [data_pre.longitude_gps, data_pre.latitude_gps] = ...
+          position_conversion_func(data_pre.longitude_gps, data_pre.latitude_gps);
+        meta_pre.longitude_gps.sources = ...
+          union(cellstr(meta_pre.longitude_gps.sources), {lon_field lat_field}');
+        meta_pre.longitude_gps.conversion = func2str(position_conversion_func);
+        meta_pre.latitude_gps.sources = ...
+          union(cellstr(meta_pre.latitude_gps.sources), {lon_field lat_field}');
+        meta_pre.latitude_gps.conversion = func2str(position_conversion_func);
+        fprintf('  conversion : %s\n', func2str(position_conversion_func));
+      end
+      if ~isempty(position_time_field) ...
+          && ismember(position_time_field, field_list)
+        data_pre.position_gps_time = data_raw.(position_gps_time_field);
+        meta_pre.position_gps_time.sources = position_time_field;
+        fprintf('  position time  : %s\n', position_time_field);
+      end
+      if ~isempty(position_date_field) ...
+          && ismember(position_date_field, field_list)
+        data_pre.position_gps_date = data_raw.(position_date_field);
+        meta_pre.position_gps_date.sources = position_date_field;
+        fprintf('  position date  : %s\n', position_date_field);
+      end
+      if ~isempty(position_time_conversion_func)
+        if ischar(position_time_conversion_func)
+          position_time_conversion_func = ...
+            str2func(position_time_conversion_func);
+        end
+        data_pre.time_gps_position = ...
+          position_time_conversion_func(data_pre.position_gps_time, ...
+                                        data_pre.position_gps_date);
+        meta_pre.time_gps_position.sources = ...
+          {position_time_field position_date_field}';
+        meta_pre.time_gps_position.conversion = ...
+          func2str(position_time_conversion_func);
+        fprintf('  time conversion : %s\n', ...
+                func2str(position_time_conversion_func));
+      end
+      break
+    end
+  end
+  if ~all(isfield(data_pre, {'longitude_gps' 'latitude_gps'}))
+      warning('glider_toolbox:preprocessGliderData:MissingSensorGPSPosition', ...
+          'No longitude and latitude sensor present in data set. Set to default position.');
+      data_pre.latitude_gps  = data_pre.latitude;
+      meta_pre.latitude_gps  = meta_pre.latitude;
+      data_pre.longitude_gps = data_pre.longitude;
+      meta_pre.longitude_gps = meta_pre.longitude;
+  end
   
+  %% Set the positioning method according. 2=NaN or 0 for valid values
+  gps_valid_values = ~isnan(data_pre.time_gps)     &  ...
+                     ~isnan(data_pre.latitude_gps) &  ...
+                     ~isnan(data_pre.longitude_gps);
+
+  data_pre.positioning_method = 2.*ones(size(data_pre.time_gps));
+  data_pre.positioning_method(gps_valid_values) = 0;
+  meta_pre.positioning_method.method = 'preprocessGliderData';
+  meta_pre.positioning_method.sources = 'time_gps latitude_gps longitude_gps';
+    
   %% Select depth sensor.
   % Find preferred valid depth sensor available in list of sensor fields, if any.
   % Convert char array to string cell array if needed (safe if cell array).

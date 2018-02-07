@@ -46,7 +46,7 @@ function [stampnum, hhmmss, ddmmyy] = fillSGMissingGPSDate(hhmmss, ddmmyy)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(2, 2, nargin, 'struct'));
+  narginchk(2, 2);
   
   nodate = cellfun(@isempty, cellstr(ddmmyy));
   stampvec(~nodate, :) = ...

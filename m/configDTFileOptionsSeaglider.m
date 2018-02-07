@@ -47,8 +47,8 @@ function seaglider_options = configDTFileOptionsSeaglider()
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(0, 0, nargin, 'struct'));
-  
+  narginchk(0, 0);
+
   % Select dive log files to use. All log files:
   seaglider_options.log_name_pattern = '^p\d{3}\d{4}\.log$';
     

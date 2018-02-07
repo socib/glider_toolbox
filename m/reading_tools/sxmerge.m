@@ -101,7 +101,7 @@ function [meta, data] = sxmerge(meta_gli, data_gli, meta_pld, data_pld, varargin
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(4, 14, nargin, 'struct'));
+  narginchk(4, 14);
   
   
   %% Set options and default values.

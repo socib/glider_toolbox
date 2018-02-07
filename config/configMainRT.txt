@@ -1,0 +1,50 @@
+##
+# This file defines the configuration parameters for glider toolbox in delayed mode 
+# processing by main_glider_data_processing_rt. Users can add any parameter 
+# of the configuration to overwrite the default values. For detailed information
+# about the available parameters refer to the configTemplate.txt template. 
+# Comments may be used by adding a # at the beginning of the line. 
+#
+# Do not change the processing_mode value (equal to rt) of this configuration 
+# since it is used mainly by the real time mode processing script. 
+#
+# Edit the data paths, the dockserver and the database information according to your needs.
+# 
+##
+
+
+########################
+# Processing mode
+
+    processing_mode = rt 
+
+########################
+# Paths to local and public data
+    
+    local_paths.base_dir = /path/to/local/folders
+    
+    public_paths.base_dir          = /path/to/public/folders
+    public_paths.base_url          = http://your.public.url/path/to/data
+    public_paths.base_html_dir     = /your/public/url/path/to/data
+
+#########################
+# Database
+
+    db_access.active    = 0
+    db_access.server    = jdbc:postgresql://mydb.myportal.mydomain:5433/my_data_base
+    db_access.name      = my_data_base
+    db_access.user      = db_user
+    db_access.pass      = top_secret
+    db_access.driver    = org.postgresql.Driver
+
+#########################
+# Dockserver
+
+    dockservers.active           = 1
+    dockservers.remote_base_dir  = /var/opt/gmc/gliders
+    dockservers.remote_xbd_dir   = from-glider
+    dockservers.remote_log_dir   = logs
+    dockservers.server(1).url    = http://mydockserver01.myportal.mydomain
+    dockservers.server(1).host   = xxx.xxx.xxx.xxx
+    dockservers.server(1).user   = dock_user
+    dockservers.server(1).pass   = top_secret

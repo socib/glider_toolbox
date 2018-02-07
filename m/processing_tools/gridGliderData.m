@@ -105,7 +105,7 @@ function [data_grid, meta_grid] = gridGliderData(data_proc, meta_proc, varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(2, 16, nargin, 'struct'));  
+  narginchk(2, 16);
   
   
   %% Set gridding options from default values and extra arguments.

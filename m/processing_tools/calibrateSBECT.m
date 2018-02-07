@@ -60,7 +60,7 @@ function [temp, cond] = calibrateSBECT(temp_freq, cond_freq, pres, temp_coefs, c
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(nargin, 5, 5, 'struct'));
+  narginchk(5, 5);
   
   if isstruct(temp_coefs)
     jihg_temp = [temp_coefs.t_j temp_coefs.t_i temp_coefs.t_h temp_coefs.t_g];

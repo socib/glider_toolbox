@@ -85,7 +85,7 @@ function json = savejson(object, varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(1, 2, nargin, 'struct'));
+  narginchk(1, 2);
   
   if isscalar(object) && isstruct(object)
     json = savejsonObject(object);

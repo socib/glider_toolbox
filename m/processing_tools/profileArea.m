@@ -55,7 +55,7 @@ function a = profileArea(x1, y1, x2, y2)
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  error(nargchk(4, 4, nargin, 'struct'));
+  narginchk(4, 4);
 
   % Join both profiles discarding invalid coordinates.
   % The resulting contour may be a complex polygon.
