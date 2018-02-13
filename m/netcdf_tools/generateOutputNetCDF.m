@@ -471,12 +471,12 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
   switch (options.netcdf_format)
     case 'EGO'
         try
+            disp('... converting attribute names for EGO format');
             [ variable_data, variable_meta ] = convert2NetCDFEGO( variable_data, variable_meta );
         catch exception
             error('glider_toolbox:generateOutputNetCDF:NetCDFConversionError', ...
                   'Problem with EGO conversion: %s.', getReport(exception, 'extended')); 
         end
-        disp('.... done converting attribute names for EGO format');
     otherwise
       ;
   end
@@ -500,7 +500,9 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
   
   
   %% Generate the file.
+  disp('... saving file');
   savenc(variable_data, variable_meta, global_meta, filename);
+  disp('... done');
   
   
   %% Return the absolute name of the generated file.

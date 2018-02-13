@@ -360,7 +360,7 @@ function ncl1_info = configRTOutputNetCDFEGO()
          attr_list = ncl1_info.variables.(var_name{1}).attributes;
          for idx_attr = 1:numel(attr_list)
              if  strcmp(attr_list(idx_attr).name, 'coordinates')
-               ncl1_info.variables.(var_name{1}).attributes(idx_attr).value = upper(attr_list(idx_attr).value);
+               ncl1_info.variables.(var_name{1}).attributes(idx_attr).value = 'TIME LATITUDE LONGITUDE PRES'; %upper(attr_list(idx_attr).value);
             end
              if  strcmp(attr_list(idx_attr).name, 'DM_indicator')
                ncl1_info.variables.(var_name{1}).attributes(idx_attr).value = 'R';

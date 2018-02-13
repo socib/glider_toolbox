@@ -14,6 +14,9 @@ function [ convert_data, convert_meta ] = convert2NetCDFEGO( variable_data, vari
       [convert_meta(:).(new_var_name)] = deal(convert_meta(:).(var_name));
       convert_meta = rmfield(convert_meta,var_name);
     end   
+    
+    
+    % Make all data uppercase and convert values to have STRINGXX dims
     data_var_name_list = fieldnames(convert_data);
     for var_name_idx = 1:numel(data_var_name_list)
       var_name = data_var_name_list{var_name_idx};

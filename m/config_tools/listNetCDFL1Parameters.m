@@ -77,6 +77,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
   end
   
   default_fill_value = realmax('double');
+  default_float_fill_value = realmax('single');
   
   var_attr_list =struct();
   var_attrtype_list = struct();
@@ -90,12 +91,12 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'valid_min'            0.0
     'valid_max'            90000.0
     'QC_procedure'         '1'
-    'ancillary_variable'  'TIME_QC'
+    'ancillary_variable'   'TIME_QC'
     'sdn_parameter_urn'    'SDN:P01::ELTMEP01'
     'sdn_uom_urn'          'SDN:P061::UTBB'
-    'coordinates'          'time latitude longitude depth'
+    'coordinates'          'TIME LATITUDE LONGITUDE PRES'
     'comment'              'None'
-    '_FillValue'           default_fill_value
+    '_FillValue'           9999999999.
     'glider_original_parameter_name'                [] 
     'sources'                [] };
   
@@ -117,7 +118,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'valid_min'            0.0
     'valid_max'            90000.0
     'QC_procedure'         '1'
-    'ancillary_variable'  'TIME_GPS_QC'
+    'ancillary_variable'   'TIME_GPS_QC'
     'sdn_parameter_urn'    'SDN:P01::ELTMEP01'
     'sdn_uom_urn'          'SDN:P061::UTBB'
     'coordinates'          'time_gps'
@@ -147,7 +148,6 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'ancillary_variable'  'JULD_QC'
     'sdn_parameter_urn'    'SDN:P01::XXX'
     'sdn_uom_urn'          'SDN:P061::UTAA'
-    'coordinates'          'time latitude longitude depth'
     'comment'              'None'
     '_FillValue'           999999
     'comment'              ''
@@ -161,10 +161,9 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'           'depth'
     'units'                   'm'
     'positive'                'down'
-    'axis'                    'Z'
-    'coordinates'             'time latitude longitude depth'
+    'coordinates'             'TIME LATITUDE LONGITUDE PRES'
     'ancillary_variable'      'DEPTH_QC'
-    '_FillValue'              default_fill_value
+    '_FillValue'              default_float_fill_value
     'comment'                 'None'
     'glider_original_parameter_name'                [] 
     'sources'                                       []
@@ -190,7 +189,6 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'               'latitude'
     'units'                       'degree_north'
     'axis'                        'Y'
-    'coordinates'                 'time latitude longitude depth'
     'valid_min'                   -90.0
     'valid_max'                   90.0
     'QC_procedure'                1
@@ -214,7 +212,6 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'                'longitude'
     'axis'                         'X'
     'units'                        'degree_east'
-    'coordinates'                  'time latitude longitude depth'
     'valid_min'                    -180.0
     'valid_max'                    180.0
     'QC_procedure'                 1
@@ -267,7 +264,6 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'                'latitude'
     'units'                        'degree_north'
     'axis'                         'Y'
-    'coordinates'                  'TIME_GPS LATITUDE LONGITUDE DEPTH'
     'valid_min'                    -90.0
     'valid_max'                    90.0
     'QC_procedure'                 1
@@ -290,7 +286,6 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'standard_name'                'longitude'
     'axis'                         'X'
     'units'                        'degree_east'
-    'coordinates'                  'TIME_GPS LATITUDE LONGITUDE DEPTH'
     'valid_min'                    -180.0
     'valid_max'                    180.0
     'QC_procedure'                 1
@@ -460,12 +455,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
   var_attrtype_list.ego.phase = 'int8';
   var_attr_list.ego.phase = {
     'long_name'     'Glider trajectory phase code'
-    'standard_name' ''
     'conventions'   'EGO reference table 9'
     'units'         '1'
     'flag_values'   [0,1,2,3,4,5,6]
     'flag_meanings' 'surface_drift descent subsurface_drift inflexion ascent grounded inconsistent'
-    'coordinates'   'time latitude longitude depth'
     '_FillValue'    -128
     'glider_original_parameter_name'                [] 
     'sources'                                       []
@@ -494,7 +487,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'long_name'               'Electrical conductivity'
     'standard_name'           'sea_water_electrical_conductivity'
     'units'                   'mhos/m'
-    'coordinates'             'time latitude longitude depth'
+    'coordinates'             'TIME LATITUDE LONGITUDE PRES'
     'valid_min'               0.0
     'valid_max'               8.5
     'sensor_mount'            'mounted_on_glider'
@@ -508,7 +501,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'cell_methods'            'point'
     'DM_indicator'            'R'
     'reference_scale'         'Undefined'
-    '_FillValue'              default_fill_value
+    '_FillValue'              default_float_fill_value
     'sdn_parameter_urn'       'SDN:P01::CNDCST01'
     'sdn_parameter_uri'       'http://vocab.nerc.ac.uk/collection/P01/current/CNDCST01/'
     'sdn_uom_name'             'SDN:P061::UECA'
@@ -551,7 +544,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'long_name'               'Sea temperature in-situ ITS-90 scale'
     'standard_name'           'sea_water_temperature'
     'units'                   'Celcius'
-    'coordinates'             'time latitude longitude depth'
+    'coordinates'             'TIME LATITUDE LONGITUDE PRES'
     'valid_min'               -2.5
     'valid_max'               40.0
     'sensor_mount'            'mounted_on_glider'
@@ -565,7 +558,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'cell_methods'            'point'
     'DM_indicator'            'R'
     'reference_scale'         'Undefined'
-    '_FillValue'              default_fill_value
+    '_FillValue'              default_float_fill_value
     'sdn_parameter_urn'       'SDN:P01::TEMPST01'
     'sdn_parameter_uri'       'http://vocab.nerc.ac.uk/collection/P01/current/TEMPST01/'
     'sdn_uom_name'             'SDN:P061::UPAA'
@@ -607,7 +600,8 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'long_name'               'Sea water pressure, equals 0 at sea-level'
     'standard_name'           'sea_water_pressure'
     'units'                   'dbar'
-    'coordinates'             'time latitude longitude depth'
+    'coordinates'             'TIME LATITUDE LONGITUDE PRES'
+    'axis'                    'Z'
     'valid_min'               0.0
     'valid_max'               12000.0
     'sensor_mount'            'mounted_on_glider'
@@ -621,7 +615,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'cell_methods'            'point'
     'DM_indicator'            'R'
     'reference_scale'         'Undefined'
-    '_FillValue'              default_fill_value
+    '_FillValue'              default_float_fill_value
     'sdn_parameter_urn'       'SDN:P01::PRESPR01'
     'sdn_parameter_uri'       'http://vocab.nerc.ac.uk/collection/P01/current/PRESPR01/'
     'sdn_uom_name'            'SDN:P061::UPDB'
@@ -817,7 +811,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'long_name'               'Practical salinity'
     'standard_name'           'sea_water_salinity'
     'units'                   'PSU'
-    'coordinates'             'time latitude longitude depth'
+    'coordinates'             'TIME LATITUDE LONGITUDE PRES'
     'valid_min'               2.0
     'valid_max'               41.0
     'sensor_mount'            'mounted_on_glider'
@@ -831,7 +825,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'cell_methods'            'point'
     'DM_indicator'            'R'
     'reference_scale'         'Undefined'
-    '_FillValue'              default_fill_value
+    '_FillValue'              default_float_fill_value
     'sdn_parameter_urn'       'SDN:P01::PSALST01'
     'sdn_parameter_uri'       'http://vocab.nerc.ac.uk/collection/P01/current/PSALST01/'
     'sdn_uom_name'            'SDN:P061::UUUU'
@@ -1204,7 +1198,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'long_name'               'Chlorophyll-A'
     'standard_name'           'mass_concentration_of_chlorophyll_a_in_sea_water'
     'units'                   'mg m-3'
-    'coordinates'             'time latitude longitude depth'
+    'coordinates'             'TIME LATITUDE LONGITUDE PRES'
     'sensor_mount'            'mounted_on_glider'
     'sensor_orientation'      'downward'
     'sensor_name'             'Undefined'
@@ -1216,7 +1210,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'cell_methods'            'point'
     'DM_indicator'            'R'
     'reference_scale'         'Undefined'
-    '_FillValue'              default_fill_value
+    '_FillValue'              default_float_fill_value
     'glider_original_parameter_name'                [] 
     'sources'                                       []
     'conversion'                                    []
@@ -1274,7 +1268,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'long_name'               'Temperature of the spectrometer'
     'standard_name'           'temperature_of_optic_sensor_in_sea_water'
     'units'                   'Celsius'
-    'coordinates'             'time latitude longitude depth'
+    'coordinates'             'TIME LATITUDE LONGITUDE PRES'
     'sensor_mount'            'mounted_on_glider'
     'sensor_orientation'      'downward'
     'sensor_name'             'Undefined'
@@ -1366,7 +1360,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'long_name'               'Uncompensated (pressure and salinity) oxygen concentration reported by the oxygen sensor'
     'standard_name'           'mole_concentration_of_dissolved_molecular_oxygen_in_sea_water'
     'units'                   'umol l-1'
-    'coordinates'             'time latitude longitude depth'
+    'coordinates'             'TIME LATITUDE LONGITUDE PRES'
     'sensor_mount'            'mounted_on_glider'
     'sensor_orientation'      'downward'
     'sensor_name'             'Undefined'
@@ -1457,7 +1451,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'long_name'               'Sea temperature from oxygen sensor ITS-90 scale'
     'standard_name'           'temperature_of_sensor_for_oxygen_in_sea_water'
     'units'                   'Celsius'
-    'coordinates'             'time latitude longitude depth'
+    'coordinates'             'TIME LATITUDE LONGITUDE PRES'
     'sensor_mount'            'mounted_on_glider'
     'sensor_orientation'      'downward'
     'sensor_name'             'Undefined'
