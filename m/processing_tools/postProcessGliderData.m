@@ -422,9 +422,6 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
         data_conv.deployment_start_longitude      = 99999;
     end
 
-    meta_conv.deployment_start_qc.sources = 'postProcessGliderData';
-    meta_conv.deployment_start_qc.method  = 'postProcessGliderData';
-    data_conv.deployment_start_qc         = -128;    % TODO: verify value
 
     meta_conv.deployment_platform.sources = 'postProcessGliderData';
     meta_conv.deployment_platform.method  = 'postProcessGliderData';
@@ -470,10 +467,6 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
     else
         data_conv.deployment_end_longitude      = 99999; % TODO: verify value
     end
-
-    meta_conv.deployment_end_qc.sources = 'postProcessGliderData';
-    meta_conv.deployment_end_qc.method  = 'postProcessGliderData';
-    data_conv.deployment_end_qc         = -128;    % TODO: verify value
 
     meta_conv.deployment_end_status.sources = 'postProcessGliderData';
     meta_conv.deployment_end_status.method  = 'postProcessGliderData';

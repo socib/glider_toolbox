@@ -75,8 +75,10 @@ function [ ] = organizePublicData( output_path, outputs, figures )
     disp('Copying public outputs...');
     strloglist = '';
     output_name_list = fieldnames(outputs);
-    for output_name_idx = 1:numel(output_name_list)
+    num_outputs = numel(output_name_list);
+    for output_name_idx = 1:num_outputs
       output_name = output_name_list{output_name_idx};
+      %disp([num2str(output_name_idx) '/' num2str(num_outputs) {' ===> '} output_name]);
       if isfield(public_paths, output_name) ...
            && ~isempty(public_paths.(output_name))
         output_local_file = outputs.(output_name);
@@ -141,8 +143,10 @@ function [ ] = organizePublicData( output_path, outputs, figures )
     public_figures = struct();
     public_figures_local = struct();
     figure_output_name_list = fieldnames(figures);
-    for figure_output_name_idx = 1:numel(figure_output_name_list)
+    num_figure_outputs = numel(figure_output_name_list);
+    for figure_output_name_idx = 1:num_figure_outputs
       figure_output_name = figure_output_name_list{figure_output_name_idx};
+      disp([num2str(figure_output_name_idx) '/' num2str(num_figure_outputs) {' ===> '} figure_output_name]);
       figure_output = figures.(figure_output_name);
       figure_name_list = fieldnames(figure_output);
       for figure_name_idx = 1:numel(figure_name_list)

@@ -123,7 +123,6 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'sdn_uom_urn'          'SDN:P061::UTBB'
     'coordinates'          'time_gps'
     'comment'              'None'
-    '_FillValue'           -1
     'glider_original_parameter_name'                [] 
     'sources'                [] };
 
@@ -133,7 +132,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'conventions'          'EGO reference table 2'
     'valid_min'            0
     'valid_max'            9
-    'flag_values'          '0, 1, 2, 3, 4, 5, 8, 9'
+    'flag_values'          [0,1,2,3,4,5,8,9]
     'flag_meanings'        'no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed interpolated_value missing_value'
     '_FillValue'           -128};
 
@@ -310,7 +309,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'conventions'          'EGO reference table 2'
     'valid_min'            0
     'valid_max'            9
-    'flag_values'          '0, 1, 2, 3, 4, 5, 8, 9'
+    'flag_values'          [0,1,2,3,4,5,8,9]
     'flag_meanings'        'no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed interpolated_value missing_value'
     '_FillValue'           -128};
       
@@ -501,7 +500,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'cell_methods'            'point'
     'DM_indicator'            'R'
     'reference_scale'         'Undefined'
-    '_FillValue'              default_float_fill_value
+    '_FillValue'              99999
     'sdn_parameter_urn'       'SDN:P01::CNDCST01'
     'sdn_parameter_uri'       'http://vocab.nerc.ac.uk/collection/P01/current/CNDCST01/'
     'sdn_uom_name'             'SDN:P061::UECA'
@@ -543,7 +542,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
   var_attr_list.ego.temp = {
     'long_name'               'Sea temperature in-situ ITS-90 scale'
     'standard_name'           'sea_water_temperature'
-    'units'                   'Celcius'
+    'units'                   'degree_Celsius'
     'coordinates'             'TIME LATITUDE LONGITUDE PRES'
     'valid_min'               -2.5
     'valid_max'               40.0
@@ -558,7 +557,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'cell_methods'            'point'
     'DM_indicator'            'R'
     'reference_scale'         'Undefined'
-    '_FillValue'              default_float_fill_value
+    '_FillValue'              99999
     'sdn_parameter_urn'       'SDN:P01::TEMPST01'
     'sdn_parameter_uri'       'http://vocab.nerc.ac.uk/collection/P01/current/TEMPST01/'
     'sdn_uom_name'             'SDN:P061::UPAA'
@@ -599,7 +598,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
   var_attr_list.ego.pres = {
     'long_name'               'Sea water pressure, equals 0 at sea-level'
     'standard_name'           'sea_water_pressure'
-    'units'                   'dbar'
+    'units'                   'decibar'
     'coordinates'             'TIME LATITUDE LONGITUDE PRES'
     'axis'                    'Z'
     'valid_min'               0.0
@@ -615,7 +614,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'cell_methods'            'point'
     'DM_indicator'            'R'
     'reference_scale'         'Undefined'
-    '_FillValue'              default_float_fill_value
+    '_FillValue'              99999
     'sdn_parameter_urn'       'SDN:P01::PRESPR01'
     'sdn_parameter_uri'       'http://vocab.nerc.ac.uk/collection/P01/current/PRESPR01/'
     'sdn_uom_name'            'SDN:P061::UPDB'
@@ -810,7 +809,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
   var_attr_list.ego.psal = {
     'long_name'               'Practical salinity'
     'standard_name'           'sea_water_salinity'
-    'units'                   'PSU'
+    'units'                   'psu'
     'coordinates'             'TIME LATITUDE LONGITUDE PRES'
     'valid_min'               2.0
     'valid_max'               41.0
@@ -825,7 +824,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'cell_methods'            'point'
     'DM_indicator'            'R'
     'reference_scale'         'Undefined'
-    '_FillValue'              default_float_fill_value
+    '_FillValue'              99999
     'sdn_parameter_urn'       'SDN:P01::PSALST01'
     'sdn_parameter_uri'       'http://vocab.nerc.ac.uk/collection/P01/current/PSALST01/'
     'sdn_uom_name'            'SDN:P061::UUUU'
@@ -1147,6 +1146,34 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'glider_original_parameter_name'                [] 
     'sources'                                       [] };
 
+  var_attrtype_list.ego.turbidity = 'single';
+  var_attr_list.ego.turbidity = {
+    'long_name'               'Sea water turbidity'
+    'standard_name'           'sea_water_turbidity'
+    'units'                   'ntu'
+    'coordinates'             'TIME LATITUDE LONGITUDE PRES'
+    'sensor_mount'            'mounted_on_glider'
+    'sensor_orientation'      'downward'
+    'sensor_name'             'Undefined'
+    'sensor_serial_number'    'Undefined'
+    'ancillary_variable'      'TURBIDITY_QC'
+    'accuracy'                0.0001
+    'precision'               0.0001
+    'resolution'              0.0
+    'cell_methods'            'point'
+    'DM_indicator'            'R'
+    'reference_scale'         'Undefined'
+    '_FillValue'              99999
+    'sdn_parameter_urn'       'SDN:P01::TURBXXXX'
+    'sdn_parameter_uri'       'http://vocab.nerc.ac.uk/collection/P01/current/TURBXXXX/'
+    'sdn_uom_name'            'SDN:P061::USTU'
+    'sdn_uom_urn'             'SDN:P061::USTU'
+    'sdn_uom_uri'             'http://vocab.nerc.ac.uk/collection/P06/current/USTU/'
+    'comment'                 'None'
+    'glider_original_parameter_name'                [] 
+    'sources'                                       []
+    'method'                                        [] };
+
   var_attr_list.socib.turbidity = {
     'long_name'               'Sea water turbidity'
     'standard_name'           'sea_water_turbidity'
@@ -1197,7 +1224,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
   var_attr_list.ego.chla = {
     'long_name'               'Chlorophyll-A'
     'standard_name'           'mass_concentration_of_chlorophyll_a_in_sea_water'
-    'units'                   'mg m-3'
+    'units'                   'mg/m3'
     'coordinates'             'TIME LATITUDE LONGITUDE PRES'
     'sensor_mount'            'mounted_on_glider'
     'sensor_orientation'      'downward'
@@ -1210,7 +1237,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'cell_methods'            'point'
     'DM_indicator'            'R'
     'reference_scale'         'Undefined'
-    '_FillValue'              default_float_fill_value
+    '_FillValue'              99999
     'glider_original_parameter_name'                [] 
     'sources'                                       []
     'conversion'                                    []
@@ -1356,10 +1383,11 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'calibration'                                   []
     'calibration_parameters'                        [] };
 
+  var_attrtype_list.ego.molar_doxy = 'single';
   var_attr_list.ego.molar_doxy = {
     'long_name'               'Uncompensated (pressure and salinity) oxygen concentration reported by the oxygen sensor'
     'standard_name'           'mole_concentration_of_dissolved_molecular_oxygen_in_sea_water'
-    'units'                   'umol l-1'
+    'units'                   'micromole/l'
     'coordinates'             'TIME LATITUDE LONGITUDE PRES'
     'sensor_mount'            'mounted_on_glider'
     'sensor_orientation'      'downward'
@@ -1372,7 +1400,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'cell_methods'            'point'
     'DM_indicator'            'R'
     'reference_scale'         'Undefined'
-    '_FillValue'              default_fill_value
+    '_FillValue'              99999
     'glider_original_parameter_name'                [] 
     'sources'                                       []
     'conversion'                                    []
@@ -1447,10 +1475,11 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'sources'                                       []
     'conversion'                                    [] };
 
+  var_attrtype_list.ego.temp_doxy = 'single';
   var_attr_list.ego.temp_doxy = {
     'long_name'               'Sea temperature from oxygen sensor ITS-90 scale'
     'standard_name'           'temperature_of_sensor_for_oxygen_in_sea_water'
-    'units'                   'Celsius'
+    'units'                   'degree_Celsius'
     'coordinates'             'TIME LATITUDE LONGITUDE PRES'
     'sensor_mount'            'mounted_on_glider'
     'sensor_orientation'      'downward'
@@ -1463,7 +1492,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'cell_methods'            'point'
     'DM_indicator'            'R'
     'reference_scale'         'Undefined'
-    '_FillValue'              default_fill_value
+    '_FillValue'              99999
     'glider_original_parameter_name'         [] 
     'sources'                                []
     'conversion'                             []
@@ -2115,7 +2144,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'long_name'               'Quality on DEPLOYMENT_START date, time and location'
     'standard_name'           'deployment_start_date'
     'conventions'             'EGO reference table 2'
-    'flag_values'             '0, 1, 2, 3, 4, 5, 8, 9'
+    'flag_values'             [0,1,2,3,4,5,8,9]
     'flag_meanings'           'no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed interpolated_value missing_value'
     '_FillValue'              -128};
   
@@ -2165,7 +2194,7 @@ function [ meta_variables ] = listNetCDFL1Parameters(time_dimension_name, vararg
     'long_name'               'Quality on DEPLOYMENT_END date, time and location'
     'standard_name'           'deployment_end_qc'
     'conventions'             'EGO reference table 2'
-    'flag_values'             '0, 1, 2, 3, 4, 5, 8, 9'
+    'flag_values'             [0,1,2,3,4,5,8,9]
     'flag_meanings'           'no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed interpolated_value missing_value'
     '_FillValue'              -128};
   
