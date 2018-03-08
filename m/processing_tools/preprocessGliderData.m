@@ -283,7 +283,12 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
   options.time_list = ...
     struct('time', {'m_present_time' 'sci_m_present_time'});
   options.time_gps_list = ...
-    struct('time', {'m_gps_utc_day' 'm_present_time' 'sci_m_present_time'});
+    struct('day',    {'m_gps_utc_day'}, ...
+           'month',  {'m_gps_utc_month'}, ...
+           'year',   {'m_gps_utc_year'}, ...
+           'hour',   {'m_gps_utc_hour'}, ...
+           'minute', {'m_gps_utc_minute'}, ...
+           'second', {'m_gps_utc_second'});
   options.position_list = ...
     struct('longitude',            {'m_gps_lon'    'm_lon'}, ...
            'latitude',             {'m_gps_lat'    'm_lat'}, ...
@@ -423,31 +428,55 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
   end  
   
   %% Select gps time coordinate sensor.
-  % Similar to time coordinator sensor
+  % Assumes day, month, year, hour, minute second is defined in
+  % time_gps_list. Otherwise, time_gps is not calculated. Their values
+  % must have the same dimensions
   time_choice_list = options.time_gps_list;
-  for time_choice_idx = 1:numel(time_choice_list)
-    time_choice = time_choice_list(time_choice_idx);
-    time_field = time_choice.time;
+  if isfield(time_choice_list, 'day') && isfield(time_choice_list, 'month') && ...
+     isfield(time_choice_list, 'year') && isfield(time_choice_list, 'hour') && ...
+     isfield(time_choice_list, 'minute') && isfield(time_choice_list, 'second')
+      
     time_conversion_func = [];
     if isfield(time_choice_list, 'conversion')
       time_conversion_func = time_choice.conversion;
     end
-    if ismember(time_field, field_list) && any(data_raw.(time_field) > 0)
-      data_pre.time_gps = data_raw.(time_field);
-      meta_pre.time_gps.sources = time_field;
-      fprintf('Selected time sensor %d:\n', time_choice_idx); ...
-      fprintf('  time: %s\n', time_field);
-      if ~isempty(time_conversion_func)
-        if ischar(time_conversion_func)
-          time_conversion_func = str2func(time_conversion_func);
+    
+    for choice_idx = 1:numel(time_choice_list)
+      day_field = time_choice_list(choice_idx).day;
+      month_field = time_choice_list(choice_idx).month;
+      year_field = time_choice_list(choice_idx).year;
+      hour_field = time_choice_list(choice_idx).hour;
+      minute_field = time_choice_list(choice_idx).minute;
+      second_field = time_choice_list(choice_idx).second;
+      if ismember(day_field, field_list) && any(data_raw.(day_field) > 0) && ...
+         ismember(month_field, field_list) && any(data_raw.(month_field) > 0) && ...
+         ismember(year_field, field_list) && any(data_raw.(year_field) > 0) && ...
+         ismember(hour_field, field_list) && any(data_raw.(hour_field) > 0) && ...
+         ismember(minute_field, field_list) && any(data_raw.(minute_field) > 0) && ...
+         ismember(second_field, field_list) && any(data_raw.(second_field) > 0) 
+        
+        data_pre.time_gps = utc2posixtime(datenum(2000+data_raw.(year_field), data_raw.(month_field), data_raw.(day_field), data_raw.(hour_field), data_raw.(minute_field), data_raw.(second_field)));
+        meta_pre.time_gps.sources = strcat(day_field, {' '}, ...
+                                           month_field, {' '}, ...
+                                           year_field, {' '}, ...
+                                           hour_field, {' '}, ...
+                                           minute_field, {' '}, ...
+                                           second_field, {' '});
+        fprintf('Selected time gps sensor %d:\n', choice_idx); ...
+        fprintf('  day: %s\n', day_field);
+        if ~isempty(time_conversion_func)
+          if ischar(time_conversion_func)
+            time_conversion_func = str2func(time_conversion_func);
+          end
+          data_pre.time_gps = time_conversion_func(data_pre.time_gps);
+          meta_pre.time_gps.conversion = func2str(time_conversion_func);
+          fprintf('  conversion: %s\n', func2str(time_conversion_func));
         end
-        data_pre.time_gps = time_conversion_func(data_pre.time_gps);
-        meta_pre.time_gps.conversion = func2str(time_conversion_func);
-        fprintf('  conversion: %s\n', func2str(time_conversion_func));
+        break
       end
-      break
     end
   end
+   
   if ~isfield(data_pre, 'time_gps')
       warning('glider_toolbox:preprocessGliderData:MissingSensorGPSTime', ...
           'No gps time sensor present in data set.Set to default time.');
@@ -1092,8 +1121,7 @@ function [data_pre, meta_pre] = preprocessGliderData(data_raw, meta_raw, varargi
   
   
   %% Select oxygen sensors.
-  % Find preferred valid oxygen sensor availbale in list of sensor fields, 
-  % if any.
+  % Find preferred valid oxygen sensor availbale in list of sensor fields, if any.
   oxygen_choice_list = options.oxygen_list;
   oxygen_variables = ...
     {'oxygen_concentration' 'oxygen_saturation' 'oxygen_frequency'};

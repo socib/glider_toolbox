@@ -552,7 +552,8 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
     disp('Processing glider data...');
     try
       [data_processed, meta_processed] = ...
-        processGliderData(data_preprocessed, meta_preprocessed, processing_config.processing_options);
+        processGliderData(data_preprocessed, meta_preprocessed, ...
+                          processing_config.processing_options);
     catch exception
       error('glider_toolbox:deploymentDataProcessing:ProcessError', ...
             'Error processing glider deployment data: %s', getReport(exception, 'extended'));
@@ -633,7 +634,8 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
     try
       [data_postprocessed, meta_postprocessed] = ...
         postProcessGliderData(data_qc_processed, meta_qc_processed, ...
-                              'deployment', deployment); %, processing_config.postprocessing_options);
+                              processing_config.netcdf_egol1_options.variables, ...   %, processing_config.postprocessing_options);
+                              'deployment', deployment);
     catch exception
       disp('Error post processing glider deployment data:');
       disp(getReport(exception, 'extended'));

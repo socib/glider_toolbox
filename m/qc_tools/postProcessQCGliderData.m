@@ -30,6 +30,7 @@ function [ data_qc, meta_qc ] = postProcessQCGliderData( data_proc, meta_proc, v
 %    META_QC is also a struct with one field per variable, adding processing 
 %    metadata to any existing metadata in META_PROC.
 %
+%
 %  Authors:
 %    Miguel Charcos Llorens  <mcharcos@socib.es>
 %
@@ -63,7 +64,7 @@ function [ data_qc, meta_qc ] = postProcessQCGliderData( data_proc, meta_proc, v
         var_name = names_data{i};
         if isnumeric(data_qc.(var_name)) && ...
             ~strcmp(var_name(1:min(8,length(var_name))), 'history_')
-            new_name = strcat(names_data{i},'_qc');
+            new_name = strcat(names_data{i},'_QC');
             data_qc.(new_name) = zeros(size(data_qc.(var_name)));
             meta_qc.(new_name).sources = var_name; 
             meta_qc.(new_name).method = 'default0';
@@ -73,28 +74,27 @@ function [ data_qc, meta_qc ] = postProcessQCGliderData( data_proc, meta_proc, v
     %% Special cases
     % Geospatial Quality control
     if isfield(data_qc, 'latitude') && ...
-            isfield(data_qc, 'longitude') && ...
-            isfield(data_qc, 'position_qc')
-        meta_qc.position_qc.sources = 'latitude longitude'; 
+            isfield(data_qc, 'longitude')
+        meta_qc.position_QC.sources = 'latitude longitude'; 
+        meta_qc.position_QC.method = 'default0';
+        data_qc.position_QC = zeros(size(data_qc.latitude));
     end
 
     % Geospatial GPS Quality control
     if isfield(data_qc, 'latitude_gps') && ...
-            isfield(data_qc, 'longitude_gps') && ...
-            isfield(data_qc, 'position_gps_qc')
-        meta_qc.position_qc.sources = 'latitude_gps longitude_gps'; 
+            isfield(data_qc, 'longitude_gps') 
+        meta_qc.position_gps_QC.sources = 'latitude_gps longitude_gps'; 
+        meta_qc.position_gps_QC.method = 'default0';
+        data_qc.position_gps_QC = zeros(size(data_qc.latitude_gps));
     end
 
     % dates Quality control
-    if isfield(data_qc, 'deployment_start_qc') 
-        data_qc.deployment_start_qc         = -128;    % TODO: verify value
-        meta_qc.deployment_start_qc.sources = 'deployment_start'; 
-        meta_qc.deployment_start_qc.method = 'default0';
-    end
-    if isfield(data_qc, 'deployment_end_qc') 
-        data_qc.deployment_end_qc         = -128;    % TODO: verify value
-        meta_qc.deployment_end_qc.sources = 'deployment_start'; 
-        meta_qc.deployment_end_qc.method = 'default0';
-    end
+    data_qc.deployment_start_QC         = -128;    % TODO: verify value
+    meta_qc.deployment_start_QC.sources = 'deployment_start'; 
+    meta_qc.deployment_start_QC.method  = 'default0';
+    
+    data_qc.deployment_end_QC         = -128;    % TODO: verify value
+    meta_qc.deployment_end_QC.sources = 'deployment_start'; 
+    meta_qc.deployment_end_QC.method  = 'default0';
     
 end
