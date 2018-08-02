@@ -38,6 +38,13 @@ if [[ ! -d ${GBT_EXT_PATH}/bin/ ]]; then
   echo "              ... creating directory";
 fi
 
+GBT_EXTGPC_PATH="${GBT_EXT_PATH}/gpcl/";
+echo "      - GPC library: $GBT_EXTGPC_PATH";
+if [[ ! -d ${GBT_EXTGPC_PATH} ]]; then
+  mkdir -p ${GBT_EXTGPC_PATH};
+  echo "              ... creating directory";
+fi
+
 GBT_EXTMAT_PATH="${GBT_EXT_PATH}/matlab/";
 echo "      - Matlab jar files: $GBT_EXTMAT_PATH";
 if [[ ! -d ${GBT_EXT_PATH}/matlab/ ]]; then
@@ -149,6 +156,25 @@ if [[ -f "slocum-master.zip" ]]; then
   rm "slocum-master.zip";
 else
   echo "Error when downloading slocum-master.zip";
+fi
+
+##
+# GCP libraries
+echo ""
+echo "***************";
+echo "* GPC LIBRARY *";
+echo "***************";
+echo "";
+
+cd ${GBT_EXTGPC_PATH};
+echo "... downloading GPC";
+wget -t 3 -O gpc232-release.zip "http://www.cs.man.ac.uk/~toby/alan/software//assets/gpc232-release.zip";
+if [[ -f "gpc232-release.zip" ]]; then
+  unzip -q -j gpc232-release.zip "*" -d .
+  rm "gpc232-release.zip"
+  ln -s ${GBT_EXTGPC_PATH} ${GBT_EXT_PATH}/../m/mex_tools/gpcl
+else
+  echo "Error when downloading gpc232.zip";
 fi
 
 

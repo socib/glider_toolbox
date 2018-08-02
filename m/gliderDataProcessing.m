@@ -196,8 +196,8 @@ function [] = gliderDataProcessing(varargin)
               'Missing database and deployment list');
         elseif ischar(options.deployment_list)
             try
-                read_deployment = readConfigFile(deployment_file);
-                deployment_list = read_deployment.deployment_list;
+                read_deployment = readConfigFile(options.deployment_list);
+                options.deployment_list = read_deployment.deployment_list;
             catch exception
                 error('glider_toolbox:gliderDataProcessing:InvalidConfiguration',...
                   'Could not read deployment definition file');
@@ -207,7 +207,7 @@ function [] = gliderDataProcessing(varargin)
         %Check/modify format of deployment_list 
         for i=1:numel(required_deployment_strparam)
            fieldname = required_deployment_strparam(i);
-           if ~isfield( deployment_list, fieldname{1})
+           if ~isfield( options.deployment_list, fieldname{1})
                disp(['ERROR: Deployment definition does not contain ' fieldname{1}]);
                return;
            end

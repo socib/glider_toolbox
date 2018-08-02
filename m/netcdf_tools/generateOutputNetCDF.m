@@ -109,6 +109,12 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
 %        'down'). If a single string is provided, the same direction is assumed
 %        for all vertical coordinate variables.
 %        Default value: 'down'
+%      REQUIRED_ATTS: required global attributes. These attribute values will
+%        overwrite the values in the global attributes after the deployment
+%        values are set. Contrary to the deployment input, the required
+%        attributes will be added to the netCDF even if it was not included
+%        in the input atts structure.
+%        
 %
 %  Notes:
 %    Usually input data is the output of LOADSLOCUMDATA or LOADSEAGLIDERDATA, 
@@ -182,6 +188,7 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
   options.vertical = 'depth';
   options.vertical_conversion = [];
   options.vertical_positive = 'down';
+  options.required_atts = struct();
  
   
   %% Parse optional arguments.
@@ -216,13 +223,10 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
 
   %% Get dynamic global attribute values.
   dyn_atts = struct();
-  % Modification date:
-  switch (options.netcdf_format)
-    case 'EGO'
-      dyn_atts.date_update   = options.modified;
-    otherwise
-      dyn_atts.date_modified = options.modified;
-  end
+  % Modification date
+  dyn_atts.date_modified = options.modified;
+  dyn_atts.date_update   = options.modified; % added for EGO format
+  
   % Time coverage:
   time_field_list = cellstr(options.time);
   time_field_present = ...
@@ -392,6 +396,24 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
         dyn_atts.(global_meta.attributes(att_idx).name);
     end
   end
+  
+  % Set required attributes
+  if ~isempty(fieldnames(options.required_atts))
+      for att_idx = 1:numel(options.required_atts)
+          varName = options.required_atts(att_idx).name;
+          req_select = strcmp(varName, {global_meta.attributes.name});
+          if any(req_select)
+              global_meta.attributes(req_select).value = ...
+                  options.required_atts(att_idx).value;
+          else
+              global_meta.attributes(end+1).name = varName;
+              global_meta.attributes(end).value = ...
+                  options.required_atts(att_idx).value;
+          end
+      end
+  end
+  
+  
   % Set dimension lengths.
   global_meta.dimensions = dims;
   % Overwrite lengths of dimensions not defined by input arguments.
@@ -471,12 +493,12 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
   switch (options.netcdf_format)
     case 'EGO'
         try
+            disp('... converting attribute names for EGO format');
             [ variable_data, variable_meta ] = convert2NetCDFEGO( variable_data, variable_meta );
         catch exception
             error('glider_toolbox:generateOutputNetCDF:NetCDFConversionError', ...
                   'Problem with EGO conversion: %s.', getReport(exception, 'extended')); 
         end
-        disp('.... done converting attribute names for EGO format');
     otherwise
       ;
   end
@@ -500,7 +522,9 @@ function nc = generateOutputNetCDF(filename, data, meta, deployment, vars, dims,
   
   
   %% Generate the file.
+  disp('... saving file');
   savenc(variable_data, variable_meta, global_meta, filename);
+  disp('... done');
   
   
   %% Return the absolute name of the generated file.

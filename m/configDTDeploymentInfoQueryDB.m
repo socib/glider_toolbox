@@ -123,6 +123,10 @@ function [sql_query, deployment_fields] = configDTDeploymentInfoQueryDB(varargin
     'deployment_label'             'deployment_name'
     'id'                           'deployment_name'
     'deployment_cruise_id'         'deployment_cruise_id'
+    'glider_owner'                 'institution_name'
+    'operating_institution'        'deployment_data_center' 
+    'platform_type'                'instrument_model'
+    'platform_maker'               'instrument_manufacturer'
   };
 
   deployment_fields = fields_map(:,1)';

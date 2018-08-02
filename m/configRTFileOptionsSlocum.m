@@ -95,6 +95,13 @@ function slocum_options = configRTFileOptionsSlocum()
     'm_gps_lat'
     'm_gps_lon'
     'm_gps_status'
+    % Need m_gps_utc_X for EGO format
+    'm_gps_utc_day'
+    'm_gps_utc_month'
+    'm_gps_utc_year'
+    'm_gps_utc_hour'
+    'm_gps_utc_minute'
+    'm_gps_utc_second'
     'c_wpt_lat'
     'c_wpt_lon'
     'm_roll'
@@ -103,6 +110,8 @@ function slocum_options = configRTFileOptionsSlocum()
     'm_depth'
     'm_final_water_vx'
     'm_final_water_vy'
+    'm_battery'
+    'm_battery_inst'
     'sci_m_present_time'
     'sci_ctd41cp_timestamp'
     'sci_water_pressure'
@@ -120,6 +129,14 @@ function slocum_options = configRTFileOptionsSlocum()
     'sci_oxy4_saturation'
     'sci_oxy4_temp'
     'sci_oxy4_timestamp'
+    % Added for the GL script
+    'm_water_depth'
+    'x_dr_state'
+    'c_de_oil_vol'
+    'm_de_oil_vol'
+    'm_pitch'
+    'm_battery_inst'
+    'c_battpos'
   };
   
 end

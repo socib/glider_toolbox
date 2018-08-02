@@ -30,6 +30,7 @@ function [ data_qc, meta_qc ] = postProcessQCGliderData( data_proc, meta_proc, v
 %    META_QC is also a struct with one field per variable, adding processing 
 %    metadata to any existing metadata in META_PROC.
 %
+%
 %  Authors:
 %    Miguel Charcos Llorens  <mcharcos@socib.es>
 %
@@ -50,50 +51,63 @@ function [ data_qc, meta_qc ] = postProcessQCGliderData( data_proc, meta_proc, v
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
   
+    %% Check inputs.
+    narginchk(2,2)
+    
     %% Initialize results 
     data_qc = data_proc;
     meta_qc = meta_proc;
-
-    %% Time Quality control
-    if isfield(data_qc, 'time')
-        meta_qc.time_qc.sources = 'time'; 
-        meta_qc.time_qc.method = 'default0';
-        data_qc.time_qc = zeros(size(data_qc.time));
-        %TODO: Complete ancillary_variable ??
-    end
-
-    %% Time GPS Quality control
-    if isfield(data_qc, 'time_gps')
-        meta_qc.time_gps_qc.sources = 'time_gps'; 
-        meta_qc.time_gps_qc.method = 'default0';
-        data_qc.time_gps_qc = zeros(size(data_qc.time_gps));
-        %TODO: Complete ancillary_variable ??
-    end
-
-    %% Geospatial Quality control
-    if isfield(data_qc, 'latitude') && isfield(data_qc, 'longitude')
-        meta_qc.position_qc.sources = 'latitude longitude'; 
-        meta_qc.position_qc.method = 'default0';
-        data_qc.position_qc = zeros(size(data_qc.latitude_gps));
-        %TODO: Complete ancillary_variable ??
-    end
-
-    %% Geospatial GPS Quality control
-    if isfield(data_qc, 'latitude_gps') && isfield(data_qc, 'longitude_gps')
-        meta_qc.position_gps_qc.sources = 'latitude_gps longitude_gps'; 
-        meta_qc.position_gps_qc.method = 'default0';
-        data_qc.position_gps_qc = zeros(size(data_qc.latitude_gps));
-        %TODO: Complete ancillary_variable ??
-    end
     
-    %% JULD Quality control
-    if isfield(data_qc, 'juld')
-        meta_qc.juld_qc.sources = 'juld'; 
-        meta_qc.juld_qc.method = 'default0';
-        data_qc.juld_qc = zeros(size(data_qc.juld));
-        %TODO: Complete juld.ancillary_variable = juld_qc ??
+    %% Start assembling.
+    names_data = fieldnames(data_qc);
+    for i=1:numel(names_data)
+        var_name = names_data{i};
+        if isnumeric(data_qc.(var_name)) && ...
+            ~strcmp(var_name(1:min(8,length(var_name))), 'history_')
+            new_name = strcat(names_data{i},'_QC');
+            data_qc.(new_name) = zeros(size(data_qc.(var_name)));
+            meta_qc.(new_name).sources = var_name; 
+            meta_qc.(new_name).method = 'default0';
+            
+            new_name = strcat(names_data{i},'_UNCERTAINTY');
+            data_qc.(new_name) = zeros(size(data_qc.(var_name)));
+            meta_qc.(new_name).sources = var_name; 
+            meta_qc.(new_name).method = 'default0';
+        end
     end
 
+    %% Special cases
+    % Geospatial Quality control
+    if isfield(data_qc, 'latitude') && ...
+            isfield(data_qc, 'longitude')
+        meta_qc.position_QC.sources = 'latitude longitude'; 
+        meta_qc.position_QC.method = 'default0';
+        data_qc.position_QC = zeros(size(data_qc.latitude));
+        
+        meta_qc.position_UNCERTAINTY.sources = 'latitude longitude'; 
+        meta_qc.position_UNCERTAINTY.method = 'default0';
+        data_qc.position_UNCERTAINTY = zeros(size(data_qc.latitude));
+    end
 
+    % Geospatial GPS Quality control
+    if isfield(data_qc, 'latitude_gps') && ...
+            isfield(data_qc, 'longitude_gps') 
+        meta_qc.position_gps_QC.sources = 'latitude_gps longitude_gps'; 
+        meta_qc.position_gps_QC.method = 'default0';
+        data_qc.position_gps_QC = zeros(size(data_qc.latitude_gps));
+        
+        meta_qc.position_gps_UNCERTAINTY.sources = 'latitude_gps longitude_gps'; 
+        meta_qc.position_gps_UNCERTAINTY.method = 'default0';
+        data_qc.position_gps_UNCERTAINTY = zeros(size(data_qc.latitude_gps));
+    end
 
+    % dates Quality control
+    data_qc.deployment_start_QC         = -128;    % TODO: verify value
+    meta_qc.deployment_start_QC.sources = 'deployment_start'; 
+    meta_qc.deployment_start_QC.method  = 'default0';
+    
+    data_qc.deployment_end_QC         = -128;    % TODO: verify value
+    meta_qc.deployment_end_QC.sources = 'deployment_start'; 
+    meta_qc.deployment_end_QC.method  = 'default0';
+    
 end

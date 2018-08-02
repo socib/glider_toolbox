@@ -1,4 +1,4 @@
-function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, varargin )
+function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, vars, varargin )
 % POSTPROCESSGLIDERDATA    Transform processed data to fit EGO standards
 %
 %  Syntax:
@@ -58,7 +58,7 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
   
 
-    narginchk(2, 4);
+    narginchk(3, 7);
 
     %% Set parameter changes options.
     options = struct();
@@ -72,9 +72,9 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
                'molar_doxy',                     'oxygen_concentration', ...
                'oxygen_saturation',              'sci_oxy3835_saturation', ...
                'temp_doxy',                      'temperature_oxygen', ...
-               'chla',                           'chlorophyll', ...
-               'temp_spectrophotometer_nitrate', 'temperature_optics');
+               'chla',                           'chlorophyll');
     options.deployment = struct();
+    options.attributes = struct();
     
     %% Get options from extra arguments.
     % Parse option key-value pairs in any accepted call signature.
@@ -157,11 +157,44 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
         end
     end
     
-    %% Data variables
+    
+    %% Data and sensor variables. Populate sensor list and convert the variable names as indicated by param_convert option
+    % Initial definition
+    meta_conv.sensor.sources = 'postProcessGliderData';
+    meta_conv.sensor.method  = 'postProcessGliderData';
+    data_conv.sensor         = [];    
+    meta_conv.sensor_maker.sources = 'postProcessGliderData';
+    meta_conv.sensor_maker.method  = 'postProcessGliderData';
+    data_conv.sensor_maker         = []; 
+    meta_conv.sensor_model.sources = 'postProcessGliderData';
+    meta_conv.sensor_model.method  = 'postProcessGliderData';
+    data_conv.sensor_model         = []; 
+    meta_conv.sensor_serial_no.sources = 'postProcessGliderData';
+    meta_conv.sensor_serial_no.method  = 'postProcessGliderData';
+    data_conv.sensor_serial_no         = []; 
+    meta_conv.sensor_units.sources = 'postProcessGliderData';
+    meta_conv.sensor_units.method  = 'postProcessGliderData';
+    data_conv.sensor_units         = []; 
+    meta_conv.sensor_accuracy.sources = 'postProcessGliderData';
+    meta_conv.sensor_accuracy.method  = 'postProcessGliderData';
+    data_conv.sensor_accuracy         = []; 
+    meta_conv.sensor_resolution.sources = 'postProcessGliderData';
+    meta_conv.sensor_resolution.method  = 'postProcessGliderData';
+    data_conv.sensor_resolution         = []; 
+    
+    % Fill values
     param_convert_list = fieldnames(options.param_convert);
+    empty_string16 = '                ';
+    empty_string32 = char(strcat({empty_string16},{empty_string16}));                     
+    empty_string64 = char(strcat({empty_string32},{empty_string32}));
+    empty_string256 = char(strcat({empty_string64},{empty_string64},{empty_string64},{empty_string64})); 
     field_list = fieldnames(data_conv);
     for param_change_idx = 1:numel(param_convert_list)
+        param_convert_sensor = empty_string64;
         param_convert_name = param_convert_list{param_change_idx};
+        laux = min(length(param_convert_sensor),length(param_convert_name));
+        param_convert_sensor(1:laux) = upper(param_convert_name(1:laux));
+        
         param_choice = options.param_convert.(param_convert_name);
         if isfield(meta_conv, param_choice) && ismember(param_choice, field_list) && any(data_conv.(param_choice) > 0) 
             [data_conv(:).(param_convert_name)] = deal(data_conv(:).(param_choice));
@@ -170,6 +203,72 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
             [meta_conv(:).(param_convert_name)] = deal(meta_conv(:).(param_choice));
             meta_conv = rmfield(meta_conv,param_choice);
         end
+        field_list = fieldnames(data_conv);
+        if isfield(meta_conv, param_convert_name) && ismember(param_convert_name, field_list) && any(data_conv.(param_convert_name) > 0) 
+            % TODO: Could input dimensions and read the structure to know
+            % how to truncate/extend the size of the strings.            
+            param_convert_serial_number = empty_string16;
+            param_convert_units         = empty_string16;
+            param_convert_accuracy      = empty_string32; 
+            param_convert_resolution    = empty_string32; 
+            
+            % Check values in attributes
+            if isfield(vars,param_convert_name) && isfield(vars.(param_convert_name), 'attributes')
+                param_convert_atts = vars.(param_convert_name).attributes;
+                
+                % Check sensor_serial_number attribute in vars.(param_convert_name)
+                param_convert_serial_number_select = strcmp('sensor_serial_number', {param_convert_atts.name});
+                if any(param_convert_serial_number_select)
+                    auxval = param_convert_atts(param_convert_serial_number_select).value;
+                    laux = min(length(param_convert_serial_number),length(auxval));
+                    param_convert_serial_number(1:laux) = auxval(1:laux);
+                end
+                
+                % Check units attribute in vars.(param_convert_name)
+                param_convert_units_select = strcmp('units', {param_convert_atts.name});
+                if any(param_convert_units_select)
+                    auxval = param_convert_atts(param_convert_units_select).value;
+                    laux = min(length(param_convert_units),length(auxval));
+                    param_convert_units(1:laux) = auxval(1:laux);
+                end
+                
+                % Check accuracy attribute in vars.(param_convert_name)
+                param_convert_accuracy_select = strcmp('accuracy', {param_convert_atts.name});
+                if any(param_convert_accuracy_select)
+                    auxval = param_convert_atts(param_convert_accuracy_select).value;
+                    laux = min(length(param_convert_accuracy),length(auxval));
+                    param_convert_accuracy(1:laux) = auxval(1:laux);
+                end
+                
+                % Check resolution attribute in vars.(param_convert_name)
+                param_convert_resolution_select = strcmp('resolution', {param_convert_atts.name});
+                if any(param_convert_resolution_select)
+                    auxval = param_convert_atts(param_convert_resolution_select).value;
+                    laux = min(length(param_convert_resolution),length(auxval));
+                    param_convert_resolution(1:laux) = auxval(1:laux);
+                end
+            end
+            
+            % Complete values
+            if numel(data_conv.sensor) == 0
+                data_conv.sensor            = param_convert_sensor;
+                data_conv.sensor_maker      = empty_string256; 
+                data_conv.sensor_model      = empty_string256; 
+                data_conv.sensor_serial_no  = param_convert_serial_number; 
+                data_conv.sensor_units      = param_convert_units;             
+                data_conv.sensor_accuracy   = param_convert_accuracy; 
+                data_conv.sensor_resolution = param_convert_resolution; 
+            else
+                data_conv.sensor(end+1,:)            = param_convert_sensor;
+                data_conv.sensor_maker(end+1,:)      = empty_string256; 
+                data_conv.sensor_model(end+1,:)      = empty_string256; 
+                data_conv.sensor_serial_no(end+1,:)  = param_convert_serial_number; 
+                data_conv.sensor_units(end+1,:)      = param_convert_units;             
+                data_conv.sensor_accuracy(end+1,:)   = param_convert_accuracy; 
+                data_conv.sensor_resolution(end+1,:) = param_convert_resolution; 
+            end
+        end
+        
     end
   
     %% Create glider_original_parameter_name from field
@@ -181,18 +280,6 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
             meta_conv.(param_convert_name) = rmfield(meta_conv.(param_convert_name),'sources');
         end
     end
-    
-    %TODO: Allow deployment to be input and complete data variable
-    %attributes if deployment contains the data that is needed. These are:
-    %        - sensor_orientation: downward, upward, vertical, horizontal.
-    %        - sensor_name
-    %        - sensor_serial_number
-    %        - ancillary_variables: PARAM_QC. Could be completed in QC processing
-    %        - accuracy, precision, resolution: BD
-    %        - cell_methods: require new implementation which considers
-    %               this info in the instrumentation webapp
-    %        - DM_indicator: needs to be completed from general config
-    %        processing_mode
     
     
     %% Fill History information 
@@ -211,7 +298,7 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
 
     meta_conv.history_step.sources = 'postProcessGliderData';
     meta_conv.history_step.method  = 'postProcessGliderData';
-    data_conv.history_step         = 'ARFM';   %TODO: confirm value
+    data_conv.history_step         = 'ARFM';   
 
     meta_conv.history_software.sources = 'postProcessGliderData';
     meta_conv.history_software.method  = 'postProcessGliderData';
@@ -223,7 +310,7 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
 
     meta_conv.history_reference.sources = 'postProcessGliderData';
     meta_conv.history_reference.method  = 'postProcessGliderData';
-    data_conv.history_reference         = 'NA';
+    data_conv.history_reference         = 'N/A';
 
     meta_conv.history_date.sources = 'postProcessGliderData';
     meta_conv.history_date.method  = 'postProcessGliderData';
@@ -231,15 +318,15 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
 
     meta_conv.history_action.sources = 'postProcessGliderData';
     meta_conv.history_action.method  = 'postProcessGliderData';
-    data_conv.history_action         = 'IP';          % TODO: verify value
+    data_conv.history_action         = 'IP';         
 
     meta_conv.history_parameter.sources = 'postProcessGliderData';
     meta_conv.history_parameter.method  = 'postProcessGliderData';
-    data_conv.history_parameter         = 'All Data';    % TODO: verify value
+    data_conv.history_parameter         = 'All Data';    
 
     meta_conv.history_previous_value.sources = 'postProcessGliderData';
     meta_conv.history_previous_value.method  = 'postProcessGliderData';
-    data_conv.history_previous_value         = 99999;         % TODO: verify value
+    data_conv.history_previous_value         = 99999;         
 
     meta_conv.history_start_time_index.sources = 'postProcessGliderData';
     meta_conv.history_start_time_index.method  = 'postProcessGliderData';
@@ -264,7 +351,7 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
 
     meta_conv.trans_frequency.sources = 'postProcessGliderData';
     meta_conv.trans_frequency.method  = 'postProcessGliderData';
-    data_conv.trans_frequency         = 'N/A';       % TODO: verify value
+    data_conv.trans_frequency         = 'N/A';       
 
     meta_conv.positioning_system.sources = 'postProcessGliderData';
     meta_conv.positioning_system.method  = 'postProcessGliderData';
@@ -276,12 +363,19 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
 
     meta_conv.platform_type.sources = 'postProcessGliderData';
     meta_conv.platform_type.method  = 'postProcessGliderData';
+    if isfield(options.deployment, 'platform_type')
+        data_conv.platform_type         = options.deployment.platform_type; 
+    elseif isfield(options.deployment, 'glider_model')
+        data_conv.platform_type         = options.deployment.glider_model; 
+    else
+        data_conv.platform_type         = 'N/A';         
+    end
+    
     meta_conv.platform_maker.sources = 'postProcessGliderData';
     meta_conv.platform_maker.method  = 'postProcessGliderData';
-    data_conv.platform_maker         = 'N/A';
-    if isfield(options.deployment, 'glider_model')
-        data_conv.platform_type         = options.deployment.glider_model; 
-        
+    if isfield(options.deployment, 'platform_maker')
+        data_conv.platform_maker         = options.deployment.platform_maker; 
+    elseif isfield(options.deployment, 'glider_model')
         if ~isempty(regexpi(options.deployment.glider_model, '.*slocum.*g1.*', 'match', 'once'))
         	data_conv.platform_maker         = 'Webb Research Corporation';
         elseif ~isempty(regexpi(options.deployment.glider_model, '.*slocum.*g2.*', 'match', 'once'))
@@ -292,20 +386,20 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
         	data_conv.platform_maker         = 'Alseamar';
         end
     else
-        data_conv.platform_type         = 'N/A';         % TODO: verify value
+        data_conv.platform_maker         = 'N/A';
     end
     
     meta_conv.firmware_version_navigation.sources = 'postProcessGliderData';
     meta_conv.firmware_version_navigation.method  = 'postProcessGliderData';
-    data_conv.firmware_version_navigation         = 'N/A';    % TODO: verify value
+    data_conv.firmware_version_navigation         = 'N/A';   
 
     meta_conv.firmware_version_science.sources = 'postProcessGliderData';
     meta_conv.firmware_version_science.method  = 'postProcessGliderData';
-    data_conv.firmware_version_science         = 'N/A';    % TODO: verify value
+    data_conv.firmware_version_science         = 'N/A';    
 
     meta_conv.manual_version.sources = 'postProcessGliderData';
     meta_conv.manual_version.method  = 'postProcessGliderData';
-    data_conv.manual_version         = 'N/A';    % TODO: verify value
+    data_conv.manual_version         = 'N/A';    
 
     meta_conv.glider_serial_no.sources = 'postProcessGliderData';
     meta_conv.glider_serial_no.method  = 'postProcessGliderData';
@@ -317,7 +411,7 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
     
     meta_conv.standard_format_id.sources = 'postProcessGliderData';
     meta_conv.standard_format_id.method  = 'postProcessGliderData';
-    data_conv.standard_format_id         = 'N/A';    % TODO: verify value
+    data_conv.standard_format_id         = 'N/A';    
 
     meta_conv.dac_format_id.sources = 'postProcessGliderData';
     meta_conv.dac_format_id.method  = 'postProcessGliderData';
@@ -329,14 +423,14 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
     
     meta_conv.wmo_inst_type.sources = 'postProcessGliderData';
     meta_conv.wmo_inst_type.method  = 'postProcessGliderData';
-    data_conv.wmo_inst_type         = '870';    % TODO: verify value
+    data_conv.wmo_inst_type         = '870';    
 
     meta_conv.project_name.sources = 'postProcessGliderData';
     meta_conv.project_name.method  = 'postProcessGliderData';
     if isfield(options.deployment, 'deployment_name')
         data_conv.project_name     = options.deployment.deployment_name;    
     else
-        data_conv.project_name     = 'N/A';    % TODO: verify value
+        data_conv.project_name     = 'N/A';    
     end
     
     meta_conv.data_centre.sources = 'postProcessGliderData';
@@ -346,7 +440,25 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
     else
         data_conv.data_centre      = 'SO';
     end
-
+    
+    if isfield(options.deployment, 'deployment_start') && ...
+       isfield(options.deployment, 'glider_name') && ...
+       isfield(options.deployment, 'glider_deployment_code')
+   
+        meta_conv.id.sources = 'postProcessGliderData';
+        meta_conv.id.method  = 'postProcessGliderData';
+        id_date = datestr(options.deployment.deployment_start, 'yyyymmdd');
+        id_glider = options.deployment.glider_name;
+        id_dep = options.deployment.glider_deployment_code;
+                
+        if isfield(options.attributes, 'data_mode')
+            id_mode = options.attributes.data_mode;
+        else
+            id_mode = 'R';
+        end
+        data_conv.id      = strcat(['GL_', id_date, '_', id_glider, '_', id_dep, '_', id_mode]);
+    end
+    
     meta_conv.pi_name.sources = 'postProcessGliderData';
     meta_conv.pi_name.method  = 'postProcessGliderData';
     if isfield(options.deployment, 'principal_investigator')
@@ -357,31 +469,39 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
     
     meta_conv.anomaly.sources = 'postProcessGliderData';
     meta_conv.anomaly.method  = 'postProcessGliderData';
-    data_conv.anomaly         = 'None';    
+    data_conv.anomaly         = 'N/A';    
 
     meta_conv.battery_type.sources = 'postProcessGliderData';
     meta_conv.battery_type.method  = 'postProcessGliderData';
-    data_conv.battery_type         = 'N/A';    % TODO: verify value
+    data_conv.battery_type         = 'N/A';   
 
     meta_conv.battery_packs.sources = 'postProcessGliderData';
     meta_conv.battery_packs.method  = 'postProcessGliderData';
-    data_conv.battery_packs         = 'N/A';    % TODO: verify value
+    data_conv.battery_packs         = 'N/A';    
 
     meta_conv.special_features.sources = 'postProcessGliderData';
     meta_conv.special_features.method  = 'postProcessGliderData';
-    data_conv.special_features         = 'N/A';    % TODO: verify value
+    data_conv.special_features         = 'N/A';    
 
     meta_conv.glider_owner.sources = 'postProcessGliderData';
     meta_conv.glider_owner.method  = 'postProcessGliderData';
-    data_conv.glider_owner         = 'SOCIB';    % TODO: verify value
-
+    if isfield(options.deployment, 'glider_owner')
+        data_conv.glider_owner         = options.deployment.glider_owner;
+    else
+        data_conv.glider_owner         = 'N/A';    
+    end
+    
     meta_conv.operating_institution.sources = 'postProcessGliderData';
     meta_conv.operating_institution.method  = 'postProcessGliderData';
-    data_conv.operating_institution         = 'SOCIB';    % TODO: verify value
-
+    if isfield(options.deployment, 'operating_institution')
+        data_conv.operating_institution  = options.deployment.operating_institution;
+    else
+        data_conv.operating_institution  = 'N/A';    
+    end
+    
     meta_conv.customization.sources = 'postProcessGliderData';
     meta_conv.customization.method  = 'postProcessGliderData';
-    data_conv.customization         = 'None';    % TODO: verify value
+    data_conv.customization         = 'None';    
 
     meta_conv.deployment_start_date.sources = 'postProcessGliderData';
     meta_conv.deployment_start_date.method  = 'postProcessGliderData';
@@ -394,7 +514,7 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
     meta_conv.deployment_start_latitude.sources = 'postProcessGliderData';
     meta_conv.deployment_start_latitude.method  = 'postProcessGliderData';
     if isfield(options.deployment, 'latitude_start')
-        data_conv.deployment_start_latitude      = options.deployment.latitude_start; % TODO: not really this one
+        data_conv.deployment_start_latitude      = options.deployment.latitude_start; 
     else
         data_conv.deployment_start_latitude      = 99999; 
     end
@@ -402,19 +522,16 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
     meta_conv.deployment_start_longitude.sources = 'postProcessGliderData';
     meta_conv.deployment_start_longitude.method  = 'postProcessGliderData';
     if isfield(options.deployment, 'longitude_start')
-        data_conv.deployment_start_longitude      = options.deployment.longitude_start; % TODO: not really this one
+        data_conv.deployment_start_longitude      = options.deployment.longitude_start; 
     else
         data_conv.deployment_start_longitude      = 99999;
     end
 
-    meta_conv.deployment_start_qc.sources = 'postProcessGliderData';
-    meta_conv.deployment_start_qc.method  = 'postProcessGliderData';
-    data_conv.deployment_start_qc         = -128;    % TODO: verify value
 
     meta_conv.deployment_platform.sources = 'postProcessGliderData';
     meta_conv.deployment_platform.method  = 'postProcessGliderData';
     if isfield(options.deployment, 'glider_name')
-        data_conv.deployment_platform      = options.deployment.glider_name; % TODO: not really this one
+        data_conv.deployment_platform      = options.deployment.glider_name; 
     else
         data_conv.deployment_platform      = 'N/A';    
     end
@@ -423,98 +540,66 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
     meta_conv.deployment_cruise_id.sources = 'postProcessGliderData';
     meta_conv.deployment_cruise_id.method  = 'postProcessGliderData';
     if isfield(options.deployment, 'deployment_cruise_id')
-        data_conv.deployment_cruise_id      = num2str(options.deployment.deployment_cruise_id); % TODO: not really this one
+        data_conv.deployment_cruise_id      = num2str(options.deployment.deployment_cruise_id); 
     else
-        data_conv.deployment_cruise_id         = 'N/A';    % TODO: verify value
+        data_conv.deployment_cruise_id         = 'N/A';
     end
 
     meta_conv.deployment_reference_station_id.sources = 'postProcessGliderData';
     meta_conv.deployment_reference_station_id.method  = 'postProcessGliderData';
-    data_conv.deployment_reference_station_id         = 'None';    % TODO: verify value
+    data_conv.deployment_reference_station_id         = 'N/A';   
 
     meta_conv.deployment_end_date.sources = 'postProcessGliderData';
     meta_conv.deployment_end_date.method  = 'postProcessGliderData';
     if isfield(options.deployment, 'deployment_end') && ~isnan(options.deployment.deployment_end)
         data_conv.deployment_end_date      = datestr(options.deployment.deployment_end, 'yyyymmddHHMMSS'); 
     else
-        data_conv.deployment_end_date      = 'yyyymmddHHMMSS'; % TODO: verify value
+        data_conv.deployment_end_date      = 'yyyymmddHHMMSS'; 
     end
 
     meta_conv.deployment_end_latitude.sources = 'postProcessGliderData';
     meta_conv.deployment_end_latitude.method  = 'postProcessGliderData';
     if isfield(options.deployment, 'latitude_end')
-        data_conv.deployment_end_latitude      = options.deployment.latitude_end; % TODO: not really this one
+        data_conv.deployment_end_latitude      = options.deployment.latitude_end; 
     else
-        data_conv.deployment_end_latitude      = 99999; % TODO: verify value
+        data_conv.deployment_end_latitude      = 99999; 
     end
 
     meta_conv.deployment_end_longitude.sources = 'postProcessGliderData';
     meta_conv.deployment_end_longitude.method  = 'postProcessGliderData';
     if isfield(options.deployment, 'longitude_end')
-        data_conv.deployment_end_longitude      = options.deployment.longitude_end; % TODO: not really this one
+        data_conv.deployment_end_longitude      = options.deployment.longitude_end; 
     else
-        data_conv.deployment_end_longitude      = 99999; % TODO: verify value
+        data_conv.deployment_end_longitude      = 99999; 
     end
-
-    meta_conv.deployment_end_qc.sources = 'postProcessGliderData';
-    meta_conv.deployment_end_qc.method  = 'postProcessGliderData';
-    data_conv.deployment_end_qc         = -128;    % TODO: verify value
 
     meta_conv.deployment_end_status.sources = 'postProcessGliderData';
     meta_conv.deployment_end_status.method  = 'postProcessGliderData';
-    data_conv.deployment_end_status         = 'R';    % TODO: verify value
-
+    if isfield(options.attributes, 'data_mode')
+        data_conv.deployment_end_status         = options.attributes.data_mode;   
+    else
+        data_conv.deployment_end_status         = 'R';   
+    end
+    
     meta_conv.deployment_operator.sources = 'postProcessGliderData';
     meta_conv.deployment_operator.method  = 'postProcessGliderData';
-    data_conv.deployment_operator         = 'N/A';    % TODO: verify value
-
-    %TODO: filling correctly the list of sensors and derivations for a
-    %      specific data set. This will require more complex
-    %      work in the database query which is out of scope of this
-    %      development.
-    meta_conv.sensor.sources = 'postProcessGliderData';
-    meta_conv.sensor.method  = 'postProcessGliderData';
-    data_conv.sensor         = 'N/A';    % TODO: verify value
-
-    meta_conv.sensor_maker.sources = 'postProcessGliderData';
-    meta_conv.sensor_maker.method  = 'postProcessGliderData';
-    data_conv.sensor_maker         = 'N/A';    % TODO: verify value
-
-    meta_conv.sensor_model.sources = 'postProcessGliderData';
-    meta_conv.sensor_model.method  = 'postProcessGliderData';
-    data_conv.sensor_model         = 'N/A';    % TODO: verify value
-
-    meta_conv.sensor_serial_no.sources = 'postProcessGliderData';
-    meta_conv.sensor_serial_no.method  = 'postProcessGliderData';
-    data_conv.sensor_serial_no         = 'N/A';    % TODO: verify value
-
-    meta_conv.sensor_units.sources = 'postProcessGliderData';
-    meta_conv.sensor_units.method  = 'postProcessGliderData';
-    data_conv.sensor_units         = 'N/A';    % TODO: verify value
-
-    meta_conv.sensor_accuracy.sources = 'postProcessGliderData';
-    meta_conv.sensor_accuracy.method  = 'postProcessGliderData';
-    data_conv.sensor_accuracy         = 'N/A';    % TODO: verify value
-
-    meta_conv.sensor_resolution.sources = 'postProcessGliderData';
-    meta_conv.sensor_resolution.method  = 'postProcessGliderData';
-    data_conv.sensor_resolution         = 'N/A';    % TODO: verify value
+    data_conv.deployment_operator         = 'N/A';    
 
     meta_conv.derivation_parameter.sources = 'postProcessGliderData';
     meta_conv.derivation_parameter.method  = 'postProcessGliderData';
-    data_conv.derivation_parameter         = 'N/A';    % TODO: verify value
+    data_conv.derivation_parameter         = 'N/A';    
 
     meta_conv.derivation_equation.sources = 'postProcessGliderData';
     meta_conv.derivation_equation.method  = 'postProcessGliderData';
-    data_conv.derivation_equation         = 'N/A';    % TODO: verify value
+    data_conv.derivation_equation         = 'N/A';    
 
     meta_conv.derivation_coefficient.sources = 'postProcessGliderData';
     meta_conv.derivation_coefficient.method  = 'postProcessGliderData';
-    data_conv.derivation_coefficient         = 'N/A';    % TODO: verify value
+    data_conv.derivation_coefficient         = 'N/A';    
 
     meta_conv.derivation_comment.sources = 'postProcessGliderData';
     meta_conv.derivation_comment.method  = 'postProcessGliderData';
-    data_conv.derivation_comment         = 'N/A';    % TODO: verify value
+    data_conv.derivation_comment         = 'N/A';   
 
     meta_conv.derivation_date.sources = 'postProcessGliderData';
     meta_conv.derivation_date.method  = 'postProcessGliderData';
