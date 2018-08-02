@@ -1,4 +1,4 @@
-function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_paths, deployment, configuration, varargin)
+pfunction [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_paths, deployment, configuration, varargin)
 % DEPLOYMENTDATAPROCESSING  Process glider data of a specific deployment
 %                            and given configuration
 %
@@ -636,7 +636,7 @@ function [outputs, figures, meta_res, data_res] = deploymentDataProcessing(data_
       [data_postprocessed, meta_postprocessed] = ...
         postProcessGliderData(data_qc_processed, meta_qc_processed, ...
                               processing_config.netcdf_egol1_options.variables, ...   %, processing_config.postprocessing_options);
-                              'attributes', processing_config.netcdf_egol1_options.attributes, ...
+                              processing_config.netcdf_egol1_options
                               'deployment', deployment);
     catch exception
       disp('Error post processing glider deployment data:');

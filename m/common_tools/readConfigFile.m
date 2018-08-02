@@ -72,9 +72,11 @@ function [ readvals ] = readConfigFile( fconfig, varargin )
       %      - split two sides of the equation (var = tok)
       %      - Check whether the right side (tok) is an array or a single value
       %      - Create a field readvals.(var) with the value (or array of values)
-      [var,tok] = strtok(line,' =');
-      var = lower(var); 
-      tok = strtok(tok,' =');  % remove = sign
+      [var,tok] = strtok(line,'=');
+      var = strtrim(lower(var));
+      tok = strtrim(tok);
+      tok = strtok(tok,'=');  % remove = sign
+      tok = strtrim(tok);
       if ~isempty(options.array_delimiter) && any(tok==options.array_delimiter),   % for arrays
         k = 1; 
         while (1)
@@ -88,6 +90,9 @@ function [ readvals ] = readConfigFile( fconfig, varargin )
         tok = strtrim(tok);
         %R.(var) = tok;		% return value of function
         %sprintf('readvals.%s=''%s''; ',var,tok);
+        
+        % replaces ' character with '' in the tok value so it is evaluated correctly
+        tok=strrep(tok,'''',''''''); 
         eval(sprintf('readvals.%s=''%s''; ',var,tok));  % stores variable in local workspace
       end;
     end;

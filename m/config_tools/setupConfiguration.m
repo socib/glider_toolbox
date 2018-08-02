@@ -411,6 +411,8 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     config.figures_gridded.status    = 'configFigures';
     
     % Overwrite figures_processed
+    % TODO: This only handles specific parameters and it won't work for all
+    %       the fields of the structure since some of them are structures
     if ~isempty(readconfig) && isfield(readconfig, 'figures_processed')
         % Read values from configuration file and overwrite default values
         % with the one found in the file
@@ -518,7 +520,6 @@ function [ config ] = setupConfiguration( glider_toolbox_dir, varargin)
     config.processing_options_seaglider = configDataProcessingSeaglider();
     config.processing_options_seaexplorer = configDataProcessingSeaExplorer();
     config.gridding_options = configDataGridding();
-
 
     %% Configure Slocum file options
     if strcmp(config.processing_mode, 'dt')

@@ -4,23 +4,71 @@ function [ var_attr_list, var_attrtype_list ] = Dictionary_EGONetCDFL1Parameters
 %
 %  Syntax:
 %    [ VAR_ATTR_LIST, VAR_ATTRTYPE_LIST ] = DICTIONARY_EGONETCDFL1PARAMETERS()
+%    [ VAR_ATTR_LIST, VAR_ATTRTYPE_LIST ] = DICTIONARY_EGONETCDFL1PARAMETERS(OPTIONS)
+%    [ VAR_ATTR_LIST, VAR_ATTRTYPE_LIST ] = DICTIONARY_EGONETCDFL1PARAMETERS(OPT1, VAL1, ...)
 %
 %  Description:
 %    [ VAR_ATTR_LIST, VAR_ATTRTYPE_LIST ] = DICTIONARY_EGONETCDFL1PARAMETERS() 
 %    should return a struct describing the structure of parameters of the NetCDF file. 
 %    This function contains the definition of all available parameters of EGO
-%    standards. 
+%    standards. It will return a structure with the entire dictionary of
+%    variables of the EGO format as well as their corresponding QC and
+%    UNCERTAINTY variables.
 %    
 %  Input:
-%    The input structures are as follow: TBD
-%
+%    No input
+%  
 %  Ouput:
-%    TBD
+%    The output lists are structures describing the resulting variables
+%    attributes and variable types
+%         - VAR_ATTR_LIST: Structure containing the list of variables and
+%                 their attributes
+%         - VAR_ATTRTYPE_LIST: Structure containing the types of specific
+%                 variables (single, double,...)
+%
+%  Options:
+%         - QC_ATTRIBUTES, QC_ATTRIBUTE_TYPE, QC_PREFIX, QC_SUFFIX and
+%             UPDATE_LONG_NAME: see options for competeQCDictionary
+%
+%             + QC_ATTRIBUTES: Default QC attributes to be used to create the
+%                  QC variables. If not input the default structure is the
+%                  one used by EGO standards
+%                 + long_name: Quality flag 
+%                 + standard_name: 
+%                 + quality_control_convention: EGO reference table 2
+%                 + comment: None
+%                 + valid_min: 0
+%                 + valid_max: 9
+%                 + _FillValue: -128
+%                 + QC_procedure: 1
+%                 + flag_values: [0,1,2,3,4,8,9]
+%                 + flag_meanings: no_qc_performed 
+%                                  good_data 
+%                                  probably_good_data
+%                                  probably_bad_data 
+%                                  bad_data
+%                                  interpolated_value 
+%                                  missing_value  
+%             + QC_ATTRIBUTE_TYPE: int8
+%
+%         - UNCERTAINTY_ATTRIBUTES, UNCERTAINTY_ATTRIBUTE_TYPE,
+%             UNCERTAINTY_PREFIX and UNCERTAINTY_SUFFIX: see options for
+%             completeUncertaintyDictionary 
+%
+%             + UNCERTAINTY_ATTRIBUTES: Default uncertainty attributes to be used to create the
+%                  uncertainty variables. If not input the default structure is the
+%                  one used by EGO standards
+%                 + long_name: Uncertainty
+%                 + _FillValue: 0
+%                 + units: na 
+%              + QC_ATTRIBUTE_TYPE: single
 %
 %  Examples:
 %    [ var_attr_list, var_attrtype_list ] = Dictionary_EGONetCDFL1Parameters()
 %
 %  See also:
+%    COMPLETEQCDICTIONARY
+%    COMPLETEUNCERTAINTYDICTIONARY
 %
 %  Authors:
 %    Miguel Charcos Llorens  <mcharcos@socib.es>
@@ -43,10 +91,31 @@ function [ var_attr_list, var_attrtype_list ] = Dictionary_EGONetCDFL1Parameters
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-  narginchk(0, 4);
+  narginchk(0, 18);
   
   options.qc_prefix = '';
-  options.qc_suffix = '_QC';
+  options.qc_suffix = '_QC';  
+  options.qc_attributes = {
+    'long_name'            'Quality flag'
+    'standard_name'        ''
+    'conventions'          'EGO reference table 2'
+    'comment'              'None'
+    'valid_min'            0
+    'valid_max'            9
+    '_FillValue'           -128
+    'QC_procedure'         '1'
+    'flag_values'          [0,1,2,3,4,5,8,9]
+    'flag_meanings'        'no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed interpolated_value missing_value'};
+  options.qc_attribute_type = 'int8';
+  options.update_long_name = true;
+  options.uncertainty_attributes = {
+    'long_name'                         'Uncertainty'
+    '_FillValue'                        99999
+    'units'                             'n/a'};
+  options.uncertainty_attribute_type = 'single';
+  options.uncertainty_prefix = '';
+  options.uncertainty_suffix = '_UNCERTAINTY';
+  
 
   %% Parse optional arguments.
   % Get option key-value pairs in any accepted call signature.
@@ -940,25 +1009,17 @@ function [ var_attr_list, var_attrtype_list ] = Dictionary_EGONetCDFL1Parameters
     'conventions'             'YYYYMMDDHHMISS'
     '_FillValue'              ' '};
   
+
+  %% Store dictionary values before adding QC so we can use the structures 
+  %  to make the uncertainty variables
+  var_attr = var_attr_list;
+  
   %% Set QC variables
-  % Quality control default structures
-  var_EGOQC_attr_default = {
-    'long_name'            'Quality flag'
-    'standard_name'        ''
-    'conventions'          'EGO reference table 2'
-    'comment'              'None'
-    'valid_min'            0
-    'valid_max'            9
-    '_FillValue'           -128
-    'QC_procedure'         '1'
-    'flag_values'          [0,1,2,3,4,5,8,9]
-    'flag_meanings'        'no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed interpolated_value missing_value'};
-    
   [var_attr_list, var_attrtype_list] = completeQCDictionary(var_attr_list, var_attrtype_list, ...
                                   'qc_prefix', options.qc_prefix, 'qc_suffix', options.qc_suffix, ...
-                                  'qc_attributes', var_EGOQC_attr_default, ...
-                                  'qc_attribute_type', 'int8', ...
-                                  'update_long_name', false);
+                                  'qc_attributes', options.qc_attributes, ...
+                                  'qc_attribute_type', options.qc_attribute_type, ...
+                                  'update_long_name', options.update_long_name);
   
   %% Special QC cases
   var_attr_list.time_gps_QC = {
@@ -1013,6 +1074,14 @@ function [ var_attr_list, var_attrtype_list ] = Dictionary_EGONetCDFL1Parameters
 
   % Add axis to time_qc
   var_attr_list.time_QC(end+1,:) = {'axis', 'T'};
+  
+  
+  %% Set Uncertainty variables
+  [var_attr_list, var_attrtype_list] = completeUncertaintyDictionary(var_attr, var_attrtype_list, 'init_attr_list', var_attr_list, ...
+                                       'uncertainty_attributes', options.uncertainty_attributes, ...
+                                       'uncertainty_attribute_type', options.uncertainty_attribute_type, ...
+                                       'uncertainty_prefix', options.uncertainty_prefix, ...
+                                       'uncertainty_suffix', options.uncertainty_suffix);
   
 end
 

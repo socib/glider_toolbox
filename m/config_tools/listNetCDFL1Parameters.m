@@ -1,12 +1,20 @@
-function [ meta_variables ] = listNetCDFL1Parameters(qc_prefix, qc_suffix, time_dimension_name, varargin)
+function [ meta_variables ] = listNetCDFL1Parameters(qc_prefix, qc_suffix, ...
+                                qc_attributes, qc_attribute_type, update_long_name, ...
+                                uncertainty_prefix, uncertainty_suffix, ...
+                                uncertainty_attributes, uncertainty_attribute_type, ...
+                                time_dimension_name, varargin)
 %LISTNETCDFL1PARAMETERS  Create structure from the available parameter
 %                         description
 %
 %  Syntax:
-%    META_VARIABLES = LISTNETCDFL1PARAMETERS()
+%    META_VARIABLES = LISTNETCDFL1PARAMETERS(qc_prefix, qc_suffix, ...
+%                                qc_attributes, qc_attribute_type, update_long_name, ...
+%                                uncertainty_prefix, uncertainty_suffix, ...
+%                                uncertainty_attributes, uncertainty_attribute_type, ...
+%                                time_dimension_name)
 %
 %  Description:
-%    META_VARIABLES = LISTNETCDFL1PARAMETERS() should return a struct
+%    META_VARIABLES = LISTNETCDFL1PARAMETERS(...) should return a struct
 %    describing the structure of parameters of the NetCDF file. This
 %    function contains the definition of all available parameters of EGO
 %    and SOCIB standards. The output variable contains the parameters
@@ -14,7 +22,32 @@ function [ meta_variables ] = listNetCDFL1Parameters(qc_prefix, qc_suffix, time_
 %    
 %  Input:
 %    The input structure is as follow:
-%       TIME_DIMENSION_NAME: name of the time dimension to which
+%         - QC_PREFIX, QC_SUFFIX: The name of the QC parameters
+%                  are by default written as QC_[variable_name]. Defaults
+%                  are then QC_PREFIX='QC_' and QC_SUFFIX=''.
+%                  Prefix and suffix may be used to change the format of
+%                  the attribute name.
+%         - QC_ATTRIBUTES: An example is shown below
+%                 + long_name
+%                 + standard_name
+%                 + quality_control_convention
+%                 + comment
+%                 + valid_min
+%                 + valid_max
+%                 + _FillValue
+%                 + QC_procedure
+%                 + flag_values
+%                 + flag_meanings
+%         - QC_ATTRIBUTE_TYPE: int8, single, double, ....
+%         - QC_PREFIX, QC_SUFFIX: Example QC_PREFIX='QC_' and QC_SUFFIX=''.
+%         - UPDATE_LONG_NAME: Change the default long name to 
+%                  'QC of [variable_name]'
+%         - UNCERTAINTY_ATTRIBUTES: Example
+%                 + long_name
+%                 + _FillValue
+%                 + units
+%         - UNCERTAINTY_ATTRIBUTE_TYPE: int8, single, double, ....
+%         - TIME_DIMENSION_NAME: name of the time dimension to which
 %            each output will be related. 
 %       OPTIONS: A structure defining the parameters to add to the output 
 %           FORMAT (ego/socib), {param1, param2, param3,...}
@@ -46,9 +79,10 @@ function [ meta_variables ] = listNetCDFL1Parameters(qc_prefix, qc_suffix, time_
 %    ncl1_info = configRTOutputNetCDFEGOL1()
 %
 %  See also:
-%    GENERATEOUTPUTNETCDF
-%    SAVENC
-%    PROCESSGLIDERDATA
+%    DICTIONARY_EGONETCDFL1PARAMETERS
+%    DICTIONARY_SOCIBNETCDFL1PARAMETERS
+%    COMPLETEQCDICTIONARY
+%    COMPLETEUNCERTAINTYDICTIONARY
 %
 %  Authors:
 %    Miguel Charcos Llorens  <mcharcos@socib.es>
@@ -70,18 +104,47 @@ function [ meta_variables ] = listNetCDFL1Parameters(qc_prefix, qc_suffix, time_
 %  You should have received a copy of the GNU General Public License
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  narginchk(2, 4);
+  narginchk(10, 14);
 
   if isempty(time_dimension_name)
       error('glider_toolbox:listNetCDFL1Parameters:MissingInput', ...
             'No time dimension');
   end
     
+  if isempty(qc_attributes)
+    qc_attributes  = {
+        'long_name'                         'Quality flag'
+        'standard_name'                     ''
+        'quality_control_convention'        'SOCIB Quality control'
+        'comment'                           'None'
+        'valid_min'                         0
+        'valid_max'                         9
+        '_FillValue'                        -128
+        'QC_procedure'                      '1'
+        'flag_values'                       [0,1,2,3,4,8,9]
+        'flag_meanings'                     'no_qc_performed good_data probably_good_data probably_bad_data bad_data interpolated_value missing_value'};
+  end
+  
   var_attr_list = struct();
   var_attrtype_list = struct();
   
-  [var_attr_list.ego, var_attrtype_list.ego ] = Dictionary_EGONetCDFL1Parameters('qc_prefix', qc_prefix, 'qc_suffix', qc_suffix);
-  [var_attr_list.socib, var_attrtype_list.socib ] = Dictionary_SOCIBNetCDFL1Parameters('qc_prefix', qc_prefix, 'qc_suffix', qc_suffix);
+  [var_attr_list.ego, var_attrtype_list.ego ] = Dictionary_EGONetCDFL1Parameters('qc_prefix', qc_prefix, 'qc_suffix', qc_suffix, ...
+                                  'qc_attributes', qc_attributes, ...
+                                  'qc_attribute_type', qc_attribute_type, ...
+                                  'update_long_name', update_long_name, ...
+                                  'uncertainty_prefix', uncertainty_prefix, ... 
+                                  'uncertainty_suffix', uncertainty_suffix, ...
+                                  'uncertainty_attributes', uncertainty_attributes, ... 
+                                  'uncertainty_attribute_type', uncertainty_attribute_type);
+                              
+  [var_attr_list.socib, var_attrtype_list.socib ] = Dictionary_SOCIBNetCDFL1Parameters('qc_prefix', qc_prefix, 'qc_suffix', qc_suffix, ...
+                                  'qc_attributes', qc_attributes, ...
+                                  'qc_attribute_type', qc_attribute_type, ...
+                                  'update_long_name', update_long_name, ...
+                                  'uncertainty_prefix', uncertainty_prefix, ... 
+                                  'uncertainty_suffix', uncertainty_suffix, ...
+                                  'uncertainty_attributes', uncertainty_attributes, ... 
+                                  'uncertainty_attribute_type', uncertainty_attribute_type);
   
 
   % Select parameters based on input params structure

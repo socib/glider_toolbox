@@ -129,6 +129,14 @@ function slocum_options = configRTFileOptionsSlocum()
     'sci_oxy4_saturation'
     'sci_oxy4_temp'
     'sci_oxy4_timestamp'
+    % Added for the GL script
+    'm_water_depth'
+    'x_dr_state'
+    'c_de_oil_vol'
+    'm_de_oil_vol'
+    'm_pitch'
+    'm_battery_inst'
+    'c_battpos'
   };
   
 end

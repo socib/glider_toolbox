@@ -3,18 +3,32 @@ function [var_attr_list, var_attrtype_list ] = completeQCDictionary(input_attr_l
 %                         description
 %
 %  Syntax:
-%    [ VAR_ATTR_LIST ] = COMPLETEQCDICTIONARY(INPUT_ATTR_LIST, DEFAULT_QC_ATTR)
+%    [ VAR_ATTR_LIST ] = COMPLETEQCDICTIONARY(INPUT_ATTR_LIST, INPUT_ATTRTYPE_LIST)
+%    [ VAR_ATTR_LIST ] = COMPLETEQCDICTIONARY(INPUT_ATTR_LIST, INPUT_ATTRTYPE_LIST, OPTIONS)
+%    [ VAR_ATTR_LIST ] = COMPLETEQCDICTIONARY(INPUT_ATTR_LIST, INPUT_ATTRTYPE_LIST, OPT1, VAL1, ...)
 %
 %  Description:
-%    [ VAR_ATTR_LIST ] = COMPLETEQCDICTIONARY() 
+%    [ VAR_ATTR_LIST ] = COMPLETEQCDICTIONARY(INPUT_ATTR_LIST, INPUT_ATTRTYPE_LIST) 
 %    returns a struct containing the cell arrays of input attributes
 %    definition and the corresponding qc attribute based on QC_ATTRIBUTES
 %    definition. A QC attribute will only be created if the input attribute
 %    list does not contain already the QC attribute.
 %    
 %  Input:
-%    The input structures are as follow: TBD
+%    The input structures are as follow: 
+%         - INPUT_ATTR_LIST: Structure containing the list of variables and
+%                 their attributes
+%         - INPUT_ATTRTYPE_LIST: Structure containing the types of specific
+%                 variables (single, double,...)
 %  
+%  Ouput:
+%    The output lists are structures describing the resulting variables
+%    attributes and variable types
+%         - VAR_ATTR_LIST: Structure containing the list of variables and
+%                 their attributes
+%         - VAR_ATTRTYPE_LIST: Structure containing the types of specific
+%                 variables (single, double,...)
+%
 %  Options:
 %         - QC_ATTRIBUTES: Default QC attributes to be used to create the
 %                  QC variables. If not input the default structure is the
@@ -45,11 +59,41 @@ function [var_attr_list, var_attrtype_list ] = completeQCDictionary(input_attr_l
 %         - UPDATE_LONG_NAME: Change the default long name to 
 %                  'QC of [variable_name]'
 %
-%  Ouput:
-%    TBD
 %
 %  Examples:
-%    [ var_attr_list ] = completeQCDictionary()
+%    input_attr_list = struct;
+%    var_attr_list.time = {
+%         'long_name'            'Epoch time'
+%         'standard_name'        'time'
+%         'units'                'seconds since 1970-01-01T00:00:00Z'
+%         'axis'                 'T'
+%         'valid_min'            0.0
+%         'valid_max'            90000.0
+%         'QC_procedure'         '1'
+%         'ancillary_variable'  'TIME_QC'
+%         'sdn_parameter_urn'    'SDN:P01::ELTMEP01'
+%         'sdn_uom_urn'          'SDN:P061::UTBB'
+%         'coordinates'          'TIME LATITUDE LONGITUDE PRES'
+%         'comment'              'None'
+%         '_FillValue'           9999999999
+%         'glider_original_parameter_name'                [] 
+%         'sources'                [] };          
+%    var_attrtype_list.depth = 'single';
+%    var_attr_list.depth = {
+%         'long_name'               'glider depth'
+%         'standard_name'           'depth'
+%         'units'                   'm'
+%         'positive'                'down'
+%         'coordinates'             'TIME LATITUDE LONGITUDE PRES'
+%         'ancillary_variable'      'DEPTH_QC'
+%         '_FillValue'              99999
+%         'comment'                 'None'
+%         'glider_original_parameter_name'                [] 
+%         'sources'                                       []
+%         'conversion'                                    []
+%         'filling'                                       [] };
+%    [ v ] = completeQCDictionary(var_attrtype_list, var_attr_list)
+%    Returns v containinng time, depth, time_QC and depth_QC 
 %
 %  See also:
 %
@@ -159,7 +203,7 @@ function [var_attr_list, var_attrtype_list ] = completeQCDictionary(input_attr_l
                 idx_stdname = find(cellfun(@(x) strcmp(x,'long_name'), vatts(:,1)));
                 idx_qcstdname = find(cellfun(@(x) strcmp(x,'long_name'), vqcatts(:,1)));
                 if ~isempty(idx_stdname) && ~isempty(idx_qcstdname)
-                  vqcatts(idx_qcstdname(1),2) = {strcat('QC of ', vatts(idx_stdname(1),2))};
+                  vqcatts(idx_qcstdname(1),2) = {strcat('QC of',{' '}, vatts(idx_stdname(1),2))};
                 end
             end
             

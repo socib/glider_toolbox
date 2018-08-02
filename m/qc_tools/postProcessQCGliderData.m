@@ -68,6 +68,11 @@ function [ data_qc, meta_qc ] = postProcessQCGliderData( data_proc, meta_proc, v
             data_qc.(new_name) = zeros(size(data_qc.(var_name)));
             meta_qc.(new_name).sources = var_name; 
             meta_qc.(new_name).method = 'default0';
+            
+            new_name = strcat(names_data{i},'_UNCERTAINTY');
+            data_qc.(new_name) = zeros(size(data_qc.(var_name)));
+            meta_qc.(new_name).sources = var_name; 
+            meta_qc.(new_name).method = 'default0';
         end
     end
 
@@ -78,6 +83,10 @@ function [ data_qc, meta_qc ] = postProcessQCGliderData( data_proc, meta_proc, v
         meta_qc.position_QC.sources = 'latitude longitude'; 
         meta_qc.position_QC.method = 'default0';
         data_qc.position_QC = zeros(size(data_qc.latitude));
+        
+        meta_qc.position_UNCERTAINTY.sources = 'latitude longitude'; 
+        meta_qc.position_UNCERTAINTY.method = 'default0';
+        data_qc.position_UNCERTAINTY = zeros(size(data_qc.latitude));
     end
 
     % Geospatial GPS Quality control
@@ -86,6 +95,10 @@ function [ data_qc, meta_qc ] = postProcessQCGliderData( data_proc, meta_proc, v
         meta_qc.position_gps_QC.sources = 'latitude_gps longitude_gps'; 
         meta_qc.position_gps_QC.method = 'default0';
         data_qc.position_gps_QC = zeros(size(data_qc.latitude_gps));
+        
+        meta_qc.position_gps_UNCERTAINTY.sources = 'latitude_gps longitude_gps'; 
+        meta_qc.position_gps_UNCERTAINTY.method = 'default0';
+        data_qc.position_gps_UNCERTAINTY = zeros(size(data_qc.latitude_gps));
     end
 
     % dates Quality control

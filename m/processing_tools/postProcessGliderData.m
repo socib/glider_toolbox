@@ -58,7 +58,7 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
   
 
-    narginchk(3, 5);
+    narginchk(3, 7);
 
     %% Set parameter changes options.
     options = struct();
@@ -74,6 +74,7 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
                'temp_doxy',                      'temperature_oxygen', ...
                'chla',                           'chlorophyll');
     options.deployment = struct();
+    options.attributes = struct();
     
     %% Get options from extra arguments.
     % Parse option key-value pairs in any accepted call signature.
@@ -439,7 +440,25 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
     else
         data_conv.data_centre      = 'SO';
     end
-
+    
+    if isfield(options.deployment, 'deployment_start') && ...
+       isfield(options.deployment, 'glider_name') && ...
+       isfield(options.deployment, 'glider_deployment_code')
+   
+        meta_conv.id.sources = 'postProcessGliderData';
+        meta_conv.id.method  = 'postProcessGliderData';
+        id_date = datestr(options.deployment.deployment_start, 'yyyymmdd');
+        id_glider = options.deployment.glider_name;
+        id_dep = options.deployment.glider_deployment_code;
+                
+        if isfield(options.attributes, 'data_mode')
+            id_mode = options.attributes.data_mode;
+        else
+            id_mode = 'R';
+        end
+        data_conv.id      = strcat(['GL_', id_date, '_', id_glider, '_', id_dep, '_', id_mode]);
+    end
+    
     meta_conv.pi_name.sources = 'postProcessGliderData';
     meta_conv.pi_name.method  = 'postProcessGliderData';
     if isfield(options.deployment, 'principal_investigator')
@@ -556,8 +575,12 @@ function [data_conv, meta_conv] = postProcessGliderData( data_proc, meta_proc, v
 
     meta_conv.deployment_end_status.sources = 'postProcessGliderData';
     meta_conv.deployment_end_status.method  = 'postProcessGliderData';
-    data_conv.deployment_end_status         = 'R';   
-
+    if isfield(options.attributes, 'data_mode')
+        data_conv.deployment_end_status         = options.attributes.data_mode;   
+    else
+        data_conv.deployment_end_status         = 'R';   
+    end
+    
     meta_conv.deployment_operator.sources = 'postProcessGliderData';
     meta_conv.deployment_operator.method  = 'postProcessGliderData';
     data_conv.deployment_operator         = 'N/A';    

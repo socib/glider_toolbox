@@ -45,7 +45,7 @@ function [] = gliderDataProcessing(varargin)
 %        information of the deployments to be processed. By default the list
 %        is built using the database when defined. However, the database
 %        query is skipped when the deployment list is input. The structure of
-%        the deployment list must contain: deployment_id, deployment_name,
+%        the deployment list must contai: deployment_id, deployment_name,
 %        deployment_start, deployment_end, glider_name, glider_serial and
 %        glider_model
 %      PROCESSING_MODE: Defines the processing mode, either real time (rt or RT)
@@ -99,7 +99,8 @@ function [] = gliderDataProcessing(varargin)
     
     options.glider_toolbox_dir = '';
     options.processing_mode = 'rt';  
-    options.config            = '';
+    %TODO: Remove the default path and set it to empty. I am using this for testing
+    options.config            = '/home/mcharcos/gtb_versions/glider_toolbox_scbd077_db01_ego/config/configMain.txt';
     options.deployment_list    = [];
     options.public_netcdfs_exceptions  = [];
     options.public_figures_exceptions  = [];
@@ -195,8 +196,8 @@ function [] = gliderDataProcessing(varargin)
               'Missing database and deployment list');
         elseif ischar(options.deployment_list)
             try
-                read_deployment = readConfigFile(deployment_file);
-                deployment_list = read_deployment.deployment_list;
+                read_deployment = readConfigFile(options.deployment_list);
+                options.deployment_list = read_deployment.deployment_list;
             catch exception
                 error('glider_toolbox:gliderDataProcessing:InvalidConfiguration',...
                   'Could not read deployment definition file');
@@ -206,7 +207,7 @@ function [] = gliderDataProcessing(varargin)
         %Check/modify format of deployment_list 
         for i=1:numel(required_deployment_strparam)
            fieldname = required_deployment_strparam(i);
-           if ~isfield( deployment_list, fieldname{1})
+           if ~isfield( options.deployment_list, fieldname{1})
                disp(['ERROR: Deployment definition does not contain ' fieldname{1}]);
                return;
            end
@@ -239,9 +240,7 @@ function [] = gliderDataProcessing(varargin)
       data_paths = createFStruct(config.local_paths, deployment);
       
       %% Start deployment processing logging.
-      if ~isempty(data_paths.processing_log)
-        startLogging(fullfile(data_paths.base_dir,data_paths.processing_log), options.glider_toolbox_ver, deployment);
-      end
+      startLogging(fullfile(data_paths.base_dir,data_paths.processing_log), options.glider_toolbox_ver, deployment);
       
       %% Copy configuration file to data folder
       if ~isempty(options.config) && ischar(options.config)
@@ -313,9 +312,7 @@ function [] = gliderDataProcessing(varargin)
       %% Stop deployment processing logging.
       disp(['Deployment processing end time: ' ...
             datestr(posixtime2utc(posixtime()), 'yyyy-mm-ddTHH:MM:SS+00:00')]);
-      if ~isempty(data_paths.processing_log)
-          diary('off');
-      end
+      diary('off');
     end
     
 end

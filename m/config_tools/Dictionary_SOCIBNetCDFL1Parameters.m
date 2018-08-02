@@ -3,7 +3,9 @@ function [ var_attr, var_attrtype ] = Dictionary_SOCIBNetCDFL1Parameters(varargi
 %                         description
 %
 %  Syntax:
-%    [ VAR_ATTR, VAR_ATTRTYPE ] = DICTIONARY_SOCIBNETCDFL1PARAMETERS(INPUT_ATTR_LIST, INPUT_ATTRTYPE_LIST)
+%    [ VAR_ATTR, VAR_ATTRTYPE ] = DICTIONARY_SOCIBNETCDFL1PARAMETERS()
+%    [ VAR_ATTR, VAR_ATTRTYPE ] = DICTIONARY_SOCIBNETCDFL1PARAMETERS(OPTIONS)
+%    [ VAR_ATTR, VAR_ATTRTYPE ] = DICTIONARY_SOCIBNETCDFL1PARAMETERS(OPT1, VAL1, ...)
 %
 %  Description:
 %    [ VAR_ATTR, VAR_ATTRTYPE ] = DICTIONARY_SOCIBNETCDFL1PARAMETERS() 
@@ -12,15 +14,59 @@ function [ var_attr, var_attrtype ] = Dictionary_SOCIBNetCDFL1Parameters(varargi
 %    standards. 
 %    
 %  Input:
-%    The input structures are as follow: TBD
+%    No input
 %
 %  Ouput:
-%    TBD
+%    The output lists are structures describing the resulting variables
+%    attributes and variable types
+%         - VAR_ATTR_LIST: Structure containing the list of variables and
+%                 their attributes
+%         - VAR_ATTRTYPE_LIST: Structure containing the types of specific
+%                 variables (single, double,...)
+%
+%  Options:
+%         - QC_ATTRIBUTES, QC_ATTRIBUTE_TYPE, QC_PREFIX, QC_SUFFIX and
+%             UPDATE_LONG_NAME: see options for competeQCDictionary
+%
+%             + QC_ATTRIBUTES: Default QC attributes to be used to create the
+%                  QC variables. If not input the default structure is the
+%                  one used by SOCIB standards
+%                 + long_name: Quality flag of [long_name of variable]
+%                 + standard_name: Quality flag of [standard_name of variable]
+%                 + quality_control_convention: SOCIB Quality control
+%                 + comment: None
+%                 + valid_min: 0
+%                 + valid_max: 9
+%                 + _FillValue: 0
+%                 + QC_procedure: 1
+%                 + flag_values: [0,1,2,3,4,8,9]
+%                 + flag_meanings: no_qc_performed 
+%                                  good_data 
+%                                  probably_good_data
+%                                  probably_bad_data 
+%                                  bad_data
+%                                  interpolated_value 
+%                                  missing_value  
+%             + QC_ATTRIBUTE_TYPE: [empty]
+%
+%         - UNCERTAINTY_ATTRIBUTES, UNCERTAINTY_ATTRIBUTE_TYPE,
+%             UNCERTAINTY_PREFIX and UNCERTAINTY_SUFFIX: see options for
+%             completeUncertaintyDictionary 
+%
+%             + UNCERTAINTY_ATTRIBUTES: Default uncertainty attributes to be used to create the
+%                  uncertainty variables. If not input the default structure is the
+%                  one used by EGO standards
+%                 + long_name: Uncertainty
+%                 + _FillValue: 0
+%                 + units: na 
+%              + QC_ATTRIBUTE_TYPE: single
 %
 %  Examples:
 %    [ var_attr, var_attrtype ] = Dictionary_SOCIBNetCDFL1Parameters()
 %
 %  See also:
+%    COMPLETEQCDICTIONARY
+%    COMPLETEUNCERTAINTYDICTIONARY
 %
 %  Authors:
 %    Miguel Charcos Llorens  <mcharcos@socib.es>
@@ -43,11 +89,32 @@ function [ var_attr, var_attrtype ] = Dictionary_SOCIBNetCDFL1Parameters(varargi
 %  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-  narginchk(0, 4);
+  narginchk(0, 18);
   
   options.qc_prefix = 'QC_';
   options.qc_suffix = '';
+  options.qc_attributes  = {
+    'long_name'                         'Quality flag'
+    'standard_name'                     ''
+    'quality_control_convention'        'SOCIB Quality control'
+    'comment'                           'None'
+    'valid_min'                         0
+    'valid_max'                         9
+    '_FillValue'                        -128
+    'QC_procedure'                      '1'
+    'flag_values'                       [0,1,2,3,4,8,9]
+    'flag_meanings'                     'no_qc_performed good_data probably_good_data probably_bad_data bad_data interpolated_value missing_value'};
+  options.qc_attribute_type = '';
+  options.update_long_name = false;
+  options.uncertainty_attributes = {
+    'long_name'                         'Uncertainty'
+    '_FillValue'                        99999
+    'units'                             'n/a'};
+  options.uncertainty_attribute_type = 'single';
+  options.uncertainty_prefix = 'UNCERTAINTY_';
+  options.uncertainty_suffix = '';
 
+    
   %% Parse optional arguments.
   % Get option key-value pairs in any accepted call signature.
   argopts = varargin;
@@ -1410,11 +1477,19 @@ function [ var_attr, var_attrtype ] = Dictionary_SOCIBNetCDFL1Parameters(varargi
 
   
   %% Set QC variables
-  % Default values of completeQCDictionary are the ones for SOCIB so no
-  % need to set any option. After the call the structure contains the
-  % variables that were selected by the user and the corresponding QC
-  % variable
-  [var_attr, var_attrtype] = completeQCDictionary(var_attr_list, var_attrtype_list);
+  %[var_attr, var_attrtype] = completeQCDictionary(var_attr_list, var_attrtype_list);
+  [var_attr, var_attrtype] = completeQCDictionary(var_attr_list, var_attrtype_list, ...
+                                  'qc_prefix', options.qc_prefix, 'qc_suffix', options.qc_suffix, ...
+                                  'qc_attributes', options.qc_attributes, ...
+                                  'qc_attribute_type', options.qc_attribute_type, ...
+                                  'update_long_name', options.update_long_name);
   
+  %% Set Uncertainty variables
+  [var_attr, var_attrtype] = completeUncertaintyDictionary(var_attr_list, var_attrtype, 'init_attr_list', var_attr, ...
+                                       'uncertainty_attributes', options.uncertainty_attributes, ...
+                                       'uncertainty_attribute_type', options.uncertainty_attribute_type, ...
+                                       'uncertainty_prefix', options.uncertainty_prefix, ...
+                                       'uncertainty_suffix', options.uncertainty_suffix);
+                                   
 end
 

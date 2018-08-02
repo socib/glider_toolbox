@@ -319,6 +319,24 @@ function [data_grid, meta_grid] = gridGliderData(data_proc, meta_proc, varargin)
       data_grid_variables(cast_idx, :, :) = ...
         cell2mat(arrayfun(@(d) nanmean(cast_variables(abs(cast_depth-d)<=0.5*depth_resolution, :), 1), ...
                           depth_range(:), 'UniformOutput', false));
+        
+%         cast_count = cell2mat(arrayfun(@(d) sum(abs(cast_depth-d)<=0.5*depth_resolution), ...
+%                           depth_range(:), 'UniformOutput', false));
+%        
+%         figure(1)
+%         hold off
+%         plot(depth_range)
+%         hold on
+%         plot(cast_depth, 'r')
+%         cast_depth_idx = 1:1:numel(cast_depth);
+%         cast_1_nonnan = ~isnan(cast_variables(:,1));
+%         plot(cast_depth_idx(cast_1_nonnan),cast_depth(cast_1_nonnan), 'r*')
+%         plot(10*cast_count, 'g')
+%         figure(2)
+%         hold off         
+%         plot(cast_depth,cast_variables(:,1), '*')
+%         hold on
+%         plot(depth_range, data_grid_variables(cast_idx,:,1), 'r*')
     end
   end
   % Move binned variable data to output struct.
@@ -328,6 +346,10 @@ function [data_grid, meta_grid] = gridGliderData(data_proc, meta_proc, varargin)
   end
   %%}
 
+  c = data_grid.chlorophyll;
+  cv = reshape(c,numel(c),1);
+  cs = tabulate(cv);
+  plot(cs(:,1),cs(:,3))
   
   %% Add gridding metadata:
   meta_grid.profile_index = meta_proc.(profile_sequence);
