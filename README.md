@@ -177,7 +177,7 @@ and [SOCIB][socib] by Tomeu Garau. He is the true glider man.
 Copyright
 ---------
 
-Copyright (C) 2013-2016
+Copyright (C) 2013-2018
 ICTS SOCIB - Servei d'observació i predicció costaner de les Illes Balears
 <http://www.socib.es>
 
