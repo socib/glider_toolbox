@@ -1,0 +1,63 @@
+{
+    "_class": "Software",
+    "alias": "https://github.com/socib/glider_toolbox",
+    "abstract": "MATLAB/Octave scripts to manage data collected by a glider fleet, including data download, data processing and product and figure generation, both in real time and delayed time.",
+    "author": {
+        "_class": "Organization",
+        "alias": "https://edmo.seadatanet.org/report/3410"
+    },
+    "created": "2011-03-03",
+    "contributor": [
+        {
+            "_class": "Person",
+            "name": "Joan Pau Beltran <joanpau.beltran@socib.cat>"
+        },
+        {
+            "_class": "Person",
+            "name": "Tomeu Garau <tgarau@socib.es>"
+        },
+        {
+            "_class": "Person",
+            "name": "Grant Rogers <grogers@socib.es>"
+        },
+        {
+            "_class": "Person",
+            "name": "Andreas Krietemeyer"
+        },
+        {
+            "_class": "Person",
+            "name": "Frederic Cyr"
+        },
+        {
+            "_class": "Person",
+            "name": "Juan Gabriel Fernandez <jfernandez@socib.es>"
+        }
+    ],
+    "description": "The glider toolbox is a set of MATLAB/Octave scripts and functions developed at SOCIB to manage the data collected by a glider fleet. They cover the main stages of the data management process both in real time and delayed time mode: metadata aggregation, data download, data processing, and generation of data products and figures.",
+    "distribution": {
+        "_class": "Distribution",
+        "accessURL": "https://github.com/socib/glider_toolbox"
+    },
+    "downloadURL": "https://github.com/socib/glider_toolbox/archive/refs/heads/master.zip",
+    "keywords": ["matlab","netcdf","octave","physical-oceanography","ocean-sciences","seaglider","data-preservation","glider-toolbox","slocum","seaexplorer","socib"],
+    "language": ["English"],
+    "license": "Copyright (C) 2013-2018 ICTS SOCIB - Servei d'observació i predicció costaner de les Illes Balears http://www.socib.es\n\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n\nThis program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.",
+    "modified": "2017-07-31",
+    "name": "SOCIB glider toolbox",
+    "organization": {
+        "_class": "Organization",
+        "alias": "https://edmo.seadatanet.org/report/3410"
+    },
+    "owner": {
+        "_class": "Organization",
+        "alias": "https://edmo.seadatanet.org/report/3410"
+    },
+    "publisher": {
+        "_class": "Organization",
+        "alias": "https://edmo.seadatanet.org/report/3410"
+    },
+    "published": "2014-08-07",
+    "programming_language": ["MATLAB", "M", "C", "Other"],
+    "url": "https://github.com/socib/glider_toolbox",
+    "version": "v1.2.0"
+}
